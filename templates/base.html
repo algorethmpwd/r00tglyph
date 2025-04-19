@@ -19,13 +19,16 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                        <a class="nav-link" href="{{ url_for('index') }}"><i class="bi bi-house-fill me-1"></i>Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('vulnerabilities') }}">Challenges</a>
+                        <a class="nav-link" href="{{ url_for('vulnerabilities') }}"><i class="bi bi-lightning-fill me-1"></i>Challenges</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('scoreboard') }}">Scoreboard</a>
+                        <a class="nav-link" href="{{ url_for('scoreboard') }}"><i class="bi bi-trophy-fill me-1"></i>Scoreboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('profile') }}"><i class="bi bi-person-fill me-1"></i>Profile</a>
                     </li>
                 </ul>
                 <div class="d-flex">

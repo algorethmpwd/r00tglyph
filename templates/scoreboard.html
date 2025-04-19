@@ -23,11 +23,11 @@
                         </thead>
                         <tbody>
                             {% for user in users %}
-                            <tr {% if 'user_id' in session and session['user_id'] == user.id %}class="table-success"{% endif %}>
+                            <tr {% if session.get('machine_id') == user.machine_id %}class="table-success"{% endif %}>
                                 <th scope="row">{{ loop.index }}</th>
-                                <td>{{ user.username }}</td>
+                                <td>{{ user.display_name }}</td>
                                 <td>{{ user.score }} pts</td>
-                                <td>{{ user.last_login.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>{{ user.last_active.strftime('%Y-%m-%d %H:%M') }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -39,7 +39,7 @@
                     No scores yet! Be the first to complete a challenge and earn points.
                 </div>
                 {% endif %}
-                
+
                 <div class="text-center mt-4">
                     <a href="{{ url_for('vulnerabilities') }}" class="btn btn-primary">
                         <i class="bi bi-lightning-fill me-2"></i>Take on a Challenge

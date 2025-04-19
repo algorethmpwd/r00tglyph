@@ -13,16 +13,45 @@
                 <div class="alert alert-dark">
                     <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
                     <p>
-                        Welcome to the R00tGlyph search engine! This is a simple search page that reflects user input directly in the response.
-                        Your goal is to inject JavaScript code that executes in the browser.
+                        Welcome to <strong>TechConnect</strong>, a fictional tech support forum! You've been hired to perform a security assessment of their search functionality.
                     </p>
+
+                    <div class="card mb-3 border-secondary">
+                        <div class="card-header bg-secondary text-white">
+                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-0">
+                                <strong>Client:</strong> TechConnect Support Forum<br>
+                                <strong>Target:</strong> User Search Functionality<br>
+                                <strong>Vulnerability:</strong> Suspected Cross-Site Scripting (XSS)<br>
+                                <strong>Objective:</strong> Confirm the vulnerability by executing JavaScript in the browser
+                            </p>
+                        </div>
+                    </div>
+
                     <p>
-                        <strong>Scenario:</strong> You've discovered a search function on a website that seems to directly output whatever you type into it.
-                        This could be vulnerable to Cross-Site Scripting (XSS). As a security researcher, you need to prove the vulnerability by executing JavaScript in the browser.
+                        <strong>Technical Background:</strong> The search function appears to take user input and reflect it directly in the response without proper sanitization.
+                        This is a classic example of a <em>Reflected XSS</em> vulnerability, where user-supplied data is immediately returned to the browser and rendered.
                     </p>
+
                     <p>
-                        <strong>Objective:</strong> Make an alert box appear with the text "XSS Level 1 Completed!" to reveal the flag.
+                        <strong>Real-world Impact:</strong> In a real scenario, this vulnerability could allow attackers to:
                     </p>
+                    <ul>
+                        <li>Steal user cookies and hijack sessions</li>
+                        <li>Redirect users to phishing sites</li>
+                        <li>Modify page content to trick users</li>
+                        <li>Execute arbitrary JavaScript in victims' browsers</li>
+                    </ul>
+
+                    <p>
+                        <strong>Your Task:</strong> Make an alert box appear with the text "XSS Level 1 Completed!" to prove the vulnerability exists and reveal the flag.
+                    </p>
+
+                    <div class="alert alert-warning">
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Try entering some text in the search box and observe how it's displayed in the results. What happens if you enter HTML tags?
+                    </div>
                 </div>
 
                 <div class="card mb-4">
@@ -57,7 +86,7 @@
                 </div>
                 {% endif %}
 
-                {% if flag and 'user_id' in session %}
+                {% if flag %}
                 <div class="card mb-4 flag-form">
                     <div class="card-header bg-success text-white">
                         <h5><i class="bi bi-flag-fill me-2"></i>Submit Flag</h5>
@@ -81,11 +110,6 @@
                             <code>{{ flag }}</code>
                         </div>
                     </div>
-                </div>
-                {% elif not 'user_id' in session %}
-                <div class="alert alert-warning">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                    <strong>Note:</strong> You need to <a href="{{ url_for('login') }}">login</a> to submit flags and track your progress.
                 </div>
                 {% endif %}
 

@@ -7,8 +7,46 @@ import string
 import re
 import hashlib
 import uuid
+import sys
+import argparse
+import shutil
+import subprocess
 from datetime import datetime
 from functools import wraps
+
+# Check for command-line arguments
+if len(sys.argv) > 1:
+    parser = argparse.ArgumentParser(description='R00tGlyph - Advanced Web Security Training Platform')
+    parser.add_argument('-up', '--update', action='store_true', help='Update R00tGlyph to the latest version')
+    args = parser.parse_args()
+
+    if args.update:
+        print("Updating R00tGlyph to the latest version...")
+        # Backup user data
+        if os.path.exists('instance/r00tglyph.db'):
+            print("Backing up user data...")
+            backup_dir = 'backup'
+            os.makedirs(backup_dir, exist_ok=True)
+            shutil.copy2('instance/r00tglyph.db', f'{backup_dir}/r00tglyph.db.bak')
+
+        # Pull latest changes from GitHub
+        try:
+            print("Pulling latest changes from GitHub...")
+            subprocess.run(['git', 'pull'], check=True)
+
+            # Restore user data
+            if os.path.exists(f'{backup_dir}/r00tglyph.db.bak'):
+                print("Restoring user data...")
+                shutil.copy2(f'{backup_dir}/r00tglyph.db.bak', 'instance/r00tglyph.db')
+
+            print("Update completed successfully!")
+        except subprocess.CalledProcessError:
+            print("Error: Failed to pull latest changes. Please check your internet connection.")
+            if os.path.exists(f'{backup_dir}/r00tglyph.db.bak'):
+                print("Restoring user data from backup...")
+                shutil.copy2(f'{backup_dir}/r00tglyph.db.bak', 'instance/r00tglyph.db')
+
+        sys.exit(0)
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'r00tglyph_secret_key_change_in_production')
@@ -17,14 +55,15 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # Models
-class User(db.Model):
+class LocalUser(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(50), unique=True, nullable=False)
-    email = db.Column(db.String(100), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128), nullable=False)
+    username = db.Column(db.String(50), nullable=False, default='Hacker')
+    display_name = db.Column(db.String(50), nullable=False, default='Anonymous Hacker')
+    machine_id = db.Column(db.String(64), unique=True, nullable=False)
     score = db.Column(db.Integer, default=0)
+    completed_challenges = db.Column(db.Text, default='[]')  # JSON string of completed challenge IDs
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    last_login = db.Column(db.DateTime, default=datetime.utcnow)
+    last_active = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Challenge(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -38,25 +77,26 @@ class Challenge(db.Model):
 class Flag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     challenge_id = db.Column(db.Integer, db.ForeignKey('challenge.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    machine_id = db.Column(db.String(64), nullable=False)
     flag_value = db.Column(db.String(100), nullable=False)
     used = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(datetime.timezone.utc))
 
 class Submission(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    machine_id = db.Column(db.String(64), nullable=False)
     challenge_id = db.Column(db.Integer, db.ForeignKey('challenge.id'), nullable=False)
     flag = db.Column(db.String(100), nullable=False)
     correct = db.Column(db.Boolean, default=False)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, default=lambda: datetime.now(datetime.timezone.utc))
 
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50))
     content = db.Column(db.Text)
     level = db.Column(db.Integer)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    machine_id = db.Column(db.String(64), nullable=True)  # Optional, to track who posted the comment
+    timestamp = db.Column(db.DateTime, default=lambda: datetime.now(datetime.timezone.utc))
 
 # Create database tables
 with app.app_context():
@@ -82,19 +122,60 @@ with app.app_context():
         db.session.commit()
 
 # Helper functions
-def generate_flag(challenge_id, user_id):
-    """Generate a unique flag for a specific challenge and user"""
+def get_machine_id():
+    """Generate or retrieve a unique machine identifier"""
+    if 'machine_id' not in session:
+        # Generate a new machine ID if not in session
+        session['machine_id'] = hashlib.sha256(str(uuid.uuid4()).encode()).hexdigest()
+
+        # Check if this machine ID exists in the database
+        existing_user = LocalUser.query.filter_by(machine_id=session['machine_id']).first()
+        if not existing_user:
+            # Create a new local user
+            new_user = LocalUser(
+                username='Hacker',
+                display_name='Anonymous Hacker',
+                machine_id=session['machine_id']
+            )
+            db.session.add(new_user)
+            db.session.commit()
+
+    return session['machine_id']
+
+def get_local_user():
+    """Get the current local user or create one if it doesn't exist"""
+    machine_id = get_machine_id()
+    user = LocalUser.query.filter_by(machine_id=machine_id).first()
+
+    if not user:
+        # Create a new local user if not found
+        user = LocalUser(
+            username='Hacker',
+            display_name='Anonymous Hacker',
+            machine_id=machine_id
+        )
+        db.session.add(user)
+        db.session.commit()
+
+    # Update last active time
+    user.last_active = datetime.now(datetime.timezone.utc)
+    db.session.commit()
+
+    return user
+
+def generate_flag(challenge_id, machine_id):
+    """Generate a unique flag for a specific challenge and machine"""
     random_part = ''.join(random.choices(string.ascii_uppercase + string.digits, k=16))
-    unique_id = f"{challenge_id}_{user_id}_{random_part}"
+    unique_id = f"{challenge_id}_{machine_id}_{random_part}"
     flag = f"R00T{{{hashlib.md5(unique_id.encode()).hexdigest()}}}"
     return flag
 
-def get_or_create_flag(challenge_id, user_id):
+def get_or_create_flag(challenge_id, machine_id):
     """Get an existing unused flag or create a new one"""
     # Check for existing unused flag
     existing_flag = Flag.query.filter_by(
         challenge_id=challenge_id,
-        user_id=user_id,
+        machine_id=machine_id,
         used=False
     ).first()
 
@@ -102,12 +183,29 @@ def get_or_create_flag(challenge_id, user_id):
         return existing_flag.flag_value
 
     # Create new flag
-    new_flag_value = generate_flag(challenge_id, user_id)
-    new_flag = Flag(challenge_id=challenge_id, user_id=user_id, flag_value=new_flag_value)
+    new_flag_value = generate_flag(challenge_id, machine_id)
+    new_flag = Flag(challenge_id=challenge_id, machine_id=machine_id, flag_value=new_flag_value)
     db.session.add(new_flag)
     db.session.commit()
 
     return new_flag_value
+
+def update_user_progress(machine_id, challenge_id, points):
+    """Update user progress after completing a challenge"""
+    user = LocalUser.query.filter_by(machine_id=machine_id).first()
+    if user:
+        # Update score
+        user.score += points
+
+        # Update completed challenges
+        completed = json.loads(user.completed_challenges)
+        if challenge_id not in completed:
+            completed.append(challenge_id)
+            user.completed_challenges = json.dumps(completed)
+
+        db.session.commit()
+        return True
+    return False
 
 # WAF emulation functions
 class WAF:
@@ -322,15 +420,6 @@ class WAF:
 
         return input_str, False
 
-# Authentication helpers
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'user_id' not in session:
-            return redirect(url_for('login', next=request.url))
-        return f(*args, **kwargs)
-    return decorated_function
-
 # Theme management
 @app.route('/change-theme/<theme>')
 def change_theme(theme):
@@ -339,69 +428,32 @@ def change_theme(theme):
         session['theme'] = theme
     return redirect(request.referrer or url_for('index'))
 
+# Profile management
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+    user = get_local_user()
+
+    if request.method == 'POST':
+        display_name = request.form.get('display_name')
+        if display_name and len(display_name) <= 50:
+            user.display_name = display_name
+            db.session.commit()
+            return redirect(url_for('profile'))
+
+    # Get completed challenges
+    completed_challenges = []
+    if user.completed_challenges:
+        challenge_ids = json.loads(user.completed_challenges)
+        completed_challenges = Challenge.query.filter(Challenge.id.in_(challenge_ids)).all()
+
+    return render_template('profile.html', user=user, completed_challenges=completed_challenges)
+
 # Home page
 @app.route('/')
 def index():
+    # Ensure user is initialized
+    get_local_user()
     return render_template('index.html')
-
-# Authentication routes
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        email = request.form.get('email')
-        password = request.form.get('password')
-
-        # Check if username or email already exists
-        existing_user = User.query.filter((User.username == username) | (User.email == email)).first()
-        if existing_user:
-            return render_template('register.html', error="Username or email already exists")
-
-        # Create new user
-        password_hash = hashlib.sha256(password.encode()).hexdigest()
-        new_user = User(username=username, email=email, password_hash=password_hash)
-        db.session.add(new_user)
-        db.session.commit()
-
-        # Log the user in
-        session['user_id'] = new_user.id
-        session['username'] = new_user.username
-
-        return redirect(url_for('index'))
-
-    return render_template('register.html')
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-
-        # Find user
-        user = User.query.filter_by(username=username).first()
-        if user and user.password_hash == hashlib.sha256(password.encode()).hexdigest():
-            # Update last login time
-            user.last_login = datetime.utcnow()
-            db.session.commit()
-
-            # Set session
-            session['user_id'] = user.id
-            session['username'] = user.username
-
-            next_page = request.args.get('next')
-            if next_page:
-                return redirect(next_page)
-            return redirect(url_for('index'))
-
-        return render_template('login.html', error="Invalid username or password")
-
-    return render_template('login.html')
-
-@app.route('/logout')
-def logout():
-    session.pop('user_id', None)
-    session.pop('username', None)
-    return redirect(url_for('index'))
 
 # Vulnerabilities selection page with categories
 @app.route('/challenges')
@@ -420,24 +472,23 @@ def vulnerabilities():
 # Scoreboard
 @app.route('/scoreboard')
 def scoreboard():
-    top_users = User.query.order_by(User.score.desc()).limit(20).all()
+    top_users = LocalUser.query.order_by(LocalUser.score.desc()).limit(20).all()
     return render_template('scoreboard.html', users=top_users)
 
 # Flag submission
 @app.route('/submit-flag', methods=['POST'])
-@login_required
 def submit_flag():
     challenge_id = request.form.get('challenge_id')
     flag = request.form.get('flag')
-    user_id = session.get('user_id')
+    machine_id = get_machine_id()
 
-    if not challenge_id or not flag or not user_id:
+    if not challenge_id or not flag:
         return jsonify({'success': False, 'message': 'Missing required parameters'})
 
     # Check if flag is valid
     valid_flag = Flag.query.filter_by(
         challenge_id=challenge_id,
-        user_id=user_id,
+        machine_id=machine_id,
         flag_value=flag,
         used=False
     ).first()
@@ -447,20 +498,19 @@ def submit_flag():
         valid_flag.used = True
 
         # Record submission
-        submission = Submission(user_id=user_id, challenge_id=challenge_id, flag=flag, correct=True)
+        submission = Submission(machine_id=machine_id, challenge_id=challenge_id, flag=flag, correct=True)
         db.session.add(submission)
 
         # Update user score
         challenge = Challenge.query.get(challenge_id)
-        user = User.query.get(user_id)
-        user.score += challenge.points
+        update_user_progress(machine_id, challenge_id, challenge.points)
 
         db.session.commit()
 
         return jsonify({'success': True, 'message': f'Congratulations! You earned {challenge.points} points!'})
     else:
         # Record incorrect submission
-        submission = Submission(user_id=user_id, challenge_id=challenge_id, flag=flag, correct=False)
+        submission = Submission(machine_id=machine_id, challenge_id=challenge_id, flag=flag, correct=False)
         db.session.add(submission)
         db.session.commit()
 
@@ -470,38 +520,41 @@ def submit_flag():
 @app.route('/xss/level1', methods=['GET', 'POST'])
 def xss_level1():
     user_input = request.args.get('name', '')
+    machine_id = get_machine_id()
     flag = None
 
-    # If user is logged in, generate a flag for this challenge
-    if 'user_id' in session:
-        challenge = Challenge.query.filter_by(name="Basic Reflected XSS").first()
-        if challenge:
-            flag = get_or_create_flag(challenge.id, session['user_id'])
+    # Generate a flag for this challenge
+    challenge = Challenge.query.filter_by(name="Basic Reflected XSS").first()
+    if challenge:
+        flag = get_or_create_flag(challenge.id, machine_id)
 
     return render_template('xss/xss_level1.html', user_input=user_input, flag=flag)
 
 # XSS Level 2 - DOM-based XSS
 @app.route('/xss/level2')
 def xss_level2():
+    machine_id = get_machine_id()
     flag = None
 
-    # If user is logged in, generate a flag for this challenge
-    if 'user_id' in session:
-        challenge = Challenge.query.filter_by(name="DOM-based XSS").first()
-        if challenge:
-            flag = get_or_create_flag(challenge.id, session['user_id'])
+    # Generate a flag for this challenge
+    challenge = Challenge.query.filter_by(name="DOM-based XSS").first()
+    if challenge:
+        flag = get_or_create_flag(challenge.id, machine_id)
 
     return render_template('xss/xss_level2.html', flag=flag)
 
 # XSS Level 3 - Stored XSS
 @app.route('/xss/level3', methods=['GET', 'POST'])
 def xss_level3():
+    machine_id = get_machine_id()
+    user = get_local_user()
+
     if request.method == 'POST':
-        username = request.form.get('username', 'Anonymous')
+        username = request.form.get('username', user.display_name)
         content = request.form.get('content', '')
 
         # Store the comment in the database
-        new_comment = Comment(username=username, content=content, level=3)
+        new_comment = Comment(username=username, content=content, level=3, machine_id=machine_id)
         db.session.add(new_comment)
         db.session.commit()
 
@@ -511,17 +564,17 @@ def xss_level3():
     comments = Comment.query.filter_by(level=3).order_by(Comment.timestamp.desc()).all()
 
     flag = None
-    # If user is logged in, generate a flag for this challenge
-    if 'user_id' in session:
-        challenge = Challenge.query.filter_by(name="Stored XSS").first()
-        if challenge:
-            flag = get_or_create_flag(challenge.id, session['user_id'])
+    # Generate a flag for this challenge
+    challenge = Challenge.query.filter_by(name="Stored XSS").first()
+    if challenge:
+        flag = get_or_create_flag(challenge.id, machine_id)
 
-    return render_template('xss/xss_level3.html', comments=comments, flag=flag)
+    return render_template('xss/xss_level3.html', comments=comments, flag=flag, user=user)
 
 # XSS Level 4 - XSS with Basic Filters
 @app.route('/xss/level4', methods=['GET', 'POST'])
 def xss_level4():
+    machine_id = get_machine_id()
     message = ""
     filtered_input = ""
     waf_blocked = False
@@ -534,11 +587,10 @@ def xss_level4():
         message = "Your input has been filtered for security!"
 
     flag = None
-    # If user is logged in, generate a flag for this challenge
-    if 'user_id' in session:
-        challenge = Challenge.query.filter_by(name="XSS with Basic Filters").first()
-        if challenge:
-            flag = get_or_create_flag(challenge.id, session['user_id'])
+    # Generate a flag for this challenge
+    challenge = Challenge.query.filter_by(name="XSS with Basic Filters").first()
+    if challenge:
+        flag = get_or_create_flag(challenge.id, machine_id)
 
     return render_template('xss/xss_level4.html', message=message, filtered_input=filtered_input,
                            waf_blocked=waf_blocked, flag=flag)
@@ -546,6 +598,7 @@ def xss_level4():
 # XSS Level 5 - XSS with Advanced Filters
 @app.route('/xss/level5', methods=['GET', 'POST'])
 def xss_level5():
+    machine_id = get_machine_id()
     message = ""
     filtered_input = ""
     waf_blocked = False
@@ -558,11 +611,10 @@ def xss_level5():
         message = "Your input has been filtered with our advanced security system!"
 
     flag = None
-    # If user is logged in, generate a flag for this challenge
-    if 'user_id' in session:
-        challenge = Challenge.query.filter_by(name="XSS with Advanced Filters").first()
-        if challenge:
-            flag = get_or_create_flag(challenge.id, session['user_id'])
+    # Generate a flag for this challenge
+    challenge = Challenge.query.filter_by(name="XSS with Advanced Filters").first()
+    if challenge:
+        flag = get_or_create_flag(challenge.id, machine_id)
 
     return render_template('xss/xss_level5.html', message=message, filtered_input=filtered_input,
                            waf_blocked=waf_blocked, flag=flag)
@@ -570,6 +622,7 @@ def xss_level5():
 # XSS Level 6 - XSS with ModSecurity WAF
 @app.route('/xss/level6', methods=['GET', 'POST'])
 def xss_level6():
+    machine_id = get_machine_id()
     message = ""
     filtered_input = ""
     waf_blocked = False
@@ -586,11 +639,10 @@ def xss_level6():
             message = "Input passed security checks."
 
     flag = None
-    # If user is logged in, generate a flag for this challenge
-    if 'user_id' in session:
-        challenge = Challenge.query.filter_by(name="XSS with ModSecurity WAF").first()
-        if challenge:
-            flag = get_or_create_flag(challenge.id, session['user_id'])
+    # Generate a flag for this challenge
+    challenge = Challenge.query.filter_by(name="XSS with ModSecurity WAF").first()
+    if challenge:
+        flag = get_or_create_flag(challenge.id, machine_id)
 
     return render_template('xss/xss_level6.html', message=message, filtered_input=filtered_input,
                            waf_blocked=waf_blocked, flag=flag)
