@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}XSS Level 5: XSS with Advanced Filters{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h2 class="text-center">Level 5: XSS with Advanced Filters</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4>Challenge Description</h4>
+                    <p>
+                        This page implements more advanced XSS protection by filtering multiple dangerous patterns.
+                        This challenge simulates a real-world scenario where developers have implemented some security measures.
+                    </p>
+                    <p>
+                        <strong>Objective:</strong> Make an alert box appear with the text "XSS Level 5 Completed!"
+                        despite the advanced filtering.
+                    </p>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Rich Text Editor</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>This is a simplified version of a rich text editor that allows some HTML formatting:</p>
+                        <form action="{{ url_for('xss_level5') }}" method="post">
+                            <div class="mb-3">
+                                <label for="user_input" class="form-label">Content:</label>
+                                <textarea class="form-control" id="user_input" name="user_input" rows="5" placeholder="<p>This is <b>formatted</b> text with <i>styling</i>.</p>"></textarea>
+                                <div class="form-text">
+                                    Allowed tags: &lt;p&gt;, &lt;b&gt;, &lt;i&gt;, &lt;u&gt;, &lt;br&gt;, &lt;hr&gt;, &lt;em&gt;, &lt;strong&gt;
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Preview Content</button>
+                        </form>
+                    </div>
+                </div>
+                
+                {% if message %}
+                <div class="alert alert-warning">
+                    {{ message }}
+                </div>
+                {% endif %}
+                
+                {% if filtered_input %}
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Content Preview</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="preview-content">
+                            {{ filtered_input | safe }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level=5) }}" class="btn btn-outline-secondary">View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end">Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

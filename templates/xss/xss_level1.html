@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 1: Basic Reflected XSS - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 1: Basic Reflected XSS</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to the R00tGlyph search engine! This is a simple search page that reflects user input directly in the response.
+                        Your goal is to inject JavaScript code that executes in the browser.
+                    </p>
+                    <p>
+                        <strong>Scenario:</strong> You've discovered a search function on a website that seems to directly output whatever you type into it.
+                        This could be vulnerable to Cross-Site Scripting (XSS). As a security researcher, you need to prove the vulnerability by executing JavaScript in the browser.
+                    </p>
+                    <p>
+                        <strong>Objective:</strong> Make an alert box appear with the text "XSS Level 1 Completed!" to reveal the flag.
+                    </p>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-search me-2"></i>Search Form</h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('xss_level1') }}" method="get">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Enter your search query:</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+                                    <input type="text" class="form-control" id="name" name="name" value="{{ request.args.get('name', '') }}" placeholder="Try searching for your name...">
+                                    <button type="submit" class="btn btn-primary">Search</button>
+                                </div>
+                                <div class="form-text">The search engine will look for matches in our database.</div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {% if user_input %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-list-ul me-2"></i>Search Results</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Hello, {{ user_input | safe }}! Here are your search results:</p>
+                        <hr>
+                        <p class="text-muted"><i class="bi bi-exclamation-circle me-2"></i>No results found for your query.</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if flag and 'user_id' in session %}
+                <div class="card mb-4 flag-form">
+                    <div class="card-header bg-success text-white">
+                        <h5><i class="bi bi-flag-fill me-2"></i>Submit Flag</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>If you've successfully exploited the vulnerability, you should be able to see the flag. Submit it below to earn points!</p>
+
+                        <form id="flag-submission-form">
+                            <input type="hidden" name="challenge_id" value="1">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text"><i class="bi bi-key-fill"></i></span>
+                                <input type="text" class="form-control" name="flag" placeholder="Enter flag (format: R00T{...})" required>
+                                <button class="btn btn-success" type="submit">Submit</button>
+                            </div>
+                        </form>
+
+                        <div id="flag-result" class="alert" style="display: none;"></div>
+
+                        <div class="flag-container">
+                            <span class="flag-label">Your Flag</span>
+                            <code>{{ flag }}</code>
+                        </div>
+                    </div>
+                </div>
+                {% elif not 'user_id' in session %}
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <strong>Note:</strong> You need to <a href="{{ url_for('login') }}">login</a> to submit flags and track your progress.
+                </div>
+                {% endif %}
+
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level=1) }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

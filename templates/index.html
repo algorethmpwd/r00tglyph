@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}R00tGlyph - Advanced Web Security Training Platform{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center"><span class="text-danger">R00t</span><span class="text-success">Glyph</span> - Web Security Training</h2>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card h-100 bg-dark text-light">
+                            <div class="card-body">
+                                <h3 class="text-danger"><i class="bi bi-shield-lock-fill me-2"></i>About R00tGlyph</h3>
+                                <p>
+                                    R00tGlyph is an advanced web security training platform designed to simulate real-world vulnerabilities in a safe, controlled environment.
+                                    Perfect for security researchers, penetration testers, and developers looking to improve their security skills.
+                                </p>
+                                <p>
+                                    Each challenge comes with a unique flag that changes for every user, ensuring a personalized experience and preventing flag sharing.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h3><i class="bi bi-bug-fill me-2"></i>Current Vulnerabilities</h3>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Cross-Site Scripting (XSS)
+                                        <span class="badge bg-success rounded-pill">6 Levels</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center text-muted">
+                                        SQL Injection
+                                        <span class="badge bg-secondary rounded-pill">Coming Soon</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center text-muted">
+                                        Command Injection
+                                        <span class="badge bg-secondary rounded-pill">Coming Soon</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3><i class="bi bi-terminal-fill me-2"></i>How to Use R00tGlyph</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="bi bi-1-circle-fill me-2"></i>Choose a Challenge</h5>
+                                <p class="card-text">Browse the available challenges and select one that matches your skill level. Start with beginner challenges if you're new.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="bi bi-2-circle-fill me-2"></i>Exploit the Vulnerability</h5>
+                                <p class="card-text">Use your favorite tools and techniques to find and exploit the vulnerability in the challenge.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="bi bi-3-circle-fill me-2"></i>Capture the Flag</h5>
+                                <p class="card-text">Successfully exploiting the vulnerability will reveal a unique flag that you can submit to earn points.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="bi bi-4-circle-fill me-2"></i>Learn & Improve</h5>
+                                <p class="card-text">Each challenge includes a detailed solution guide explaining the vulnerability and how to prevent it.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <strong>Important:</strong> This platform is for educational purposes only. The skills learned here should only be applied to systems you have permission to test.
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-danger btn-lg me-2"><i class="bi bi-lightning-fill me-2"></i>Start Hacking</a>
+                    {% if 'user_id' not in session %}
+                    <a href="{{ url_for('register') }}" class="btn btn-outline-success btn-lg"><i class="bi bi-person-plus-fill me-2"></i>Register</a>
+                    {% else %}
+                    <a href="{{ url_for('scoreboard') }}" class="btn btn-outline-primary btn-lg"><i class="bi bi-trophy-fill me-2"></i>Scoreboard</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

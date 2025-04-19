@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}XSS Level 4: XSS with Basic Filters{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h2 class="text-center">Level 4: XSS with Basic Filters</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4>Challenge Description</h4>
+                    <p>
+                        This page implements basic XSS protection by filtering out &lt;script&gt; tags.
+                        Your challenge is to bypass this protection and still execute JavaScript.
+                    </p>
+                    <p>
+                        <strong>Objective:</strong> Make an alert box appear with the text "XSS Level 4 Completed!"
+                        despite the filtering.
+                    </p>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Profile Customization</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Enter HTML to customize your profile page:</p>
+                        <form action="{{ url_for('xss_level4') }}" method="post">
+                            <div class="mb-3">
+                                <label for="user_input" class="form-label">HTML Content:</label>
+                                <textarea class="form-control" id="user_input" name="user_input" rows="4" placeholder="<h1>My Profile</h1><p>Welcome to my page!</p>"></textarea>
+                                <div class="form-text">Note: Script tags are not allowed for security reasons.</div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Update Profile</button>
+                        </form>
+                    </div>
+                </div>
+                
+                {% if message %}
+                <div class="alert alert-warning">
+                    {{ message }}
+                </div>
+                {% endif %}
+                
+                {% if filtered_input %}
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Your Profile Preview</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="profile-content">
+                            {{ filtered_input | safe }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level=4) }}" class="btn btn-outline-secondary">View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end">Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

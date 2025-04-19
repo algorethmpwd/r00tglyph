@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Challenges - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">R00tGlyph Challenges</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    Select a challenge category below to begin. Each challenge has a unique flag that you must capture to earn points.
+                    <br>
+                    <small class="text-muted">Note: You need to be logged in to submit flags and track your progress.</small>
+                </div>
+
+                <div class="accordion" id="challengeAccordion">
+                    {% for category in categories %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading{{ category }}">
+                            <button class="accordion-button {% if not loop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ category }}" aria-expanded="{% if loop.first %}true{% else %}false{% endif %}" aria-controls="collapse{{ category }}">
+                                <i class="bi bi-bug-fill me-2"></i>
+                                {{ category.upper() }} Challenges
+                            </button>
+                        </h2>
+                        <div id="collapse{{ category }}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}" aria-labelledby="heading{{ category }}" data-bs-parent="#challengeAccordion">
+                            <div class="accordion-body p-0">
+                                <div class="list-group list-group-flush">
+                                    {% for challenge in challenges[category] %}
+                                    <a href="{{ url_for('xss_level' + (loop.index | string)) if category == 'xss' else '#' }}" class="list-group-item list-group-item-action">
+                                        <div class="d-flex w-100 justify-content-between align-items-center">
+                                            <div>
+                                                <h5 class="mb-1">{{ challenge.name }}</h5>
+                                                <p class="mb-1">{{ challenge.description }}</p>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="badge {% if challenge.difficulty == 'beginner' %}bg-success{% elif challenge.difficulty == 'intermediate' %}bg-warning{% else %}bg-danger{% endif %} mb-2 d-block">
+                                                    {{ challenge.difficulty | title }}
+                                                </span>
+                                                <span class="badge bg-primary">{{ challenge.points }} pts</span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="alert alert-info mt-4">
+                    <strong><i class="bi bi-clock-history"></i> Coming Soon:</strong> SQL Injection, Command Injection, CSRF, and more vulnerability types!
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Enable all tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    });
+</script>
+{% endblock %}

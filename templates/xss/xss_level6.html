@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 6: XSS with ModSecurity WAF - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 6: XSS with ModSecurity WAF</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to the most advanced challenge! This page is protected by an emulation of ModSecurity, 
+                        a popular Web Application Firewall (WAF) used in production environments.
+                    </p>
+                    <p>
+                        <strong>Scenario:</strong> You're testing a high-security web application that uses ModSecurity WAF to protect against XSS attacks.
+                        The WAF has extensive rules to detect and block common XSS patterns, but you suspect it might still be vulnerable.
+                    </p>
+                    <p>
+                        <strong>Objective:</strong> Bypass the WAF and execute JavaScript to make an alert box appear with the text "XSS Level 6 Completed!"
+                    </p>
+                </div>
+                
+                {% if waf_blocked %}
+                <div class="alert alert-danger waf-blocked">
+                    <h5><i class="bi bi-shield-exclamation me-2"></i>WAF Alert</h5>
+                    <p>Potential XSS attack detected and blocked! The WAF has identified suspicious patterns in your input.</p>
+                    <p><small>ModSecurity Rule ID: OWASP_CRS/942100 - XSS Attack Detected</small></p>
+                </div>
+                {% endif %}
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Content Editor</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>This is a secure content editor that allows limited HTML formatting for blog posts:</p>
+                        <form action="{{ url_for('xss_level6') }}" method="post">
+                            <div class="mb-3">
+                                <label for="user_input" class="form-label">HTML Content:</label>
+                                <textarea class="form-control" id="user_input" name="user_input" rows="6" placeholder="<p>This is a <b>secure</b> content editor with <i>WAF protection</i>.</p>"></textarea>
+                                <div class="form-text">
+                                    <i class="bi bi-shield-check me-1"></i>Protected by ModSecurity WAF. Allowed tags: &lt;p&gt;, &lt;b&gt;, &lt;i&gt;, &lt;u&gt;, &lt;br&gt;, &lt;hr&gt;, &lt;em&gt;, &lt;strong&gt;
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-eye me-2"></i>Preview Content
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                {% if message %}
+                <div class="alert {% if waf_blocked %}alert-danger{% else %}alert-success{% endif %}">
+                    <i class="bi {% if waf_blocked %}bi-shield-exclamation{% else %}bi-shield-check{% endif %} me-2"></i>
+                    {{ message }}
+                </div>
+                {% endif %}
+                
+                {% if filtered_input %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-display me-2"></i>Content Preview</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="preview-content">
+                            {{ filtered_input | safe }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if flag and 'user_id' in session %}
+                <div class="card mb-4 flag-form">
+                    <div class="card-header bg-success text-white">
+                        <h5><i class="bi bi-flag-fill me-2"></i>Submit Flag</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>If you've successfully bypassed the WAF and executed JavaScript, you should be able to see the flag. Submit it below to earn points!</p>
+                        
+                        <form id="flag-submission-form">
+                            <input type="hidden" name="challenge_id" value="6">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text"><i class="bi bi-key-fill"></i></span>
+                                <input type="text" class="form-control" name="flag" placeholder="Enter flag (format: R00T{...})" required>
+                                <button class="btn btn-success" type="submit">Submit</button>
+                            </div>
+                        </form>
+                        
+                        <div id="flag-result" class="alert" style="display: none;"></div>
+                        
+                        <div class="flag-container">
+                            <span class="flag-label">Your Flag</span>
+                            <code>{{ flag }}</code>
+                        </div>
+                    </div>
+                </div>
+                {% elif not 'user_id' in session %}
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <strong>Note:</strong> You need to <a href="{{ url_for('login') }}">login</a> to submit flags and track your progress.
+                </div>
+                {% endif %}
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level=6) }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

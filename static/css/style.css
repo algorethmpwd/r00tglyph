@@ -1,0 +1,309 @@
+/* Custom styles for R00tGlyph Platform */
+
+/* Base Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    border: none;
+}
+
+.card-header {
+    font-weight: bold;
+}
+
+pre {
+    padding: 15px;
+    border-radius: 5px;
+    overflow-x: auto;
+}
+
+code {
+    color: #d63384;
+}
+
+.profile-content, .preview-content {
+    padding: 15px;
+    border-radius: 5px;
+    min-height: 100px;
+}
+
+footer {
+    margin-top: 50px;
+}
+
+/* Social Icons */
+.social-icons a {
+    transition: all 0.3s ease;
+}
+
+.social-icons a:hover {
+    transform: scale(1.2);
+    opacity: 0.8;
+}
+
+/* Custom badge colors */
+.badge.bg-success {
+    background-color: #28a745 !important;
+}
+
+.badge.bg-warning {
+    background-color: #ffc107 !important;
+    color: #212529 !important;
+}
+
+.badge.bg-danger {
+    background-color: #dc3545 !important;
+}
+
+/* Styling for the color box in Level 2 */
+#colorBox {
+    transition: background-color 0.3s ease;
+    border-radius: 5px;
+}
+
+/* Comment styling for Level 3 */
+.comment-author {
+    font-weight: bold;
+}
+
+.comment-date {
+    font-size: 0.8em;
+}
+
+/* Solution page styling */
+.solution-code {
+    border-left: 4px solid #28a745;
+    padding: 10px 15px;
+    margin: 15px 0;
+}
+
+/* Flag submission form */
+.flag-form {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+/* Theme: Dark (default) */
+[data-bs-theme="dark"] {
+    --bs-body-bg: #121212;
+    --bs-body-color: #e0e0e0;
+}
+
+[data-bs-theme="dark"] .card {
+    background-color: #1e1e1e;
+    border-color: #333;
+}
+
+[data-bs-theme="dark"] pre {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+}
+
+[data-bs-theme="dark"] .profile-content,
+[data-bs-theme="dark"] .preview-content {
+    background-color: #2d2d2d;
+    border: 1px solid #444;
+}
+
+/* Theme: Cyberpunk */
+[data-bs-theme="cyberpunk"] {
+    --bs-body-bg: #0a0a1e;
+    --bs-body-color: #00ff9d;
+}
+
+[data-bs-theme="cyberpunk"] .navbar {
+    background: linear-gradient(90deg, #0a0a1e, #1a1a3e) !important;
+    border-bottom: 2px solid #00ff9d;
+}
+
+[data-bs-theme="cyberpunk"] .card {
+    background-color: #1a1a3e;
+    border: 1px solid #00ff9d;
+    box-shadow: 0 0 15px rgba(0, 255, 157, 0.3);
+}
+
+[data-bs-theme="cyberpunk"] .card-header {
+    background-color: #2a2a4e !important;
+    color: #00ff9d !important;
+    border-bottom: 1px solid #00ff9d;
+}
+
+[data-bs-theme="cyberpunk"] .btn-primary {
+    background-color: #ff00aa;
+    border-color: #ff00aa;
+}
+
+[data-bs-theme="cyberpunk"] .btn-success {
+    background-color: #00ff9d;
+    border-color: #00ff9d;
+    color: #0a0a1e;
+}
+
+[data-bs-theme="cyberpunk"] .btn-danger {
+    background-color: #ff003c;
+    border-color: #ff003c;
+}
+
+[data-bs-theme="cyberpunk"] a {
+    color: #00ffff;
+}
+
+[data-bs-theme="cyberpunk"] pre {
+    background-color: #2a2a4e;
+    border: 1px solid #00ff9d;
+    color: #00ffff;
+}
+
+[data-bs-theme="cyberpunk"] .profile-content,
+[data-bs-theme="cyberpunk"] .preview-content {
+    background-color: #2a2a4e;
+    border: 1px solid #00ff9d;
+}
+
+/* Theme: Hacker */
+[data-bs-theme="hacker"] {
+    --bs-body-bg: #0c0c0c;
+    --bs-body-color: #00ff00;
+    font-family: 'Courier New', monospace;
+}
+
+[data-bs-theme="hacker"] .navbar {
+    background-color: #0c0c0c !important;
+    border-bottom: 1px solid #00ff00;
+}
+
+[data-bs-theme="hacker"] .card {
+    background-color: #0c0c0c;
+    border: 1px solid #00ff00;
+}
+
+[data-bs-theme="hacker"] .card-header {
+    background-color: #0c0c0c !important;
+    color: #00ff00 !important;
+    border-bottom: 1px solid #00ff00;
+}
+
+[data-bs-theme="hacker"] .btn {
+    background-color: #0c0c0c;
+    border-color: #00ff00;
+    color: #00ff00;
+}
+
+[data-bs-theme="hacker"] .btn:hover {
+    background-color: #00ff00;
+    color: #0c0c0c;
+}
+
+[data-bs-theme="hacker"] a {
+    color: #00ff00;
+    text-decoration: none;
+}
+
+[data-bs-theme="hacker"] a:hover {
+    color: #00cc00;
+    text-decoration: underline;
+}
+
+[data-bs-theme="hacker"] pre {
+    background-color: #0c0c0c;
+    border: 1px solid #00ff00;
+    color: #00ff00;
+}
+
+[data-bs-theme="hacker"] .profile-content,
+[data-bs-theme="hacker"] .preview-content {
+    background-color: #0c0c0c;
+    border: 1px solid #00ff00;
+}
+
+[data-bs-theme="hacker"] input,
+[data-bs-theme="hacker"] textarea,
+[data-bs-theme="hacker"] select {
+    background-color: #0c0c0c;
+    border: 1px solid #00ff00;
+    color: #00ff00;
+}
+
+[data-bs-theme="hacker"] ::placeholder {
+    color: #00aa00;
+    opacity: 0.7;
+}
+
+/* Animations */
+@keyframes glitch {
+    0% {
+        text-shadow: 0.05em 0 0 #ff00ff, -0.05em -0.025em 0 #00ffff;
+    }
+    14% {
+        text-shadow: 0.05em 0 0 #ff00ff, -0.05em -0.025em 0 #00ffff;
+    }
+    15% {
+        text-shadow: -0.05em -0.025em 0 #ff00ff, 0.025em 0.025em 0 #00ffff;
+    }
+    49% {
+        text-shadow: -0.05em -0.025em 0 #ff00ff, 0.025em 0.025em 0 #00ffff;
+    }
+    50% {
+        text-shadow: 0.025em 0.05em 0 #ff00ff, 0.05em 0 0 #00ffff;
+    }
+    99% {
+        text-shadow: 0.025em 0.05em 0 #ff00ff, 0.05em 0 0 #00ffff;
+    }
+    100% {
+        text-shadow: -0.025em 0 0 #ff00ff, -0.025em -0.025em 0 #00ffff;
+    }
+}
+
+[data-bs-theme="cyberpunk"] .navbar-brand,
+[data-bs-theme="hacker"] .navbar-brand {
+    animation: glitch 2s infinite;
+}
+
+/* Challenge-specific styles */
+.waf-blocked {
+    background-color: rgba(255, 0, 0, 0.1);
+    border-left: 4px solid #dc3545;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+/* Flag display */
+.flag-container {
+    background-color: rgba(40, 167, 69, 0.1);
+    border: 1px dashed #28a745;
+    border-radius: 5px;
+    padding: 10px 15px;
+    margin: 15px 0;
+    font-family: monospace;
+    position: relative;
+}
+
+.flag-label {
+    position: absolute;
+    top: -10px;
+    left: 10px;
+    background-color: var(--bs-body-bg);
+    padding: 0 5px;
+    font-size: 0.8rem;
+    color: #28a745;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-title {
+        font-size: 1.2rem;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+    }
+
+    h3 {
+        font-size: 1.3rem;
+    }
+}

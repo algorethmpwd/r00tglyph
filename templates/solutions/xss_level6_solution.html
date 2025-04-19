@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: XSS Level 6 - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h2 class="text-center">Solution: Level 6 - XSS with ModSecurity WAF</h2>
+            </div>
+            <div class="card-body">
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This challenge simulates a real-world scenario where a web application is protected by ModSecurity, 
+                    a popular Web Application Firewall (WAF). The WAF is configured to detect and block common XSS patterns,
+                    making this challenge significantly more difficult than the previous ones.
+                </p>
+                <p>
+                    The WAF uses pattern matching to identify potentially malicious input, including:
+                </p>
+                <ul>
+                    <li>JavaScript keywords and functions (alert, eval, document, etc.)</li>
+                    <li>HTML event handlers (onclick, onerror, etc.)</li>
+                    <li>Script tags and other dangerous HTML elements</li>
+                    <li>Various encoding and obfuscation techniques</li>
+                </ul>
+                
+                <h3>Solution Approaches</h3>
+                <p>There are several advanced techniques that can be used to bypass the WAF:</p>
+                
+                <h4>1. Using Exotic Encodings</h4>
+                <div class="alert alert-secondary">
+                    <code>&lt;img src=x o&#x6E;error=alert('XSS Level 6 Completed!')&gt;</code>
+                </div>
+                <p>
+                    This approach uses HTML entity encoding for the "n" in "onerror". The WAF is looking for the exact string "onerror",
+                    but the browser will decode the entity before execution.
+                </p>
+                
+                <h4>2. Splitting Dangerous Strings</h4>
+                <div class="alert alert-secondary">
+                    <code>&lt;img src=x one&#x72;ror=alert('XSS Level 6 Completed!')&gt;</code>
+                </div>
+                <p>
+                    Similar to the first approach, but encoding a different character in the event handler name.
+                </p>
+                
+                <h4>3. Using Less Common Event Handlers</h4>
+                <div class="alert alert-secondary">
+                    <code>&lt;body onpageshow=alert('XSS Level 6 Completed!')&gt;</code>
+                </div>
+                <p>
+                    The WAF might be configured to block common event handlers like "onclick" and "onerror", 
+                    but might miss less common ones like "onpageshow".
+                </p>
+                
+                <h4>4. Using JavaScript Protocol in Unexpected Places</h4>
+                <div class="alert alert-secondary">
+                    <code>&lt;a href=java&#115;cript:alert('XSS Level 6 Completed!')&gt;Click me&lt;/a&gt;</code>
+                </div>
+                <p>
+                    This approach uses HTML entity encoding within the "javascript:" protocol to bypass detection.
+                </p>
+                
+                <h4>5. Polyglot XSS</h4>
+                <div class="alert alert-secondary">
+                    <code>&lt;p/style=&quot;font-family:'\22\3E\3Cimg/src/onerror=alert('XSS Level 6 Completed!')\3E'&quot;&gt;Test&lt;/p&gt;</code>
+                </div>
+                <p>
+                    A polyglot XSS combines multiple contexts to create a payload that works in various situations.
+                    This example breaks out of a CSS context to execute JavaScript.
+                </p>
+                
+                <h3>Real-world Impact</h3>
+                <p>
+                    WAF bypass techniques are particularly concerning because:
+                </p>
+                <ul>
+                    <li>Organizations often rely heavily on WAFs as their primary defense against web attacks</li>
+                    <li>A successful bypass can lead to the compromise of high-security applications</li>
+                    <li>WAF bypasses often go undetected by security monitoring systems</li>
+                    <li>They demonstrate that security through pattern matching alone is insufficient</li>
+                </ul>
+                
+                <h3>Prevention</h3>
+                <p>To properly secure applications against advanced XSS attacks, even with a WAF:</p>
+                <ul>
+                    <li>Implement proper input validation and output encoding at the application level</li>
+                    <li>Use Content Security Policy (CSP) with strict directives</li>
+                    <li>Adopt a defense-in-depth approach rather than relying solely on the WAF</li>
+                    <li>Use modern frameworks with built-in XSS protections</li>
+                    <li>Regularly update WAF rules to address new bypass techniques</li>
+                    <li>Consider using a whitelist approach for HTML rather than trying to block all possible attack vectors</li>
+                </ul>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('xss_level6') }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

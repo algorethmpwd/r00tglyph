@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Scoreboard - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center"><i class="bi bi-trophy-fill me-2"></i>R00tGlyph Scoreboard</h2>
+            </div>
+            <div class="card-body">
+                {% if users %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Username</th>
+                                <th scope="col">Score</th>
+                                <th scope="col">Last Active</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr {% if 'user_id' in session and session['user_id'] == user.id %}class="table-success"{% endif %}>
+                                <th scope="row">{{ loop.index }}</th>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.score }} pts</td>
+                                <td>{{ user.last_login.strftime('%Y-%m-%d %H:%M') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    No scores yet! Be the first to complete a challenge and earn points.
+                </div>
+                {% endif %}
+                
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-primary">
+                        <i class="bi bi-lightning-fill me-2"></i>Take on a Challenge
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

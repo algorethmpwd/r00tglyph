@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: XSS Level 1{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h2 class="text-center">Solution: Level 1 - Basic Reflected XSS</h2>
+            </div>
+            <div class="card-body">
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This page contains a basic reflected XSS vulnerability. The user input from the "name" parameter
+                    is directly inserted into the HTML response without any sanitization or encoding.
+                </p>
+                <p>
+                    The vulnerability is in this line of the template:
+                </p>
+                <pre><code>Hello, {{ "{{ user_input | safe }}" }}! Here are your search results:</code></pre>
+                <p>
+                    The <code>| safe</code> filter in Jinja2 tells the template engine not to escape the HTML, which allows
+                    any HTML or JavaScript to be executed.
+                </p>
+                
+                <h3>Solution</h3>
+                <p>To solve this challenge, you can inject a simple JavaScript alert in the name parameter:</p>
+                <div class="alert alert-secondary">
+                    <code>&lt;script&gt;alert("XSS Level 1 Completed!")&lt;/script&gt;</code>
+                </div>
+                <p>
+                    When you submit this in the form, or add it directly to the URL as:
+                </p>
+                <div class="alert alert-secondary">
+                    <code>?name=&lt;script&gt;alert("XSS Level 1 Completed!")&lt;/script&gt;</code>
+                </div>
+                <p>
+                    The browser will execute the script and display the alert.
+                </p>
+                
+                <h3>Real-world Impact</h3>
+                <p>
+                    In a real-world scenario, this type of vulnerability could be used to:
+                </p>
+                <ul>
+                    <li>Steal user cookies and session information</li>
+                    <li>Redirect users to phishing sites</li>
+                    <li>Perform actions on behalf of the user</li>
+                    <li>Deface websites</li>
+                </ul>
+                
+                <h3>Prevention</h3>
+                <p>To prevent this type of vulnerability, developers should:</p>
+                <ul>
+                    <li>Always sanitize and encode user input before displaying it</li>
+                    <li>Use template engine's auto-escaping features (remove the <code>| safe</code> filter)</li>
+                    <li>Implement Content Security Policy (CSP) headers</li>
+                    <li>Use frameworks that automatically escape output</li>
+                </ul>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('xss_level1') }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

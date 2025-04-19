@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: XSS Level 3{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h2 class="text-center">Solution: Level 3 - Stored XSS</h2>
+            </div>
+            <div class="card-body">
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This page contains a stored XSS vulnerability. In a stored XSS attack, the malicious script is permanently
+                    stored on the target server (in this case, in the database). The attack is then executed when other users
+                    access the affected page.
+                </p>
+                <p>
+                    The vulnerability is in this line of the template:
+                </p>
+                <pre><code>{{ "{{ comment.content | safe }}" }}</code></pre>
+                <p>
+                    The application stores user comments in the database without sanitization and then displays them with the
+                    <code>| safe</code> filter, which prevents automatic HTML escaping.
+                </p>
+                
+                <h3>Solution</h3>
+                <p>To solve this challenge, you can post a comment containing JavaScript code:</p>
+                <div class="alert alert-secondary">
+                    <code>&lt;script&gt;alert("XSS Level 3 Completed!")&lt;/script&gt;</code>
+                </div>
+                <p>
+                    When you or any other user views the page after submitting this comment, the script will execute and display the alert.
+                </p>
+                
+                <h3>Real-world Impact</h3>
+                <p>
+                    Stored XSS is often considered the most dangerous type of XSS because:
+                </p>
+                <ul>
+                    <li>It affects all users who view the affected page</li>
+                    <li>It persists until the malicious content is removed from the database</li>
+                    <li>It can be used for widespread attacks on multiple users</li>
+                    <li>It doesn't require any user interaction beyond visiting the affected page</li>
+                </ul>
+                <p>
+                    Real-world examples include forum posts, user profiles, product reviews, and comment sections.
+                </p>
+                
+                <h3>Prevention</h3>
+                <p>To prevent stored XSS vulnerabilities, developers should:</p>
+                <ul>
+                    <li>Sanitize user input before storing it in the database</li>
+                    <li>Encode output when displaying user-generated content</li>
+                    <li>Use Content Security Policy (CSP) headers</li>
+                    <li>Implement input validation on both client and server sides</li>
+                    <li>Consider using HTML sanitization libraries like DOMPurify</li>
+                </ul>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('xss_level3') }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

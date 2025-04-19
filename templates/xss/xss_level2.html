@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}XSS Level 2: DOM-based XSS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h2 class="text-center">Level 2: DOM-based XSS</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4>Challenge Description</h4>
+                    <p>
+                        This page demonstrates a DOM-based XSS vulnerability. The vulnerability occurs when 
+                        JavaScript code directly manipulates the DOM with user-controlled data.
+                    </p>
+                    <p>
+                        <strong>Objective:</strong> Make an alert box appear with the text "XSS Level 2 Completed!"
+                    </p>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Color Selector</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>This page allows you to change the background color of the box below.</p>
+                        <p>Try adding a color parameter to the URL (e.g., ?color=red)</p>
+                        
+                        <div id="colorBox" class="p-5 mt-3 border" style="background-color: #f0f0f0;">
+                            <h3 class="text-center">This box will change color</h3>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level=2) }}" class="btn btn-outline-secondary">View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end">Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Vulnerable code that doesn't sanitize user input
+    function setColor() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const color = urlParams.get('color');
+        
+        if (color) {
+            // Vulnerable line - directly inserting user input into the DOM
+            document.getElementById('colorBox').style = "background-color: " + color;
+        }
+    }
+    
+    // Call the function when the page loads
+    window.onload = setColor;
+</script>
+{% endblock %}

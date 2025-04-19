@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}XSS Level 3: Stored XSS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h2 class="text-center">Level 3: Stored XSS</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4>Challenge Description</h4>
+                    <p>
+                        This page demonstrates a stored XSS vulnerability. In this type of attack, the malicious script is stored
+                        on the target server (in this case, our database) and then executed when other users view the affected page.
+                    </p>
+                    <p>
+                        <strong>Objective:</strong> Post a comment that will execute JavaScript and show an alert with the text "XSS Level 3 Completed!"
+                        when the page is loaded.
+                    </p>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Comment Section</h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('xss_level3') }}" method="post">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Username:</label>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="content" class="form-label">Comment:</label>
+                                <textarea class="form-control" id="content" name="content" rows="3" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Post Comment</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Comments</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if comments %}
+                            {% for comment in comments %}
+                                <div class="card mb-3">
+                                    <div class="card-header">
+                                        <strong>{{ comment.username }}</strong> 
+                                        <small class="text-muted">{{ comment.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+                                    </div>
+                                    <div class="card-body">
+                                        {{ comment.content | safe }}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p>No comments yet. Be the first to comment!</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level=3) }}" class="btn btn-outline-secondary">View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end">Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

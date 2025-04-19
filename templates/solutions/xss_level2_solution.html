@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: XSS Level 2{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h2 class="text-center">Solution: Level 2 - DOM-based XSS</h2>
+            </div>
+            <div class="card-body">
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This page contains a DOM-based XSS vulnerability. Unlike reflected or stored XSS, DOM-based XSS occurs entirely
+                    in the browser when JavaScript code takes data from a user-controllable source (like URL parameters) and
+                    passes it to a sink that supports dynamic code execution.
+                </p>
+                <p>
+                    The vulnerability is in this JavaScript code:
+                </p>
+                <pre><code>document.getElementById('colorBox').style = "background-color: " + color;</code></pre>
+                <p>
+                    The code takes the "color" parameter from the URL and directly assigns it to the style attribute without any validation.
+                    Since the style attribute can execute JavaScript in certain contexts, this creates an XSS vulnerability.
+                </p>
+                
+                <h3>Solution</h3>
+                <p>To solve this challenge, you can inject JavaScript into the style attribute:</p>
+                <div class="alert alert-secondary">
+                    <code>?color=red;javascript:alert("XSS Level 2 Completed!")</code>
+                </div>
+                <p>
+                    Another solution using the expression syntax:
+                </p>
+                <div class="alert alert-secondary">
+                    <code>?color=red');alert('XSS Level 2 Completed!</code>
+                </div>
+                <p>
+                    When the page loads, the JavaScript will execute and display the alert.
+                </p>
+                
+                <h3>Real-world Impact</h3>
+                <p>
+                    DOM-based XSS can be particularly dangerous because:
+                </p>
+                <ul>
+                    <li>It may bypass server-side XSS filters since the vulnerability exists entirely in client-side code</li>
+                    <li>It can be harder to detect with automated scanning tools</li>
+                    <li>It can affect single-page applications that rely heavily on client-side JavaScript</li>
+                </ul>
+                
+                <h3>Prevention</h3>
+                <p>To prevent DOM-based XSS vulnerabilities, developers should:</p>
+                <ul>
+                    <li>Use safe JavaScript methods like <code>textContent</code> instead of <code>innerHTML</code></li>
+                    <li>Sanitize user input before using it in the DOM</li>
+                    <li>Use libraries like DOMPurify to clean user input</li>
+                    <li>Implement Content Security Policy (CSP)</li>
+                    <li>Avoid directly inserting user input into dangerous contexts like style attributes</li>
+                </ul>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('xss_level2') }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
