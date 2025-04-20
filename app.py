@@ -205,6 +205,22 @@ def reset_database():
                      description="Exploit prototype pollution to achieve XSS.", points=1300),
             Challenge(name="XSS via Template Injection", category="xss", difficulty="expert",
                      description="Exploit template injection to achieve XSS.", points=1400),
+            Challenge(name="XSS in WebAssembly Applications", category="xss", difficulty="expert",
+                     description="Exploit XSS vulnerabilities in WebAssembly applications.", points=1500),
+            Challenge(name="XSS in Progressive Web Apps", category="xss", difficulty="expert",
+                     description="Exploit XSS vulnerabilities in Progressive Web Apps.", points=1600),
+            Challenge(name="XSS via Web Components", category="xss", difficulty="expert",
+                     description="Exploit XSS vulnerabilities in Web Components and Shadow DOM.", points=1700),
+            Challenge(name="XSS in GraphQL APIs", category="xss", difficulty="expert",
+                     description="Exploit XSS vulnerabilities in GraphQL API responses.", points=1800),
+            Challenge(name="XSS in WebRTC Applications", category="xss", difficulty="expert",
+                     description="Exploit XSS vulnerabilities in WebRTC applications.", points=1900),
+            Challenge(name="XSS via Web Bluetooth/USB", category="xss", difficulty="expert",
+                     description="Exploit XSS vulnerabilities in Web Bluetooth/USB APIs.", points=2000),
+            Challenge(name="XSS in WebGPU Applications", category="xss", difficulty="expert",
+                     description="Exploit XSS vulnerabilities in WebGPU applications.", points=2100),
+            Challenge(name="XSS in Federated Identity Systems", category="xss", difficulty="expert",
+                     description="Exploit XSS vulnerabilities in federated identity systems.", points=2200),
         ]
         db.session.add_all(challenges)
         db.session.commit()
@@ -1099,6 +1115,51 @@ def xss_level15():
                            template_name=template_name, template_subject=template_subject,
                            template_content=template_content, rendered_template=rendered_template,
                            current_date=current_date, flag=flag, user=user)
+
+# XSS Level 16 - XSS in WebAssembly Applications
+@app.route('/xss/level16', methods=['GET', 'POST'])
+def xss_level16():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+
+    # Check if success parameter is present
+    if request.args.get('success') == 'true':
+        challenge = Challenge.query.filter_by(name="XSS in WebAssembly Applications").first()
+        if challenge:
+            flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xss/xss_level16.html', flag=flag, user=user)
+
+# XSS Level 17 - XSS in Progressive Web Apps
+@app.route('/xss/level17', methods=['GET', 'POST'])
+def xss_level17():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+
+    # Check if success parameter is present
+    if request.args.get('success') == 'true':
+        challenge = Challenge.query.filter_by(name="XSS in Progressive Web Apps").first()
+        if challenge:
+            flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xss/xss_level17.html', flag=flag, user=user)
+
+# XSS Level 18 - XSS via Web Components
+@app.route('/xss/level18', methods=['GET', 'POST'])
+def xss_level18():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+
+    # Check if success parameter is present
+    if request.args.get('success') == 'true':
+        challenge = Challenge.query.filter_by(name="XSS via Web Components").first()
+        if challenge:
+            flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xss/xss_level18.html', flag=flag, user=user)
 
 # Solutions
 @app.route('/solutions/<level>')

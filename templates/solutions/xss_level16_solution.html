@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}XSS Level 16 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">XSS Level 16 Solution: XSS in WebAssembly Applications</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
+                    <p>
+                        This challenge demonstrates how WebAssembly applications can be vulnerable to XSS attacks through the JavaScript-WebAssembly bridge. The calculator application uses a simulated WebAssembly module for computation, but has a vulnerable function that evaluates expressions using JavaScript's Function constructor.
+                    </p>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-lightbulb-fill me-2 text-warning"></i>Solution</h3>
+                <p>
+                    To solve this challenge, you need to exploit the vulnerable <code>evaluateExpression</code> function in the WebAssembly module by injecting JavaScript code that will be executed when the expression is evaluated.
+                </p>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Understanding the Vulnerability</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>The vulnerability lies in the WebAssembly module's <code>evaluateExpression</code> function, which uses JavaScript's <code>Function</code> constructor to evaluate expressions:</p>
+                        <pre class="bg-light p-3 rounded"><code>evaluateExpression: function(expression) {
+    try {
+        // This is the vulnerable part - it uses Function constructor to evaluate expressions
+        // which is similar to eval() and can lead to XSS
+        return new Function('return ' + expression)();
+    } catch (error) {
+        return 'Error: ' + error.message;
+    }
+}</code></pre>
+                        <p>This function takes a user-supplied expression, wraps it in a <code>return</code> statement, and creates a new function that executes it. This is essentially equivalent to using <code>eval()</code>, which is a well-known XSS vector.</p>
+                        <p>When a user enters an expression in the "Enter complex expression" input field and clicks "Evaluate", the application calls this vulnerable function with the user's input.</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Crafting the Payload</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>To exploit this vulnerability, we need to craft a payload that will break out of the <code>return</code> statement and execute our own JavaScript code. Here are several approaches:</p>
+                        
+                        <h6>Method 1: Using String Concatenation</h6>
+                        <pre class="bg-light p-3 rounded"><code>1; alert("XSS Level 16 Completed!")</code></pre>
+                        <p>This payload first returns the number 1, then executes the <code>alert()</code> function. The semicolon separates the two statements.</p>
+                        
+                        <h6>Method 2: Using Logical Operators</h6>
+                        <pre class="bg-light p-3 rounded"><code>1 && alert("XSS Level 16 Completed!")</code></pre>
+                        <p>This payload uses the logical AND operator to execute the <code>alert()</code> function after evaluating the first operand (1).</p>
+                        
+                        <h6>Method 3: Using Ternary Operator</h6>
+                        <pre class="bg-light p-3 rounded"><code>1 ? alert("XSS Level 16 Completed!") : 0</code></pre>
+                        <p>This payload uses the ternary operator to execute the <code>alert()</code> function if the condition (1) is true.</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Step-by-Step Solution</h5>
+                    </div>
+                    <div class="card-body">
+                        <ol>
+                            <li>
+                                <p>Open the calculator application and locate the "Enter complex expression" input field at the bottom.</p>
+                            </li>
+                            <li>
+                                <p>Enter one of the XSS payloads in the input field:</p>
+                                <pre class="bg-light p-3 rounded"><code>1; alert("XSS Level 16 Completed!")</code></pre>
+                            </li>
+                            <li>
+                                <p>Click the "Evaluate" button to execute the payload.</p>
+                            </li>
+                            <li>
+                                <p>The calculator will first evaluate the expression (returning 1), then execute the <code>alert()</code> function, displaying the message "XSS Level 16 Completed!".</p>
+                            </li>
+                            <li>
+                                <p>When the alert appears, the challenge will be solved and the flag will be revealed.</p>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Alternative Approaches</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>1. Using Self-Executing Functions</h6>
+                        <pre class="bg-light p-3 rounded"><code>(function() { alert("XSS Level 16 Completed!"); return 1; })()</code></pre>
+                        <p>This payload uses a self-executing function to run the <code>alert()</code> function and then return a value.</p>
+                        
+                        <h6>2. Using Template Literals</h6>
+                        <pre class="bg-light p-3 rounded"><code>`${alert("XSS Level 16 Completed!")}`</code></pre>
+                        <p>This payload uses JavaScript template literals to execute the <code>alert()</code> function during string interpolation.</p>
+                        
+                        <h6>3. Using Object Properties</h6>
+                        <pre class="bg-light p-3 rounded"><code>({toString: () => { alert("XSS Level 16 Completed!"); return ""; }})</code></pre>
+                        <p>This payload creates an object with a <code>toString</code> method that executes the <code>alert()</code> function when the object is converted to a string.</p>
+                    </div>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-shield-fill-check me-2 text-success"></i>Security Lessons</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Vulnerabilities Demonstrated</h5>
+                        <ul>
+                            <li><strong>Insecure JavaScript-WebAssembly Bridge:</strong> The vulnerability occurs at the interface between JavaScript and WebAssembly, where user input is passed to a JavaScript function that uses <code>eval()</code>-like functionality.</li>
+                            <li><strong>Dangerous Function Constructor:</strong> Using <code>new Function()</code> or <code>eval()</code> on user-supplied input is a well-known security risk.</li>
+                            <li><strong>Insufficient Input Validation:</strong> The application doesn't properly validate or sanitize user input before passing it to the vulnerable function.</li>
+                        </ul>
+                        
+                        <h5>Prevention Measures</h5>
+                        <ul>
+                            <li><strong>Avoid Eval-like Functions:</strong> Never use <code>eval()</code>, <code>Function()</code>, or similar functions on user-supplied input.</li>
+                            <li><strong>Input Validation:</strong> Validate and sanitize all user input before processing it, especially when it's used in a security-sensitive context.</li>
+                            <li><strong>Safe Expression Evaluation:</strong> Use a safe expression evaluator library that doesn't execute arbitrary code, such as <code>math.js</code> or <code>expr-eval</code>.</li>
+                            <li><strong>Content Security Policy (CSP):</strong> Implement a strict CSP to mitigate the impact of XSS vulnerabilities.</li>
+                            <li><strong>Secure WebAssembly Design:</strong> Design WebAssembly modules with security in mind, ensuring that the JavaScript-WebAssembly bridge doesn't introduce vulnerabilities.</li>
+                        </ul>
+                        
+                        <h5>Real-World Implications</h5>
+                        <p>
+                            As WebAssembly becomes more widely adopted for performance-critical applications, the security of the JavaScript-WebAssembly bridge becomes increasingly important. In real-world scenarios, vulnerabilities in this bridge can lead to XSS attacks that compromise the security of the entire application. Attackers can exploit these vulnerabilities to steal sensitive data, hijack user sessions, or perform other malicious actions in the context of the victim's browser.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('xss_level16') }}" class="btn btn-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

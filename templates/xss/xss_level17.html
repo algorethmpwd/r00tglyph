@@ -1,0 +1,486 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 17: XSS in Progressive Web Apps - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 17: XSS in Progressive Web Apps</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>PWANotes</strong>, a fictional note-taking Progressive Web App! This challenge simulates a real-world scenario where a PWA has an XSS vulnerability in its offline storage mechanism.
+                    </p>
+                    
+                    <div class="card mb-3 border-secondary">
+                        <div class="card-header bg-secondary text-white">
+                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-0">
+                                <strong>Client:</strong> PWANotes Inc.<br>
+                                <strong>Target:</strong> Progressive Web App Note-Taking Application<br>
+                                <strong>Vulnerability:</strong> XSS in Service Worker Cache and IndexedDB Storage<br>
+                                <strong>Objective:</strong> Exploit the PWA's offline storage to achieve persistent XSS
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <p>
+                        <strong>Technical Background:</strong> Progressive Web Apps (PWAs) are web applications that use modern web capabilities to provide an app-like experience to users. They often use Service Workers for offline functionality and IndexedDB for client-side storage. These features can introduce unique security vulnerabilities, particularly around persistent XSS attacks that survive page refreshes and browser restarts.
+                    </p>
+                    
+                    <p>
+                        <strong>Real-world Impact:</strong> PWA vulnerabilities are particularly dangerous because:
+                    </p>
+                    <ul>
+                        <li>They can persist across sessions due to offline storage mechanisms</li>
+                        <li>Service Workers can intercept and modify network requests</li>
+                        <li>PWAs often have access to more device features than regular web apps</li>
+                        <li>Users may trust PWAs more since they appear similar to native applications</li>
+                        <li>PWA vulnerabilities can be difficult to detect and remediate</li>
+                    </ul>
+                    
+                    <p>
+                        <strong>Your Task:</strong> In this challenge, you need to exploit a vulnerability in the PWANotes application. The application allows users to create and store notes offline using IndexedDB. However, there's a vulnerability in how the application handles note content when displaying it. Find a way to inject JavaScript that will persist in the offline storage and execute when the note is viewed. Make an alert box appear with the text "XSS Level 17 Completed!" to reveal the flag.
+                    </p>
+                    
+                    <div class="alert alert-warning">
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Look for ways to inject code into the note content that will be stored in IndexedDB and later rendered without proper sanitization. The vulnerability might be in how the application renders stored notes.
+                    </div>
+                </div>
+                
+                <!-- PWANotes Interface -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-journal-text me-2"></i>PWANotes</h5>
+                        <div>
+                            <span class="badge bg-light text-dark">Progressive Web App</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <!-- Navigation Bar -->
+                        <nav class="navbar navbar-expand navbar-light bg-light px-3">
+                            <div class="container-fluid">
+                                <ul class="navbar-nav">
+                                    <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-house-door me-1"></i>Home</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-journal-text me-1"></i>My Notes</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-star me-1"></i>Favorites</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-gear me-1"></i>Settings</a></li>
+                                </ul>
+                                <div class="d-flex">
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-person-circle me-1"></i>Guest User
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                            <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
+                                            <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </nav>
+                        
+                        <div class="p-4">
+                            <div class="row">
+                                <div class="col-md-4 mb-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">App Status</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="small mb-2"><i class="bi bi-wifi me-2 text-success"></i><span id="connection-status">Online</span></p>
+                                            <p class="small mb-2"><i class="bi bi-hdd me-2 text-success"></i><span id="storage-status">IndexedDB Available</span></p>
+                                            <p class="small mb-0"><i class="bi bi-gear me-2 text-success"></i><span id="service-worker-status">Service Worker Active</span></p>
+                                            <hr>
+                                            <p class="small mb-0 fst-italic">Note: This is a simulated PWA environment for the challenge.</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card mt-3">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">My Notes</h6>
+                                        </div>
+                                        <div class="list-group list-group-flush" id="notes-list">
+                                            <!-- Notes will be added here -->
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card mt-3">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Technical Information</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="small mb-2">This application uses:</p>
+                                            <ul class="small mb-0">
+                                                <li>Service Workers for offline functionality</li>
+                                                <li>IndexedDB for client-side storage</li>
+                                                <li>Cache API for resource caching</li>
+                                            </ul>
+                                            <hr>
+                                            <button class="btn btn-sm btn-outline-danger w-100" id="clear-data-btn">Clear All Data</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-8">
+                                    <div class="card">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0" id="note-view-title">Create New Note</h5>
+                                            <div>
+                                                <button class="btn btn-sm btn-outline-primary" id="new-note-btn"><i class="bi bi-plus-lg me-1"></i>New Note</button>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="note-editor" class="mb-3">
+                                                <div class="mb-3">
+                                                    <label for="note-title" class="form-label">Title</label>
+                                                    <input type="text" class="form-control" id="note-title" placeholder="Enter note title">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="note-content" class="form-label">Content</label>
+                                                    <textarea class="form-control" id="note-content" rows="10" placeholder="Enter note content"></textarea>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="note-favorite">
+                                                        <label class="form-check-label" for="note-favorite">
+                                                            Add to favorites
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex justify-content-end">
+                                                    <button class="btn btn-primary" id="save-note-btn"><i class="bi bi-save me-2"></i>Save Note</button>
+                                                </div>
+                                            </div>
+                                            
+                                            <div id="note-viewer" class="d-none">
+                                                <div class="mb-3">
+                                                    <h3 id="viewer-title"></h3>
+                                                    <div class="text-muted small mb-3">
+                                                        <span id="viewer-date"></span>
+                                                        <span id="viewer-favorite" class="ms-2 d-none"><i class="bi bi-star-fill text-warning"></i> Favorite</span>
+                                                    </div>
+                                                    <div id="viewer-content" class="border rounded p-3 bg-light"></div>
+                                                </div>
+                                                <div class="d-flex justify-content-end">
+                                                    <button class="btn btn-outline-secondary me-2" id="edit-note-btn"><i class="bi bi-pencil me-2"></i>Edit</button>
+                                                    <button class="btn btn-outline-danger" id="delete-note-btn"><i class="bi bi-trash me-2"></i>Delete</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    {% if flag %}
+                                    <div class="alert alert-success mt-4">
+                                        <i class="bi bi-check-circle-fill me-2"></i>
+                                        <strong>Congratulations!</strong> Your XSS payload successfully executed in the Progressive Web App.
+                                    </div>
+                                    <div class="card mt-2">
+                                        <div class="card-header bg-success text-white">
+                                            <h5 class="mb-0"><i class="bi bi-trophy me-2"></i>Challenge Completed!</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>You've successfully demonstrated an XSS vulnerability in a Progressive Web App. In a real-world scenario, this could allow attackers to create persistent XSS attacks that survive page refreshes and browser restarts, potentially leading to long-term compromise of the user's browser environment.</p>
+                                            <div class="flag-container p-3 bg-light rounded">
+                                                <span class="flag-label">Your Flag:</span>
+                                                <code id="flag-value">{{ flag }}</code>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level=17) }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Simulated IndexedDB for notes storage
+    class NotesDatabase {
+        constructor() {
+            this.notes = [];
+            this.currentId = 1;
+            
+            // Load notes from localStorage (simulating IndexedDB persistence)
+            const storedNotes = localStorage.getItem('pwa_notes');
+            if (storedNotes) {
+                this.notes = JSON.parse(storedNotes);
+                if (this.notes.length > 0) {
+                    this.currentId = Math.max(...this.notes.map(note => note.id)) + 1;
+                }
+            }
+        }
+        
+        saveNote(title, content, isFavorite = false) {
+            const note = {
+                id: this.currentId++,
+                title: title,
+                content: content,
+                favorite: isFavorite,
+                date: new Date().toISOString()
+            };
+            
+            this.notes.push(note);
+            this._saveToStorage();
+            return note;
+        }
+        
+        updateNote(id, title, content, isFavorite) {
+            const noteIndex = this.notes.findIndex(note => note.id === id);
+            if (noteIndex !== -1) {
+                this.notes[noteIndex] = {
+                    ...this.notes[noteIndex],
+                    title: title,
+                    content: content,
+                    favorite: isFavorite,
+                    date: new Date().toISOString()
+                };
+                this._saveToStorage();
+                return this.notes[noteIndex];
+            }
+            return null;
+        }
+        
+        deleteNote(id) {
+            const noteIndex = this.notes.findIndex(note => note.id === id);
+            if (noteIndex !== -1) {
+                this.notes.splice(noteIndex, 1);
+                this._saveToStorage();
+                return true;
+            }
+            return false;
+        }
+        
+        getNote(id) {
+            return this.notes.find(note => note.id === id) || null;
+        }
+        
+        getAllNotes() {
+            return [...this.notes];
+        }
+        
+        clearAllNotes() {
+            this.notes = [];
+            this.currentId = 1;
+            this._saveToStorage();
+        }
+        
+        _saveToStorage() {
+            localStorage.setItem('pwa_notes', JSON.stringify(this.notes));
+        }
+    }
+    
+    // Initialize the notes database
+    const db = new NotesDatabase();
+    
+    // DOM elements
+    const notesList = document.getElementById('notes-list');
+    const noteEditor = document.getElementById('note-editor');
+    const noteViewer = document.getElementById('note-viewer');
+    const noteViewTitle = document.getElementById('note-view-title');
+    const noteTitleInput = document.getElementById('note-title');
+    const noteContentInput = document.getElementById('note-content');
+    const noteFavoriteInput = document.getElementById('note-favorite');
+    const viewerTitle = document.getElementById('viewer-title');
+    const viewerDate = document.getElementById('viewer-date');
+    const viewerFavorite = document.getElementById('viewer-favorite');
+    const viewerContent = document.getElementById('viewer-content');
+    const newNoteBtn = document.getElementById('new-note-btn');
+    const saveNoteBtn = document.getElementById('save-note-btn');
+    const editNoteBtn = document.getElementById('edit-note-btn');
+    const deleteNoteBtn = document.getElementById('delete-note-btn');
+    const clearDataBtn = document.getElementById('clear-data-btn');
+    
+    // Current note being edited or viewed
+    let currentNoteId = null;
+    
+    // Initialize the app
+    function initApp() {
+        renderNotesList();
+        showNoteEditor();
+        
+        // Event listeners
+        newNoteBtn.addEventListener('click', showNoteEditor);
+        saveNoteBtn.addEventListener('click', saveNote);
+        editNoteBtn.addEventListener('click', editCurrentNote);
+        deleteNoteBtn.addEventListener('click', deleteCurrentNote);
+        clearDataBtn.addEventListener('click', clearAllData);
+    }
+    
+    // Render the list of notes
+    function renderNotesList() {
+        notesList.innerHTML = '';
+        const notes = db.getAllNotes();
+        
+        if (notes.length === 0) {
+            const emptyItem = document.createElement('div');
+            emptyItem.className = 'list-group-item text-center text-muted';
+            emptyItem.textContent = 'No notes yet';
+            notesList.appendChild(emptyItem);
+        } else {
+            notes.forEach(note => {
+                const noteItem = document.createElement('a');
+                noteItem.href = '#';
+                noteItem.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
+                noteItem.dataset.noteId = note.id;
+                
+                const titleSpan = document.createElement('span');
+                titleSpan.className = 'text-truncate';
+                titleSpan.style.maxWidth = '80%';
+                titleSpan.textContent = note.title || 'Untitled';
+                
+                const favoriteIcon = document.createElement('i');
+                favoriteIcon.className = note.favorite ? 'bi bi-star-fill text-warning' : 'd-none';
+                
+                noteItem.appendChild(titleSpan);
+                noteItem.appendChild(favoriteIcon);
+                
+                noteItem.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    viewNote(note.id);
+                });
+                
+                notesList.appendChild(noteItem);
+            });
+        }
+    }
+    
+    // Show the note editor for creating a new note
+    function showNoteEditor() {
+        currentNoteId = null;
+        noteViewTitle.textContent = 'Create New Note';
+        noteTitleInput.value = '';
+        noteContentInput.value = '';
+        noteFavoriteInput.checked = false;
+        noteEditor.classList.remove('d-none');
+        noteViewer.classList.add('d-none');
+    }
+    
+    // Save the current note
+    function saveNote() {
+        const title = noteTitleInput.value.trim();
+        const content = noteContentInput.value;
+        const isFavorite = noteFavoriteInput.checked;
+        
+        if (!title && !content) {
+            alert('Please enter a title or content for your note.');
+            return;
+        }
+        
+        if (currentNoteId === null) {
+            // Create new note
+            const note = db.saveNote(title, content, isFavorite);
+            currentNoteId = note.id;
+        } else {
+            // Update existing note
+            db.updateNote(currentNoteId, title, content, isFavorite);
+        }
+        
+        renderNotesList();
+        viewNote(currentNoteId);
+    }
+    
+    // View a note
+    function viewNote(noteId) {
+        const note = db.getNote(parseInt(noteId));
+        if (!note) return;
+        
+        currentNoteId = note.id;
+        noteViewTitle.textContent = 'View Note';
+        viewerTitle.textContent = note.title || 'Untitled';
+        
+        // Format date
+        const date = new Date(note.date);
+        viewerDate.textContent = date.toLocaleString();
+        
+        // Show/hide favorite indicator
+        if (note.favorite) {
+            viewerFavorite.classList.remove('d-none');
+        } else {
+            viewerFavorite.classList.add('d-none');
+        }
+        
+        // This is the vulnerable part - it uses innerHTML to render the note content
+        // which can lead to XSS if the content contains malicious HTML/JavaScript
+        viewerContent.innerHTML = note.content;
+        
+        noteEditor.classList.add('d-none');
+        noteViewer.classList.remove('d-none');
+    }
+    
+    // Edit the current note
+    function editCurrentNote() {
+        const note = db.getNote(currentNoteId);
+        if (!note) return;
+        
+        noteViewTitle.textContent = 'Edit Note';
+        noteTitleInput.value = note.title || '';
+        noteContentInput.value = note.content || '';
+        noteFavoriteInput.checked = note.favorite;
+        
+        noteEditor.classList.remove('d-none');
+        noteViewer.classList.add('d-none');
+    }
+    
+    // Delete the current note
+    function deleteCurrentNote() {
+        if (confirm('Are you sure you want to delete this note?')) {
+            db.deleteNote(currentNoteId);
+            renderNotesList();
+            showNoteEditor();
+        }
+    }
+    
+    // Clear all data
+    function clearAllData() {
+        if (confirm('Are you sure you want to clear all notes? This action cannot be undone.')) {
+            db.clearAllNotes();
+            renderNotesList();
+            showNoteEditor();
+        }
+    }
+    
+    // Initialize the app when the DOM is loaded
+    document.addEventListener('DOMContentLoaded', initApp);
+    
+    // Check for XSS success
+    window.addEventListener('DOMContentLoaded', function() {
+        // Original alert function
+        var originalAlert = window.alert;
+        
+        // Override alert
+        window.alert = function(message) {
+            // Call the original alert
+            originalAlert(message);
+            
+            // Check if this is the success message
+            if (message === "XSS Level 17 Completed!") {
+                // Redirect to success page
+                window.location.href = window.location.href + "?success=true";
+            }
+        };
+    });
+    
+    // Simulate Service Worker registration
+    if ('serviceWorker' in navigator) {
+        console.log('Service Worker supported in this browser (simulated)');
+    }
+</script>
+{% endblock %}

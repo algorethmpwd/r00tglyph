@@ -1,0 +1,429 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 16: XSS in WebAssembly Applications - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 16: XSS in WebAssembly Applications</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>WasmCalc</strong>, a fictional calculator application powered by WebAssembly! This challenge simulates a real-world scenario where a WebAssembly application has an XSS vulnerability.
+                    </p>
+                    
+                    <div class="card mb-3 border-secondary">
+                        <div class="card-header bg-secondary text-white">
+                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-0">
+                                <strong>Client:</strong> WasmCalc Inc.<br>
+                                <strong>Target:</strong> WebAssembly Calculator Application<br>
+                                <strong>Vulnerability:</strong> XSS in WebAssembly-JavaScript Bridge<br>
+                                <strong>Objective:</strong> Exploit the WebAssembly-JavaScript bridge to execute arbitrary JavaScript
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <p>
+                        <strong>Technical Background:</strong> WebAssembly (Wasm) is a binary instruction format that allows high-performance applications to run in web browsers. It's often used alongside JavaScript, with a bridge between the two that can introduce security vulnerabilities. In this challenge, the calculator application uses WebAssembly for computation but has a vulnerable JavaScript bridge that can be exploited.
+                    </p>
+                    
+                    <p>
+                        <strong>Real-world Impact:</strong> WebAssembly vulnerabilities are particularly dangerous because:
+                    </p>
+                    <ul>
+                        <li>WebAssembly is increasingly used for performance-critical applications</li>
+                        <li>The JavaScript-WebAssembly bridge can introduce complex security issues</li>
+                        <li>Developers may focus on WebAssembly performance and overlook security</li>
+                        <li>Traditional XSS protections may not account for WebAssembly-specific attack vectors</li>
+                        <li>WebAssembly can be used to obfuscate malicious code</li>
+                    </ul>
+                    
+                    <p>
+                        <strong>Your Task:</strong> In this challenge, you need to exploit a vulnerability in the WebAssembly calculator application. The application takes user input, processes it with WebAssembly, and displays the result. However, there's a vulnerability in how the application handles certain inputs. Find a way to inject JavaScript that will execute when the calculation is processed. Make an alert box appear with the text "XSS Level 16 Completed!" to reveal the flag.
+                    </p>
+                    
+                    <div class="alert alert-warning">
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Look for ways to inject code that will be passed to the JavaScript bridge. The calculator has a special function that evaluates expressions, which might be vulnerable to injection.
+                    </div>
+                </div>
+                
+                <!-- WasmCalc Interface -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-calculator me-2"></i>WasmCalc</h5>
+                        <div>
+                            <span class="badge bg-light text-dark">Powered by WebAssembly</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <!-- Navigation Bar -->
+                        <nav class="navbar navbar-expand navbar-light bg-light px-3">
+                            <div class="container-fluid">
+                                <ul class="navbar-nav">
+                                    <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-calculator me-1"></i>Calculator</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-clock-history me-1"></i>History</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-gear me-1"></i>Settings</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-question-circle me-1"></i>Help</a></li>
+                                </ul>
+                                <div class="d-flex">
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-person-circle me-1"></i>Guest User
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                            <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
+                                            <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </nav>
+                        
+                        <div class="p-4">
+                            <div class="row">
+                                <div class="col-md-4 mb-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Calculator Modes</h6>
+                                        </div>
+                                        <div class="list-group list-group-flush">
+                                            <a href="#" class="list-group-item list-group-item-action active">
+                                                <i class="bi bi-calculator me-2"></i>Standard
+                                            </a>
+                                            <a href="#" class="list-group-item list-group-item-action">
+                                                <i class="bi bi-graph-up me-2"></i>Scientific
+                                            </a>
+                                            <a href="#" class="list-group-item list-group-item-action">
+                                                <i class="bi bi-currency-exchange me-2"></i>Currency Converter
+                                            </a>
+                                            <a href="#" class="list-group-item list-group-item-action">
+                                                <i class="bi bi-code-slash me-2"></i>Programmer
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card mt-3">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Technical Information</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="small mb-2">This calculator uses WebAssembly for high-performance calculations.</p>
+                                            <p class="small mb-0">For this challenge, the calculator has a special "eval" function that can evaluate complex expressions.</p>
+                                            <hr>
+                                            <p class="small mb-0 fst-italic">Note: In a real application, this would use actual WebAssembly code.</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card mt-3">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Calculation History</h6>
+                                        </div>
+                                        <div class="card-body p-0">
+                                            <ul class="list-group list-group-flush" id="calculation-history">
+                                                <!-- History items will be added here -->
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-8">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="mb-0">Standard Calculator</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="calculator">
+                                                <div class="mb-3">
+                                                    <input type="text" class="form-control form-control-lg text-end" id="calculator-display" value="0" readonly>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <div class="row g-2">
+                                                        <div class="col-3">
+                                                            <button class="btn btn-outline-secondary w-100" onclick="appendToDisplay('7')">7</button>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <button class="btn btn-outline-secondary w-100" onclick="appendToDisplay('8')">8</button>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <button class="btn btn-outline-secondary w-100" onclick="appendToDisplay('9')">9</button>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <button class="btn btn-outline-primary w-100" onclick="appendToDisplay('/')">/</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <div class="row g-2">
+                                                        <div class="col-3">
+                                                            <button class="btn btn-outline-secondary w-100" onclick="appendToDisplay('4')">4</button>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <button class="btn btn-outline-secondary w-100" onclick="appendToDisplay('5')">5</button>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <button class="btn btn-outline-secondary w-100" onclick="appendToDisplay('6')">6</button>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <button class="btn btn-outline-primary w-100" onclick="appendToDisplay('*')">*</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <div class="row g-2">
+                                                        <div class="col-3">
+                                                            <button class="btn btn-outline-secondary w-100" onclick="appendToDisplay('1')">1</button>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <button class="btn btn-outline-secondary w-100" onclick="appendToDisplay('2')">2</button>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <button class="btn btn-outline-secondary w-100" onclick="appendToDisplay('3')">3</button>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <button class="btn btn-outline-primary w-100" onclick="appendToDisplay('-')">-</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <div class="row g-2">
+                                                        <div class="col-3">
+                                                            <button class="btn btn-outline-secondary w-100" onclick="appendToDisplay('0')">0</button>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <button class="btn btn-outline-secondary w-100" onclick="appendToDisplay('.')">.</button>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <button class="btn btn-success w-100" onclick="calculateResult()">=</button>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <button class="btn btn-outline-primary w-100" onclick="appendToDisplay('+')">+</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <div class="row g-2">
+                                                        <div class="col-6">
+                                                            <button class="btn btn-outline-danger w-100" onclick="clearDisplay()">Clear</button>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <button class="btn btn-outline-warning w-100" onclick="backspace()">Backspace</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <div class="row g-2">
+                                                        <div class="col-12">
+                                                            <div class="input-group">
+                                                                <input type="text" class="form-control" id="expression-input" placeholder="Enter complex expression">
+                                                                <button class="btn btn-primary" onclick="evaluateExpression()">Evaluate</button>
+                                                            </div>
+                                                            <div class="form-text">
+                                                                <i class="bi bi-info-circle me-1"></i>Use the expression evaluator for complex calculations.
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div id="calculation-result" class="mt-3"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    {% if flag %}
+                                    <div class="alert alert-success mt-4">
+                                        <i class="bi bi-check-circle-fill me-2"></i>
+                                        <strong>Congratulations!</strong> Your XSS payload successfully executed in the WebAssembly application.
+                                    </div>
+                                    <div class="card mt-2">
+                                        <div class="card-header bg-success text-white">
+                                            <h5 class="mb-0"><i class="bi bi-trophy me-2"></i>Challenge Completed!</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>You've successfully demonstrated an XSS vulnerability in a WebAssembly application. In a real-world scenario, this could allow attackers to execute arbitrary JavaScript in the context of the application, potentially leading to data theft, session hijacking, and other attacks.</p>
+                                            <div class="flag-container p-3 bg-light rounded">
+                                                <span class="flag-label">Your Flag:</span>
+                                                <code id="flag-value">{{ flag }}</code>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level=16) }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Simulated WebAssembly module
+    const wasmModule = {
+        // Simulated WebAssembly functions
+        add: function(a, b) {
+            return a + b;
+        },
+        subtract: function(a, b) {
+            return a - b;
+        },
+        multiply: function(a, b) {
+            return a * b;
+        },
+        divide: function(a, b) {
+            return a / b;
+        },
+        // Vulnerable function that evaluates expressions
+        evaluateExpression: function(expression) {
+            try {
+                // This is the vulnerable part - it uses Function constructor to evaluate expressions
+                // which is similar to eval() and can lead to XSS
+                return new Function('return ' + expression)();
+            } catch (error) {
+                return 'Error: ' + error.message;
+            }
+        }
+    };
+    
+    // Calculator functions
+    let display = document.getElementById('calculator-display');
+    let expressionInput = document.getElementById('expression-input');
+    let calculationHistory = document.getElementById('calculation-history');
+    let calculationResult = document.getElementById('calculation-result');
+    
+    function appendToDisplay(value) {
+        if (display.value === '0') {
+            display.value = value;
+        } else {
+            display.value += value;
+        }
+    }
+    
+    function clearDisplay() {
+        display.value = '0';
+    }
+    
+    function backspace() {
+        if (display.value.length === 1) {
+            display.value = '0';
+        } else {
+            display.value = display.value.slice(0, -1);
+        }
+    }
+    
+    function calculateResult() {
+        try {
+            // Parse the expression
+            let expression = display.value;
+            let result;
+            
+            // Simple parsing for basic operations
+            if (expression.includes('+')) {
+                let [a, b] = expression.split('+').map(Number);
+                result = wasmModule.add(a, b);
+            } else if (expression.includes('-')) {
+                let [a, b] = expression.split('-').map(Number);
+                result = wasmModule.subtract(a, b);
+            } else if (expression.includes('*')) {
+                let [a, b] = expression.split('*').map(Number);
+                result = wasmModule.multiply(a, b);
+            } else if (expression.includes('/')) {
+                let [a, b] = expression.split('/').map(Number);
+                result = wasmModule.divide(a, b);
+            } else {
+                result = parseFloat(expression);
+            }
+            
+            // Update display
+            display.value = result;
+            
+            // Add to history
+            addToHistory(expression, result);
+        } catch (error) {
+            display.value = 'Error';
+        }
+    }
+    
+    function evaluateExpression() {
+        try {
+            let expression = expressionInput.value;
+            
+            // Call the vulnerable WebAssembly function
+            let result = wasmModule.evaluateExpression(expression);
+            
+            // Update display
+            display.value = result;
+            
+            // Add to history
+            addToHistory(expression, result);
+            
+            // Show result
+            calculationResult.innerHTML = `
+                <div class="alert alert-info">
+                    <strong>Expression:</strong> ${expression}<br>
+                    <strong>Result:</strong> ${result}
+                </div>
+            `;
+            
+            // Clear input
+            expressionInput.value = '';
+        } catch (error) {
+            calculationResult.innerHTML = `
+                <div class="alert alert-danger">
+                    <strong>Error:</strong> ${error.message}
+                </div>
+            `;
+        }
+    }
+    
+    function addToHistory(expression, result) {
+        let historyItem = document.createElement('li');
+        historyItem.className = 'list-group-item';
+        historyItem.innerHTML = `${expression} = ${result}`;
+        calculationHistory.prepend(historyItem);
+        
+        // Limit history to 5 items
+        if (calculationHistory.children.length > 5) {
+            calculationHistory.removeChild(calculationHistory.lastChild);
+        }
+    }
+    
+    // Check for XSS success
+    window.addEventListener('DOMContentLoaded', function() {
+        // Original alert function
+        var originalAlert = window.alert;
+        
+        // Override alert
+        window.alert = function(message) {
+            // Call the original alert
+            originalAlert(message);
+            
+            // Check if this is the success message
+            if (message === "XSS Level 16 Completed!") {
+                // Redirect to success page
+                window.location.href = window.location.href + "?success=true";
+            }
+        };
+    });
+</script>
+{% endblock %}

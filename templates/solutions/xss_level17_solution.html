@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block title %}XSS Level 17 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">XSS Level 17 Solution: XSS in Progressive Web Apps</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
+                    <p>
+                        This challenge demonstrates how Progressive Web Apps (PWAs) can be vulnerable to persistent XSS attacks through their offline storage mechanisms. The PWANotes application uses client-side storage (simulated IndexedDB) to store notes, but fails to properly sanitize note content when displaying it, leading to a persistent XSS vulnerability.
+                    </p>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-lightbulb-fill me-2 text-warning"></i>Solution</h3>
+                <p>
+                    To solve this challenge, you need to exploit the vulnerable note rendering mechanism by injecting JavaScript code that will be stored in the client-side database and executed when the note is viewed.
+                </p>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Understanding the Vulnerability</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>The vulnerability lies in how the application renders note content when viewing a note. Looking at the code, we can see that it uses <code>innerHTML</code> to render the note content without any sanitization:</p>
+                        <pre class="bg-light p-3 rounded"><code>// This is the vulnerable part - it uses innerHTML to render the note content
+// which can lead to XSS if the content contains malicious HTML/JavaScript
+viewerContent.innerHTML = note.content;</code></pre>
+                        <p>This means that any HTML or JavaScript in the note content will be executed when the note is viewed. Furthermore, since the notes are stored in the client-side database (simulated with localStorage in this challenge, but would be IndexedDB in a real PWA), the XSS payload will persist across page refreshes and browser sessions.</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Crafting the Payload</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>To exploit this vulnerability, we need to craft a payload that will be stored in the note content and executed when the note is viewed. Here are several approaches:</p>
+                        
+                        <h6>Method 1: Basic Script Tag</h6>
+                        <pre class="bg-light p-3 rounded"><code>&lt;script&gt;alert("XSS Level 17 Completed!")&lt;/script&gt;</code></pre>
+                        <p>This is the simplest approach, using a script tag to execute JavaScript when the note is rendered.</p>
+                        
+                        <h6>Method 2: Event Handler</h6>
+                        <pre class="bg-light p-3 rounded"><code>&lt;img src="x" onerror="alert('XSS Level 17 Completed!')"&gt;</code></pre>
+                        <p>This payload uses an image with an invalid source, triggering the onerror event handler which executes our JavaScript.</p>
+                        
+                        <h6>Method 3: Inline JavaScript</h6>
+                        <pre class="bg-light p-3 rounded"><code>&lt;div onload="alert('XSS Level 17 Completed!')" id="xss"&gt;&lt;/div&gt;
+&lt;script&gt;document.getElementById('xss').onload();&lt;/script&gt;</code></pre>
+                        <p>This payload defines an element with an onload event handler, then executes that handler using a script tag.</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Step-by-Step Solution</h5>
+                    </div>
+                    <div class="card-body">
+                        <ol>
+                            <li>
+                                <p>Open the PWANotes application and click on "New Note" if you're not already in the note editor.</p>
+                            </li>
+                            <li>
+                                <p>Enter a title for your note (e.g., "XSS Test").</p>
+                            </li>
+                            <li>
+                                <p>In the content field, enter one of the XSS payloads:</p>
+                                <pre class="bg-light p-3 rounded"><code>&lt;script&gt;alert("XSS Level 17 Completed!")&lt;/script&gt;</code></pre>
+                            </li>
+                            <li>
+                                <p>Click the "Save Note" button to save the note with the XSS payload.</p>
+                            </li>
+                            <li>
+                                <p>The note will be saved to the client-side database and appear in the notes list on the left.</p>
+                            </li>
+                            <li>
+                                <p>Click on the note in the list to view it.</p>
+                            </li>
+                            <li>
+                                <p>When the note is rendered, the XSS payload will be executed, displaying the alert message "XSS Level 17 Completed!".</p>
+                            </li>
+                            <li>
+                                <p>When the alert appears, the challenge will be solved and the flag will be revealed.</p>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>PWA-Specific Exploitation Techniques</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>In a real PWA, there are additional exploitation techniques that could be used:</p>
+                        
+                        <h6>1. Service Worker Exploitation</h6>
+                        <pre class="bg-light p-3 rounded"><code>&lt;script&gt;
+// Register a malicious service worker
+navigator.serviceWorker.register('/malicious-sw.js')
+  .then(function(registration) {
+    console.log('Malicious service worker registered');
+    alert("XSS Level 17 Completed!");
+  });
+&lt;/script&gt;</code></pre>
+                        <p>This payload attempts to register a malicious service worker, which could intercept and modify network requests, creating a persistent backdoor in the application.</p>
+                        
+                        <h6>2. Cache API Poisoning</h6>
+                        <pre class="bg-light p-3 rounded"><code>&lt;script&gt;
+// Poison the cache with malicious content
+caches.open('pwanotes-cache').then(function(cache) {
+  cache.put('/index.html', new Response('&lt;script&gt;alert("XSS Level 17 Completed!")&lt;/script&gt;'));
+  alert("XSS Level 17 Completed!");
+});
+&lt;/script&gt;</code></pre>
+                        <p>This payload attempts to poison the application's cache by storing malicious content that will be served when the user accesses the application offline.</p>
+                        
+                        <h6>3. IndexedDB Manipulation</h6>
+                        <pre class="bg-light p-3 rounded"><code>&lt;script&gt;
+// Manipulate other data in IndexedDB
+var request = indexedDB.open('pwanotes-db', 1);
+request.onsuccess = function(event) {
+  var db = event.target.result;
+  // Modify other data in the database
+  alert("XSS Level 17 Completed!");
+};
+&lt;/script&gt;</code></pre>
+                        <p>This payload attempts to manipulate other data stored in the IndexedDB database, potentially compromising more than just the current note.</p>
+                    </div>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-shield-fill-check me-2 text-success"></i>Security Lessons</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Vulnerabilities Demonstrated</h5>
+                        <ul>
+                            <li><strong>Persistent XSS in Client-Side Storage:</strong> The vulnerability allows attackers to store malicious code in the client-side database, which is executed when the data is retrieved and rendered.</li>
+                            <li><strong>Unsafe Content Rendering:</strong> Using <code>innerHTML</code> to render user-supplied content without sanitization is a well-known XSS vector.</li>
+                            <li><strong>PWA-Specific Risks:</strong> PWAs introduce additional attack surfaces through Service Workers, Cache API, and IndexedDB, which can be exploited for persistent attacks.</li>
+                        </ul>
+                        
+                        <h5>Prevention Measures</h5>
+                        <ul>
+                            <li><strong>Content Sanitization:</strong> Always sanitize user-supplied content before storing it or rendering it in the DOM. Use libraries like DOMPurify to remove potentially malicious content.</li>
+                            <li><strong>Safe DOM Manipulation:</strong> Use <code>textContent</code> instead of <code>innerHTML</code> when rendering user-supplied content, or use a framework that automatically escapes HTML.</li>
+                            <li><strong>Content Security Policy (CSP):</strong> Implement a strict CSP to mitigate the impact of XSS vulnerabilities, particularly for PWAs where persistent attacks are possible.</li>
+                            <li><strong>Secure Service Worker Design:</strong> Carefully design Service Workers to prevent them from being exploited for malicious purposes.</li>
+                            <li><strong>Input Validation:</strong> Validate all user input on both the client and server side to prevent malicious data from being stored in the first place.</li>
+                        </ul>
+                        
+                        <h5>Real-World Implications</h5>
+                        <p>
+                            Progressive Web Apps are becoming increasingly popular due to their ability to provide an app-like experience on the web. However, their offline capabilities and access to powerful APIs also introduce new security risks. In real-world scenarios, XSS vulnerabilities in PWAs can be particularly dangerous because:
+                        </p>
+                        <ul>
+                            <li>They can persist across sessions due to client-side storage, creating long-term compromises</li>
+                            <li>They can exploit Service Workers to intercept and modify network requests, potentially affecting all communication with the server</li>
+                            <li>They can access device features that are available to PWAs but not regular web apps, such as push notifications, geolocation, and camera access</li>
+                            <li>They can be difficult to detect and remediate, as the malicious code may be stored in various client-side storage mechanisms</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('xss_level17') }}" class="btn btn-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

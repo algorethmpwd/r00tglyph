@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+{% block title %}XSS Level 18 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">XSS Level 18 Solution: XSS via Web Components</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
+                    <p>
+                        This challenge demonstrates how Web Components, specifically Custom Elements and Shadow DOM, can be vulnerable to XSS attacks if not properly implemented. The ComponentHub application allows users to create custom cards with content that is rendered inside a Web Component with Shadow DOM, but has a vulnerability in how it handles custom attributes.
+                    </p>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-lightbulb-fill me-2 text-warning"></i>Solution</h3>
+                <p>
+                    To solve this challenge, you need to exploit the vulnerable custom attribute handling in the Custom Card component to inject JavaScript that will bypass the Shadow DOM boundary and execute in the main document context.
+                </p>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Understanding the Vulnerability</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>The vulnerability lies in how the Custom Card component processes custom attributes. Looking at the code, we can see that it has a particularly dangerous section:</p>
+                        <pre class="bg-light p-3 rounded"><code>// This is the vulnerable part - it processes custom attributes
+// and adds them to the component without proper sanitization
+const customAttrs = this.getAttribute('custom-attrs');
+if (customAttrs) {
+    const attrs = customAttrs.split(',');
+    attrs.forEach(attr => {
+        const [name, value] = attr.split('=');
+        if (name && value) {
+            // Vulnerable: directly setting attributes without sanitization
+            this.setAttribute(name.trim(), value.trim());
+            
+            // Even more vulnerable: if the attribute starts with "on", it's treated as an event handler
+            if (name.trim().startsWith('on')) {
+                // This is extremely dangerous - it creates an event handler from user input
+                // This is where the XSS vulnerability lies
+                try {
+                    this[name.trim()] = new Function(value.trim());
+                } catch (error) {
+                    console.error('Error setting event handler:', error);
+                }
+            }
+        }
+    });
+}</code></pre>
+                        <p>This code takes user-supplied custom attributes, splits them by commas, and then for each attribute:</p>
+                        <ol>
+                            <li>Sets the attribute on the component without sanitization</li>
+                            <li>If the attribute name starts with "on" (like onclick, onmouseover, etc.), it creates a new Function from the attribute value and assigns it as an event handler</li>
+                        </ol>
+                        <p>This is extremely dangerous because it allows an attacker to inject arbitrary JavaScript that will be executed when the corresponding event is triggered.</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Crafting the Payload</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>To exploit this vulnerability, we need to craft a payload that uses an event attribute to execute our JavaScript. Here are several approaches:</p>
+                        
+                        <h6>Method 1: Using onclick Event</h6>
+                        <pre class="bg-light p-3 rounded"><code>onclick=alert("XSS Level 18 Completed!")</code></pre>
+                        <p>This payload creates an onclick event handler that executes our JavaScript when the card is clicked.</p>
+                        
+                        <h6>Method 2: Using onmouseover Event</h6>
+                        <pre class="bg-light p-3 rounded"><code>onmouseover=alert("XSS Level 18 Completed!")</code></pre>
+                        <p>This payload creates an onmouseover event handler that executes our JavaScript when the mouse moves over the card.</p>
+                        
+                        <h6>Method 3: Using onload Event</h6>
+                        <pre class="bg-light p-3 rounded"><code>onload=alert("XSS Level 18 Completed!")</code></pre>
+                        <p>This payload creates an onload event handler that executes our JavaScript when the component is loaded.</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Step-by-Step Solution</h5>
+                    </div>
+                    <div class="card-body">
+                        <ol>
+                            <li>
+                                <p>Open the ComponentHub application and fill out the Custom Card form:</p>
+                                <ul>
+                                    <li>Enter a title (e.g., "XSS Test")</li>
+                                    <li>Enter some content (e.g., "Click me to trigger the XSS")</li>
+                                    <li>Select a theme (any theme will work)</li>
+                                    <li>Optionally, add an image URL and footer text</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <p>In the "Custom Attributes" field, enter one of the XSS payloads:</p>
+                                <pre class="bg-light p-3 rounded"><code>onclick=alert("XSS Level 18 Completed!")</code></pre>
+                            </li>
+                            <li>
+                                <p>Click the "Create Card" button to create the card with the XSS payload.</p>
+                            </li>
+                            <li>
+                                <p>The card will be created and displayed in the result area and preview panel.</p>
+                            </li>
+                            <li>
+                                <p>Click on the card to trigger the onclick event, which will execute our JavaScript.</p>
+                            </li>
+                            <li>
+                                <p>When the alert appears with the message "XSS Level 18 Completed!", the challenge will be solved and the flag will be revealed.</p>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Alternative Approaches</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>1. Using Multiple Event Handlers</h6>
+                        <pre class="bg-light p-3 rounded"><code>onclick=alert("XSS Level 18 Completed!"),onmouseover=alert("XSS Level 18 Completed!")</code></pre>
+                        <p>This payload creates multiple event handlers to increase the chance of triggering the XSS.</p>
+                        
+                        <h6>2. Using Custom Element Lifecycle Callbacks</h6>
+                        <pre class="bg-light p-3 rounded"><code>onconnectedcallback=alert("XSS Level 18 Completed!")</code></pre>
+                        <p>This payload attempts to override a Custom Element lifecycle callback to execute our JavaScript.</p>
+                        
+                        <h6>3. Exploiting Slotted Content</h6>
+                        <p>Instead of using custom attributes, we could also try to exploit the slotted content:</p>
+                        <pre class="bg-light p-3 rounded"><code>&lt;img src="x" onerror="alert('XSS Level 18 Completed!')"&gt;</code></pre>
+                        <p>This payload injects an image with an invalid source into the card content, triggering the onerror event handler. However, this might not work if the Shadow DOM properly encapsulates the slotted content.</p>
+                    </div>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-shield-fill-check me-2 text-success"></i>Security Lessons</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Vulnerabilities Demonstrated</h5>
+                        <ul>
+                            <li><strong>Unsafe Custom Attribute Handling:</strong> The component processes custom attributes without proper sanitization, allowing attackers to inject malicious event handlers.</li>
+                            <li><strong>Dangerous Use of Function Constructor:</strong> Using <code>new Function()</code> on user-supplied input is a well-known security risk.</li>
+                            <li><strong>Shadow DOM Boundary Bypass:</strong> The vulnerability allows attackers to bypass the Shadow DOM boundary and execute JavaScript in the main document context.</li>
+                        </ul>
+                        
+                        <h5>Prevention Measures</h5>
+                        <ul>
+                            <li><strong>Attribute Sanitization:</strong> Always sanitize user-supplied attributes before processing them, especially those that could be used for JavaScript execution.</li>
+                            <li><strong>Avoid Dynamic Event Handlers:</strong> Never create event handlers dynamically from user input using <code>new Function()</code> or similar methods.</li>
+                            <li><strong>Proper Shadow DOM Usage:</strong> Use Shadow DOM correctly to maintain encapsulation and prevent content from escaping the boundary.</li>
+                            <li><strong>Content Security Policy (CSP):</strong> Implement a strict CSP to mitigate the impact of XSS vulnerabilities.</li>
+                            <li><strong>Input Validation:</strong> Validate all user input to ensure it conforms to expected formats and doesn't contain malicious code.</li>
+                        </ul>
+                        
+                        <h5>Real-World Implications</h5>
+                        <p>
+                            Web Components are becoming increasingly popular for creating reusable UI elements, but they introduce new security challenges. In real-world scenarios, vulnerabilities in Web Components can be particularly dangerous because:
+                        </p>
+                        <ul>
+                            <li>They can bypass traditional XSS protections that rely on DOM structure</li>
+                            <li>They can affect all instances of a component across an application</li>
+                            <li>Shadow DOM boundaries can create a false sense of security</li>
+                            <li>They can be difficult to detect with standard security tools</li>
+                            <li>They can lead to persistent XSS if the component state is stored</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('xss_level18') }}" class="btn btn-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
