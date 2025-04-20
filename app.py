@@ -181,6 +181,10 @@ with app.app_context():
                      description="Bypass DOM sanitization with Mutation Observers.", points=900),
             Challenge(name="XSS via SVG and CDATA", category="xss", difficulty="expert",
                      description="Exploit SVG features to execute JavaScript.", points=1000),
+            Challenge(name="Blind XSS with Webhook Exfiltration", category="xss", difficulty="expert",
+                     description="Exploit a blind XSS vulnerability and exfiltrate data.", points=1100),
+            Challenge(name="XSS in PDF Generation", category="xss", difficulty="expert",
+                     description="Exploit an XSS vulnerability in PDF generation.", points=1200),
         ]
         db.session.add_all(challenges)
         db.session.commit()
@@ -886,6 +890,102 @@ def xss_level11():
         flag = get_or_create_flag(challenge.id, machine_id)
 
     return render_template('xss/xss_level11.html', svg_code=svg_code, filtered_svg=filtered_svg, flag=flag, user=user)
+
+# XSS Level 12 - Blind XSS with Webhook Exfiltration
+@app.route('/xss/level12', methods=['GET', 'POST'])
+def xss_level12():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    ticket_submitted = False
+    ticket_id = None
+    ticket_subject = None
+    ticket_description = None
+    flag = None
+
+    if request.method == 'POST':
+        # Get form data
+        name = request.form.get('name', '')
+        email = request.form.get('email', '')
+        subject = request.form.get('subject', '')
+        category = request.form.get('category', '')
+        description = request.form.get('description', '')
+        webhook_url = request.form.get('webhook_url', '')
+
+        # Generate a random ticket ID
+        ticket_id = 'TKT-' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+        ticket_subject = subject
+        ticket_description = description
+        ticket_submitted = True
+
+        # Check if the description contains an XSS payload that would exfiltrate cookies
+        if ('fetch' in description.lower() and 'cookie' in description.lower()) or \
+           ('xmlhttprequest' in description.lower() and 'cookie' in description.lower()) or \
+           ('ajax' in description.lower() and 'cookie' in description.lower()) or \
+           ('img' in description.lower() and 'cookie' in description.lower()) or \
+           ('beacon' in description.lower() and 'cookie' in description.lower()):
+            # Generate a flag for this challenge
+            challenge = Challenge.query.filter_by(name="Blind XSS with Webhook Exfiltration").first()
+            if challenge:
+                flag = get_or_create_flag(challenge.id, machine_id)
+    else:
+        # Generate a flag for this challenge (for display purposes if needed)
+        challenge = Challenge.query.filter_by(name="Blind XSS with Webhook Exfiltration").first()
+        if challenge:
+            flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xss/xss_level12.html', ticket_submitted=ticket_submitted,
+                           ticket_id=ticket_id, ticket_subject=ticket_subject,
+                           ticket_description=ticket_description, flag=flag, user=user)
+
+# XSS Level 13 - XSS in PDF Generation
+@app.route('/xss/level13', methods=['GET', 'POST'])
+def xss_level13():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    pdf_generated = False
+    resume_name = None
+    resume_email = None
+    resume_phone = None
+    resume_summary = None
+    resume_skills = None
+    resume_experience = None
+    flag = None
+
+    if request.method == 'POST':
+        # Get form data
+        resume_name = request.form.get('name', '')
+        resume_email = request.form.get('email', '')
+        resume_phone = request.form.get('phone', '')
+        resume_summary = request.form.get('summary', '')
+        resume_skills = request.form.get('skills', '')
+        resume_experience = request.form.get('experience', '')
+        pdf_generated = True
+
+        # Check if any of the fields contain PDF JavaScript
+        if ('app.alert' in resume_summary or 'app.alert' in resume_skills or 'app.alert' in resume_experience) or \
+           ('this.submitForm' in resume_summary or 'this.submitForm' in resume_skills or 'this.submitForm' in resume_experience) or \
+           ('getField' in resume_summary or 'getField' in resume_skills or 'getField' in resume_experience) or \
+           ('getAnnots' in resume_summary or 'getAnnots' in resume_skills or 'getAnnots' in resume_experience):
+            # Check specifically for the completion message
+            if 'XSS Level 13 Completed!' in resume_summary or \
+               'XSS Level 13 Completed!' in resume_skills or \
+               'XSS Level 13 Completed!' in resume_experience:
+                # Generate a flag for this challenge
+                challenge = Challenge.query.filter_by(name="XSS in PDF Generation").first()
+                if challenge:
+                    flag = get_or_create_flag(challenge.id, machine_id)
+    else:
+        # Check if success parameter is present (for simulating PDF JavaScript execution)
+        if request.args.get('success') == 'true':
+            challenge = Challenge.query.filter_by(name="XSS in PDF Generation").first()
+            if challenge:
+                flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xss/xss_level13.html', pdf_generated=pdf_generated,
+                           resume_name=resume_name, resume_email=resume_email,
+                           resume_phone=resume_phone, resume_summary=resume_summary,
+                           resume_skills=resume_skills, resume_experience=resume_experience,
+                           flag=flag, user=user)
 
 # Solutions
 @app.route('/solutions/<level>')

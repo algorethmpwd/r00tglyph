@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block title %}XSS Level 13 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">XSS Level 13 Solution: XSS in PDF Generation</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
+                    <p>
+                        This challenge demonstrates an XSS vulnerability in a PDF generation feature. The application converts HTML to PDF without proper sanitization, allowing JavaScript to be executed when the PDF is opened.
+                    </p>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-lightbulb-fill me-2 text-warning"></i>Solution</h3>
+                <p>
+                    To solve this challenge, you need to craft a payload that will execute JavaScript in the context of a PDF document.
+                </p>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Understanding the Vulnerability</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>PDF documents can contain JavaScript that executes when the document is opened or when certain actions are performed. When HTML is converted to PDF without proper sanitization, it can lead to XSS vulnerabilities:</p>
+                        <ol>
+                            <li>The application takes user input and includes it in the HTML that will be converted to PDF.</li>
+                            <li>The HTML-to-PDF converter doesn't properly sanitize the input.</li>
+                            <li>JavaScript in the HTML is converted to PDF JavaScript that executes when the PDF is opened.</li>
+                            <li>In this challenge, the PDF generation is simulated, but the same principles apply to real PDF generators.</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>PDF JavaScript Basics</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>PDF JavaScript has its own API that differs from browser JavaScript. Some key functions include:</p>
+                        <ul>
+                            <li><code>app.alert()</code>: Displays an alert dialog</li>
+                            <li><code>this.submitForm()</code>: Submits a form in the PDF</li>
+                            <li><code>this.getField()</code>: Gets a form field in the PDF</li>
+                            <li><code>this.getAnnots()</code>: Gets annotations in the PDF</li>
+                        </ul>
+                        <p>For this challenge, we need to use <code>app.alert()</code> to display the completion message.</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Crafting the Payload</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>There are several ways to inject PDF JavaScript into the resume fields:</p>
+                        
+                        <h6>Method 1: Direct PDF JavaScript Injection</h6>
+                        <pre class="bg-light p-3 rounded"><code>&lt;script&gt;app.alert("XSS Level 13 Completed!");&lt;/script&gt;</code></pre>
+                        
+                        <h6>Method 2: Using HTML Elements with JavaScript Attributes</h6>
+                        <pre class="bg-light p-3 rounded"><code>&lt;a href="javascript:app.alert('XSS Level 13 Completed!');"&gt;Click me&lt;/a&gt;</code></pre>
+                        
+                        <h6>Method 3: Using Form Elements</h6>
+                        <pre class="bg-light p-3 rounded"><code>&lt;form action="javascript:app.alert('XSS Level 13 Completed!');"&gt;
+  &lt;input type="submit" value="Submit"&gt;
+&lt;/form&gt;</code></pre>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Step-by-Step Solution</h5>
+                    </div>
+                    <div class="card-body">
+                        <ol>
+                            <li>
+                                <p>Fill out the resume form with your name, email, and phone number.</p>
+                            </li>
+                            <li>
+                                <p>In one of the text areas (Professional Summary, Skills, or Work Experience), insert one of the PDF JavaScript payloads:</p>
+                                <pre class="bg-light p-3 rounded"><code>&lt;script&gt;app.alert("XSS Level 13 Completed!");&lt;/script&gt;</code></pre>
+                            </li>
+                            <li>
+                                <p>Submit the form to generate the PDF.</p>
+                            </li>
+                            <li>
+                                <p>When the PDF is "opened" (simulated in this challenge), the JavaScript will execute and display the alert.</p>
+                            </li>
+                            <li>
+                                <p>The challenge will detect the successful execution and reveal the flag.</p>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Alternative Approaches</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>1. Using OpenAction</h6>
+                        <p>In real PDF exploitation, you can use OpenAction to execute JavaScript when the PDF is opened:</p>
+                        <pre class="bg-light p-3 rounded"><code>&lt;script&gt;
+this.openAction = {
+  type: "JavaScript",
+  script: "app.alert('XSS Level 13 Completed!');"
+};
+&lt;/script&gt;</code></pre>
+                        
+                        <h6>2. Using Document-Level JavaScript</h6>
+                        <pre class="bg-light p-3 rounded"><code>&lt;object type="application/pdf"&gt;
+&lt;param name="JavaScript" value="app.alert('XSS Level 13 Completed!');"&gt;
+&lt;/object&gt;</code></pre>
+                        
+                        <h6>3. Using Adobe-Specific Tags</h6>
+                        <pre class="bg-light p-3 rounded"><code>&lt;adobe-pdf-javascript&gt;app.alert('XSS Level 13 Completed!');&lt;/adobe-pdf-javascript&gt;</code></pre>
+                    </div>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-shield-fill-check me-2 text-success"></i>Security Lessons</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Vulnerabilities Demonstrated</h5>
+                        <ul>
+                            <li><strong>PDF JavaScript Execution:</strong> PDF documents can execute JavaScript, which can be exploited for XSS attacks.</li>
+                            <li><strong>Insecure HTML-to-PDF Conversion:</strong> Converting HTML to PDF without proper sanitization can lead to XSS vulnerabilities.</li>
+                            <li><strong>Cross-Context Scripting:</strong> JavaScript that executes in a different context (PDF) than where it was injected (web form).</li>
+                        </ul>
+                        
+                        <h5>Prevention Measures</h5>
+                        <ul>
+                            <li><strong>Input Sanitization:</strong> Sanitize all user input before including it in HTML that will be converted to PDF.</li>
+                            <li><strong>Secure PDF Generation:</strong> Use PDF generation libraries that properly sanitize input and disable JavaScript execution.</li>
+                            <li><strong>Content Disposition:</strong> Set the Content-Disposition header to force the PDF to be downloaded rather than opened in the browser.</li>
+                            <li><strong>PDF Security Settings:</strong> Configure PDF security settings to disable JavaScript execution.</li>
+                            <li><strong>Sandboxed Rendering:</strong> Use sandboxed environments for PDF generation to limit the impact of potential vulnerabilities.</li>
+                        </ul>
+                        
+                        <h5>Real-World Implications</h5>
+                        <p>
+                            XSS vulnerabilities in PDF generation are particularly dangerous because PDFs are often trusted more than websites by users. In real-world scenarios, attackers have used PDF XSS to:
+                        </p>
+                        <ul>
+                            <li>Steal sensitive information from users who open the PDF</li>
+                            <li>Execute malicious code on the user's system through PDF reader vulnerabilities</li>
+                            <li>Bypass web application firewalls and content security policies</li>
+                            <li>Create persistent attack vectors as PDFs are often stored and shared</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('xss_level13') }}" class="btn btn-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

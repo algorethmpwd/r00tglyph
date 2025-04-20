@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 12: Blind XSS with Webhook Exfiltration - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 12: Blind XSS with Webhook Exfiltration</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>SupportDesk</strong>, a fictional customer support platform! This challenge simulates a real-world scenario where a blind XSS vulnerability exists in a support ticket system.
+                    </p>
+                    
+                    <div class="card mb-3 border-secondary">
+                        <div class="card-header bg-secondary text-white">
+                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-0">
+                                <strong>Client:</strong> SupportDesk Inc.<br>
+                                <strong>Target:</strong> Support Ticket System<br>
+                                <strong>Vulnerability:</strong> Blind XSS in Admin Panel<br>
+                                <strong>Objective:</strong> Exfiltrate admin cookie data using a webhook service
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <p>
+                        <strong>Technical Background:</strong> Blind XSS occurs when the payload is executed in a different context than where it was injected, typically in an admin panel or back-office application. Since you don't have direct access to see the execution, you need to use techniques like webhook callbacks to confirm the execution and exfiltrate data.
+                    </p>
+                    
+                    <p>
+                        <strong>Real-world Impact:</strong> Blind XSS vulnerabilities are particularly dangerous because:
+                    </p>
+                    <ul>
+                        <li>They often affect administrative interfaces with higher privileges</li>
+                        <li>They can remain undetected for long periods</li>
+                        <li>They can lead to account takeover of privileged users</li>
+                        <li>They can expose sensitive internal data and systems</li>
+                        <li>They can be used as a foothold for further attacks</li>
+                    </ul>
+                    
+                    <p>
+                        <strong>Your Task:</strong> In this challenge, you need to submit a support ticket with a payload that will execute when an admin views the ticket. Your payload should exfiltrate the admin's cookie to a webhook service. The simulated admin panel will view your ticket after submission, and if your payload works, you'll receive the flag.
+                    </p>
+                    
+                    <div class="alert alert-warning">
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> You'll need to use a webhook service like <a href="https://webhook.site" target="_blank">webhook.site</a> or <a href="https://requestbin.com" target="_blank">requestbin.com</a> to capture the exfiltrated data. Your payload should send the document.cookie value to your webhook URL.
+                    </div>
+                </div>
+                
+                <!-- SupportDesk Interface -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-headset me-2"></i>SupportDesk</h5>
+                        <div>
+                            <span class="badge bg-light text-dark">Customer Portal</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <!-- Navigation Bar -->
+                        <nav class="navbar navbar-expand navbar-light bg-light px-3">
+                            <div class="container-fluid">
+                                <ul class="navbar-nav">
+                                    <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-house-door me-1"></i>Home</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-ticket-perforated me-1"></i>My Tickets</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-question-circle me-1"></i>Knowledge Base</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-chat-dots me-1"></i>Live Chat</a></li>
+                                </ul>
+                                <div class="d-flex">
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-person-circle me-1"></i>Guest User
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                            <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
+                                            <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </nav>
+                        
+                        <div class="p-4">
+                            <div class="row">
+                                <div class="col-md-4 mb-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Support Options</h6>
+                                        </div>
+                                        <div class="list-group list-group-flush">
+                                            <a href="#" class="list-group-item list-group-item-action active">
+                                                <i class="bi bi-plus-circle me-2"></i>Submit New Ticket
+                                            </a>
+                                            <a href="#" class="list-group-item list-group-item-action">
+                                                <i class="bi bi-clock-history me-2"></i>View Ticket History
+                                            </a>
+                                            <a href="#" class="list-group-item list-group-item-action">
+                                                <i class="bi bi-chat-dots me-2"></i>Live Chat Support
+                                            </a>
+                                            <a href="#" class="list-group-item list-group-item-action">
+                                                <i class="bi bi-telephone me-2"></i>Contact by Phone
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card mt-3">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Support Hours</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="small mb-2">Monday - Friday: 9am - 6pm</p>
+                                            <p class="small mb-2">Saturday: 10am - 4pm</p>
+                                            <p class="small mb-0">Sunday: Closed</p>
+                                            <hr>
+                                            <p class="small mb-0 text-success">
+                                                <i class="bi bi-circle-fill me-1"></i>Support agents are online
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card mt-3">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Ticket Processing</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="small mb-0">All tickets are reviewed by our support team. For this challenge, the admin panel will automatically review your ticket submission.</p>
+                                            <hr>
+                                            <p class="small mb-0 fst-italic">Average response time: 15 minutes</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-8">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="mb-0">Submit New Support Ticket</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            {% if ticket_submitted %}
+                                            <div class="alert alert-success">
+                                                <i class="bi bi-check-circle-fill me-2"></i>
+                                                <strong>Ticket Submitted!</strong> Your ticket has been received and will be reviewed by our support team.
+                                            </div>
+                                            <div class="ticket-details p-3 border rounded mb-3">
+                                                <h6>Ticket Details:</h6>
+                                                <p><strong>Ticket ID:</strong> {{ ticket_id }}</p>
+                                                <p><strong>Subject:</strong> {{ ticket_subject }}</p>
+                                                <p><strong>Status:</strong> <span class="badge bg-warning text-dark">Pending Review</span></p>
+                                                <p><strong>Description:</strong></p>
+                                                <div class="p-3 bg-light rounded">{{ ticket_description | safe }}</div>
+                                            </div>
+                                            <p>Our admin team will review your ticket shortly. If your XSS payload successfully exfiltrates the admin cookie, you'll receive the flag.</p>
+                                            <div class="d-grid gap-2">
+                                                <a href="{{ url_for('xss_level12') }}" class="btn btn-primary">
+                                                    <i class="bi bi-plus-circle me-2"></i>Submit Another Ticket
+                                                </a>
+                                            </div>
+                                            {% else %}
+                                            <form action="{{ url_for('xss_level12') }}" method="post">
+                                                <div class="mb-3">
+                                                    <label for="name" class="form-label">Your Name:</label>
+                                                    <input type="text" class="form-control" id="name" name="name" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="email" class="form-label">Email Address:</label>
+                                                    <input type="email" class="form-control" id="email" name="email" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="subject" class="form-label">Subject:</label>
+                                                    <input type="text" class="form-control" id="subject" name="subject" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="category" class="form-label">Category:</label>
+                                                    <select class="form-select" id="category" name="category" required>
+                                                        <option value="">Select a category</option>
+                                                        <option value="technical">Technical Support</option>
+                                                        <option value="billing">Billing Issue</option>
+                                                        <option value="account">Account Management</option>
+                                                        <option value="feature">Feature Request</option>
+                                                        <option value="other">Other</option>
+                                                    </select>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="description" class="form-label">Description:</label>
+                                                    <textarea class="form-control" id="description" name="description" rows="5" required></textarea>
+                                                    <div class="form-text">
+                                                        <i class="bi bi-info-circle me-1"></i>Please provide as much detail as possible to help us assist you better.
+                                                    </div>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="webhook_url" class="form-label">Your Webhook URL (for challenge verification):</label>
+                                                    <input type="url" class="form-control" id="webhook_url" name="webhook_url" placeholder="https://webhook.site/your-unique-id" required>
+                                                    <div class="form-text">
+                                                        <i class="bi bi-info-circle me-1"></i>Create a free webhook at <a href="https://webhook.site" target="_blank">webhook.site</a> or similar service.
+                                                    </div>
+                                                </div>
+                                                <div class="d-grid">
+                                                    <button type="submit" class="btn btn-primary">
+                                                        <i class="bi bi-send me-2"></i>Submit Ticket
+                                                    </button>
+                                                </div>
+                                            </form>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    {% if flag %}
+                                    <div class="alert alert-success mt-4">
+                                        <i class="bi bi-check-circle-fill me-2"></i>
+                                        <strong>Congratulations!</strong> Your blind XSS payload successfully executed in the admin panel and exfiltrated the cookie data.
+                                    </div>
+                                    <div class="card mt-2">
+                                        <div class="card-header bg-success text-white">
+                                            <h5 class="mb-0"><i class="bi bi-trophy me-2"></i>Challenge Completed!</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>You've successfully demonstrated a blind XSS vulnerability with data exfiltration. In a real-world scenario, this could lead to session hijacking and account takeover.</p>
+                                            <div class="flag-container p-3 bg-light rounded">
+                                                <span class="flag-label">Your Flag:</span>
+                                                <code id="flag-value">{{ flag }}</code>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level=12) }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

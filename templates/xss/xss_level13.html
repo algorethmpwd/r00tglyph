@@ -1,0 +1,303 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 13: XSS in PDF Generation - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 13: XSS in PDF Generation</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>ResumeBuilder</strong>, a fictional resume creation platform! This challenge simulates a real-world scenario where an XSS vulnerability exists in a PDF generation feature.
+                    </p>
+                    
+                    <div class="card mb-3 border-secondary">
+                        <div class="card-header bg-secondary text-white">
+                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-0">
+                                <strong>Client:</strong> ResumeBuilder Inc.<br>
+                                <strong>Target:</strong> PDF Resume Generator<br>
+                                <strong>Vulnerability:</strong> XSS in PDF Generation<br>
+                                <strong>Objective:</strong> Execute JavaScript in the generated PDF
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <p>
+                        <strong>Technical Background:</strong> PDF documents can contain JavaScript that executes when the document is opened. Many web applications convert HTML to PDF, and if the HTML is not properly sanitized, it can lead to XSS vulnerabilities in the generated PDF. This is particularly dangerous because PDF viewers like Adobe Reader can execute JavaScript.
+                    </p>
+                    
+                    <p>
+                        <strong>Real-world Impact:</strong> XSS in PDF generation is particularly dangerous because:
+                    </p>
+                    <ul>
+                        <li>PDFs are often trusted more than websites by users</li>
+                        <li>PDFs can be shared and opened by multiple users, spreading the attack</li>
+                        <li>PDF JavaScript can access local system resources in some viewers</li>
+                        <li>PDF XSS can bypass web application firewalls and content security policies</li>
+                        <li>PDF documents are often stored long-term, creating persistent vulnerabilities</li>
+                    </ul>
+                    
+                    <p>
+                        <strong>Your Task:</strong> In this challenge, you need to create a resume with a payload that will execute JavaScript when the PDF is generated and viewed. The application uses a simulated HTML-to-PDF converter that doesn't properly sanitize input. Make an alert box appear with the text "XSS Level 13 Completed!" to reveal the flag.
+                    </p>
+                    
+                    <div class="alert alert-warning">
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> PDF JavaScript can be embedded in various ways. Look for PDF-specific JavaScript triggers like <code>app.alert()</code> or try using HTML elements that might be converted to interactive PDF elements.
+                    </div>
+                </div>
+                
+                <!-- ResumeBuilder Interface -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-file-earmark-person me-2"></i>ResumeBuilder</h5>
+                        <div>
+                            <span class="badge bg-light text-dark">PDF Generator</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <!-- Navigation Bar -->
+                        <nav class="navbar navbar-expand navbar-light bg-light px-3">
+                            <div class="container-fluid">
+                                <ul class="navbar-nav">
+                                    <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-house-door me-1"></i>Home</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-file-earmark-text me-1"></i>My Resumes</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-palette me-1"></i>Templates</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-question-circle me-1"></i>Help</a></li>
+                                </ul>
+                                <div class="d-flex">
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-person-circle me-1"></i>Guest User
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                            <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
+                                            <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </nav>
+                        
+                        <div class="p-4">
+                            <div class="row">
+                                <div class="col-md-4 mb-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Resume Options</h6>
+                                        </div>
+                                        <div class="list-group list-group-flush">
+                                            <a href="#" class="list-group-item list-group-item-action active">
+                                                <i class="bi bi-plus-circle me-2"></i>Create New Resume
+                                            </a>
+                                            <a href="#" class="list-group-item list-group-item-action">
+                                                <i class="bi bi-file-earmark-text me-2"></i>My Saved Resumes
+                                            </a>
+                                            <a href="#" class="list-group-item list-group-item-action">
+                                                <i class="bi bi-palette me-2"></i>Browse Templates
+                                            </a>
+                                            <a href="#" class="list-group-item list-group-item-action">
+                                                <i class="bi bi-gear me-2"></i>Account Settings
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card mt-3">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">PDF Generation Info</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="small mb-2">Our PDF generator converts your resume to a professional PDF document.</p>
+                                            <p class="small mb-0">For this challenge, the PDF generator simulates a vulnerable HTML-to-PDF conversion process that doesn't properly sanitize input.</p>
+                                            <hr>
+                                            <p class="small mb-0 fst-italic">Note: In a real application, this would generate an actual PDF file.</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card mt-3">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Template Preview</h6>
+                                        </div>
+                                        <div class="card-body text-center">
+                                            <img src="https://via.placeholder.com/200x280?text=Resume+Template" class="img-fluid border" alt="Resume Template">
+                                            <p class="small mt-2 mb-0">Professional Template</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-8">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="mb-0">Create Your Resume</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            {% if pdf_generated %}
+                                            <div class="alert alert-success">
+                                                <i class="bi bi-check-circle-fill me-2"></i>
+                                                <strong>Resume Generated!</strong> Your PDF resume has been created.
+                                            </div>
+                                            <div class="pdf-preview p-4 border rounded mb-3">
+                                                <h4 class="text-center mb-4">PDF Preview</h4>
+                                                <div class="pdf-content p-3 bg-light rounded">
+                                                    <h5 class="text-center">{{ resume_name }}</h5>
+                                                    <p class="text-center">{{ resume_email }} | {{ resume_phone }}</p>
+                                                    <hr>
+                                                    <h6>Professional Summary</h6>
+                                                    <div class="mb-3">{{ resume_summary | safe }}</div>
+                                                    <h6>Skills</h6>
+                                                    <div class="mb-3">{{ resume_skills | safe }}</div>
+                                                    <h6>Experience</h6>
+                                                    <div>{{ resume_experience | safe }}</div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div id="pdf-message" class="alert alert-info">
+                                                <i class="bi bi-info-circle-fill me-2"></i>
+                                                The PDF is being processed. If your XSS payload is successful, you'll see the flag below.
+                                            </div>
+                                            
+                                            <div class="d-grid gap-2">
+                                                <a href="{{ url_for('xss_level13') }}" class="btn btn-primary">
+                                                    <i class="bi bi-plus-circle me-2"></i>Create Another Resume
+                                                </a>
+                                            </div>
+                                            {% else %}
+                                            <form action="{{ url_for('xss_level13') }}" method="post">
+                                                <div class="mb-3">
+                                                    <label for="name" class="form-label">Full Name:</label>
+                                                    <input type="text" class="form-control" id="name" name="name" required>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="email" class="form-label">Email Address:</label>
+                                                        <input type="email" class="form-control" id="email" name="email" required>
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <label for="phone" class="form-label">Phone Number:</label>
+                                                        <input type="tel" class="form-control" id="phone" name="phone" required>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="summary" class="form-label">Professional Summary:</label>
+                                                    <textarea class="form-control" id="summary" name="summary" rows="3" required></textarea>
+                                                    <div class="form-text">
+                                                        <i class="bi bi-info-circle me-1"></i>A brief overview of your professional background and goals.
+                                                    </div>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="skills" class="form-label">Skills:</label>
+                                                    <textarea class="form-control" id="skills" name="skills" rows="3" required></textarea>
+                                                    <div class="form-text">
+                                                        <i class="bi bi-info-circle me-1"></i>List your key skills and competencies.
+                                                    </div>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="experience" class="form-label">Work Experience:</label>
+                                                    <textarea class="form-control" id="experience" name="experience" rows="5" required></textarea>
+                                                    <div class="form-text">
+                                                        <i class="bi bi-info-circle me-1"></i>Describe your work history and achievements.
+                                                    </div>
+                                                </div>
+                                                <div class="d-grid">
+                                                    <button type="submit" class="btn btn-primary">
+                                                        <i class="bi bi-file-earmark-pdf me-2"></i>Generate PDF Resume
+                                                    </button>
+                                                </div>
+                                            </form>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    {% if flag %}
+                                    <div class="alert alert-success mt-4">
+                                        <i class="bi bi-check-circle-fill me-2"></i>
+                                        <strong>Congratulations!</strong> Your XSS payload successfully executed in the PDF document.
+                                    </div>
+                                    <div class="card mt-2">
+                                        <div class="card-header bg-success text-white">
+                                            <h5 class="mb-0"><i class="bi bi-trophy me-2"></i>Challenge Completed!</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>You've successfully demonstrated an XSS vulnerability in PDF generation. In a real-world scenario, this could lead to data theft, malware distribution, and other attacks through seemingly innocent PDF documents.</p>
+                                            <div class="flag-container p-3 bg-light rounded">
+                                                <span class="flag-label">Your Flag:</span>
+                                                <code id="flag-value">{{ flag }}</code>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level=13) }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Simulate PDF JavaScript execution
+    document.addEventListener('DOMContentLoaded', function() {
+        if (document.getElementById('pdf-message')) {
+            setTimeout(function() {
+                // This simulates the PDF being loaded and any JavaScript in it being executed
+                var pdfContent = document.querySelector('.pdf-content');
+                if (pdfContent) {
+                    // Create a sandbox to evaluate any potential XSS in the PDF content
+                    try {
+                        // Define app object to simulate PDF JavaScript environment
+                        window.app = {
+                            alert: function(msg) {
+                                if (msg === "XSS Level 13 Completed!") {
+                                    // Show success message and flag
+                                    var flagDisplay = document.getElementById('flag-display');
+                                    if (flagDisplay) {
+                                        flagDisplay.style.display = 'block';
+                                        flagDisplay.scrollIntoView({ behavior: 'smooth' });
+                                    }
+                                    
+                                    // Redirect to success page
+                                    window.location.href = window.location.href + "?success=true";
+                                }
+                                return alert(msg);
+                            }
+                        };
+                        
+                        // Look for PDF JavaScript patterns in the content
+                        var content = pdfContent.innerHTML;
+                        if (content.includes('app.alert') || 
+                            content.includes('this.submitForm') || 
+                            content.includes('getField') ||
+                            content.includes('getAnnots')) {
+                            
+                            // Extract and execute the JavaScript
+                            var jsPattern = /app\.alert\(['"]XSS Level 13 Completed!['"].*?\)/;
+                            var match = content.match(jsPattern);
+                            if (match) {
+                                eval(match[0]);
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Error in PDF JavaScript simulation:', e);
+                    }
+                }
+            }, 2000);
+        }
+    });
+</script>
+{% endblock %}
