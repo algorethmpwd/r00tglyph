@@ -15,7 +15,7 @@
                     <p>
                         Welcome to <strong>DevNotes</strong>, a fictional developer note-taking application! This challenge simulates a real-world scenario where XSS vulnerabilities can exist in JSON API responses.
                     </p>
-                    
+
                     <div class="card mb-3 border-secondary">
                         <div class="card-header bg-secondary text-white">
                             <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
@@ -29,11 +29,11 @@
                             </p>
                         </div>
                     </div>
-                    
+
                     <p>
                         <strong>Technical Background:</strong> Modern web applications often use JSON APIs to transfer data between the client and server. Developers may assume that JSON data is safe from XSS since it's not HTML, but if the JSON response is improperly handled by the client-side code, it can lead to DOM-based XSS vulnerabilities.
                     </p>
-                    
+
                     <p>
                         <strong>Real-world Impact:</strong> JSON API XSS vulnerabilities are particularly dangerous because:
                     </p>
@@ -44,16 +44,16 @@
                         <li>They can lead to data exfiltration and account takeover</li>
                         <li>They may affect third-party applications that consume the vulnerable API</li>
                     </ul>
-                    
+
                     <p>
                         <strong>Your Task:</strong> The DevNotes application has a JSON API endpoint that returns note data. You need to craft a malicious note title that will execute JavaScript when the API response is processed by the client. Make an alert box appear with the text "XSS Level 8 Completed!" to reveal the flag.
                     </p>
-                    
+
                     <div class="alert alert-warning">
                         <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> You'll need to use tools like Burp Suite or browser developer tools to analyze the API request and response. Look for how the JSON data is processed and rendered in the DOM.
                     </div>
                 </div>
-                
+
                 <!-- DevNotes Application Interface -->
                 <div class="card mb-4">
                     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
@@ -80,7 +80,7 @@
                                 </div>
                             </div>
                         </nav>
-                        
+
                         <div class="p-4">
                             <div class="row">
                                 <div class="col-md-4 mb-4">
@@ -110,7 +110,7 @@
                                             </form>
                                         </div>
                                     </div>
-                                    
+
                                     <div class="card mt-3">
                                         <div class="card-header">
                                             <h6 class="mb-0">API Documentation</h6>
@@ -140,14 +140,14 @@
   "title": "My Note",
   "content": "Note content",
   "tags": ["tag1", "tag2"],
-  "created": "2023-04-20T12:34:56Z"
+  "created": "2025-04-20T12:34:56Z"
 }</code></pre>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-md-8">
                                     <div class="card">
                                         <div class="card-header d-flex justify-content-between align-items-center">
@@ -185,7 +185,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 {% if flag %}
                 <!-- Hidden flag container that will be revealed when the challenge is solved -->
                 <div id="flag-display" style="display: none;">
@@ -198,17 +198,17 @@
                         <code id="flag-value">{{ flag }}</code>
                     </div>
                 </div>
-                
+
                 <!-- Hidden form for the main page flag submission -->
                 <form id="flag-submission-form" style="display: none;">
                     <input type="hidden" name="challenge_id" value="8">
                     <input type="text" name="flag" value="">
                 </form>
-                
+
                 <!-- Result container for flag submission -->
                 <div id="flag-result" class="alert" style="display: none;"></div>
                 {% endif %}
-                
+
                 <div class="mt-4">
                     <a href="{{ url_for('solutions', level=8) }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
                     <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
@@ -226,18 +226,18 @@
         const noteForm = document.getElementById('note-form');
         noteForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            
+
             const title = document.getElementById('note-title').value;
             const content = document.getElementById('note-content').value;
             const tags = document.getElementById('note-tags').value;
-            
+
             // Create a note object
             const note = {
                 title: title,
                 content: content,
                 tags: tags
             };
-            
+
             // Send the note to the API
             fetch('/api/notes', {
                 method: 'POST',
@@ -250,10 +250,10 @@
             .then(data => {
                 // Clear the form
                 noteForm.reset();
-                
+
                 // Refresh the notes
                 loadNotes();
-                
+
                 // Show success message
                 alert('Note saved successfully!');
             })
@@ -262,33 +262,33 @@
                 alert('Failed to save note. Please try again.');
             });
         });
-        
+
         // Load notes on page load
         loadNotes();
-        
+
         // Refresh notes when the refresh button is clicked
         document.getElementById('refresh-notes').addEventListener('click', function() {
             loadNotes();
         });
     });
-    
+
     function loadNotes() {
         const notesContainer = document.getElementById('notes-container');
         const loadingIndicator = document.getElementById('loading-indicator');
-        
+
         // Show loading indicator
         loadingIndicator.style.display = 'block';
-        
+
         // Fetch notes from the API
         fetch('/api/notes')
             .then(response => response.json())
             .then(data => {
                 // Hide loading indicator
                 loadingIndicator.style.display = 'none';
-                
+
                 // Clear the container
                 notesContainer.innerHTML = '';
-                
+
                 if (data.length === 0) {
                     // No notes found
                     notesContainer.innerHTML = `
@@ -299,7 +299,7 @@
                     `;
                     return;
                 }
-                
+
                 // Create a card for each note
                 data.forEach(note => {
                     // Vulnerable line - directly inserting the note title without sanitization

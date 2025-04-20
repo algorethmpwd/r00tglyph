@@ -776,21 +776,21 @@ def api_notes():
                 'title': 'Getting Started with DevNotes',
                 'content': 'Welcome to DevNotes! This is a simple note-taking app for developers.',
                 'tags': ['welcome', 'tutorial'],
-                'created': '2023-04-19T10:30:00Z'
+                'created': '2025-04-19T10:30:00Z'
             },
             {
                 'id': 102,
                 'title': 'JavaScript Tips and Tricks',
                 'content': 'Here are some useful JavaScript tips and tricks for web developers.',
                 'tags': ['javascript', 'tips'],
-                'created': '2023-04-19T11:45:00Z'
+                'created': '2025-04-19T11:45:00Z'
             },
             {
                 'id': 103,
                 'title': 'API Security Best Practices',
                 'content': 'Learn how to secure your APIs against common vulnerabilities.',
                 'tags': ['security', 'api'],
-                'created': '2023-04-19T14:20:00Z'
+                'created': '2025-04-19T14:20:00Z'
             }
         ]
 
