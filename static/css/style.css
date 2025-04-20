@@ -88,6 +88,102 @@ footer {
     border-radius: 5px;
 }
 
+/* Flag container styling */
+.flag-container {
+    background-color: #f8f9fa;
+    border: 1px dashed #28a745;
+    border-radius: 5px;
+    padding: 15px;
+    margin-top: 15px;
+    position: relative;
+}
+
+.flag-label {
+    position: absolute;
+    top: -10px;
+    left: 15px;
+    background-color: #28a745;
+    color: white;
+    padding: 2px 10px;
+    border-radius: 3px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.flag-container code {
+    display: block;
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #f1f1f1;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 1.1rem;
+    color: #d63384;
+    word-break: break-all;
+}
+
+/* Challenge description popup styling */
+.modal-content {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.modal-footer {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+/* Dark theme adjustments for flag container */
+[data-bs-theme="dark"] .flag-container {
+    background-color: #2d2d2d;
+    border-color: #28a745;
+}
+
+[data-bs-theme="dark"] .flag-container code {
+    background-color: #1e1e1e;
+    color: #ff6b9d;
+}
+
+/* Cyberpunk theme adjustments for flag container */
+[data-bs-theme="cyberpunk"] .flag-container {
+    background-color: #1a1a3e;
+    border: 1px dashed #00ff9d;
+}
+
+[data-bs-theme="cyberpunk"] .flag-label {
+    background-color: #00ff9d;
+    color: #0a0a1e;
+}
+
+[data-bs-theme="cyberpunk"] .flag-container code {
+    background-color: #2a2a4e;
+    color: #ff00aa;
+    border: 1px solid #00ffff;
+}
+
+/* Hacker theme adjustments for flag container */
+[data-bs-theme="hacker"] .flag-container {
+    background-color: #0c0c0c;
+    border: 1px dashed #00ff00;
+}
+
+[data-bs-theme="hacker"] .flag-label {
+    background-color: #00ff00;
+    color: #0c0c0c;
+}
+
+[data-bs-theme="hacker"] .flag-container code {
+    background-color: #000000;
+    color: #00ff00;
+    border: 1px solid #00ff00;
+}
+
 /* Theme: Dark (default) */
 [data-bs-theme="dark"] {
     --bs-body-bg: #121212;
