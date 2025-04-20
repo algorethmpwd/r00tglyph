@@ -30,7 +30,7 @@
                             <div class="accordion-body p-0">
                                 <div class="list-group list-group-flush">
                                     {% for challenge in challenges[category] %}
-                                    <a href="{{ url_for('xss_level' + (loop.index | string)) if category == 'xss' else '#' }}" class="list-group-item list-group-item-action">
+                                    <a href="{{ url_for('xss_level' + (loop.index | string)) if category == 'xss' and loop.index <= 9 else '#' }}" class="list-group-item list-group-item-action">
                                         <div class="d-flex w-100 justify-content-between align-items-center">
                                             <div>
                                                 <h5 class="mb-1">{{ challenge.name }}</h5>
