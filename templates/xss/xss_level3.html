@@ -52,53 +52,129 @@
                 </div>
 
                 <div class="card mb-4">
-                    <div class="card-header">
-                        <h5><i class="bi bi-chat-left-text-fill me-2"></i>Comment Section</h5>
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-code-square me-2"></i>DevShare</h5>
+                        <div>
+                            <span class="badge bg-light text-dark">Community Forum</span>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <form action="{{ url_for('xss_level3') }}" method="post">
-                            <div class="mb-3">
-                                <label for="username" class="form-label">Username:</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
-                                    <input type="text" class="form-control" id="username" name="username" value="{{ user.display_name }}" required>
+                    <div class="card-body p-0">
+                        <!-- Navigation Bar -->
+                        <nav class="navbar navbar-expand navbar-light bg-light px-3">
+                            <div class="container-fluid">
+                                <ul class="navbar-nav">
+                                    <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-house-door me-1"></i>Home</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-code-slash me-1"></i>Projects</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-people me-1"></i>Community</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-book me-1"></i>Tutorials</a></li>
+                                </ul>
+                                <div class="d-flex">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control form-control-sm" placeholder="Search...">
+                                        <button class="btn btn-sm btn-outline-secondary" type="button"><i class="bi bi-search"></i></button>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="mb-3">
-                                <label for="content" class="form-label">Comment:</label>
-                                <textarea class="form-control" id="content" name="content" rows="3" placeholder="Share your thoughts..." required></textarea>
-                                <div class="form-text">HTML formatting is allowed to enhance your comment.</div>
-                            </div>
-                            <button type="submit" class="btn btn-primary"><i class="bi bi-send-fill me-2"></i>Post Comment</button>
-                        </form>
-                    </div>
-                </div>
+                        </nav>
 
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5><i class="bi bi-chat-square-text-fill me-2"></i>Comments</h5>
-                    </div>
-                    <div class="card-body">
-                        {% if comments %}
-                            {% for comment in comments %}
-                                <div class="card mb-3">
-                                    <div class="card-header d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <strong>{{ comment.username }}</strong>
-                                            {% if comment.machine_id == session.get('machine_id') %}
-                                            <span class="badge bg-secondary ms-2">You</span>
+                        <div class="p-4">
+                            <div class="row">
+                                <div class="col-md-3 mb-4">
+                                    <div class="card">
+                                        <div class="card-body text-center">
+                                            <img src="https://via.placeholder.com/80" class="rounded-circle mb-3" alt="Profile Picture" width="80">
+                                            <h5>{{ user.display_name }}</h5>
+                                            <p class="text-muted small">@{{ user.username }}</p>
+                                            <div class="d-flex justify-content-center gap-2 mb-3">
+                                                <span class="badge bg-primary">JavaScript</span>
+                                                <span class="badge bg-secondary">Python</span>
+                                                <span class="badge bg-success">Web Dev</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card mt-3">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Popular Topics</h6>
+                                        </div>
+                                        <div class="list-group list-group-flush">
+                                            <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                                JavaScript
+                                                <span class="badge bg-primary rounded-pill">142</span>
+                                            </a>
+                                            <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                                React
+                                                <span class="badge bg-primary rounded-pill">98</span>
+                                            </a>
+                                            <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                                Python
+                                                <span class="badge bg-primary rounded-pill">76</span>
+                                            </a>
+                                            <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                                Web Security
+                                                <span class="badge bg-primary rounded-pill">54</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-9">
+                                    <div class="card mb-4">
+                                        <div class="card-header">
+                                            <h5 class="mb-0"><i class="bi bi-chat-square-text-fill me-2"></i>Discussion: Web Security Best Practices</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="alert alert-info mb-4">
+                                                <i class="bi bi-info-circle-fill me-2"></i>
+                                                <strong>Topic:</strong> Share your best practices for securing web applications and preventing common vulnerabilities.
+                                            </div>
+
+                                            <form action="{{ url_for('xss_level3') }}" method="post" class="mb-4">
+                                                <div class="mb-3">
+                                                    <label for="username" class="form-label">Username:</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+                                                        <input type="text" class="form-control" id="username" name="username" value="{{ user.display_name }}" required>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="content" class="form-label">Comment:</label>
+                                                    <textarea class="form-control" id="content" name="content" rows="3" placeholder="Share your thoughts..." required></textarea>
+                                                    <div class="form-text">HTML formatting is allowed to enhance your comment.</div>
+                                                </div>
+                                                <button type="submit" class="btn btn-primary"><i class="bi bi-send-fill me-2"></i>Post Comment</button>
+                                            </form>
+
+                                            <h5 class="mt-4 mb-3"><i class="bi bi-chat-dots-fill me-2"></i>Comments ({{ comments|length if comments else 0 }})</h5>
+
+                                            {% if comments %}
+                                                {% for comment in comments %}
+                                                    <div class="card mb-3">
+                                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                                            <div>
+                                                                <strong>{{ comment.username }}</strong>
+                                                                {% if comment.machine_id == session.get('machine_id') %}
+                                                                <span class="badge bg-secondary ms-2">You</span>
+                                                                {% endif %}
+                                                            </div>
+                                                            <small class="text-muted">{{ comment.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            {{ comment.content | safe }}
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                            {% else %}
+                                                <div class="text-center p-4 bg-light rounded">
+                                                    <i class="bi bi-chat-square text-muted" style="font-size: 2rem;"></i>
+                                                    <p class="text-muted mt-3">No comments yet. Be the first to share your thoughts!</p>
+                                                </div>
                                             {% endif %}
                                         </div>
-                                        <small class="text-muted">{{ comment.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</small>
-                                    </div>
-                                    <div class="card-body">
-                                        {{ comment.content | safe }}
                                     </div>
                                 </div>
-                            {% endfor %}
-                        {% else %}
-                            <p class="text-center text-muted"><i class="bi bi-chat-square me-2"></i>No comments yet. Be the first to comment!</p>
-                        {% endif %}
+                            </div>
+                        </div>
                     </div>
                 </div>
 

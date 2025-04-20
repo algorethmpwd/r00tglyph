@@ -426,8 +426,7 @@ function setupFlagSubmissionPopup() {
             });
         });
 
-        // Initially hide the flag icon until the challenge is solved
-        // It will be shown when the flag is revealed
-        flagIcon.style.display = 'none';
+        // Always show the flag icon
+        flagIcon.style.display = 'flex';
     }
 }

@@ -629,6 +629,7 @@ def xss_level3():
 @app.route('/xss/level4', methods=['GET', 'POST'])
 def xss_level4():
     machine_id = get_machine_id()
+    user = get_local_user()
     message = ""
     filtered_input = ""
     waf_blocked = False
@@ -647,12 +648,13 @@ def xss_level4():
         flag = get_or_create_flag(challenge.id, machine_id)
 
     return render_template('xss/xss_level4.html', message=message, filtered_input=filtered_input,
-                           waf_blocked=waf_blocked, flag=flag)
+                           waf_blocked=waf_blocked, flag=flag, user=user)
 
 # XSS Level 5 - XSS with Advanced Filters
 @app.route('/xss/level5', methods=['GET', 'POST'])
 def xss_level5():
     machine_id = get_machine_id()
+    user = get_local_user()
     message = ""
     filtered_input = ""
     waf_blocked = False
@@ -671,7 +673,7 @@ def xss_level5():
         flag = get_or_create_flag(challenge.id, machine_id)
 
     return render_template('xss/xss_level5.html', message=message, filtered_input=filtered_input,
-                           waf_blocked=waf_blocked, flag=flag)
+                           waf_blocked=waf_blocked, flag=flag, user=user)
 
 # XSS Level 6 - XSS with ModSecurity WAF
 @app.route('/xss/level6', methods=['GET', 'POST'])

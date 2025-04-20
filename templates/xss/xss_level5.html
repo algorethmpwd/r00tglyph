@@ -55,30 +55,155 @@
                 </div>
 
                 <div class="card mb-4">
-                    <div class="card-header">
-                        <h5><i class="bi bi-pencil-square me-2"></i>Rich Text Editor</h5>
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-journal-richtext me-2"></i>BlogPress</h5>
+                        <div>
+                            <span class="badge bg-warning text-dark">Pro</span>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <p>This is a simplified version of a rich text editor that allows some HTML formatting for blog posts:</p>
-                        <form action="{{ url_for('xss_level5') }}" method="post">
-                            <div class="mb-3">
-                                <label for="user_input" class="form-label">Content:</label>
-                                <textarea class="form-control" id="user_input" name="user_input" rows="5" placeholder="<p>This is <b>formatted</b> text with <i>styling</i>.</p>"></textarea>
-                                <div class="form-text">
-                                    <i class="bi bi-shield-fill-check me-1"></i>Allowed tags: &lt;p&gt;, &lt;b&gt;, &lt;i&gt;, &lt;u&gt;, &lt;br&gt;, &lt;hr&gt;, &lt;em&gt;, &lt;strong&gt;
+                    <div class="card-body p-0">
+                        <!-- Navigation Bar -->
+                        <nav class="navbar navbar-expand navbar-light bg-light px-3">
+                            <div class="container-fluid">
+                                <ul class="navbar-nav">
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-house-door me-1"></i>Dashboard</a></li>
+                                    <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-file-earmark-text me-1"></i>New Post</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-archive me-1"></i>My Posts</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-bar-chart me-1"></i>Analytics</a></li>
+                                </ul>
+                                <div class="d-flex">
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="userDropdown">
+                                            <i class="bi bi-person-circle me-1"></i>{{ user.display_name }}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary"><i class="bi bi-eye-fill me-2"></i>Preview Content</button>
-                        </form>
+                        </nav>
+
+                        <div class="p-4">
+                            <div class="row">
+                                <div class="col-md-3 mb-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Blog Tools</h6>
+                                        </div>
+                                        <div class="list-group list-group-flush">
+                                            <a href="#" class="list-group-item list-group-item-action active">
+                                                <i class="bi bi-pencil-square me-2"></i>Rich Text Editor
+                                            </a>
+                                            <a href="#" class="list-group-item list-group-item-action">
+                                                <i class="bi bi-image me-2"></i>Media Library
+                                            </a>
+                                            <a href="#" class="list-group-item list-group-item-action">
+                                                <i class="bi bi-tags me-2"></i>Categories & Tags
+                                            </a>
+                                            <a href="#" class="list-group-item list-group-item-action">
+                                                <i class="bi bi-share me-2"></i>Social Sharing
+                                            </a>
+                                            <a href="#" class="list-group-item list-group-item-action">
+                                                <i class="bi bi-gear me-2"></i>Settings
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <div class="card mt-3">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Blog Stats</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="small mb-2">Published Posts: <span class="badge bg-primary">24</span></p>
+                                            <p class="small mb-2">Total Views: <span class="badge bg-success">12,458</span></p>
+                                            <p class="small mb-0">Comments: <span class="badge bg-info">342</span></p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-9">
+                                    <div class="card">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Create New Blog Post</h5>
+                                            <div>
+                                                <button class="btn btn-sm btn-outline-secondary me-2"><i class="bi bi-save me-1"></i>Save Draft</button>
+                                                <button class="btn btn-sm btn-outline-primary"><i class="bi bi-eye me-1"></i>Preview</button>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <form action="{{ url_for('xss_level5') }}" method="post">
+                                                <div class="mb-3">
+                                                    <label for="post_title" class="form-label">Post Title:</label>
+                                                    <input type="text" class="form-control" id="post_title" name="post_title" placeholder="Enter your blog post title..." value="My First Blog Post">
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label for="user_input" class="form-label">Content:</label>
+                                                    <div class="btn-toolbar mb-2" role="toolbar">
+                                                        <div class="btn-group me-2" role="group">
+                                                            <button type="button" class="btn btn-sm btn-outline-secondary"><i class="bi bi-type-bold"></i></button>
+                                                            <button type="button" class="btn btn-sm btn-outline-secondary"><i class="bi bi-type-italic"></i></button>
+                                                            <button type="button" class="btn btn-sm btn-outline-secondary"><i class="bi bi-type-underline"></i></button>
+                                                        </div>
+                                                        <div class="btn-group me-2" role="group">
+                                                            <button type="button" class="btn btn-sm btn-outline-secondary"><i class="bi bi-list-ul"></i></button>
+                                                            <button type="button" class="btn btn-sm btn-outline-secondary"><i class="bi bi-list-ol"></i></button>
+                                                        </div>
+                                                        <div class="btn-group" role="group">
+                                                            <button type="button" class="btn btn-sm btn-outline-secondary"><i class="bi bi-link"></i></button>
+                                                            <button type="button" class="btn btn-sm btn-outline-secondary"><i class="bi bi-image"></i></button>
+                                                        </div>
+                                                    </div>
+                                                    <textarea class="form-control" id="user_input" name="user_input" rows="6" placeholder="<p>This is <b>formatted</b> text with <i>styling</i>.</p>"></textarea>
+                                                    <div class="form-text">
+                                                        <i class="bi bi-shield-fill-check me-1"></i>Allowed tags: &lt;p&gt;, &lt;b&gt;, &lt;i&gt;, &lt;u&gt;, &lt;br&gt;, &lt;hr&gt;, &lt;em&gt;, &lt;strong&gt;
+                                                    </div>
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label for="post_tags" class="form-label">Tags:</label>
+                                                    <input type="text" class="form-control" id="post_tags" name="post_tags" placeholder="technology, programming, web development" value="blogging, first post">
+                                                </div>
+
+                                                <div class="d-grid">
+                                                    <button type="submit" class="btn btn-primary"><i class="bi bi-eye-fill me-2"></i>Preview Post</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                    {% if message %}
+                                    <div class="alert alert-warning mt-3">
+                                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                        {{ message }}
+                                    </div>
+                                    {% endif %}
+
+                                    {% if filtered_input %}
+                                    <div class="card mt-3">
+                                        <div class="card-header">
+                                            <h5 class="mb-0"><i class="bi bi-display me-2"></i>Post Preview</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <h3 class="mb-3">My First Blog Post</h3>
+                                            <div class="d-flex mb-3">
+                                                <span class="badge bg-secondary me-2">blogging</span>
+                                                <span class="badge bg-secondary">first post</span>
+                                                <span class="ms-auto text-muted small">{{ user.display_name }} | Just now</span>
+                                            </div>
+                                            <hr>
+                                            <div class="preview-content">
+                                                {{ filtered_input | safe }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                {% if message %}
-                <div class="alert alert-warning">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                    {{ message }}
-                </div>
-                {% endif %}
+                <!-- Message alert is now inside the main card -->
+                <!-- No need for duplicate alert here -->
 
                 {% if filtered_input %}
                 <div class="card mb-4">

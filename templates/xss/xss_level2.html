@@ -55,15 +55,113 @@
                 </div>
 
                 <div class="card mb-4">
-                    <div class="card-header">
-                        <h5><i class="bi bi-palette-fill me-2"></i>Color Selector</h5>
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-palette-fill me-2"></i>ColorPicker Pro</h5>
+                        <div>
+                            <span class="badge bg-success">Premium</span>
+                            <span class="ms-2">v2.5.1</span>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <p>This tool allows you to preview different background colors for your design projects.</p>
-                        <p>Try adding a color parameter to the URL (e.g., <code>?color=red</code>, <code>?color=blue</code>, <code>?color=#ff5733</code>)</p>
+                    <div class="card-body p-0">
+                        <!-- Navigation Bar -->
+                        <nav class="navbar navbar-expand navbar-light bg-light px-3">
+                            <div class="container-fluid">
+                                <ul class="navbar-nav">
+                                    <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-house-door me-1"></i>Home</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-palette me-1"></i>Colors</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-grid-3x3 me-1"></i>Palettes</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-brush me-1"></i>Tools</a></li>
+                                </ul>
+                                <div class="d-flex">
+                                    <a href="#" class="btn btn-sm btn-outline-primary me-2"><i class="bi bi-cloud-arrow-down me-1"></i>Export</a>
+                                    <a href="#" class="btn btn-sm btn-outline-secondary"><i class="bi bi-gear-fill me-1"></i>Settings</a>
+                                </div>
+                            </div>
+                        </nav>
 
-                        <div id="colorBox" class="p-5 mt-3 border" style="background-color: #f0f0f0;">
-                            <h3 class="text-center">This box will change color</h3>
+                        <div class="p-4">
+                            <div class="row">
+                                <div class="col-md-4 mb-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Color Tools</h6>
+                                        </div>
+                                        <div class="list-group list-group-flush">
+                                            <a href="#" class="list-group-item list-group-item-action active">
+                                                <i class="bi bi-eyedropper me-2"></i>Color Preview
+                                            </a>
+                                            <a href="#" class="list-group-item list-group-item-action">
+                                                <i class="bi bi-palette2 me-2"></i>Color Mixer
+                                            </a>
+                                            <a href="#" class="list-group-item list-group-item-action">
+                                                <i class="bi bi-circle-half me-2"></i>Contrast Checker
+                                            </a>
+                                            <a href="#" class="list-group-item list-group-item-action">
+                                                <i class="bi bi-grid me-2"></i>Color Grid
+                                            </a>
+                                            <a href="#" class="list-group-item list-group-item-action">
+                                                <i class="bi bi-code-slash me-2"></i>CSS Generator
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <div class="card mt-3">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Recent Colors</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="d-flex flex-wrap gap-2">
+                                                <div class="color-swatch" style="background-color: #ff5733; width: 30px; height: 30px; border-radius: 4px;"></div>
+                                                <div class="color-swatch" style="background-color: #33ff57; width: 30px; height: 30px; border-radius: 4px;"></div>
+                                                <div class="color-swatch" style="background-color: #3357ff; width: 30px; height: 30px; border-radius: 4px;"></div>
+                                                <div class="color-swatch" style="background-color: #f3f3f3; width: 30px; height: 30px; border-radius: 4px;"></div>
+                                                <div class="color-swatch" style="background-color: #222222; width: 30px; height: 30px; border-radius: 4px;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-8">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="mb-0"><i class="bi bi-eyedropper me-2"></i>Color Preview Tool</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>This tool allows you to preview different background colors for your design projects.</p>
+                                            <p>Try adding a color parameter to the URL (e.g., <code>?color=red</code>, <code>?color=blue</code>, <code>?color=#ff5733</code>)</p>
+
+                                            <div class="row mt-4">
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Sample URL Format:</label>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">URL</span>
+                                                            <input type="text" class="form-control" value="/xss/level2?color=blue" readonly>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Common Colors:</label>
+                                                        <div class="d-flex flex-wrap gap-2">
+                                                            <a href="?color=red" class="btn btn-sm btn-outline-danger">Red</a>
+                                                            <a href="?color=blue" class="btn btn-sm btn-outline-primary">Blue</a>
+                                                            <a href="?color=green" class="btn btn-sm btn-outline-success">Green</a>
+                                                            <a href="?color=yellow" class="btn btn-sm btn-outline-warning">Yellow</a>
+                                                            <a href="?color=purple" class="btn btn-sm btn-outline-secondary">Purple</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <div id="colorBox" class="p-5 border shadow-sm" style="background-color: #f0f0f0; height: 100%; display: flex; align-items: center; justify-content: center;">
+                                                        <h3 class="text-center mb-0">Color Preview</h3>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
