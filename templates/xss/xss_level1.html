@@ -55,36 +55,118 @@
                 </div>
 
                 <div class="card mb-4">
-                    <div class="card-header">
-                        <h5><i class="bi bi-search me-2"></i>Search Form</h5>
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-headset me-2"></i>TechConnect Support Forum</h5>
+                        <div>
+                            <span class="badge bg-success">Online</span>
+                            <span class="ms-2">Users: 1,342</span>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <form action="{{ url_for('xss_level1') }}" method="get">
-                            <div class="mb-3">
-                                <label for="name" class="form-label">Enter your search query:</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
-                                    <input type="text" class="form-control" id="name" name="name" value="{{ request.args.get('name', '') }}" placeholder="Try searching for your name...">
-                                    <button type="submit" class="btn btn-primary">Search</button>
-                                </div>
-                                <div class="form-text">The search engine will look for matches in our database.</div>
+                    <div class="card-body p-0">
+                        <nav class="navbar navbar-expand navbar-light bg-light px-3">
+                            <div class="container-fluid">
+                                <ul class="navbar-nav">
+                                    <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-house-door me-1"></i>Home</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-chat-dots me-1"></i>Forums</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-question-circle me-1"></i>FAQ</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-people me-1"></i>Members</a></li>
+                                </ul>
+                                <form action="{{ url_for('xss_level1') }}" method="get" class="d-flex">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="name" name="name" value="{{ request.args.get('name', '') }}" placeholder="Search the forum...">
+                                        <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i></button>
+                                    </div>
+                                </form>
                             </div>
-                        </form>
-                    </div>
-                </div>
+                        </nav>
 
-                {% if user_input %}
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5><i class="bi bi-list-ul me-2"></i>Search Results</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>Hello, {{ user_input | safe }}! Here are your search results:</p>
-                        <hr>
-                        <p class="text-muted"><i class="bi bi-exclamation-circle me-2"></i>No results found for your query.</p>
+                        <div class="p-3">
+                            <div class="row mb-4">
+                                <div class="col-md-3">
+                                    <div class="card">
+                                        <div class="card-header">Categories</div>
+                                        <div class="list-group list-group-flush">
+                                            <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                                Hardware Issues
+                                                <span class="badge bg-primary rounded-pill">24</span>
+                                            </a>
+                                            <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                                Software Problems
+                                                <span class="badge bg-primary rounded-pill">18</span>
+                                            </a>
+                                            <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                                Networking
+                                                <span class="badge bg-primary rounded-pill">9</span>
+                                            </a>
+                                            <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                                Security
+                                                <span class="badge bg-primary rounded-pill">12</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    {% if user_input %}
+                                    <div class="card">
+                                        <div class="card-header bg-light">
+                                            <h5 class="mb-0"><i class="bi bi-search me-2"></i>Search Results</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="alert alert-info">
+                                                <i class="bi bi-info-circle me-2"></i>Showing results for user: <strong>{{ user_input | safe }}</strong>
+                                            </div>
+                                            <div class="list-group">
+                                                <div class="list-group-item list-group-item-action">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h5 class="mb-1">No results found</h5>
+                                                        <small class="text-muted">Just now</small>
+                                                    </div>
+                                                    <p class="mb-1">We couldn't find any forum posts or users matching your search criteria.</p>
+                                                    <small class="text-muted">Try using different keywords or check your spelling.</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% else %}
+                                    <div class="card">
+                                        <div class="card-header bg-light">
+                                            <h5 class="mb-0"><i class="bi bi-chat-text me-2"></i>Recent Discussions</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="list-group">
+                                                <a href="#" class="list-group-item list-group-item-action">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h5 class="mb-1">My computer keeps crashing after updates</h5>
+                                                        <small class="text-muted">3 days ago</small>
+                                                    </div>
+                                                    <p class="mb-1">Ever since the latest Windows update, my PC crashes randomly...</p>
+                                                    <small class="text-muted">Posted by: TechGuru99</small>
+                                                </a>
+                                                <a href="#" class="list-group-item list-group-item-action">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h5 class="mb-1">WiFi signal keeps dropping</h5>
+                                                        <small class="text-muted">1 week ago</small>
+                                                    </div>
+                                                    <p class="mb-1">My WiFi connection drops every few minutes. I've tried resetting the router...</p>
+                                                    <small class="text-muted">Posted by: NetworkNewbie</small>
+                                                </a>
+                                                <a href="#" class="list-group-item list-group-item-action">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h5 class="mb-1">Best antivirus for small business?</h5>
+                                                        <small class="text-muted">2 weeks ago</small>
+                                                    </div>
+                                                    <p class="mb-1">Looking for recommendations on the best antivirus solution for a small business...</p>
+                                                    <small class="text-muted">Posted by: SmallBizOwner</small>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                {% endif %}
 
                 {% if flag %}
                 <div class="card mb-4 flag-form">
@@ -105,9 +187,13 @@
 
                         <div id="flag-result" class="alert" style="display: none;"></div>
 
-                        <div class="flag-container">
+                        <div class="flag-container" style="display: none;" id="flag-display">
                             <span class="flag-label">Your Flag</span>
-                            <code>{{ flag }}</code>
+                            <code id="flag-value">{{ flag }}</code>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            <strong>Hint:</strong> The flag will be revealed when you successfully execute the XSS payload that shows an alert with "XSS Level 1 Completed!"
                         </div>
                     </div>
                 </div>

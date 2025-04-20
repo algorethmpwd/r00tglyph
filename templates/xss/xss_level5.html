@@ -112,9 +112,13 @@
 
                         <div id="flag-result" class="alert" style="display: none;"></div>
 
-                        <div class="flag-container">
+                        <div class="flag-container" style="display: none;" id="flag-display">
                             <span class="flag-label">Your Flag</span>
-                            <code>{{ flag }}</code>
+                            <code id="flag-value">{{ flag }}</code>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            <strong>Hint:</strong> The flag will be revealed when you successfully execute the XSS payload that shows an alert with "XSS Level 5 Completed!"
                         </div>
                     </div>
                 </div>

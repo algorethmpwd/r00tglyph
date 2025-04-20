@@ -17,33 +17,88 @@ from datetime import datetime
 if len(sys.argv) > 1:
     parser = argparse.ArgumentParser(description='R00tGlyph - Advanced Web Security Training Platform')
     parser.add_argument('-up', '--update', action='store_true', help='Update R00tGlyph to the latest version')
+    parser.add_argument('--backup', action='store_true', help='Backup user data only')
+    parser.add_argument('--restore', action='store_true', help='Restore user data from backup')
     args = parser.parse_args()
 
+    backup_dir = 'backup'
+    db_file = 'instance/r00tglyph.db'
+    backup_file = f'{backup_dir}/r00tglyph.db.bak'
+
+    # Create backup directory if it doesn't exist
+    os.makedirs(backup_dir, exist_ok=True)
+
+    # Backup user data function
+    def backup_user_data():
+        if os.path.exists(db_file):
+            print("Backing up user data...")
+            # Create a timestamped backup
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            timestamped_backup = f'{backup_dir}/r00tglyph_{timestamp}.db.bak'
+
+            # Copy to both timestamped and regular backup files
+            shutil.copy2(db_file, timestamped_backup)
+            shutil.copy2(db_file, backup_file)
+            print(f"Backup created: {timestamped_backup}")
+            return True
+        else:
+            print("No database file found to backup.")
+            return False
+
+    # Restore user data function
+    def restore_user_data():
+        if os.path.exists(backup_file):
+            print("Restoring user data from backup...")
+            if os.path.exists(db_file):
+                # Create a backup of the current database before overwriting
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                pre_restore_backup = f'{backup_dir}/pre_restore_{timestamp}.db.bak'
+                shutil.copy2(db_file, pre_restore_backup)
+                print(f"Created pre-restore backup: {pre_restore_backup}")
+
+            # Restore the backup
+            shutil.copy2(backup_file, db_file)
+            print("User data restored successfully!")
+            return True
+        else:
+            print("No backup file found to restore.")
+            return False
+
+    # Handle backup command
+    if args.backup:
+        backup_user_data()
+        sys.exit(0)
+
+    # Handle restore command
+    if args.restore:
+        restore_user_data()
+        sys.exit(0)
+
+    # Handle update command
     if args.update:
         print("Updating R00tGlyph to the latest version...")
-        # Backup user data
-        if os.path.exists('instance/r00tglyph.db'):
-            print("Backing up user data...")
-            backup_dir = 'backup'
-            os.makedirs(backup_dir, exist_ok=True)
-            shutil.copy2('instance/r00tglyph.db', f'{backup_dir}/r00tglyph.db.bak')
 
-        # Pull latest changes from GitHub
+        # Step 1: Backup user data
+        backup_success = backup_user_data()
+
+        # Step 2: Pull latest changes from GitHub
         try:
             print("Pulling latest changes from GitHub...")
             subprocess.run(['git', 'pull'], check=True)
+            print("Code updated successfully!")
 
-            # Restore user data
-            if os.path.exists(f'{backup_dir}/r00tglyph.db.bak'):
-                print("Restoring user data...")
-                shutil.copy2(f'{backup_dir}/r00tglyph.db.bak', 'instance/r00tglyph.db')
+            # Step 3: Restore user data if backup was successful
+            if backup_success:
+                restore_user_data()
 
-            print("Update completed successfully!")
-        except subprocess.CalledProcessError:
-            print("Error: Failed to pull latest changes. Please check your internet connection.")
-            if os.path.exists(f'{backup_dir}/r00tglyph.db.bak'):
-                print("Restoring user data from backup...")
-                shutil.copy2(f'{backup_dir}/r00tglyph.db.bak', 'instance/r00tglyph.db')
+            print("\nUpdate completed successfully!")
+            print("Your progress and achievements have been preserved.")
+            print("Restart the application to apply all changes.")
+
+        except subprocess.CalledProcessError as e:
+            print(f"Error: Failed to pull latest changes. {str(e)}")
+            print("Please check your internet connection and Git configuration.")
+            print("Your data has been backed up and remains unchanged.")
 
         sys.exit(0)
 

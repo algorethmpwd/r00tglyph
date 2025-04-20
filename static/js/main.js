@@ -15,6 +15,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Setup theme switcher
     setupThemeSwitcher();
+
+    // Setup XSS detection
+    setupXSSDetection();
 });
 
 function setupChallengeListeners() {
@@ -130,4 +133,50 @@ function setupThemeSwitcher() {
             document.documentElement.setAttribute('data-bs-theme', theme);
         });
     });
+}
+
+function setupXSSDetection() {
+    // Override the alert function to detect when XSS challenges are completed
+    const originalAlert = window.alert;
+    window.alert = function(message) {
+        // Call the original alert function
+        originalAlert(message);
+
+        // Check if this is a challenge completion message
+        if (message && typeof message === 'string') {
+            const level = getCurrentXSSLevel();
+            const expectedMessage = `XSS Level ${level} Completed!`;
+
+            if (message === expectedMessage) {
+                console.log(`Challenge completed: ${expectedMessage}`);
+                revealFlag();
+            }
+        }
+    };
+}
+
+function getCurrentXSSLevel() {
+    // Extract the level number from the URL
+    const path = window.location.pathname;
+    const match = path.match(/\/xss\/level(\d+)/);
+    return match ? match[1] : null;
+}
+
+function revealFlag() {
+    // Show the flag container
+    const flagDisplay = document.getElementById('flag-display');
+    if (flagDisplay) {
+        flagDisplay.style.display = 'block';
+
+        // Add a success message
+        const resultElement = document.getElementById('flag-result');
+        if (resultElement) {
+            resultElement.className = 'alert alert-success mt-3';
+            resultElement.innerHTML = `<i class="bi bi-check-circle-fill me-2"></i>Congratulations! You've solved the challenge. Here's your flag:`;
+            resultElement.style.display = 'block';
+        }
+
+        // Scroll to the flag
+        flagDisplay.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
 }
