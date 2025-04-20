@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, make_response
 from flask_sqlalchemy import SQLAlchemy
 import os
 import json
@@ -171,6 +171,12 @@ with app.app_context():
                      description="Bypass complex WAF-like protections.", points=350),
             Challenge(name="XSS with ModSecurity WAF", category="xss", difficulty="advanced",
                      description="Bypass industry-standard WAF rules.", points=500),
+            Challenge(name="XSS via HTTP Headers", category="xss", difficulty="advanced",
+                     description="Exploit XSS vulnerabilities in HTTP header processing.", points=600),
+            Challenge(name="XSS in JSON API", category="xss", difficulty="advanced",
+                     description="Exploit XSS vulnerabilities in JSON API responses.", points=700),
+            Challenge(name="XSS with CSP Bypass", category="xss", difficulty="expert",
+                     description="Bypass Content Security Policy protections.", points=800),
         ]
         db.session.add_all(challenges)
         db.session.commit()
@@ -702,6 +708,129 @@ def xss_level6():
 
     return render_template('xss/xss_level6.html', message=message, filtered_input=filtered_input,
                            waf_blocked=waf_blocked, flag=flag)
+
+# XSS Level 7 - XSS via HTTP Headers
+@app.route('/xss/level7', methods=['GET'])
+def xss_level7():
+    machine_id = get_machine_id()
+    user = get_local_user()
+
+    # Get the user's IP address and User-Agent
+    client_ip = request.remote_addr
+    user_agent = request.headers.get('User-Agent', '')
+
+    # Generate a random visitor ID
+    random_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
+
+    # Check if the User-Agent contains the XSS payload
+    message = ""
+    if 'XSS Level 7 Completed!' in user_agent:
+        message = "XSS detected in User-Agent header!"
+
+    flag = None
+    # Generate a flag for this challenge
+    challenge = Challenge.query.filter_by(name="XSS via HTTP Headers").first()
+    if challenge:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xss/xss_level7.html', client_ip=client_ip, user_agent=user_agent,
+                           random_id=random_id, message=message, flag=flag, user=user)
+
+# XSS Level 8 - XSS in JSON API
+@app.route('/xss/level8', methods=['GET'])
+def xss_level8():
+    machine_id = get_machine_id()
+    user = get_local_user()
+
+    flag = None
+    # Generate a flag for this challenge
+    challenge = Challenge.query.filter_by(name="XSS in JSON API").first()
+    if challenge:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xss/xss_level8.html', flag=flag, user=user)
+
+# API endpoint for XSS Level 8
+@app.route('/api/notes', methods=['GET', 'POST'])
+def api_notes():
+    if request.method == 'POST':
+        # Handle note creation
+        data = request.get_json()
+
+        # Create a new note
+        new_note = {
+            'id': random.randint(1000, 9999),
+            'title': data.get('title', ''),
+            'content': data.get('content', ''),
+            'tags': data.get('tags', '').split(',') if data.get('tags') else [],
+            'created': datetime.now().isoformat()
+        }
+
+        # Return the new note
+        return jsonify(new_note)
+    else:
+        # Return sample notes
+        notes = [
+            {
+                'id': 101,
+                'title': 'Getting Started with DevNotes',
+                'content': 'Welcome to DevNotes! This is a simple note-taking app for developers.',
+                'tags': ['welcome', 'tutorial'],
+                'created': '2023-04-19T10:30:00Z'
+            },
+            {
+                'id': 102,
+                'title': 'JavaScript Tips and Tricks',
+                'content': 'Here are some useful JavaScript tips and tricks for web developers.',
+                'tags': ['javascript', 'tips'],
+                'created': '2023-04-19T11:45:00Z'
+            },
+            {
+                'id': 103,
+                'title': 'API Security Best Practices',
+                'content': 'Learn how to secure your APIs against common vulnerabilities.',
+                'tags': ['security', 'api'],
+                'created': '2023-04-19T14:20:00Z'
+            }
+        ]
+
+        # Check if there's an XSS payload in the request headers
+        user_agent = request.headers.get('User-Agent', '')
+        if 'XSS Level 8 Completed!' in user_agent:
+            # Add a note with the XSS payload in the title
+            notes.insert(0, {
+                'id': 104,
+                'title': '<img src=x onerror="alert(\'XSS Level 8 Completed!\');">',
+                'content': 'This note contains an XSS payload in the title.',
+                'tags': ['xss', 'security'],
+                'created': datetime.now().isoformat()
+            })
+
+        return jsonify(notes)
+
+# XSS Level 9 - XSS with CSP Bypass
+@app.route('/xss/level9', methods=['GET', 'POST'])
+def xss_level9():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    user_comment = ""
+
+    if request.method == 'POST':
+        user_comment = request.form.get('comment', '')
+
+    flag = None
+    # Generate a flag for this challenge
+    challenge = Challenge.query.filter_by(name="XSS with CSP Bypass").first()
+    if challenge:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    response = make_response(render_template('xss/xss_level9.html', user_comment=user_comment, flag=flag, user=user))
+
+    # Set a strict CSP header with a misconfiguration (allowing unsafe-inline for styles but not scripts)
+    # The misconfiguration is that we're allowing 'https://cdnjs.cloudflare.com' which can be exploited
+    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' https://via.placeholder.com data:;"
+
+    return response
 
 # Solutions
 @app.route('/solutions/<level>')

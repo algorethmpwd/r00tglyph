@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block title %}XSS Level 8 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">XSS Level 8 Solution: XSS in JSON API</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
+                    <p>
+                        This challenge demonstrates how XSS vulnerabilities can exist in JSON API responses. The application fetches note data from an API endpoint and inserts it into the DOM without proper sanitization, allowing an attacker to inject malicious JavaScript.
+                    </p>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-lightbulb-fill me-2 text-warning"></i>Solution</h3>
+                <p>
+                    To solve this challenge, you need to analyze how the application processes JSON data from the API and find a way to inject a malicious payload that will be executed when rendered in the DOM.
+                </p>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Understanding the Vulnerability</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>After examining the application code, we can see that:</p>
+                        <ol>
+                            <li>The application fetches notes from the <code>/api/notes</code> endpoint.</li>
+                            <li>The notes are returned as JSON objects with properties like <code>title</code>, <code>content</code>, etc.</li>
+                            <li>The application creates HTML elements for each note and inserts the <code>title</code> property directly into the DOM without sanitization.</li>
+                            <li>The vulnerable line is: <code>noteCard.innerHTML = `...${note.title}...`</code></li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Exploiting the Vulnerability</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>There are two main approaches to exploit this vulnerability:</p>
+                        
+                        <h6>Method 1: Using Burp Suite to Modify the API Response</h6>
+                        <ol>
+                            <li>
+                                <p>Configure your browser to use Burp Suite as a proxy.</p>
+                            </li>
+                            <li>
+                                <p>Navigate to the challenge page.</p>
+                            </li>
+                            <li>
+                                <p>In Burp Suite, find the request to <code>/api/notes</code> and enable interception for the response.</p>
+                            </li>
+                            <li>
+                                <p>Modify the response to include a note with an XSS payload in the title:</p>
+                                <pre class="bg-light p-3 rounded"><code>[
+  {
+    "id": 104,
+    "title": "&lt;img src=x onerror=\"alert('XSS Level 8 Completed!');\"&gt;",
+    "content": "This note contains an XSS payload",
+    "tags": ["xss", "security"],
+    "created": "2023-04-20T12:00:00Z"
+  },
+  // ... other notes ...
+]</code></pre>
+                            </li>
+                            <li>
+                                <p>Forward the modified response.</p>
+                            </li>
+                            <li>
+                                <p>When the page processes the JSON data, the JavaScript in your payload will execute, triggering the alert and revealing the flag.</p>
+                            </li>
+                        </ol>
+                        
+                        <h6 class="mt-4">Method 2: Using the User-Agent Header</h6>
+                        <p>The application has a special feature where it checks the User-Agent header for a specific string and adds a note with an XSS payload if found:</p>
+                        <ol>
+                            <li>
+                                <p>Use Burp Suite, a browser extension, or cURL to set your User-Agent header to include the string "XSS Level 8 Completed!":</p>
+                                <pre class="bg-light p-3 rounded"><code>User-Agent: Mozilla/5.0 XSS Level 8 Completed!</code></pre>
+                            </li>
+                            <li>
+                                <p>Visit the challenge page or refresh it.</p>
+                            </li>
+                            <li>
+                                <p>The server will detect the string in your User-Agent and add a note with an XSS payload to the API response.</p>
+                            </li>
+                            <li>
+                                <p>When the page processes the JSON data, the JavaScript will execute, triggering the alert and revealing the flag.</p>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Using cURL</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>You can also use cURL to test the API directly:</p>
+                        <pre class="bg-light p-3 rounded"><code>curl -H "User-Agent: XSS Level 8 Completed!" http://localhost:5000/api/notes</code></pre>
+                        <p>This will return the JSON response with the injected XSS payload. Then visit the challenge page normally to see the result.</p>
+                    </div>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-shield-fill-check me-2 text-success"></i>Security Lessons</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Vulnerabilities Demonstrated</h5>
+                        <ul>
+                            <li><strong>Improper Output Encoding:</strong> The application inserts JSON data into the DOM without proper HTML encoding.</li>
+                            <li><strong>Insufficient Input Validation:</strong> The application fails to validate or sanitize data from the API before using it.</li>
+                            <li><strong>JSON Injection:</strong> The application is vulnerable to JSON injection attacks.</li>
+                        </ul>
+                        
+                        <h5>Prevention Measures</h5>
+                        <ul>
+                            <li><strong>Context-Appropriate Output Encoding:</strong> Always encode data before inserting it into the DOM.</li>
+                            <li><strong>Use Safe DOM APIs:</strong> Instead of using <code>innerHTML</code>, use safer alternatives like <code>textContent</code> for text or DOM creation methods.</li>
+                            <li><strong>Content Security Policy (CSP):</strong> Implement a strict CSP to mitigate the impact of XSS vulnerabilities.</li>
+                            <li><strong>Input Validation:</strong> Validate and sanitize all data, even from trusted sources like your own API.</li>
+                            <li><strong>JSON Schema Validation:</strong> Validate JSON responses against a schema to ensure they match expected formats.</li>
+                        </ul>
+                        
+                        <h5>Real-World Implications</h5>
+                        <p>
+                            JSON API XSS vulnerabilities are particularly dangerous in modern web applications that rely heavily on APIs and client-side rendering. Developers often assume that JSON data is safe because it's not HTML, but if the data is eventually inserted into the DOM without proper sanitization, it can lead to XSS attacks. This type of vulnerability can affect multiple parts of an application that consume the same API.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('xss_level8') }}" class="btn btn-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

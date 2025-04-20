@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}XSS Level 7 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">XSS Level 7 Solution: XSS via HTTP Headers</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
+                    <p>
+                        This challenge demonstrates how XSS vulnerabilities can exist in HTTP header processing. The application displays the User-Agent header value without proper sanitization, allowing an attacker to inject malicious JavaScript.
+                    </p>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-lightbulb-fill me-2 text-warning"></i>Solution</h3>
+                <p>
+                    To solve this challenge, you need to modify the User-Agent header to include a JavaScript payload that will execute when displayed on the page.
+                </p>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Using Burp Suite</h5>
+                    </div>
+                    <div class="card-body">
+                        <ol>
+                            <li>
+                                <p>Configure your browser to use Burp Suite as a proxy.</p>
+                            </li>
+                            <li>
+                                <p>Navigate to the challenge page.</p>
+                            </li>
+                            <li>
+                                <p>In Burp Suite, intercept the request and modify the User-Agent header to include an XSS payload:</p>
+                                <pre class="bg-light p-3 rounded"><code>User-Agent: &lt;img src=x onerror="alert('XSS Level 7 Completed!');"&gt;</code></pre>
+                            </li>
+                            <li>
+                                <p>Forward the modified request.</p>
+                            </li>
+                            <li>
+                                <p>When the page loads, the JavaScript in your User-Agent will execute, triggering the alert and revealing the flag.</p>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Using cURL</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Alternatively, you can use cURL to send a request with a custom User-Agent:</p>
+                        <pre class="bg-light p-3 rounded"><code>curl -H "User-Agent: &lt;img src=x onerror=\"alert('XSS Level 7 Completed!');\"&gt;" http://localhost:5000/xss/level7</code></pre>
+                        <p>Then visit the page normally in your browser to see the result.</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Using a Custom Browser Extension</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>You can also use browser extensions like "User-Agent Switcher" to modify your User-Agent:</p>
+                        <ol>
+                            <li>Install a User-Agent Switcher extension for your browser.</li>
+                            <li>Configure a custom User-Agent with the XSS payload.</li>
+                            <li>Visit the challenge page with the modified User-Agent.</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-shield-fill-check me-2 text-success"></i>Security Lessons</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Vulnerabilities Demonstrated</h5>
+                        <ul>
+                            <li><strong>Improper Output Encoding:</strong> The application displays the User-Agent header without proper HTML encoding.</li>
+                            <li><strong>Insufficient Input Validation:</strong> The application fails to validate or sanitize HTTP headers before displaying them.</li>
+                            <li><strong>Trust Boundary Violation:</strong> HTTP headers are user-controllable and should not be trusted.</li>
+                        </ul>
+                        
+                        <h5>Prevention Measures</h5>
+                        <ul>
+                            <li><strong>Context-Appropriate Output Encoding:</strong> Always encode user-controlled data before including it in HTML contexts.</li>
+                            <li><strong>Input Validation:</strong> Validate and sanitize all user inputs, including HTTP headers.</li>
+                            <li><strong>Content Security Policy (CSP):</strong> Implement a strict CSP to mitigate the impact of XSS vulnerabilities.</li>
+                            <li><strong>Security Headers:</strong> Use security headers like X-XSS-Protection to enable browser-built-in XSS filters.</li>
+                        </ul>
+                        
+                        <h5>Real-World Implications</h5>
+                        <p>
+                            Header-based XSS vulnerabilities are particularly dangerous because they often bypass traditional input validation mechanisms that focus on form fields and URL parameters. Many applications display HTTP headers in admin panels, logs, or analytics dashboards, creating potential attack vectors if not properly sanitized.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('xss_level7') }}" class="btn btn-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

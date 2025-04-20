@@ -248,9 +248,18 @@ function setupChallengeDescriptionPopup() {
                 firstCard.parentNode.insertBefore(descriptionButton, firstCard);
             }
 
-            // Show the modal automatically when the page loads
+            // Show the modal automatically only on first visit, not after form submissions
             const bsModal = new bootstrap.Modal(modal);
-            bsModal.show();
+
+            // Check if this is a fresh page load or a form submission
+            const isFormSubmission = document.referrer &&
+                                    document.referrer.includes(window.location.pathname) &&
+                                    performance.navigation.type !== 1; // Not a page refresh
+
+            // Only show on first visit or page refresh, not after form submissions
+            if (!isFormSubmission) {
+                bsModal.show();
+            }
         }
     }
 }
