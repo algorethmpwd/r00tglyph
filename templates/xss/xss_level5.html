@@ -1,56 +1,89 @@
 {% extends 'base.html' %}
 
-{% block title %}XSS Level 5: XSS with Advanced Filters{% endblock %}
+{% block title %}Level 5: XSS with Advanced Filters - R00tGlyph{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-md-8 offset-md-2">
         <div class="card">
-            <div class="card-header bg-primary text-white">
+            <div class="card-header bg-dark text-white">
                 <h2 class="text-center">Level 5: XSS with Advanced Filters</h2>
             </div>
             <div class="card-body">
-                <div class="alert alert-info">
-                    <h4>Challenge Description</h4>
+                <div class="alert alert-dark">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
                     <p>
-                        This page implements more advanced XSS protection by filtering multiple dangerous patterns.
-                        This challenge simulates a real-world scenario where developers have implemented some security measures.
+                        Welcome to <strong>BlogPress</strong>, a fictional blogging platform! You've discovered that their rich text editor has implemented more advanced XSS protection.
                     </p>
+
+                    <div class="card mb-3 border-secondary">
+                        <div class="card-header bg-secondary text-white">
+                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-0">
+                                <strong>Client:</strong> BlogPress Publishing Platform<br>
+                                <strong>Target:</strong> Rich Text Editor<br>
+                                <strong>Vulnerability:</strong> Suspected XSS with Advanced Filter Bypass<br>
+                                <strong>Objective:</strong> Bypass the advanced filters and execute JavaScript in the browser
+                            </p>
+                        </div>
+                    </div>
+
                     <p>
-                        <strong>Objective:</strong> Make an alert box appear with the text "XSS Level 5 Completed!"
-                        despite the advanced filtering.
+                        <strong>Technical Background:</strong> The developers have implemented more sophisticated security measures by filtering multiple dangerous patterns,
+                        including <code>javascript:</code>, event handlers like <code>onerror</code> and <code>onload</code>, and script tags. This is a common approach in real-world applications.
                     </p>
+
+                    <p>
+                        <strong>Real-world Impact:</strong> Even advanced filters can often be bypassed if they're not implemented correctly. In a real-world scenario, this could allow attackers to:
+                    </p>
+                    <ul>
+                        <li>Execute arbitrary JavaScript despite the security measures</li>
+                        <li>Compromise user accounts across the platform</li>
+                        <li>Steal sensitive information from authenticated users</li>
+                        <li>Spread malicious content to other users' blogs</li>
+                    </ul>
+
+                    <p>
+                        <strong>Your Task:</strong> Bypass the advanced filters and make an alert box appear with the text "XSS Level 5 Completed!" to prove the vulnerability exists and reveal the flag.
+                    </p>
+
+                    <div class="alert alert-warning">
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Look carefully at how the filtering is implemented. Are there ways to obfuscate your input or use alternative syntax that might bypass the filters?
+                    </div>
                 </div>
-                
+
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h5>Rich Text Editor</h5>
+                        <h5><i class="bi bi-pencil-square me-2"></i>Rich Text Editor</h5>
                     </div>
                     <div class="card-body">
-                        <p>This is a simplified version of a rich text editor that allows some HTML formatting:</p>
+                        <p>This is a simplified version of a rich text editor that allows some HTML formatting for blog posts:</p>
                         <form action="{{ url_for('xss_level5') }}" method="post">
                             <div class="mb-3">
                                 <label for="user_input" class="form-label">Content:</label>
                                 <textarea class="form-control" id="user_input" name="user_input" rows="5" placeholder="<p>This is <b>formatted</b> text with <i>styling</i>.</p>"></textarea>
                                 <div class="form-text">
-                                    Allowed tags: &lt;p&gt;, &lt;b&gt;, &lt;i&gt;, &lt;u&gt;, &lt;br&gt;, &lt;hr&gt;, &lt;em&gt;, &lt;strong&gt;
+                                    <i class="bi bi-shield-fill-check me-1"></i>Allowed tags: &lt;p&gt;, &lt;b&gt;, &lt;i&gt;, &lt;u&gt;, &lt;br&gt;, &lt;hr&gt;, &lt;em&gt;, &lt;strong&gt;
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary">Preview Content</button>
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-eye-fill me-2"></i>Preview Content</button>
                         </form>
                     </div>
                 </div>
-                
+
                 {% if message %}
                 <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
                     {{ message }}
                 </div>
                 {% endif %}
-                
+
                 {% if filtered_input %}
-                <div class="card">
+                <div class="card mb-4">
                     <div class="card-header">
-                        <h5>Content Preview</h5>
+                        <h5><i class="bi bi-display me-2"></i>Content Preview</h5>
                     </div>
                     <div class="card-body">
                         <div class="preview-content">
@@ -59,10 +92,37 @@
                     </div>
                 </div>
                 {% endif %}
-                
+
+                {% if flag %}
+                <div class="card mb-4 flag-form">
+                    <div class="card-header bg-success text-white">
+                        <h5><i class="bi bi-flag-fill me-2"></i>Submit Flag</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>If you've successfully exploited the vulnerability, you should be able to see the flag. Submit it below to earn points!</p>
+
+                        <form id="flag-submission-form">
+                            <input type="hidden" name="challenge_id" value="5">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text"><i class="bi bi-key-fill"></i></span>
+                                <input type="text" class="form-control" name="flag" placeholder="Enter flag (format: R00T{...})" required>
+                                <button class="btn btn-success" type="submit">Submit</button>
+                            </div>
+                        </form>
+
+                        <div id="flag-result" class="alert" style="display: none;"></div>
+
+                        <div class="flag-container">
+                            <span class="flag-label">Your Flag</span>
+                            <code>{{ flag }}</code>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
                 <div class="mt-4">
-                    <a href="{{ url_for('solutions', level=5) }}" class="btn btn-outline-secondary">View Solution</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end">Back to Challenges</a>
+                    <a href="{{ url_for('solutions', level=5) }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
                 </div>
             </div>
         </div>

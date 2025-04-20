@@ -12,7 +12,6 @@ import argparse
 import shutil
 import subprocess
 from datetime import datetime
-from functools import wraps
 
 # Check for command-line arguments
 if len(sys.argv) > 1:
@@ -80,7 +79,7 @@ class Flag(db.Model):
     machine_id = db.Column(db.String(64), nullable=False)
     flag_value = db.Column(db.String(100), nullable=False)
     used = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(datetime.timezone.utc))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Submission(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -88,7 +87,7 @@ class Submission(db.Model):
     challenge_id = db.Column(db.Integer, db.ForeignKey('challenge.id'), nullable=False)
     flag = db.Column(db.String(100), nullable=False)
     correct = db.Column(db.Boolean, default=False)
-    timestamp = db.Column(db.DateTime, default=lambda: datetime.now(datetime.timezone.utc))
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -96,7 +95,7 @@ class Comment(db.Model):
     content = db.Column(db.Text)
     level = db.Column(db.Integer)
     machine_id = db.Column(db.String(64), nullable=True)  # Optional, to track who posted the comment
-    timestamp = db.Column(db.DateTime, default=lambda: datetime.now(datetime.timezone.utc))
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 # Create database tables
 with app.app_context():
@@ -158,7 +157,7 @@ def get_local_user():
         db.session.commit()
 
     # Update last active time
-    user.last_active = datetime.now(datetime.timezone.utc)
+    user.last_active = datetime.utcnow()
     db.session.commit()
 
     return user

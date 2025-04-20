@@ -1,56 +1,94 @@
 {% extends 'base.html' %}
 
-{% block title %}XSS Level 3: Stored XSS{% endblock %}
+{% block title %}Level 3: Stored XSS - R00tGlyph{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-md-8 offset-md-2">
         <div class="card">
-            <div class="card-header bg-primary text-white">
+            <div class="card-header bg-dark text-white">
                 <h2 class="text-center">Level 3: Stored XSS</h2>
             </div>
             <div class="card-body">
-                <div class="alert alert-info">
-                    <h4>Challenge Description</h4>
+                <div class="alert alert-dark">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
                     <p>
-                        This page demonstrates a stored XSS vulnerability. In this type of attack, the malicious script is stored
-                        on the target server (in this case, our database) and then executed when other users view the affected page.
+                        Welcome to <strong>DevShare</strong>, a fictional developer community forum! You've discovered that this site might be vulnerable to stored XSS attacks.
                     </p>
+
+                    <div class="card mb-3 border-secondary">
+                        <div class="card-header bg-secondary text-white">
+                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-0">
+                                <strong>Client:</strong> DevShare Community Forum<br>
+                                <strong>Target:</strong> Comment System<br>
+                                <strong>Vulnerability:</strong> Suspected Stored Cross-Site Scripting (XSS)<br>
+                                <strong>Objective:</strong> Confirm the vulnerability by posting a comment that executes JavaScript when the page loads
+                            </p>
+                        </div>
+                    </div>
+
                     <p>
-                        <strong>Objective:</strong> Post a comment that will execute JavaScript and show an alert with the text "XSS Level 3 Completed!"
-                        when the page is loaded.
+                        <strong>Technical Background:</strong> In a stored XSS attack, the malicious script is permanently stored on the target server (in this case, in the database).
+                        The attack is then executed when other users view the affected page. This makes stored XSS particularly dangerous as it affects all visitors.
+                    </p>
+
+                    <p>
+                        <strong>Real-world Impact:</strong> In a real scenario, this vulnerability could allow attackers to:
+                    </p>
+                    <ul>
+                        <li>Steal session cookies from all users who view the page</li>
+                        <li>Perform actions on behalf of other users</li>
+                        <li>Modify the content of the page for all visitors</li>
+                        <li>Redirect users to phishing sites</li>
+                        <li>Install keyloggers or other malicious scripts</li>
+                    </ul>
+
+                    <p>
+                        <strong>Your Task:</strong> Post a comment that will execute JavaScript and show an alert with the text "XSS Level 3 Completed!" when the page is loaded.
                     </p>
                 </div>
-                
+
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h5>Comment Section</h5>
+                        <h5><i class="bi bi-chat-left-text-fill me-2"></i>Comment Section</h5>
                     </div>
                     <div class="card-body">
                         <form action="{{ url_for('xss_level3') }}" method="post">
                             <div class="mb-3">
                                 <label for="username" class="form-label">Username:</label>
-                                <input type="text" class="form-control" id="username" name="username" required>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+                                    <input type="text" class="form-control" id="username" name="username" value="{{ user.display_name }}" required>
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label for="content" class="form-label">Comment:</label>
-                                <textarea class="form-control" id="content" name="content" rows="3" required></textarea>
+                                <textarea class="form-control" id="content" name="content" rows="3" placeholder="Share your thoughts..." required></textarea>
+                                <div class="form-text">HTML formatting is allowed to enhance your comment.</div>
                             </div>
-                            <button type="submit" class="btn btn-primary">Post Comment</button>
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-send-fill me-2"></i>Post Comment</button>
                         </form>
                     </div>
                 </div>
-                
-                <div class="card">
+
+                <div class="card mb-4">
                     <div class="card-header">
-                        <h5>Comments</h5>
+                        <h5><i class="bi bi-chat-square-text-fill me-2"></i>Comments</h5>
                     </div>
                     <div class="card-body">
                         {% if comments %}
                             {% for comment in comments %}
                                 <div class="card mb-3">
-                                    <div class="card-header">
-                                        <strong>{{ comment.username }}</strong> 
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>{{ comment.username }}</strong>
+                                            {% if comment.machine_id == session.get('machine_id') %}
+                                            <span class="badge bg-secondary ms-2">You</span>
+                                            {% endif %}
+                                        </div>
                                         <small class="text-muted">{{ comment.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</small>
                                     </div>
                                     <div class="card-body">
@@ -59,14 +97,41 @@
                                 </div>
                             {% endfor %}
                         {% else %}
-                            <p>No comments yet. Be the first to comment!</p>
+                            <p class="text-center text-muted"><i class="bi bi-chat-square me-2"></i>No comments yet. Be the first to comment!</p>
                         {% endif %}
                     </div>
                 </div>
-                
+
+                {% if flag %}
+                <div class="card mb-4 flag-form">
+                    <div class="card-header bg-success text-white">
+                        <h5><i class="bi bi-flag-fill me-2"></i>Submit Flag</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>If you've successfully exploited the vulnerability, you should be able to see the flag. Submit it below to earn points!</p>
+
+                        <form id="flag-submission-form">
+                            <input type="hidden" name="challenge_id" value="3">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text"><i class="bi bi-key-fill"></i></span>
+                                <input type="text" class="form-control" name="flag" placeholder="Enter flag (format: R00T{...})" required>
+                                <button class="btn btn-success" type="submit">Submit</button>
+                            </div>
+                        </form>
+
+                        <div id="flag-result" class="alert" style="display: none;"></div>
+
+                        <div class="flag-container">
+                            <span class="flag-label">Your Flag</span>
+                            <code>{{ flag }}</code>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
                 <div class="mt-4">
-                    <a href="{{ url_for('solutions', level=3) }}" class="btn btn-outline-secondary">View Solution</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end">Back to Challenges</a>
+                    <a href="{{ url_for('solutions', level=3) }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
                 </div>
             </div>
         </div>

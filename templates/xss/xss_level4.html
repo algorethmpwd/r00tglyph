@@ -1,30 +1,63 @@
 {% extends 'base.html' %}
 
-{% block title %}XSS Level 4: XSS with Basic Filters{% endblock %}
+{% block title %}Level 4: XSS with Basic Filters - R00tGlyph{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-md-8 offset-md-2">
         <div class="card">
-            <div class="card-header bg-primary text-white">
+            <div class="card-header bg-dark text-white">
                 <h2 class="text-center">Level 4: XSS with Basic Filters</h2>
             </div>
             <div class="card-body">
-                <div class="alert alert-info">
-                    <h4>Challenge Description</h4>
+                <div class="alert alert-dark">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
                     <p>
-                        This page implements basic XSS protection by filtering out &lt;script&gt; tags.
-                        Your challenge is to bypass this protection and still execute JavaScript.
+                        Welcome to <strong>SocialConnect</strong>, a fictional social media platform! You've discovered that their profile customization feature has some basic XSS protection.
                     </p>
+
+                    <div class="card mb-3 border-secondary">
+                        <div class="card-header bg-secondary text-white">
+                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-0">
+                                <strong>Client:</strong> SocialConnect Platform<br>
+                                <strong>Target:</strong> Profile Customization Feature<br>
+                                <strong>Vulnerability:</strong> Suspected XSS with Basic Filter Bypass<br>
+                                <strong>Objective:</strong> Bypass the filter and execute JavaScript in the browser
+                            </p>
+                        </div>
+                    </div>
+
                     <p>
-                        <strong>Objective:</strong> Make an alert box appear with the text "XSS Level 4 Completed!"
-                        despite the filtering.
+                        <strong>Technical Background:</strong> The developers have implemented a basic security measure by filtering out &lt;script&gt; tags from user input.
+                        However, there are many other ways to execute JavaScript in a browser besides using script tags directly.
                     </p>
+
+                    <p>
+                        <strong>Real-world Impact:</strong> Filter bypass vulnerabilities are common in real applications where developers implement incomplete protection measures.
+                        These can lead to the same security issues as any other XSS vulnerability:
+                    </p>
+                    <ul>
+                        <li>Session hijacking and account takeover</li>
+                        <li>Data theft from the page</li>
+                        <li>Phishing attacks against users</li>
+                        <li>Malicious actions performed on behalf of the victim</li>
+                    </ul>
+
+                    <p>
+                        <strong>Your Task:</strong> Bypass the filter and make an alert box appear with the text "XSS Level 4 Completed!" to prove the vulnerability exists and reveal the flag.
+                    </p>
+
+                    <div class="alert alert-warning">
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> There are many HTML elements and attributes that can execute JavaScript. What happens if you try event handlers like <code>onclick</code>, <code>onmouseover</code>, or <code>onerror</code>?
+                    </div>
                 </div>
-                
+
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h5>Profile Customization</h5>
+                        <h5><i class="bi bi-person-badge me-2"></i>Profile Customization</h5>
                     </div>
                     <div class="card-body">
                         <p>Enter HTML to customize your profile page:</p>
@@ -32,23 +65,24 @@
                             <div class="mb-3">
                                 <label for="user_input" class="form-label">HTML Content:</label>
                                 <textarea class="form-control" id="user_input" name="user_input" rows="4" placeholder="<h1>My Profile</h1><p>Welcome to my page!</p>"></textarea>
-                                <div class="form-text">Note: Script tags are not allowed for security reasons.</div>
+                                <div class="form-text"><i class="bi bi-shield-fill-check me-1"></i>Note: Script tags are not allowed for security reasons.</div>
                             </div>
-                            <button type="submit" class="btn btn-primary">Update Profile</button>
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle-fill me-2"></i>Update Profile</button>
                         </form>
                     </div>
                 </div>
-                
+
                 {% if message %}
                 <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
                     {{ message }}
                 </div>
                 {% endif %}
-                
+
                 {% if filtered_input %}
-                <div class="card">
+                <div class="card mb-4">
                     <div class="card-header">
-                        <h5>Your Profile Preview</h5>
+                        <h5><i class="bi bi-eye-fill me-2"></i>Your Profile Preview</h5>
                     </div>
                     <div class="card-body">
                         <div class="profile-content">
@@ -57,10 +91,37 @@
                     </div>
                 </div>
                 {% endif %}
-                
+
+                {% if flag %}
+                <div class="card mb-4 flag-form">
+                    <div class="card-header bg-success text-white">
+                        <h5><i class="bi bi-flag-fill me-2"></i>Submit Flag</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>If you've successfully exploited the vulnerability, you should be able to see the flag. Submit it below to earn points!</p>
+
+                        <form id="flag-submission-form">
+                            <input type="hidden" name="challenge_id" value="4">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text"><i class="bi bi-key-fill"></i></span>
+                                <input type="text" class="form-control" name="flag" placeholder="Enter flag (format: R00T{...})" required>
+                                <button class="btn btn-success" type="submit">Submit</button>
+                            </div>
+                        </form>
+
+                        <div id="flag-result" class="alert" style="display: none;"></div>
+
+                        <div class="flag-container">
+                            <span class="flag-label">Your Flag</span>
+                            <code>{{ flag }}</code>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
                 <div class="mt-4">
-                    <a href="{{ url_for('solutions', level=4) }}" class="btn btn-outline-secondary">View Solution</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end">Back to Challenges</a>
+                    <a href="{{ url_for('solutions', level=4) }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
                 </div>
             </div>
         </div>

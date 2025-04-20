@@ -1,43 +1,103 @@
 {% extends 'base.html' %}
 
-{% block title %}XSS Level 2: DOM-based XSS{% endblock %}
+{% block title %}Level 2: DOM-based XSS - R00tGlyph{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-md-8 offset-md-2">
         <div class="card">
-            <div class="card-header bg-primary text-white">
+            <div class="card-header bg-dark text-white">
                 <h2 class="text-center">Level 2: DOM-based XSS</h2>
             </div>
             <div class="card-body">
-                <div class="alert alert-info">
-                    <h4>Challenge Description</h4>
+                <div class="alert alert-dark">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
                     <p>
-                        This page demonstrates a DOM-based XSS vulnerability. The vulnerability occurs when 
-                        JavaScript code directly manipulates the DOM with user-controlled data.
+                        Welcome to <strong>ColorPicker Pro</strong>, a fictional web application for designers! You've been hired to test the security of their color preview feature.
                     </p>
+
+                    <div class="card mb-3 border-secondary">
+                        <div class="card-header bg-secondary text-white">
+                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-0">
+                                <strong>Client:</strong> ColorPicker Pro<br>
+                                <strong>Target:</strong> Color Preview Feature<br>
+                                <strong>Vulnerability:</strong> Suspected DOM-based Cross-Site Scripting (XSS)<br>
+                                <strong>Objective:</strong> Confirm the vulnerability by executing JavaScript in the browser
+                            </p>
+                        </div>
+                    </div>
+
                     <p>
-                        <strong>Objective:</strong> Make an alert box appear with the text "XSS Level 2 Completed!"
+                        <strong>Technical Background:</strong> DOM-based XSS occurs when JavaScript code takes data from a user-controllable source (like URL parameters)
+                        and passes it to a sink that supports dynamic code execution. Unlike reflected or stored XSS, the vulnerability exists entirely in client-side code.
                     </p>
+
+                    <p>
+                        <strong>Real-world Impact:</strong> In a real scenario, this vulnerability could allow attackers to:
+                    </p>
+                    <ul>
+                        <li>Execute arbitrary JavaScript in the victim's browser</li>
+                        <li>Access sensitive information from other parts of the page</li>
+                        <li>Bypass client-side security controls</li>
+                        <li>Perform actions that appear to come from the victim</li>
+                    </ul>
+
+                    <p>
+                        <strong>Your Task:</strong> Make an alert box appear with the text "XSS Level 2 Completed!" to prove the vulnerability exists and reveal the flag.
+                    </p>
+
+                    <div class="alert alert-warning">
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Look at how the color parameter is used in the URL and how it affects the page. What happens if you provide something other than a valid color?
+                    </div>
                 </div>
-                
+
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h5>Color Selector</h5>
+                        <h5><i class="bi bi-palette-fill me-2"></i>Color Selector</h5>
                     </div>
                     <div class="card-body">
-                        <p>This page allows you to change the background color of the box below.</p>
-                        <p>Try adding a color parameter to the URL (e.g., ?color=red)</p>
-                        
+                        <p>This tool allows you to preview different background colors for your design projects.</p>
+                        <p>Try adding a color parameter to the URL (e.g., <code>?color=red</code>, <code>?color=blue</code>, <code>?color=#ff5733</code>)</p>
+
                         <div id="colorBox" class="p-5 mt-3 border" style="background-color: #f0f0f0;">
                             <h3 class="text-center">This box will change color</h3>
                         </div>
                     </div>
                 </div>
-                
+
+                {% if flag %}
+                <div class="card mb-4 flag-form">
+                    <div class="card-header bg-success text-white">
+                        <h5><i class="bi bi-flag-fill me-2"></i>Submit Flag</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>If you've successfully exploited the vulnerability, you should be able to see the flag. Submit it below to earn points!</p>
+
+                        <form id="flag-submission-form">
+                            <input type="hidden" name="challenge_id" value="2">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text"><i class="bi bi-key-fill"></i></span>
+                                <input type="text" class="form-control" name="flag" placeholder="Enter flag (format: R00T{...})" required>
+                                <button class="btn btn-success" type="submit">Submit</button>
+                            </div>
+                        </form>
+
+                        <div id="flag-result" class="alert" style="display: none;"></div>
+
+                        <div class="flag-container">
+                            <span class="flag-label">Your Flag</span>
+                            <code>{{ flag }}</code>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
                 <div class="mt-4">
-                    <a href="{{ url_for('solutions', level=2) }}" class="btn btn-outline-secondary">View Solution</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end">Back to Challenges</a>
+                    <a href="{{ url_for('solutions', level=2) }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
                 </div>
             </div>
         </div>
@@ -51,13 +111,13 @@
     function setColor() {
         const urlParams = new URLSearchParams(window.location.search);
         const color = urlParams.get('color');
-        
+
         if (color) {
             // Vulnerable line - directly inserting user input into the DOM
             document.getElementById('colorBox').style = "background-color: " + color;
         }
     }
-    
+
     // Call the function when the page loads
     window.onload = setColor;
 </script>
