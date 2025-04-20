@@ -13,12 +13,15 @@ import shutil
 import subprocess
 from datetime import datetime
 
+
+
 # Check for command-line arguments
 if len(sys.argv) > 1:
     parser = argparse.ArgumentParser(description='R00tGlyph - Advanced Web Security Training Platform')
     parser.add_argument('-up', '--update', action='store_true', help='Update R00tGlyph to the latest version')
     parser.add_argument('--backup', action='store_true', help='Backup user data only')
     parser.add_argument('--restore', action='store_true', help='Restore user data from backup')
+    parser.add_argument('--reset', action='store_true', help='Reset the database to its initial state')
     args = parser.parse_args()
 
     backup_dir = 'backup'
@@ -73,6 +76,11 @@ if len(sys.argv) > 1:
     if args.restore:
         restore_user_data()
         sys.exit(0)
+
+    # Handle reset command
+    if args.reset:
+        # We'll handle this later after app is defined
+        pass
 
     # Handle update command
     if args.update:
@@ -156,25 +164,33 @@ class Comment(db.Model):
 with app.app_context():
     db.create_all()
 
-    # Initialize challenges if they don't exist
-    if Challenge.query.count() == 0:
+# Define reset_database function
+def reset_database():
+    """Reset the database to its initial state"""
+    print("Dropping all tables...")
+    with app.app_context():
+        db.drop_all()
+        print("Creating all tables...")
+        db.create_all()
+        print("Initializing database...")
+        # Initialize challenges
         challenges = [
             Challenge(name="Basic Reflected XSS", category="xss", difficulty="beginner",
-                     description="A simple search page that reflects user input directly in the response.", points=100),
+                     description="Find and exploit a basic reflected XSS vulnerability.", points=100),
             Challenge(name="DOM-based XSS", category="xss", difficulty="beginner",
-                     description="Exploit a vulnerability in client-side JavaScript code.", points=150),
+                     description="Exploit a DOM-based XSS vulnerability.", points=200),
             Challenge(name="Stored XSS", category="xss", difficulty="intermediate",
-                     description="Inject persistent JavaScript that affects all visitors.", points=200),
+                     description="Find and exploit a stored XSS vulnerability.", points=300),
             Challenge(name="XSS with Basic Filters", category="xss", difficulty="intermediate",
-                     description="Bypass simple XSS protection mechanisms.", points=250),
+                     description="Bypass basic XSS filters.", points=400),
             Challenge(name="XSS with Advanced Filters", category="xss", difficulty="advanced",
-                     description="Bypass complex WAF-like protections.", points=350),
+                     description="Bypass advanced XSS filters.", points=500),
             Challenge(name="XSS with ModSecurity WAF", category="xss", difficulty="advanced",
-                     description="Bypass industry-standard WAF rules.", points=500),
+                     description="Bypass ModSecurity WAF rules.", points=600),
             Challenge(name="XSS via HTTP Headers", category="xss", difficulty="advanced",
-                     description="Exploit XSS vulnerabilities in HTTP header processing.", points=600),
+                     description="Exploit XSS via HTTP headers.", points=700),
             Challenge(name="XSS in JSON API", category="xss", difficulty="advanced",
-                     description="Exploit XSS vulnerabilities in JSON API responses.", points=700),
+                     description="Exploit XSS in a JSON API.", points=750),
             Challenge(name="XSS with CSP Bypass", category="xss", difficulty="expert",
                      description="Bypass Content Security Policy protections.", points=800),
             Challenge(name="XSS with Mutation Observer Bypass", category="xss", difficulty="expert",
@@ -185,9 +201,16 @@ with app.app_context():
                      description="Exploit a blind XSS vulnerability and exfiltrate data.", points=1100),
             Challenge(name="XSS in PDF Generation", category="xss", difficulty="expert",
                      description="Exploit an XSS vulnerability in PDF generation.", points=1200),
+            Challenge(name="XSS via Prototype Pollution", category="xss", difficulty="expert",
+                     description="Exploit prototype pollution to achieve XSS.", points=1300),
+            Challenge(name="XSS via Template Injection", category="xss", difficulty="expert",
+                     description="Exploit template injection to achieve XSS.", points=1400),
         ]
         db.session.add_all(challenges)
         db.session.commit()
+        print("Database reset complete!")
+
+
 
 # Helper functions
 def get_machine_id():
@@ -987,10 +1010,128 @@ def xss_level13():
                            resume_skills=resume_skills, resume_experience=resume_experience,
                            flag=flag, user=user)
 
+# XSS Level 14 - XSS via Prototype Pollution
+@app.route('/xss/level14', methods=['GET', 'POST'])
+def xss_level14():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    config_saved = False
+    config_name = None
+    config_json = None
+    flag = None
+
+    if request.method == 'POST':
+        # Get form data
+        config_name = request.form.get('config_name', '')
+        config_json = request.form.get('config_json', '')
+        config_saved = True
+
+        # Check if the JSON contains a prototype pollution payload
+        if '__proto__' in config_json and ('innerHTML' in config_json or 'outerHTML' in config_json):
+            # Generate a flag for this challenge
+            challenge = Challenge.query.filter_by(name="XSS via Prototype Pollution").first()
+            if challenge:
+                flag = get_or_create_flag(challenge.id, machine_id)
+    else:
+        # Check if success parameter is present
+        if request.args.get('success') == 'true':
+            challenge = Challenge.query.filter_by(name="XSS via Prototype Pollution").first()
+            if challenge:
+                flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xss/xss_level14.html', config_saved=config_saved,
+                           config_name=config_name, config_json=config_json,
+                           flag=flag, user=user)
+
+# XSS Level 15 - XSS via Template Injection
+@app.route('/xss/level15', methods=['GET', 'POST'])
+def xss_level15():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    template_saved = False
+    template_name = None
+    template_subject = None
+    template_content = None
+    rendered_template = None
+    flag = None
+    current_date = datetime.now().strftime('%B %d, %Y')
+
+    if request.method == 'POST':
+        # Get form data
+        template_name = request.form.get('template_name', '')
+        template_subject = request.form.get('template_subject', '')
+        template_content = request.form.get('template_content', '')
+        template_saved = True
+
+        # Simple template rendering (vulnerable to template injection)
+        try:
+            # Define template variables
+            template_vars = {
+                'name': 'John Doe',
+                'email': 'john@example.com',
+                'company': 'ACME Corp',
+                'date': current_date,
+                'unsubscribe': '#unsubscribe'
+            }
+
+            # Render the template (simulated)
+            rendered_template = template_content
+            for var_name, var_value in template_vars.items():
+                rendered_template = rendered_template.replace('{{ ' + var_name + ' }}', var_value)
+
+            # Check if the template contains a template injection payload
+            if 'constructor.constructor' in template_content or 'eval(' in template_content or \
+               '__proto__' in template_content or 'XSS Level 15 Completed!' in template_content:
+                # Generate a flag for this challenge
+                challenge = Challenge.query.filter_by(name="XSS via Template Injection").first()
+                if challenge:
+                    flag = get_or_create_flag(challenge.id, machine_id)
+        except Exception as e:
+            rendered_template = f"<div class='alert alert-danger'>Error rendering template: {str(e)}</div>"
+    else:
+        # Check if success parameter is present
+        if request.args.get('success') == 'true':
+            challenge = Challenge.query.filter_by(name="XSS via Template Injection").first()
+            if challenge:
+                flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xss/xss_level15.html', template_saved=template_saved,
+                           template_name=template_name, template_subject=template_subject,
+                           template_content=template_content, rendered_template=rendered_template,
+                           current_date=current_date, flag=flag, user=user)
+
 # Solutions
 @app.route('/solutions/<level>')
 def solutions(level):
     return render_template(f'solutions/xss_level{level}_solution.html')
 
+
+
+def show_help():
+    """Show help information"""
+    print("R00tGlyph - XSS Training Platform")
+    print("\nUsage:")
+    print("  python app.py [options]")
+    print("\nOptions:")
+    print("  -h, --help     Show this help message and exit")
+    print("  --reset        Reset the database to its initial state")
+    print("\nExamples:")
+    print("  python app.py              Start the application")
+    print("  python app.py --reset      Reset the database and start the application")
+    print("  python app.py -h           Show this help message")
+
 if __name__ == '__main__':
+    import sys
+
+    # Process command-line arguments
+    if len(sys.argv) > 1:
+        # Simple argument handling
+        if sys.argv[1] in ['-h', '--help']:
+            show_help()
+            sys.exit(0)
+        elif sys.argv[1] == '--reset':
+            reset_database()
+            sys.exit(0)
+
+    # Start the application
     app.run(debug=True, host='0.0.0.0', port=5000)
