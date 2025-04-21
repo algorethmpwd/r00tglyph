@@ -168,6 +168,12 @@ function setupXSSDetection() {
                         url.searchParams.set('success', 'true');
                         window.location.href = url.toString();
                     }, 1000);
+                } else {
+                    // If success=true is already in the URL, force a page reload
+                    // This ensures the flag banner is displayed
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
                 }
             }
         }

@@ -125,40 +125,180 @@
                                                     <small class="text-muted">Try using different keywords or check your spelling.</small>
                                                 </div>
                                             </div>
+
+                                            <!-- Interactive search filters -->
+                                            <div class="mt-4">
+                                                <h6><i class="bi bi-funnel-fill me-2"></i>Refine Your Search</h6>
+                                                <div class="row g-3">
+                                                    <div class="col-md-4">
+                                                        <select class="form-select" id="search-category">
+                                                            <option selected>All Categories</option>
+                                                            <option>Hardware Issues</option>
+                                                            <option>Software Problems</option>
+                                                            <option>Networking</option>
+                                                            <option>Security</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <select class="form-select" id="search-time">
+                                                            <option selected>Any Time</option>
+                                                            <option>Today</option>
+                                                            <option>This Week</option>
+                                                            <option>This Month</option>
+                                                            <option>This Year</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <select class="form-select" id="search-sort">
+                                                            <option selected>Relevance</option>
+                                                            <option>Newest First</option>
+                                                            <option>Oldest First</option>
+                                                            <option>Most Replies</option>
+                                                            <option>Least Replies</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                                                    <button class="btn btn-outline-secondary" type="button" id="clear-search-btn">
+                                                        <i class="bi bi-x-circle me-2"></i>Clear
+                                                    </button>
+                                                    <button class="btn btn-primary" type="button" id="apply-search-btn">
+                                                        <i class="bi bi-search me-2"></i>Apply Filters
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     {% else %}
                                     <div class="card">
-                                        <div class="card-header bg-light">
+                                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
                                             <h5 class="mb-0"><i class="bi bi-chat-text me-2"></i>Recent Discussions</h5>
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-sm btn-outline-secondary active" id="view-all-btn">All</button>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary" id="view-popular-btn">Popular</button>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary" id="view-unanswered-btn">Unanswered</button>
+                                            </div>
                                         </div>
                                         <div class="card-body">
+                                            <!-- Forum post creation form -->
+                                            <div class="mb-4 p-3 border rounded bg-light">
+                                                <h6><i class="bi bi-pencil-square me-2"></i>Create New Post</h6>
+                                                <div class="mb-3">
+                                                    <input type="text" class="form-control" id="post-title" placeholder="Post title">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <textarea class="form-control" id="post-content" rows="2" placeholder="What's on your mind?"></textarea>
+                                                </div>
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <button class="btn btn-sm btn-outline-secondary me-2" id="attach-file-btn">
+                                                            <i class="bi bi-paperclip me-1"></i>Attach
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-secondary" id="add-tags-btn">
+                                                            <i class="bi bi-tag me-1"></i>Tags
+                                                        </button>
+                                                    </div>
+                                                    <button class="btn btn-primary" id="submit-post-btn">
+                                                        <i class="bi bi-send me-2"></i>Post
+                                                    </button>
+                                                </div>
+                                            </div>
+
                                             <div class="list-group">
-                                                <a href="#" class="list-group-item list-group-item-action">
+                                                <div class="list-group-item list-group-item-action">
                                                     <div class="d-flex w-100 justify-content-between">
                                                         <h5 class="mb-1">My computer keeps crashing after updates</h5>
                                                         <small class="text-muted">3 days ago</small>
                                                     </div>
-                                                    <p class="mb-1">Ever since the latest Windows update, my PC crashes randomly...</p>
-                                                    <small class="text-muted">Posted by: TechGuru99</small>
-                                                </a>
-                                                <a href="#" class="list-group-item list-group-item-action">
+                                                    <p class="mb-1">Ever since the latest Windows update, my PC crashes randomly when I open certain applications. I've tried rolling back the update but the problem persists.</p>
+                                                    <div class="d-flex justify-content-between align-items-center mt-2">
+                                                        <small class="text-muted">Posted by: TechGuru99</small>
+                                                        <div>
+                                                            <span class="badge bg-secondary me-1">Windows</span>
+                                                            <span class="badge bg-secondary me-1">Crashes</span>
+                                                            <span class="badge bg-secondary">Updates</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="d-flex mt-2">
+                                                        <button class="btn btn-sm btn-outline-primary me-2" id="reply-btn-1">
+                                                            <i class="bi bi-reply me-1"></i>Reply
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-secondary me-2" id="like-btn-1">
+                                                            <i class="bi bi-hand-thumbs-up me-1"></i>Like (12)
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-secondary" id="share-btn-1">
+                                                            <i class="bi bi-share me-1"></i>Share
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="list-group-item list-group-item-action">
                                                     <div class="d-flex w-100 justify-content-between">
                                                         <h5 class="mb-1">WiFi signal keeps dropping</h5>
                                                         <small class="text-muted">1 week ago</small>
                                                     </div>
-                                                    <p class="mb-1">My WiFi connection drops every few minutes. I've tried resetting the router...</p>
-                                                    <small class="text-muted">Posted by: NetworkNewbie</small>
-                                                </a>
-                                                <a href="#" class="list-group-item list-group-item-action">
+                                                    <p class="mb-1">My WiFi connection drops every few minutes. I've tried resetting the router, updating firmware, and changing channels but nothing seems to work. Any suggestions?</p>
+                                                    <div class="d-flex justify-content-between align-items-center mt-2">
+                                                        <small class="text-muted">Posted by: NetworkNewbie</small>
+                                                        <div>
+                                                            <span class="badge bg-secondary me-1">WiFi</span>
+                                                            <span class="badge bg-secondary me-1">Networking</span>
+                                                            <span class="badge bg-secondary">Router</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="d-flex mt-2">
+                                                        <button class="btn btn-sm btn-outline-primary me-2" id="reply-btn-2">
+                                                            <i class="bi bi-reply me-1"></i>Reply
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-secondary me-2" id="like-btn-2">
+                                                            <i class="bi bi-hand-thumbs-up me-1"></i>Like (8)
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-secondary" id="share-btn-2">
+                                                            <i class="bi bi-share me-1"></i>Share
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="list-group-item list-group-item-action">
                                                     <div class="d-flex w-100 justify-content-between">
                                                         <h5 class="mb-1">Best antivirus for small business?</h5>
                                                         <small class="text-muted">2 weeks ago</small>
                                                     </div>
-                                                    <p class="mb-1">Looking for recommendations on the best antivirus solution for a small business...</p>
-                                                    <small class="text-muted">Posted by: SmallBizOwner</small>
-                                                </a>
+                                                    <p class="mb-1">Looking for recommendations on the best antivirus solution for a small business with about 15 computers. Budget is a concern but security is the priority.</p>
+                                                    <div class="d-flex justify-content-between align-items-center mt-2">
+                                                        <small class="text-muted">Posted by: SmallBizOwner</small>
+                                                        <div>
+                                                            <span class="badge bg-secondary me-1">Security</span>
+                                                            <span class="badge bg-secondary me-1">Antivirus</span>
+                                                            <span class="badge bg-secondary">Business</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="d-flex mt-2">
+                                                        <button class="btn btn-sm btn-outline-primary me-2" id="reply-btn-3">
+                                                            <i class="bi bi-reply me-1"></i>Reply
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-secondary me-2" id="like-btn-3">
+                                                            <i class="bi bi-hand-thumbs-up me-1"></i>Like (5)
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-secondary" id="share-btn-3">
+                                                            <i class="bi bi-share me-1"></i>Share
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
+
+                                            <!-- Pagination controls -->
+                                            <nav aria-label="Forum pagination" class="mt-4">
+                                                <ul class="pagination justify-content-center">
+                                                    <li class="page-item disabled">
+                                                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+                                                    </li>
+                                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                                    <li class="page-item">
+                                                        <a class="page-link" href="#">Next</a>
+                                                    </li>
+                                                </ul>
+                                            </nav>
                                         </div>
                                     </div>
                                     {% endif %}
