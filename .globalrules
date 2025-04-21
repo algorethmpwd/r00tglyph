@@ -1,0 +1,8 @@
+Do not change the general structure of the websites.
+Enusure all functionalities are working.
+Add more context to all of the vulnerable sites to make them more realistic. Like when I click something thats a link, it should go somewhere.
+Ensure the css is great in all the levels.
+Ensure the flags are generated after the user solves the level.
+Ensure all other simulated technologies like the wafs are implemented well.
+Ensure the flags are unique and not repeated.
+Ensure all levels are solvable, and the solutions are unique and the ones needing emulated functions work well.
