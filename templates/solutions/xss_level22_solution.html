@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+
+{% block title %}XSS Level 22 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">XSS Level 22 Solution: XSS in WebGPU Applications</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
+                    <p>
+                        This challenge demonstrates how WebGPU applications can be vulnerable to XSS attacks if they don't properly sanitize shader compilation errors before displaying them. The GPURenderer application allows users to write custom shader code for 3D visualization, but has a vulnerability in how it handles and displays shader compilation errors.
+                    </p>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-lightbulb-fill me-2 text-warning"></i>Solution</h3>
+                <p>
+                    To solve this challenge, you need to exploit the vulnerable shader error handling mechanism by injecting JavaScript code that will be executed when a shader compilation error is displayed.
+                </p>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Understanding the Vulnerability</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>The vulnerability lies in how the application processes and displays shader compilation errors. Looking at the code, we can see that it directly renders error messages without sanitization:</p>
+                        <pre class="bg-light p-3 rounded"><code>// Compile a shader
+async compileShader(shaderCode) {
+    // ...
+    
+    // Check for syntax errors (very simplified)
+    if (shaderCode.includes('ERROR_TRIGGER')) {
+        // This is the vulnerable part - it directly renders the error message
+        // without sanitizing it, allowing XSS
+        const errorMessage = shaderCode.split('ERROR_TRIGGER')[1].trim();
+        return {
+            success: false,
+            error: `Shader compilation failed: ${errorMessage}`
+        };
+    }
+    
+    // ...
+}</code></pre>
+                        <p>And in the function that updates the compilation log:</p>
+                        <pre class="bg-light p-3 rounded"><code>// Update the compilation log
+function updateCompilationLog(message, isError = false) {
+    // This is the vulnerable part - it uses innerHTML to render the message
+    // without sanitizing it, allowing XSS
+    const logEntry = document.createElement('div');
+    logEntry.className = isError ? 'text-danger' : 'text-success';
+    logEntry.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+    
+    compilationLog.innerHTML = '';
+    compilationLog.appendChild(logEntry);
+}</code></pre>
+                        <p>This means that any HTML or JavaScript in the error message will be executed when the message is displayed. The application also provides a special trigger for generating custom error messages: <code>ERROR_TRIGGER</code>.</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Crafting the Payload</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>To exploit this vulnerability, we need to craft a payload that will trigger a shader compilation error with a message that contains malicious JavaScript. Here are several approaches:</p>
+                        
+                        <h6>Method 1: Basic Script Tag in Error Message</h6>
+                        <pre class="bg-light p-3 rounded"><code>// Add this to your shader code
+ERROR_TRIGGER &lt;script&gt;alert("XSS Level 22 Completed!")&lt;/script&gt;</code></pre>
+                        <p>This payload uses the ERROR_TRIGGER keyword to generate a custom error message that contains a script tag, which will be executed when the error message is displayed.</p>
+                        
+                        <h6>Method 2: Event Handler in Error Message</h6>
+                        <pre class="bg-light p-3 rounded"><code>// Add this to your shader code
+ERROR_TRIGGER &lt;img src="x" onerror="alert('XSS Level 22 Completed!')"&gt;</code></pre>
+                        <p>This payload uses the ERROR_TRIGGER keyword to generate a custom error message that contains an image with an invalid source, triggering the onerror event handler which executes our JavaScript.</p>
+                        
+                        <h6>Method 3: Inline JavaScript in Error Message</h6>
+                        <pre class="bg-light p-3 rounded"><code>// Add this to your shader code
+ERROR_TRIGGER &lt;div onmouseover="alert('XSS Level 22 Completed!')" style="display:block;width:100%;height:50px;background:#f0f0f0;"&gt;Hover over me to trigger the XSS&lt;/div&gt;</code></pre>
+                        <p>This payload uses the ERROR_TRIGGER keyword to generate a custom error message that contains a div with an onmouseover event handler, which executes our JavaScript when the user hovers over it.</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Step-by-Step Solution</h5>
+                    </div>
+                    <div class="card-body">
+                        <ol>
+                            <li>
+                                <p>Open the GPURenderer application and locate the shader editor.</p>
+                            </li>
+                            <li>
+                                <p>Load any shader template (e.g., "Basic Shader") by clicking on it in the Shader Templates list.</p>
+                            </li>
+                            <li>
+                                <p>Add one of the XSS payloads to the shader code:</p>
+                                <pre class="bg-light p-3 rounded"><code>// Vertex shader
+struct VertexOutput {
+    @builtin(position) position: vec4<f32>,
+    @location(0) color: vec4<f32>,
+};
+
+@vertex
+fn vertexMain(@location(0) position: vec3<f32>,
+              @location(1) color: vec3<f32>) -> VertexOutput {
+    var output: VertexOutput;
+    output.position = vec4<f32>(position, 1.0);
+    output.color = vec4<f32>(color, 1.0);
+    return output;
+}
+
+// Fragment shader
+@fragment
+fn fragmentMain(@location(0) color: vec4<f32>) -> @location(0) vec4<f32> {
+    return color;
+}
+
+// XSS Payload
+ERROR_TRIGGER &lt;script&gt;alert("XSS Level 22 Completed!")&lt;/script&gt;</code></pre>
+                            </li>
+                            <li>
+                                <p>Click the "Compile & Run" button to compile the shader with the XSS payload.</p>
+                            </li>
+                            <li>
+                                <p>The shader compilation will fail, and the error message containing the XSS payload will be displayed in the compilation log.</p>
+                            </li>
+                            <li>
+                                <p>When the error message is rendered, the XSS payload will be executed, displaying the alert message "XSS Level 22 Completed!".</p>
+                            </li>
+                            <li>
+                                <p>When the alert appears, the challenge will be solved and the flag will be revealed.</p>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>WebGPU-Specific Exploitation Techniques</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>In a real WebGPU application, there are additional exploitation techniques that could be used:</p>
+                        
+                        <h6>1. Shader Validation Error Injection</h6>
+                        <pre class="bg-light p-3 rounded"><code>// Malicious shader code that generates a validation error
+@vertex
+fn vertexMain() -> @location(0) vec4<f32> {
+    // Invalid return type, will cause a validation error
+    // The error message might be displayed without sanitization
+    return "XSS payload &lt;script&gt;alert('XSS')&lt;/script&gt;";
+}</code></pre>
+                        <p>This technique involves crafting a shader that will generate a validation error with a message that contains an XSS payload. When the error message is displayed without proper sanitization, the XSS payload is executed.</p>
+                        
+                        <h6>2. Shader Compilation Error Reflection</h6>
+                        <pre class="bg-light p-3 rounded"><code>// Shader with syntax error that reflects user input
+@vertex
+fn vertexMain() -> @builtin(position) vec4<f32> {
+    // The variable name contains an XSS payload
+    var &lt;script&gt;alert('XSS')&lt;/script&gt; = 1.0;
+    return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+}</code></pre>
+                        <p>This technique involves creating a shader with a syntax error that includes an XSS payload in a variable name or other identifier. When the error message reflects the invalid identifier, the XSS payload is executed.</p>
+                        
+                        <h6>3. WebGPU Error Callback Exploitation</h6>
+                        <pre class="bg-light p-3 rounded"><code>// Exploiting error callbacks in WebGPU
+device.createShaderModule({
+    code: "invalid shader code",
+    label: "&lt;script&gt;alert('XSS')&lt;/script&gt;"
+}).then(module => {
+    // Success
+}).catch(error => {
+    // Error message might include the label without sanitization
+    document.getElementById('error-log').innerHTML = error.message;
+});</code></pre>
+                        <p>This technique involves setting a malicious label on a WebGPU resource and then causing an error that will include the label in the error message. When the error message is displayed without proper sanitization, the XSS payload is executed.</p>
+                    </div>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-shield-fill-check me-2 text-success"></i>Security Lessons</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Vulnerabilities Demonstrated</h5>
+                        <ul>
+                            <li><strong>Unsafe Error Handling:</strong> The application displays shader compilation errors without sanitization, allowing XSS attacks.</li>
+                            <li><strong>Direct DOM Manipulation:</strong> The application uses innerHTML to render error messages, which can execute injected JavaScript.</li>
+                            <li><strong>Insufficient Input Validation:</strong> The application doesn't properly validate shader code before processing it.</li>
+                        </ul>
+                        
+                        <h5>Prevention Measures</h5>
+                        <ul>
+                            <li><strong>Content Sanitization:</strong> Always sanitize error messages before rendering them in the DOM. Use libraries like DOMPurify to remove potentially malicious content.</li>
+                            <li><strong>Safe DOM Manipulation:</strong> Use <code>textContent</code> instead of <code>innerHTML</code> when rendering error messages, or use a framework that automatically escapes HTML.</li>
+                            <li><strong>Input Validation:</strong> Validate all shader code to ensure it conforms to expected formats and doesn't contain malicious code.</li>
+                            <li><strong>WebGPU-Specific Protections:</strong>
+                                <ul>
+                                    <li>Sanitize all error messages from shader compilation and validation</li>
+                                    <li>Use safe error handling practices for WebGPU operations</li>
+                                    <li>Consider using a sandboxed environment for shader execution</li>
+                                    <li>Implement proper validation for shader code before compilation</li>
+                                    <li>Limit the permissions requested from the WebGPU API</li>
+                                </ul>
+                            </li>
+                            <li><strong>Content Security Policy (CSP):</strong> Implement a strict CSP to mitigate the impact of XSS vulnerabilities.</li>
+                        </ul>
+                        
+                        <h5>Real-World Implications</h5>
+                        <p>
+                            WebGPU is increasingly used for scientific visualization, machine learning, and other critical applications. In real-world scenarios, XSS vulnerabilities in WebGPU applications can be particularly dangerous because:
+                        </p>
+                        <ul>
+                            <li>They can lead to unauthorized access to sensitive data being processed by the GPU</li>
+                            <li>They can compromise the integrity of scientific or financial calculations</li>
+                            <li>They can be used to steal intellectual property in visualization applications</li>
+                            <li>They can be difficult to detect due to the complexity of shader code</li>
+                            <li>They can affect high-performance computing applications that process large amounts of data</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('xss_level22') }}" class="btn btn-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

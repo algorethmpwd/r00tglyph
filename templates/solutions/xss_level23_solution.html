@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+
+{% block title %}XSS Level 23 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">XSS Level 23 Solution: XSS in Federated Identity Systems</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
+                    <p>
+                        This challenge demonstrates how federated identity systems can be vulnerable to XSS attacks if they don't properly sanitize authentication parameters before displaying them. The IdentityHub application allows users to authenticate using a federated identity provider, but has a vulnerability in how it handles and displays authentication parameters during the redirect step.
+                    </p>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-lightbulb-fill me-2 text-warning"></i>Solution</h3>
+                <p>
+                    To solve this challenge, you need to exploit the vulnerable authentication parameter handling mechanism by injecting JavaScript code that will be executed during the authentication flow.
+                </p>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Understanding the Vulnerability</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>The vulnerability lies in how the application processes and displays authentication parameters during the redirect step. Looking at the code, we can see that it directly renders the redirect URI and state parameters without sanitization:</p>
+                        <pre class="bg-light p-3 rounded"><code>case 'redirect':
+    // This is the vulnerable part - it directly renders the redirect URI and state
+    // without sanitizing them, allowing XSS
+    authFlowContent.innerHTML = `
+        &lt;div class="card"&gt;
+            &lt;div class="card-header bg-primary text-white"&gt;
+                &lt;h5 class="mb-0"&gt;Redirect to Client&lt;/h5&gt;
+            &lt;/div&gt;
+            &lt;div class="card-body"&gt;
+                &lt;p&gt;&lt;strong&gt;Redirect URI:&lt;/strong&gt; &lt;span id="redirect-uri-display"&gt;${data.redirectUri}&lt;/span&gt;&lt;/p&gt;
+                &lt;p&gt;&lt;strong&gt;State:&lt;/strong&gt; &lt;span id="state-display"&gt;${data.state}&lt;/span&gt;&lt;/p&gt;
+                &lt;p&gt;&lt;strong&gt;Token:&lt;/strong&gt; &lt;code&gt;${data.token}&lt;/code&gt;&lt;/p&gt;
+                &lt;div class="progress"&gt;
+                    &lt;div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 90%"&gt;&lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    `;</code></pre>
+                        <p>This means that any HTML or JavaScript in the redirect URI or state parameter will be executed when the authentication flow reaches the redirect step. The application also provides a form where users can enter custom authentication parameters, which can be used to inject malicious code.</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Crafting the Payload</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>To exploit this vulnerability, we need to craft a payload that will be included in one of the authentication parameters and executed during the authentication flow. Here are several approaches:</p>
+                        
+                        <h6>Method 1: Injecting Script via State Parameter</h6>
+                        <pre class="bg-light p-3 rounded"><code>&lt;script&gt;alert("XSS Level 23 Completed!")&lt;/script&gt;</code></pre>
+                        <p>This payload injects a script tag into the state parameter, which will be executed when the authentication flow reaches the redirect step and the state parameter is displayed.</p>
+                        
+                        <h6>Method 2: Injecting Event Handler via Redirect URI</h6>
+                        <pre class="bg-light p-3 rounded"><code>javascript:alert("XSS Level 23 Completed!")</code></pre>
+                        <p>This payload uses a JavaScript URI in the redirect URI parameter, which will be executed when the authentication flow reaches the redirect step and the redirect URI is displayed as a link.</p>
+                        
+                        <h6>Method 3: Injecting HTML with Event Handler</h6>
+                        <pre class="bg-light p-3 rounded"><code>&lt;img src="x" onerror="alert('XSS Level 23 Completed!')"&gt;</code></pre>
+                        <p>This payload injects an image with an invalid source into one of the authentication parameters, triggering the onerror event handler which executes our JavaScript when the parameter is displayed.</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Step-by-Step Solution</h5>
+                    </div>
+                    <div class="card-body">
+                        <ol>
+                            <li>
+                                <p>Open the IdentityHub application and locate the "Authentication Simulator" section on the left side of the page.</p>
+                            </li>
+                            <li>
+                                <p>In the "State" field, enter one of the XSS payloads:</p>
+                                <pre class="bg-light p-3 rounded"><code>&lt;script&gt;alert("XSS Level 23 Completed!")&lt;/script&gt;</code></pre>
+                            </li>
+                            <li>
+                                <p>Leave the other fields with their default values.</p>
+                            </li>
+                            <li>
+                                <p>Click the "Simulate Authentication" button to start the authentication flow.</p>
+                            </li>
+                            <li>
+                                <p>The authentication flow will progress through several steps: Authentication Request, User Login, User Consent, Token Generation, and finally Redirect to Client.</p>
+                            </li>
+                            <li>
+                                <p>When the flow reaches the "Redirect to Client" step, the state parameter containing the XSS payload will be displayed without proper sanitization.</p>
+                            </li>
+                            <li>
+                                <p>The XSS payload will be executed, displaying the alert message "XSS Level 23 Completed!".</p>
+                            </li>
+                            <li>
+                                <p>When the alert appears, the challenge will be solved and the flag will be revealed.</p>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Federated Identity-Specific Exploitation Techniques</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>In a real federated identity system, there are additional exploitation techniques that could be used:</p>
+                        
+                        <h6>1. OAuth 2.0 Redirect URI Manipulation</h6>
+                        <pre class="bg-light p-3 rounded"><code>https://identity-provider.com/authorize?
+  client_id=client123&
+  redirect_uri=https://attacker.com&
+  response_type=code&
+  state=&lt;script&gt;alert('XSS')&lt;/script&gt;</code></pre>
+                        <p>This technique involves manipulating the redirect_uri parameter in an OAuth 2.0 authorization request to point to an attacker-controlled domain, and injecting an XSS payload in the state parameter. When the victim is redirected, the XSS payload is executed.</p>
+                        
+                        <h6>2. SAML Response Injection</h6>
+                        <pre class="bg-light p-3 rounded"><code>&lt;saml:Attribute Name="DisplayName"&gt;
+  &lt;saml:AttributeValue&gt;&lt;script&gt;alert('XSS')&lt;/script&gt;&lt;/saml:AttributeValue&gt;
+&lt;/saml:Attribute&gt;</code></pre>
+                        <p>This technique involves injecting an XSS payload into a SAML attribute value. When the service provider displays the attribute value without proper sanitization, the XSS payload is executed.</p>
+                        
+                        <h6>3. OpenID Connect ID Token Claim Injection</h6>
+                        <pre class="bg-light p-3 rounded"><code>{
+  "sub": "user123",
+  "name": "&lt;script&gt;alert('XSS')&lt;/script&gt;",
+  "email": "user@example.com",
+  "iss": "https://identity-provider.com",
+  "aud": "client123",
+  "exp": 1619876543
+}</code></pre>
+                        <p>This technique involves injecting an XSS payload into an ID token claim, such as the name claim. When the client application displays the claim value without proper sanitization, the XSS payload is executed.</p>
+                    </div>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-shield-fill-check me-2 text-success"></i>Security Lessons</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Vulnerabilities Demonstrated</h5>
+                        <ul>
+                            <li><strong>Unsafe Parameter Handling:</strong> The application displays authentication parameters without sanitization, allowing XSS attacks.</li>
+                            <li><strong>Direct DOM Manipulation:</strong> The application uses innerHTML to render authentication parameters, which can execute injected JavaScript.</li>
+                            <li><strong>Insufficient Input Validation:</strong> The application doesn't properly validate authentication parameters before processing them.</li>
+                        </ul>
+                        
+                        <h5>Prevention Measures</h5>
+                        <ul>
+                            <li><strong>Content Sanitization:</strong> Always sanitize authentication parameters before rendering them in the DOM. Use libraries like DOMPurify to remove potentially malicious content.</li>
+                            <li><strong>Safe DOM Manipulation:</strong> Use <code>textContent</code> instead of <code>innerHTML</code> when rendering authentication parameters, or use a framework that automatically escapes HTML.</li>
+                            <li><strong>Input Validation:</strong> Validate all authentication parameters to ensure they conform to expected formats and don't contain malicious code.</li>
+                            <li><strong>Federated Identity-Specific Protections:</strong>
+                                <ul>
+                                    <li>Validate redirect URIs against a whitelist of allowed URIs</li>
+                                    <li>Use strict CORS policies to prevent cross-origin attacks</li>
+                                    <li>Implement proper token validation and verification</li>
+                                    <li>Use secure communication channels (HTTPS) for all authentication flows</li>
+                                    <li>Implement proper session management and token handling</li>
+                                </ul>
+                            </li>
+                            <li><strong>Content Security Policy (CSP):</strong> Implement a strict CSP to mitigate the impact of XSS vulnerabilities.</li>
+                        </ul>
+                        
+                        <h5>Real-World Implications</h5>
+                        <p>
+                            Federated identity systems are widely used for authentication across multiple applications and services. In real-world scenarios, XSS vulnerabilities in federated identity systems can be particularly dangerous because:
+                        </p>
+                        <ul>
+                            <li>They can compromise authentication across multiple applications and services</li>
+                            <li>They often handle sensitive personal information and credentials</li>
+                            <li>They typically have high levels of trust from users and applications</li>
+                            <li>They can lead to account takeovers and identity theft</li>
+                            <li>They can be difficult to detect due to the complex nature of federated authentication flows</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('xss_level23') }}" class="btn btn-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

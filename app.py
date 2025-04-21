@@ -1206,6 +1206,36 @@ def xss_level21():
 
     return render_template('xss/xss_level21.html', flag=flag, user=user)
 
+# XSS Level 22 - XSS in WebGPU Applications
+@app.route('/xss/level22', methods=['GET', 'POST'])
+def xss_level22():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+
+    # Check if success parameter is present
+    if request.args.get('success') == 'true':
+        challenge = Challenge.query.filter_by(name="XSS in WebGPU Applications").first()
+        if challenge:
+            flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xss/xss_level22.html', flag=flag, user=user)
+
+# XSS Level 23 - XSS in Federated Identity Systems
+@app.route('/xss/level23', methods=['GET', 'POST'])
+def xss_level23():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+
+    # Check if success parameter is present
+    if request.args.get('success') == 'true':
+        challenge = Challenge.query.filter_by(name="XSS in Federated Identity Systems").first()
+        if challenge:
+            flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xss/xss_level23.html', flag=flag, user=user)
+
 # Solutions
 @app.route('/solutions/<level>')
 def solutions(level):
