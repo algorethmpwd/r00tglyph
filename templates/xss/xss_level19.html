@@ -1,0 +1,678 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 19: XSS in GraphQL APIs - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 19: XSS in GraphQL APIs</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>GraphQL Explorer</strong>, a fictional GraphQL API explorer! This challenge simulates a real-world scenario where a GraphQL API has an XSS vulnerability in its response handling.
+                    </p>
+                    
+                    <div class="card mb-3 border-secondary">
+                        <div class="card-header bg-secondary text-white">
+                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-0">
+                                <strong>Client:</strong> GraphQL Explorer Inc.<br>
+                                <strong>Target:</strong> GraphQL API Explorer Application<br>
+                                <strong>Vulnerability:</strong> XSS in GraphQL Response Rendering<br>
+                                <strong>Objective:</strong> Exploit the GraphQL API to inject and execute malicious JavaScript
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <p>
+                        <strong>Technical Background:</strong> GraphQL is a query language for APIs that allows clients to request exactly the data they need. Unlike REST APIs, GraphQL gives clients more control over the data they receive. This flexibility can introduce security vulnerabilities if the API and client application are not properly secured. In particular, if user-controlled data is included in GraphQL mutations and then rendered without proper sanitization, XSS vulnerabilities can occur.
+                    </p>
+                    
+                    <p>
+                        <strong>Real-world Impact:</strong> GraphQL API vulnerabilities are particularly dangerous because:
+                    </p>
+                    <ul>
+                        <li>GraphQL provides detailed error messages that can leak sensitive information</li>
+                        <li>The flexible nature of GraphQL queries can lead to unexpected data exposure</li>
+                        <li>GraphQL APIs often have complex authorization logic that can be bypassed</li>
+                        <li>Client applications may not properly sanitize data received from GraphQL APIs</li>
+                        <li>GraphQL introspection can reveal the entire API schema to attackers</li>
+                    </ul>
+                    
+                    <p>
+                        <strong>Your Task:</strong> In this challenge, you need to exploit a vulnerability in the GraphQL Explorer application. The application allows users to create and view product reviews through a GraphQL API. However, there's a vulnerability in how the application handles and renders review content. Find a way to inject JavaScript that will be stored via a GraphQL mutation and executed when the review is viewed. Make an alert box appear with the text "XSS Level 19 Completed!" to reveal the flag.
+                    </p>
+                    
+                    <div class="alert alert-warning">
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Look for ways to inject code into the review content that will be stored via a GraphQL mutation and later rendered without proper sanitization. The vulnerability might be in how the application renders reviews received from the GraphQL API.
+                    </div>
+                </div>
+                
+                <!-- GraphQL Explorer Interface -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-diagram-3 me-2"></i>GraphQL Explorer</h5>
+                        <div>
+                            <span class="badge bg-light text-dark">API Version 1.0</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <!-- Navigation Bar -->
+                        <nav class="navbar navbar-expand navbar-light bg-light px-3">
+                            <div class="container-fluid">
+                                <ul class="navbar-nav">
+                                    <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-house-door me-1"></i>Home</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-diagram-3 me-1"></i>API Explorer</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-book me-1"></i>Documentation</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-question-circle me-1"></i>Help</a></li>
+                                </ul>
+                                <div class="d-flex">
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-person-circle me-1"></i>Guest User
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                            <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
+                                            <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </nav>
+                        
+                        <div class="p-4">
+                            <div class="row">
+                                <div class="col-md-4 mb-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">API Information</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="small mb-2">GraphQL Endpoint: <code>/api/graphql</code></p>
+                                            <p class="small mb-2">Authentication: None (Public API)</p>
+                                            <p class="small mb-0">Schema: Product Reviews</p>
+                                            <hr>
+                                            <p class="small mb-0 fst-italic">Note: This is a simulated GraphQL API for the challenge.</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card mt-3">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Available Queries</h6>
+                                        </div>
+                                        <div class="list-group list-group-flush">
+                                            <a href="#" class="list-group-item list-group-item-action" onclick="setQuery('getProducts')">
+                                                <code>getProducts</code>
+                                            </a>
+                                            <a href="#" class="list-group-item list-group-item-action" onclick="setQuery('getProductById')">
+                                                <code>getProductById</code>
+                                            </a>
+                                            <a href="#" class="list-group-item list-group-item-action" onclick="setQuery('getReviews')">
+                                                <code>getReviews</code>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card mt-3">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Available Mutations</h6>
+                                        </div>
+                                        <div class="list-group list-group-flush">
+                                            <a href="#" class="list-group-item list-group-item-action" onclick="setQuery('createReview')">
+                                                <code>createReview</code>
+                                            </a>
+                                            <a href="#" class="list-group-item list-group-item-action" onclick="setQuery('updateReview')">
+                                                <code>updateReview</code>
+                                            </a>
+                                            <a href="#" class="list-group-item list-group-item-action" onclick="setQuery('deleteReview')">
+                                                <code>deleteReview</code>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card mt-3">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Products</h6>
+                                        </div>
+                                        <div class="list-group list-group-flush" id="products-list">
+                                            <!-- Products will be loaded here -->
+                                            <div class="list-group-item text-center">
+                                                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                                    <span class="visually-hidden">Loading...</span>
+                                                </div>
+                                                <span class="ms-2">Loading products...</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-8">
+                                    <div class="card mb-4">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0">GraphQL Query Editor</h5>
+                                            <button class="btn btn-sm btn-primary" id="execute-query-btn">
+                                                <i class="bi bi-play-fill me-1"></i>Execute
+                                            </button>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="mb-3">
+                                                <textarea class="form-control font-monospace" id="query-editor" rows="10" placeholder="Enter your GraphQL query here..."></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="mb-0">Response</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="response-container" class="bg-light p-3 rounded">
+                                                <p class="text-muted mb-0">Execute a query to see the response.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card mt-4">
+                                        <div class="card-header">
+                                            <h5 class="mb-0">Product Reviews</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="reviews-container">
+                                                <!-- Reviews will be displayed here -->
+                                                <p class="text-muted mb-0">Select a product to view its reviews.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    {% if flag %}
+                                    <div class="alert alert-success mt-4">
+                                        <i class="bi bi-check-circle-fill me-2"></i>
+                                        <strong>Congratulations!</strong> Your XSS payload successfully executed through the GraphQL API.
+                                    </div>
+                                    <div class="card mt-2">
+                                        <div class="card-header bg-success text-white">
+                                            <h5 class="mb-0"><i class="bi bi-trophy me-2"></i>Challenge Completed!</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>You've successfully demonstrated an XSS vulnerability in a GraphQL API. In a real-world scenario, this could allow attackers to inject malicious JavaScript that would be executed when the data is rendered, potentially leading to data theft, session hijacking, and other attacks.</p>
+                                            <div class="flag-container p-3 bg-light rounded">
+                                                <span class="flag-label">Your Flag:</span>
+                                                <code id="flag-value">{{ flag }}</code>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level=19) }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Simulated GraphQL API
+    class GraphQLAPI {
+        constructor() {
+            // Simulated database
+            this.products = [
+                { id: 1, name: "Smartphone X", description: "Latest smartphone with advanced features", price: 999.99 },
+                { id: 2, name: "Laptop Pro", description: "High-performance laptop for professionals", price: 1499.99 },
+                { id: 3, name: "Wireless Earbuds", description: "Premium wireless earbuds with noise cancellation", price: 199.99 },
+                { id: 4, name: "Smart Watch", description: "Fitness tracker and smartwatch with health monitoring", price: 299.99 },
+                { id: 5, name: "4K Smart TV", description: "Ultra HD smart TV with voice control", price: 799.99 }
+            ];
+            
+            this.reviews = [
+                { id: 1, productId: 1, author: "John Doe", rating: 5, content: "Best smartphone I've ever used!", date: "2025-03-15" },
+                { id: 2, productId: 1, author: "Jane Smith", rating: 4, content: "Great phone, but battery life could be better.", date: "2025-03-18" },
+                { id: 3, productId: 2, author: "Bob Johnson", rating: 5, content: "Perfect for my work needs. Fast and reliable.", date: "2025-03-10" },
+                { id: 4, productId: 3, author: "Alice Brown", rating: 3, content: "Good sound quality, but uncomfortable for long periods.", date: "2025-03-20" },
+                { id: 5, productId: 4, author: "Charlie Wilson", rating: 4, content: "Accurate fitness tracking and good battery life.", date: "2025-03-22" }
+            ];
+            
+            this.nextReviewId = 6;
+        }
+        
+        // GraphQL query resolver
+        async executeQuery(query, variables = {}) {
+            // Simulate network delay
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Parse the query (very simplified)
+            if (query.includes('getProducts')) {
+                return { data: { products: this.products } };
+            } else if (query.includes('getProductById')) {
+                const productId = parseInt(variables.id || 1);
+                const product = this.products.find(p => p.id === productId);
+                return { data: { product } };
+            } else if (query.includes('getReviews')) {
+                const productId = parseInt(variables.productId || 1);
+                const reviews = this.reviews.filter(r => r.productId === productId);
+                return { data: { reviews } };
+            } else if (query.includes('createReview')) {
+                // Extract variables from the mutation
+                const productId = parseInt(variables.productId || 1);
+                const author = variables.author || "Anonymous";
+                const rating = parseInt(variables.rating || 5);
+                const content = variables.content || "";
+                
+                // Create a new review
+                const newReview = {
+                    id: this.nextReviewId++,
+                    productId,
+                    author,
+                    rating,
+                    content,
+                    date: new Date().toISOString().split('T')[0]
+                };
+                
+                this.reviews.push(newReview);
+                return { data: { createReview: newReview } };
+            } else if (query.includes('updateReview')) {
+                const reviewId = parseInt(variables.id || 1);
+                const content = variables.content || "";
+                
+                const reviewIndex = this.reviews.findIndex(r => r.id === reviewId);
+                if (reviewIndex !== -1) {
+                    this.reviews[reviewIndex].content = content;
+                    return { data: { updateReview: this.reviews[reviewIndex] } };
+                }
+                return { errors: [{ message: "Review not found" }] };
+            } else if (query.includes('deleteReview')) {
+                const reviewId = parseInt(variables.id || 1);
+                
+                const reviewIndex = this.reviews.findIndex(r => r.id === reviewId);
+                if (reviewIndex !== -1) {
+                    const deletedReview = this.reviews[reviewIndex];
+                    this.reviews.splice(reviewIndex, 1);
+                    return { data: { deleteReview: deletedReview } };
+                }
+                return { errors: [{ message: "Review not found" }] };
+            } else {
+                return { errors: [{ message: "Unknown query" }] };
+            }
+        }
+    }
+    
+    // Initialize the GraphQL API
+    const api = new GraphQLAPI();
+    
+    // DOM elements
+    const queryEditor = document.getElementById('query-editor');
+    const executeQueryBtn = document.getElementById('execute-query-btn');
+    const responseContainer = document.getElementById('response-container');
+    const productsList = document.getElementById('products-list');
+    const reviewsContainer = document.getElementById('reviews-container');
+    
+    // Current product ID
+    let currentProductId = null;
+    
+    // Initialize the app
+    async function initApp() {
+        // Load products
+        await loadProducts();
+        
+        // Set up event listeners
+        executeQueryBtn.addEventListener('click', executeQuery);
+    }
+    
+    // Load products
+    async function loadProducts() {
+        const query = `
+            query {
+                products {
+                    id
+                    name
+                    price
+                }
+            }
+        `;
+        
+        try {
+            const response = await api.executeQuery(query);
+            
+            if (response.data && response.data.products) {
+                productsList.innerHTML = '';
+                
+                response.data.products.forEach(product => {
+                    const productItem = document.createElement('a');
+                    productItem.href = '#';
+                    productItem.className = 'list-group-item list-group-item-action';
+                    productItem.dataset.productId = product.id;
+                    productItem.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>${product.name}</div>
+                            <span class="badge bg-primary">$${product.price}</span>
+                        </div>
+                    `;
+                    
+                    productItem.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        selectProduct(product.id);
+                    });
+                    
+                    productsList.appendChild(productItem);
+                });
+            }
+        } catch (error) {
+            console.error('Error loading products:', error);
+            productsList.innerHTML = '<div class="list-group-item text-danger">Error loading products</div>';
+        }
+    }
+    
+    // Select a product
+    async function selectProduct(productId) {
+        currentProductId = productId;
+        
+        // Update active product
+        const productItems = productsList.querySelectorAll('.list-group-item');
+        productItems.forEach(item => {
+            if (parseInt(item.dataset.productId) === productId) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+        
+        // Load reviews for the selected product
+        await loadReviews(productId);
+    }
+    
+    // Load reviews for a product
+    async function loadReviews(productId) {
+        const query = `
+            query {
+                product(id: ${productId}) {
+                    id
+                    name
+                    description
+                    price
+                }
+                reviews(productId: ${productId}) {
+                    id
+                    author
+                    rating
+                    content
+                    date
+                }
+            }
+        `;
+        
+        try {
+            const response = await api.executeQuery(query);
+            
+            if (response.data) {
+                const product = response.data.product;
+                const reviews = response.data.reviews || [];
+                
+                reviewsContainer.innerHTML = `
+                    <div class="product-info mb-4">
+                        <h4>${product.name}</h4>
+                        <p class="text-muted">${product.description}</p>
+                        <p class="fw-bold">$${product.price}</p>
+                    </div>
+                    
+                    <div class="reviews-list">
+                        <h5 class="mb-3">Customer Reviews (${reviews.length})</h5>
+                        ${reviews.length === 0 ? '<p class="text-muted">No reviews yet. Be the first to review this product!</p>' : ''}
+                        <div id="reviews-list">
+                            ${reviews.map(review => renderReview(review)).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="add-review mt-4">
+                        <h5 class="mb-3">Add Your Review</h5>
+                        <form id="review-form">
+                            <div class="mb-3">
+                                <label for="review-author" class="form-label">Your Name</label>
+                                <input type="text" class="form-control" id="review-author" placeholder="Enter your name">
+                            </div>
+                            <div class="mb-3">
+                                <label for="review-rating" class="form-label">Rating</label>
+                                <select class="form-select" id="review-rating">
+                                    <option value="5">5 Stars</option>
+                                    <option value="4">4 Stars</option>
+                                    <option value="3">3 Stars</option>
+                                    <option value="2">2 Stars</option>
+                                    <option value="1">1 Star</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="review-content" class="form-label">Review</label>
+                                <textarea class="form-control" id="review-content" rows="3" placeholder="Write your review here..."></textarea>
+                            </div>
+                            <button type="button" class="btn btn-primary" onclick="submitReview()">Submit Review</button>
+                        </form>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('Error loading reviews:', error);
+            reviewsContainer.innerHTML = '<div class="alert alert-danger">Error loading reviews</div>';
+        }
+    }
+    
+    // Render a review (vulnerable to XSS)
+    function renderReview(review) {
+        const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+        
+        return `
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">${review.author}</h6>
+                        <span class="text-warning">${stars}</span>
+                    </div>
+                    <div class="review-content mb-2">
+                        <!-- This is the vulnerable part - it uses innerHTML to render the review content -->
+                        <div>${review.content}</div>
+                    </div>
+                    <div class="text-muted small">
+                        <i class="bi bi-calendar me-1"></i>${review.date}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Submit a review
+    async function submitReview() {
+        const author = document.getElementById('review-author').value.trim();
+        const rating = parseInt(document.getElementById('review-rating').value);
+        const content = document.getElementById('review-content').value.trim();
+        
+        if (!author || !content) {
+            alert('Please enter your name and review.');
+            return;
+        }
+        
+        const query = `
+            mutation {
+                createReview(
+                    productId: ${currentProductId},
+                    author: "${author}",
+                    rating: ${rating},
+                    content: "${content.replace(/"/g, '\\"')}"
+                ) {
+                    id
+                    author
+                    rating
+                    content
+                    date
+                }
+            }
+        `;
+        
+        try {
+            const response = await api.executeQuery(query);
+            
+            if (response.data && response.data.createReview) {
+                // Reload reviews
+                await loadReviews(currentProductId);
+                
+                // Show the query and response
+                queryEditor.value = query;
+                displayResponse(response);
+            }
+        } catch (error) {
+            console.error('Error submitting review:', error);
+            alert('Error submitting review. Please try again.');
+        }
+    }
+    
+    // Execute a GraphQL query
+    async function executeQuery() {
+        const query = queryEditor.value.trim();
+        
+        if (!query) {
+            alert('Please enter a GraphQL query.');
+            return;
+        }
+        
+        try {
+            // Extract variables from the query (very simplified)
+            const variables = {};
+            
+            // Execute the query
+            const response = await api.executeQuery(query, variables);
+            
+            // Display the response
+            displayResponse(response);
+            
+            // If it's a getReviews query, update the reviews container
+            if (query.includes('getReviews') && response.data && response.data.reviews) {
+                const productId = currentProductId || 1;
+                await loadReviews(productId);
+            }
+        } catch (error) {
+            console.error('Error executing query:', error);
+            responseContainer.innerHTML = `<pre class="text-danger">${JSON.stringify({ error: error.message }, null, 2)}</pre>`;
+        }
+    }
+    
+    // Display the GraphQL response
+    function displayResponse(response) {
+        responseContainer.innerHTML = `<pre>${JSON.stringify(response, null, 2)}</pre>`;
+    }
+    
+    // Set a predefined query
+    function setQuery(queryType) {
+        switch (queryType) {
+            case 'getProducts':
+                queryEditor.value = `
+query {
+    products {
+        id
+        name
+        description
+        price
+    }
+}`;
+                break;
+            case 'getProductById':
+                queryEditor.value = `
+query {
+    product(id: 1) {
+        id
+        name
+        description
+        price
+    }
+}`;
+                break;
+            case 'getReviews':
+                queryEditor.value = `
+query {
+    reviews(productId: 1) {
+        id
+        author
+        rating
+        content
+        date
+    }
+}`;
+                break;
+            case 'createReview':
+                queryEditor.value = `
+mutation {
+    createReview(
+        productId: 1,
+        author: "Your Name",
+        rating: 5,
+        content: "This product is amazing!"
+    ) {
+        id
+        author
+        rating
+        content
+        date
+    }
+}`;
+                break;
+            case 'updateReview':
+                queryEditor.value = `
+mutation {
+    updateReview(
+        id: 1,
+        content: "Updated review content"
+    ) {
+        id
+        author
+        rating
+        content
+        date
+    }
+}`;
+                break;
+            case 'deleteReview':
+                queryEditor.value = `
+mutation {
+    deleteReview(id: 1) {
+        id
+        author
+        rating
+        content
+    }
+}`;
+                break;
+        }
+    }
+    
+    // Initialize the app when the DOM is loaded
+    document.addEventListener('DOMContentLoaded', initApp);
+    
+    // Check for XSS success
+    window.addEventListener('DOMContentLoaded', function() {
+        // Original alert function
+        var originalAlert = window.alert;
+        
+        // Override alert
+        window.alert = function(message) {
+            // Call the original alert
+            originalAlert(message);
+            
+            // Check if this is the success message
+            if (message === "XSS Level 19 Completed!") {
+                // Redirect to success page
+                window.location.href = window.location.href + "?success=true";
+            }
+        };
+    });
+</script>
+{% endblock %}

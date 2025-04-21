@@ -1,0 +1,537 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 20: XSS in WebRTC Applications - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 20: XSS in WebRTC Applications</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>WebRTC Chat</strong>, a fictional video chat application! This challenge simulates a real-world scenario where a WebRTC application has an XSS vulnerability in its signaling mechanism.
+                    </p>
+                    
+                    <div class="card mb-3 border-secondary">
+                        <div class="card-header bg-secondary text-white">
+                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-0">
+                                <strong>Client:</strong> WebRTC Chat Inc.<br>
+                                <strong>Target:</strong> WebRTC Video Chat Application<br>
+                                <strong>Vulnerability:</strong> XSS in WebRTC Signaling Messages<br>
+                                <strong>Objective:</strong> Exploit the WebRTC signaling mechanism to execute arbitrary JavaScript
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <p>
+                        <strong>Technical Background:</strong> WebRTC (Web Real-Time Communication) is a technology that enables peer-to-peer communication for voice, video, and data directly between browsers without requiring plugins or native apps. WebRTC applications use a signaling mechanism to exchange session information between peers. This signaling process often involves sending and receiving JSON messages that contain session descriptions, ICE candidates, and other metadata. If these messages are not properly sanitized before being displayed or processed, they can introduce XSS vulnerabilities.
+                    </p>
+                    
+                    <p>
+                        <strong>Real-world Impact:</strong> WebRTC vulnerabilities are particularly dangerous because:
+                    </p>
+                    <ul>
+                        <li>WebRTC applications often handle sensitive audio and video streams</li>
+                        <li>They typically have access to device cameras and microphones</li>
+                        <li>The peer-to-peer nature can make it difficult to monitor and filter malicious content</li>
+                        <li>Signaling servers may not properly sanitize user-controlled data</li>
+                        <li>WebRTC is increasingly used for critical applications like telemedicine and financial services</li>
+                    </ul>
+                    
+                    <p>
+                        <strong>Your Task:</strong> In this challenge, you need to exploit a vulnerability in the WebRTC Chat application. The application allows users to exchange messages during video calls through a WebRTC data channel. However, there's a vulnerability in how the application handles and displays these messages. Find a way to inject JavaScript that will be executed when a message is displayed. Make an alert box appear with the text "XSS Level 20 Completed!" to reveal the flag.
+                    </p>
+                    
+                    <div class="alert alert-warning">
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Look for ways to inject code into the chat messages that will be processed by the WebRTC data channel and displayed without proper sanitization. The vulnerability might be in how the application renders received messages.
+                    </div>
+                </div>
+                
+                <!-- WebRTC Chat Interface -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-camera-video me-2"></i>WebRTC Chat</h5>
+                        <div>
+                            <span class="badge bg-light text-dark">Simulated Environment</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <!-- Navigation Bar -->
+                        <nav class="navbar navbar-expand navbar-light bg-light px-3">
+                            <div class="container-fluid">
+                                <ul class="navbar-nav">
+                                    <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-house-door me-1"></i>Home</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-people me-1"></i>Contacts</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-gear me-1"></i>Settings</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-question-circle me-1"></i>Help</a></li>
+                                </ul>
+                                <div class="d-flex">
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-person-circle me-1"></i>Guest User
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                            <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
+                                            <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </nav>
+                        
+                        <div class="p-4">
+                            <div class="row">
+                                <div class="col-md-4 mb-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Active Call</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="text-center mb-3">
+                                                <div class="position-relative d-inline-block">
+                                                    <img src="https://via.placeholder.com/150" class="rounded-circle" alt="Remote User" width="100" height="100">
+                                                    <span class="position-absolute bottom-0 end-0 badge rounded-pill bg-success">
+                                                        <i class="bi bi-mic-fill"></i>
+                                                    </span>
+                                                </div>
+                                                <h5 class="mt-2 mb-0">John Doe</h5>
+                                                <p class="text-muted small">Technical Support</p>
+                                            </div>
+                                            
+                                            <div class="d-flex justify-content-center mb-3">
+                                                <button class="btn btn-outline-danger mx-1" title="End Call">
+                                                    <i class="bi bi-telephone-x"></i>
+                                                </button>
+                                                <button class="btn btn-outline-secondary mx-1" title="Mute">
+                                                    <i class="bi bi-mic-mute"></i>
+                                                </button>
+                                                <button class="btn btn-outline-secondary mx-1" title="Turn Off Camera">
+                                                    <i class="bi bi-camera-video-off"></i>
+                                                </button>
+                                                <button class="btn btn-outline-secondary mx-1" title="Share Screen">
+                                                    <i class="bi bi-display"></i>
+                                                </button>
+                                            </div>
+                                            
+                                            <div class="card">
+                                                <div class="card-header bg-light">
+                                                    <h6 class="mb-0">Call Information</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <p class="small mb-1"><strong>Call ID:</strong> <span id="call-id">RTCCall-12345</span></p>
+                                                    <p class="small mb-1"><strong>Duration:</strong> <span id="call-duration">00:05:23</span></p>
+                                                    <p class="small mb-1"><strong>Quality:</strong> <span class="text-success">Excellent</span></p>
+                                                    <p class="small mb-0"><strong>Connection:</strong> <span id="connection-status" class="text-success">Connected</span></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card mt-3">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Technical Information</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="small mb-2">This application uses WebRTC for:</p>
+                                            <ul class="small mb-0">
+                                                <li>Peer-to-peer video and audio streaming</li>
+                                                <li>Real-time data channels for chat</li>
+                                                <li>ICE for NAT traversal</li>
+                                            </ul>
+                                            <hr>
+                                            <p class="small mb-0 fst-italic">Note: This is a simulated WebRTC environment for the challenge.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-8">
+                                    <div class="card mb-4">
+                                        <div class="card-header">
+                                            <h5 class="mb-0">Video Call</h5>
+                                        </div>
+                                        <div class="card-body p-0">
+                                            <div class="position-relative">
+                                                <!-- Main video (remote user) -->
+                                                <div class="bg-dark text-white d-flex align-items-center justify-content-center" style="height: 300px;">
+                                                    <div class="text-center">
+                                                        <i class="bi bi-camera-video-off display-1"></i>
+                                                        <p>Remote camera is disabled</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Self video (picture-in-picture) -->
+                                                <div class="position-absolute bottom-0 end-0 m-2 bg-dark border border-light" style="width: 100px; height: 75px;">
+                                                    <div class="d-flex align-items-center justify-content-center h-100 text-white">
+                                                        <i class="bi bi-camera-video-off"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0">Chat</h5>
+                                            <div>
+                                                <button class="btn btn-sm btn-outline-secondary" id="clear-chat-btn">
+                                                    <i class="bi bi-trash me-1"></i>Clear Chat
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="chat-messages" class="mb-3 overflow-auto" style="height: 250px;">
+                                                <!-- Chat messages will be displayed here -->
+                                                <div class="d-flex mb-2">
+                                                    <div class="flex-shrink-0">
+                                                        <img src="https://via.placeholder.com/40" class="rounded-circle" alt="John Doe">
+                                                    </div>
+                                                    <div class="flex-grow-1 ms-2">
+                                                        <div class="bg-light rounded p-2">
+                                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                                <strong>John Doe</strong>
+                                                                <small class="text-muted">10:30 AM</small>
+                                                            </div>
+                                                            <div>Hello! How can I help you today?</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="d-flex mb-2 justify-content-end">
+                                                    <div class="flex-grow-1 me-2">
+                                                        <div class="bg-primary text-white rounded p-2">
+                                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                                <strong>You</strong>
+                                                                <small class="text-white-50">10:31 AM</small>
+                                                            </div>
+                                                            <div>Hi! I'm having an issue with my account.</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex-shrink-0">
+                                                        <img src="https://via.placeholder.com/40" class="rounded-circle" alt="You">
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="d-flex mb-2">
+                                                    <div class="flex-shrink-0">
+                                                        <img src="https://via.placeholder.com/40" class="rounded-circle" alt="John Doe">
+                                                    </div>
+                                                    <div class="flex-grow-1 ms-2">
+                                                        <div class="bg-light rounded p-2">
+                                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                                <strong>John Doe</strong>
+                                                                <small class="text-muted">10:32 AM</small>
+                                                            </div>
+                                                            <div>I'd be happy to help. Could you please provide more details about the issue?</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="d-flex mb-2 justify-content-end">
+                                                    <div class="flex-grow-1 me-2">
+                                                        <div class="bg-primary text-white rounded p-2">
+                                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                                <strong>You</strong>
+                                                                <small class="text-white-50">10:33 AM</small>
+                                                            </div>
+                                                            <div>I can't access my dashboard after the recent update.</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex-shrink-0">
+                                                        <img src="https://via.placeholder.com/40" class="rounded-circle" alt="You">
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="d-flex mb-2">
+                                                    <div class="flex-shrink-0">
+                                                        <img src="https://via.placeholder.com/40" class="rounded-circle" alt="John Doe">
+                                                    </div>
+                                                    <div class="flex-grow-1 ms-2">
+                                                        <div class="bg-light rounded p-2">
+                                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                                <strong>John Doe</strong>
+                                                                <small class="text-muted">10:34 AM</small>
+                                                            </div>
+                                                            <div>Thanks for the information. Let me check the system status for you. In the meantime, could you try clearing your browser cache?</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="text-center text-muted small my-3">
+                                                    <span>--- WebRTC Data Channel Established ---</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" id="message-input" placeholder="Type your message...">
+                                                <button class="btn btn-primary" id="send-message-btn">
+                                                    <i class="bi bi-send"></i>
+                                                </button>
+                                            </div>
+                                            <div class="form-text">
+                                                <i class="bi bi-info-circle me-1"></i>Messages are sent through a WebRTC data channel.
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    {% if flag %}
+                                    <div class="alert alert-success mt-4">
+                                        <i class="bi bi-check-circle-fill me-2"></i>
+                                        <strong>Congratulations!</strong> Your XSS payload successfully executed in the WebRTC application.
+                                    </div>
+                                    <div class="card mt-2">
+                                        <div class="card-header bg-success text-white">
+                                            <h5 class="mb-0"><i class="bi bi-trophy me-2"></i>Challenge Completed!</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>You've successfully demonstrated an XSS vulnerability in a WebRTC application. In a real-world scenario, this could allow attackers to execute arbitrary JavaScript in the context of the application, potentially leading to data theft, session hijacking, camera/microphone access, and other attacks.</p>
+                                            <div class="flag-container p-3 bg-light rounded">
+                                                <span class="flag-label">Your Flag:</span>
+                                                <code id="flag-value">{{ flag }}</code>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level=20) }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Simulated WebRTC environment
+    class WebRTCSimulator {
+        constructor() {
+            this.isConnected = true;
+            this.callDuration = 323; // 5 minutes and 23 seconds
+            this.callId = 'RTCCall-12345';
+            this.peerName = 'John Doe';
+            this.peerRole = 'Technical Support';
+            
+            // Update call duration every second
+            setInterval(() => {
+                this.callDuration++;
+                this.updateCallDuration();
+            }, 1000);
+        }
+        
+        // Update the call duration display
+        updateCallDuration() {
+            const minutes = Math.floor(this.callDuration / 60).toString().padStart(2, '0');
+            const seconds = (this.callDuration % 60).toString().padStart(2, '0');
+            document.getElementById('call-duration').textContent = `${minutes}:${seconds}`;
+        }
+        
+        // Send a message through the WebRTC data channel
+        sendMessage(message) {
+            // In a real WebRTC application, this would send the message through a data channel
+            // For this simulation, we'll just add it to the chat
+            this.addMessageToChat('You', message, true);
+            
+            // Simulate a response from the peer
+            setTimeout(() => {
+                this.receiveMessage({
+                    sender: this.peerName,
+                    content: this.generateResponse(message),
+                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                });
+            }, 1000);
+        }
+        
+        // Receive a message from the WebRTC data channel
+        receiveMessage(message) {
+            // In a real WebRTC application, this would be called when a message is received from the data channel
+            this.addMessageToChat(message.sender, message.content, false, message.timestamp);
+        }
+        
+        // Add a message to the chat display
+        addMessageToChat(sender, content, isFromYou, timestamp = null) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageTime = timestamp || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            const messageElement = document.createElement('div');
+            messageElement.className = `d-flex mb-2 ${isFromYou ? 'justify-content-end' : ''}`;
+            
+            if (isFromYou) {
+                messageElement.innerHTML = `
+                    <div class="flex-grow-1 me-2">
+                        <div class="bg-primary text-white rounded p-2">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <strong>${sender}</strong>
+                                <small class="text-white-50">${messageTime}</small>
+                            </div>
+                            <div>${content}</div>
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <img src="https://via.placeholder.com/40" class="rounded-circle" alt="${sender}">
+                    </div>
+                `;
+            } else {
+                messageElement.innerHTML = `
+                    <div class="flex-shrink-0">
+                        <img src="https://via.placeholder.com/40" class="rounded-circle" alt="${sender}">
+                    </div>
+                    <div class="flex-grow-1 ms-2">
+                        <div class="bg-light rounded p-2">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <strong>${sender}</strong>
+                                <small class="text-muted">${messageTime}</small>
+                            </div>
+                            <div>${content}</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            chatMessages.appendChild(messageElement);
+            
+            // Scroll to the bottom of the chat
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Generate a response based on the user's message
+        generateResponse(message) {
+            const responses = [
+                "I understand your concern. Let me check that for you.",
+                "Thanks for providing that information. I'll look into it right away.",
+                "I see what you mean. Let me see how I can help with that.",
+                "That's a good question. Let me find the answer for you.",
+                "I appreciate your patience. I'm working on resolving this issue.",
+                "Could you please provide more details about what you're experiencing?",
+                "Have you tried clearing your browser cache and cookies?",
+                "Let me check if there are any known issues with that feature.",
+                "I'll need to escalate this to our technical team for further investigation.",
+                "Is there anything else you'd like me to help you with while we're on this call?"
+            ];
+            
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+        
+        // Process a signaling message (vulnerable to XSS)
+        processSignalingMessage(message) {
+            try {
+                // In a real WebRTC application, this would process SDP offers, answers, and ICE candidates
+                // For this simulation, we'll just parse the message as JSON and display it
+                
+                // This is the vulnerable part - it doesn't properly sanitize the message content
+                // before rendering it in the DOM
+                const parsedMessage = JSON.parse(message);
+                
+                if (parsedMessage.type === 'chat') {
+                    // This is vulnerable to XSS because it directly renders the message content
+                    this.receiveMessage({
+                        sender: parsedMessage.sender || 'System',
+                        content: parsedMessage.content,
+                        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    });
+                    return true;
+                }
+                
+                return false;
+            } catch (error) {
+                console.error('Error processing signaling message:', error);
+                return false;
+            }
+        }
+    }
+    
+    // Initialize the WebRTC simulator
+    const webrtc = new WebRTCSimulator();
+    
+    // DOM elements
+    const messageInput = document.getElementById('message-input');
+    const sendMessageBtn = document.getElementById('send-message-btn');
+    const clearChatBtn = document.getElementById('clear-chat-btn');
+    
+    // Event listeners
+    sendMessageBtn.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            sendMessage();
+        }
+    });
+    clearChatBtn.addEventListener('click', clearChat);
+    
+    // Send a message
+    function sendMessage() {
+        const message = messageInput.value.trim();
+        if (!message) return;
+        
+        // Check if it's a signaling message (starts with /)
+        if (message.startsWith('/signal ')) {
+            const signalingMessage = message.substring(8);
+            const processed = webrtc.processSignalingMessage(signalingMessage);
+            
+            if (processed) {
+                // Add a system message indicating a signaling message was processed
+                const chatMessages = document.getElementById('chat-messages');
+                const systemMessage = document.createElement('div');
+                systemMessage.className = 'text-center text-muted small my-3';
+                systemMessage.innerHTML = '<span>--- Signaling Message Processed ---</span>';
+                chatMessages.appendChild(systemMessage);
+            } else {
+                // Add an error message
+                const chatMessages = document.getElementById('chat-messages');
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'text-center text-danger small my-3';
+                errorMessage.innerHTML = '<span>--- Error Processing Signaling Message ---</span>';
+                chatMessages.appendChild(errorMessage);
+            }
+        } else {
+            // Regular chat message
+            webrtc.sendMessage(message);
+        }
+        
+        // Clear the input
+        messageInput.value = '';
+    }
+    
+    // Clear the chat
+    function clearChat() {
+        const chatMessages = document.getElementById('chat-messages');
+        chatMessages.innerHTML = '';
+        
+        // Add a system message
+        const systemMessage = document.createElement('div');
+        systemMessage.className = 'text-center text-muted small my-3';
+        systemMessage.innerHTML = '<span>--- Chat Cleared ---</span>';
+        chatMessages.appendChild(systemMessage);
+    }
+    
+    // Check for XSS success
+    window.addEventListener('DOMContentLoaded', function() {
+        // Original alert function
+        var originalAlert = window.alert;
+        
+        // Override alert
+        window.alert = function(message) {
+            // Call the original alert
+            originalAlert(message);
+            
+            // Check if this is the success message
+            if (message === "XSS Level 20 Completed!") {
+                // Redirect to success page
+                window.location.href = window.location.href + "?success=true";
+            }
+        };
+    });
+</script>
+{% endblock %}
