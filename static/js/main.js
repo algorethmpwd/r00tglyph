@@ -155,7 +155,20 @@ function setupXSSDetection() {
 
             if (message === expectedMessage) {
                 console.log(`Challenge completed: ${expectedMessage}`);
+
+                // Reveal the flag
                 revealFlag();
+
+                // Reload the page with success parameter if not already present
+                // This ensures the server-side flag generation happens
+                if (!window.location.href.includes('success=true')) {
+                    // Add a small delay to ensure the alert is seen
+                    setTimeout(() => {
+                        let url = new URL(window.location.href);
+                        url.searchParams.set('success', 'true');
+                        window.location.href = url.toString();
+                    }, 1000);
+                }
             }
         }
     };
@@ -180,6 +193,36 @@ function revealFlag() {
             resultElement.className = 'alert alert-success mt-3';
             resultElement.innerHTML = `<i class="bi bi-check-circle-fill me-2"></i>Congratulations! You've solved the challenge. Here's your flag:`;
             resultElement.style.display = 'block';
+        }
+
+        // Get the flag value
+        const flagValue = document.getElementById('flag-value')?.textContent;
+
+        // Create a flag banner at the top of the page
+        if (flagValue) {
+            // Check if the banner already exists
+            let flagBanner = document.getElementById('flag-banner');
+            if (!flagBanner) {
+                flagBanner = document.createElement('div');
+                flagBanner.id = 'flag-banner';
+                flagBanner.className = 'alert alert-success';
+                flagBanner.style.position = 'sticky';
+                flagBanner.style.top = '0';
+                flagBanner.style.zIndex = '1000';
+                flagBanner.style.textAlign = 'center';
+                flagBanner.style.fontWeight = 'bold';
+                flagBanner.style.fontSize = '1.2rem';
+                flagBanner.style.padding = '15px';
+                flagBanner.style.margin = '0';
+                flagBanner.style.borderRadius = '0';
+                flagBanner.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+
+                // Add the flag to the banner
+                flagBanner.innerHTML = `<i class="bi bi-trophy-fill me-2"></i>Flag: <code>${flagValue}</code>`;
+
+                // Insert at the top of the body
+                document.body.insertBefore(flagBanner, document.body.firstChild);
+            }
         }
 
         // Scroll to the flag
