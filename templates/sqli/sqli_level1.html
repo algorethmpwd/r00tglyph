@@ -3,8 +3,70 @@
 {% block title %}Level 1: Basic SQL Injection - R00tGlyph{% endblock %}
 
 {% block content %}
+<style>
+    .bank-logo {
+        max-width: 200px;
+        margin-bottom: 20px;
+    }
+    .secure-bank-header {
+        background: linear-gradient(135deg, #1e5799 0%,#207cca 51%,#2989d8 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .login-container {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        padding: 30px;
+        border: 1px solid #e9ecef;
+    }
+    .news-ticker {
+        background-color: #f8f9fa;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        border-left: 4px solid #007bff;
+    }
+    .ticker-content {
+        white-space: nowrap;
+        overflow: hidden;
+        animation: ticker 20s linear infinite;
+    }
+    @keyframes ticker {
+        0% { transform: translateX(100%); }
+        100% { transform: translateX(-100%); }
+    }
+    .feature-box {
+        text-align: center;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+        background-color: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+    .feature-box:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .feature-icon {
+        font-size: 2rem;
+        margin-bottom: 10px;
+        color: #007bff;
+    }
+    .scenario-box {
+        background-color: #e9f7fe;
+        border-left: 4px solid #17a2b8;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+    }
+</style>
+
 <div class="row">
-    <div class="col-md-8 offset-md-2">
+    <div class="col-md-10 offset-md-1">
         {% if sqli_detected %}
         <div class="alert alert-success">
             <i class="bi bi-check-circle-fill me-2"></i>
@@ -17,12 +79,158 @@
         </div>
         {% endif %}
 
-        <div class="card">
+        <!-- Challenge Description Button -->
+        <button type="button" class="btn btn-info mb-3" data-bs-toggle="modal" data-bs-target="#challengeDescriptionModal">
+            <i class="bi bi-info-circle-fill me-2"></i>View Challenge Description
+        </button>
+
+        <div class="secure-bank-header text-center">
+            <div class="d-flex align-items-center justify-content-center">
+                <i class="bi bi-bank2 me-2" style="font-size: 2.5rem;"></i>
+                <h1 class="mb-0">SecureBank™</h1>
+            </div>
+            <p class="mb-0 mt-2">Your Trusted Financial Partner Since 2023</p>
+        </div>
+
+        <div class="news-ticker">
+            <div class="ticker-content">
+                <strong>BREAKING NEWS:</strong> SecureBank announces record profits for Q2 2023 | New mobile banking app launching next month | SecureBank rated #1 in customer satisfaction | CEO announces enhanced security measures for online banking
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="feature-box">
+                    <div class="feature-icon">
+                        <i class="bi bi-shield-lock"></i>
+                    </div>
+                    <h5>Secure Banking</h5>
+                    <p class="text-muted">State-of-the-art security for your peace of mind</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-box">
+                    <div class="feature-icon">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
+                    <h5>Investment Options</h5>
+                    <p class="text-muted">Grow your wealth with our expert guidance</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-box">
+                    <div class="feature-icon">
+                        <i class="bi bi-phone"></i>
+                    </div>
+                    <h5>Mobile Banking</h5>
+                    <p class="text-muted">Bank anytime, anywhere with our mobile app</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="scenario-box">
+                    <h4><i class="bi bi-exclamation-triangle-fill me-2"></i>Penetration Testing Scenario</h4>
+                    <p>You are a security consultant hired to perform a penetration test on SecureBank's online banking portal. The bank has recently migrated their legacy systems to a new web platform and wants to ensure it's secure before the public launch.</p>
+                    <p>Your first task is to assess the login page for common vulnerabilities. The development team has assured management that they've implemented "industry-standard security practices," but you've been asked to verify these claims.</p>
+                    <p><strong>Your objective:</strong> Attempt to bypass the authentication mechanism and gain unauthorized access to the banking portal.</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="login-container">
+                    <h4 class="text-center mb-4"><i class="bi bi-person-lock me-2"></i>Online Banking Login</h4>
+
+                    {% if error %}
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <strong>Error:</strong> {{ error }}
+                    </div>
+                    {% endif %}
+
+                    {% if success %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <strong>Success!</strong> {{ success }}
+                    </div>
+                    {% endif %}
+
+                    <form action="{{ url_for('sqli_level1') }}" method="post">
+                        <div class="mb-3">
+                            <label for="username" class="form-label"><i class="bi bi-person me-2"></i>Username:</label>
+                            <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label"><i class="bi bi-key me-2"></i>Password:</label>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="rememberMe">
+                            <label class="form-check-label" for="rememberMe">Remember me</label>
+                            <a href="#" class="float-end">Forgot password?</a>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                            </button>
+                        </div>
+                    </form>
+                    <div class="text-center mt-3">
+                        <small class="text-muted">Don't have an account? <a href="#">Register now</a></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
             <div class="card-header bg-dark text-white">
-                <h2 class="text-center">Level 1: Basic SQL Injection</h2>
+                <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Technical Notes</h5>
             </div>
             <div class="card-body">
-                <div class="alert alert-dark challenge-description">
+                <p>
+                    <strong>For educational purposes:</strong> This login form is vulnerable to SQL injection. In a real banking application, such vulnerabilities would be critical security flaws.
+                </p>
+                <p>
+                    The backend code might look something like this:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>// Vulnerable code example (PHP)
+$username = $_POST['username'];
+$password = $_POST['password'];
+
+$query = "SELECT * FROM users WHERE username = '$username' AND password = '$password'";
+$result = mysqli_query($connection, $query);
+
+if(mysqli_num_rows($result) > 0) {
+    // User authenticated successfully
+    $_SESSION['authenticated'] = true;
+    // Redirect to dashboard
+} else {
+    // Authentication failed
+    echo "Invalid username or password";
+}</code></pre>
+                <p>
+                    <strong>Security tip:</strong> Always use parameterized queries or prepared statements to prevent SQL injection attacks.
+                </p>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <a href="{{ url_for('solutions', level='sqli1') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+            <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+        </div>
+    </div>
+</div>
+
+<!-- Challenge Description Modal -->
+<div class="modal fade" id="challengeDescriptionModal" tabindex="-1" aria-labelledby="challengeDescriptionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="challengeDescriptionModalLabel">Challenge Description: Basic SQL Injection</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-dark">
                     <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
                     <p>
                         Welcome to <strong>SecureBank</strong>, a fictional banking application! This challenge simulates a real-world scenario where a login form is vulnerable to SQL injection.
@@ -35,42 +243,26 @@
                     </p>
                 </div>
 
-                {% if error %}
-                <div class="alert alert-danger">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                    <strong>Error:</strong> {{ error }}
-                </div>
-                {% endif %}
-
-                {% if success %}
-                <div class="alert alert-success">
-                    <i class="bi bi-check-circle-fill me-2"></i>
-                    <strong>Success!</strong> {{ success }}
-                </div>
-                {% endif %}
-
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0"><i class="bi bi-bank me-2"></i>SecureBank Login</h4>
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{ url_for('sqli_level1') }}" method="post">
-                            <div class="mb-3">
-                                <label for="username" class="form-label">Username:</label>
-                                <input type="text" class="form-control" id="username" name="username" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Password:</label>
-                                <input type="password" class="form-control" id="password" name="password" required>
-                            </div>
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary">Login</button>
-                            </div>
-                        </form>
+                        <p>
+                            SQL injection is one of the most common web application vulnerabilities. It occurs when user input is incorrectly filtered and directly included in SQL queries. This can allow attackers to:
+                        </p>
+                        <ul>
+                            <li>Bypass authentication</li>
+                            <li>Access, modify, or delete data in a database</li>
+                            <li>Execute administrative operations on the database</li>
+                        </ul>
+                        <p>
+                            In 2023, SQL injection remains in the OWASP Top 10 Web Application Security Risks, despite being well-understood, because many developers still make implementation mistakes.
+                        </p>
                     </div>
                 </div>
 
-                <div class="card mb-4">
+                <div class="card mb-3">
                     <div class="card-header">
                         <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
                     </div>
@@ -80,15 +272,42 @@
                         </p>
                         <pre class="bg-light p-3 rounded"><code>SELECT * FROM users WHERE username = 'input_username' AND password = 'input_password'</code></pre>
                         <p>
-                            What happens if you can manipulate this query to always return true?
+                            What happens if you can manipulate this query to always return true? Consider:
                         </p>
+                        <ul>
+                            <li>How can you use SQL syntax like quotes and comments to alter the query?</li>
+                            <li>Can you make the WHERE clause always evaluate to true?</li>
+                            <li>What SQL operators might help you bypass the password check?</li>
+                        </ul>
                     </div>
                 </div>
 
-                <div class="mt-4">
-                    <a href="{{ url_for('solutions', level='sqli1') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-shield-fill-check me-2"></i>Real-World Impact</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            SQL injection vulnerabilities have led to numerous high-profile data breaches:
+                        </p>
+                        <ul>
+                            <li><strong>Equifax (2017)</strong>: Attackers exploited an SQL injection vulnerability to access personal data of 147 million people.</li>
+                            <li><strong>Yahoo (2012)</strong>: SQL injection was used in a breach that exposed 450,000 user credentials.</li>
+                            <li><strong>Sony Pictures (2011)</strong>: Attackers used SQL injection to steal personal information of millions of customers.</li>
+                        </ul>
+                        <p>
+                            For financial institutions like banks, such vulnerabilities can be catastrophic, potentially allowing attackers to:
+                        </p>
+                        <ul>
+                            <li>Access customer account information</li>
+                            <li>Manipulate transaction records</li>
+                            <li>Transfer funds without authorization</li>
+                        </ul>
+                    </div>
                 </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
