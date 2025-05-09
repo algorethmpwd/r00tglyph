@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 5: Time-Based Blind SQL Injection - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        {% if sqli_detected %}
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>Success!</strong> You've successfully exploited the time-based blind SQL injection vulnerability! The challenge has been marked as completed.
+            {% if flag %}
+            <div class="mt-2">
+                <strong>Flag:</strong> <code>{{ flag }}</code>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 5: Time-Based Blind SQL Injection</h2>
+            </div>
+            <div class="card-body">
+                <!-- Challenge Description Popup Button -->
+                <button type="button" class="btn btn-info mb-3" data-bs-toggle="modal" data-bs-target="#challengeDescriptionModal">
+                    <i class="bi bi-info-circle-fill me-2"></i>View Challenge Description
+                </button>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-newspaper me-2"></i>Newsletter Subscription</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('sqli_level5') }}" method="post">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email Address:</label>
+                                <input type="email" class="form-control" id="email" name="email" required placeholder="your@email.com">
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">Subscribe</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {% if message %}
+                <div class="alert alert-{{ message_type }}">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    {{ message }}
+                </div>
+                {% endif %}
+
+                {% if response_time %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-clock-history me-2"></i>Response Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Response Time:</strong> {{ response_time }} seconds</p>
+                        <div class="progress mb-3" style="height: 25px;">
+                            <div class="progress-bar bg-info" role="progressbar" style="width: {{ (response_time / 5) * 100 if response_time < 5 else 100 }}%;" aria-valuenow="{{ response_time }}" aria-valuemin="0" aria-valuemax="5">
+                                {{ response_time }} seconds
+                            </div>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            Normal response times are typically under 0.5 seconds. Longer response times may indicate that the server is processing a time-consuming query.
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level='sqli5') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Challenge Description Modal -->
+<div class="modal fade" id="challengeDescriptionModal" tabindex="-1" aria-labelledby="challengeDescriptionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="challengeDescriptionModalLabel">Challenge Description: Time-Based Blind SQL Injection</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-dark">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>NewsletterPro</strong>, a fictional newsletter subscription service! This challenge simulates a real-world scenario where an email subscription form is vulnerable to time-based blind SQL injection.
+                    </p>
+                    <p>
+                        The developers of NewsletterPro have implemented a feature that allows users to subscribe to newsletters using their email address. However, they've made a critical mistake in how they handle user input, allowing attackers to perform time-based blind SQL injection attacks.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> The system has a hidden configuration table with a key named <code>secret_flag</code>. You need to extract the value of this key, which contains the flag. Since this is a time-based blind SQL injection vulnerability, you won't see the actual data returned from the database - you'll need to use time delays to extract the information.
+                    </p>
+                </div>
+                
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            The application likely uses a SQL query similar to:
+                        </p>
+                        <pre class="bg-light p-3 rounded"><code>INSERT INTO subscribers (email) VALUES ('[user_input]')</code></pre>
+                        <p>
+                            For time-based blind SQL injection, you need to:
+                        </p>
+                        <ol>
+                            <li>Use SQL functions that cause delays (like SLEEP or similar functions)</li>
+                            <li>Construct conditional queries that only cause delays when certain conditions are true</li>
+                            <li>Extract data character by character based on the presence or absence of delays</li>
+                        </ol>
+                        <p>
+                            Try using payloads like:
+                        </p>
+                        <pre class="bg-light p-3 rounded"><code>test@example.com'; IF (SELECT 1 FROM config WHERE key_name = 'secret_flag') SLEEP(3); --</code></pre>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -46,6 +46,7 @@ R00tGlyph is a Python-based web application designed to simulate real-world web 
   - Level 4: Blind SQL Injection
   - Level 5: Time-Based Blind SQL Injection
   - Level 6: SQL Injection with WAF Bypass
+  - Level 7: Error-Based SQL Injection
 
 ## Installation
 

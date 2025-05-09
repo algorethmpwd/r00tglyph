@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 7: Error-Based SQL Injection - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        {% if sqli_detected %}
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>Success!</strong> You've successfully exploited the error-based SQL injection vulnerability! The challenge has been marked as completed.
+            {% if flag %}
+            <div class="mt-2">
+                <strong>Flag:</strong> <code>{{ flag }}</code>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 7: Error-Based SQL Injection</h2>
+            </div>
+            <div class="card-body">
+                <!-- Challenge Description Popup Button -->
+                <button type="button" class="btn btn-info mb-3" data-bs-toggle="modal" data-bs-target="#challengeDescriptionModal">
+                    <i class="bi bi-info-circle-fill me-2"></i>View Challenge Description
+                </button>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-card-list me-2"></i>Category Browser</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('sqli_level7') }}" method="get">
+                            <div class="mb-3">
+                                <label for="category_id" class="form-label">Select Category ID:</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="category_id" name="id" value="{{ category_id }}" placeholder="e.g., 1">
+                                    <button class="btn btn-primary" type="submit">View Category</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {% if error_message %}
+                <div class="card mb-4">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0"><i class="bi bi-exclamation-triangle-fill me-2"></i>Database Error</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-light p-3 rounded"><code>{{ error_message }}</code></pre>
+                        <div class="alert alert-warning mt-3">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            <strong>Note:</strong> In a production environment, detailed error messages like this should never be displayed to users as they can reveal sensitive information about the database structure.
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if category %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-folder-fill me-2"></i>Category Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <h4>{{ category.name }}</h4>
+                        <p class="text-muted">ID: {{ category.id }}</p>
+                        <p>{{ category.description }}</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level='sqli7') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Challenge Description Modal -->
+<div class="modal fade" id="challengeDescriptionModal" tabindex="-1" aria-labelledby="challengeDescriptionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="challengeDescriptionModalLabel">Challenge Description: Error-Based SQL Injection</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-dark">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>CatalogManager</strong>, a fictional product catalog system! This challenge simulates a real-world scenario where a category browser feature is vulnerable to error-based SQL injection.
+                    </p>
+                    <p>
+                        The developers of CatalogManager have implemented a feature that allows users to browse product categories by ID. However, they've made two critical mistakes:
+                    </p>
+                    <ol>
+                        <li>They directly concatenate user input into SQL queries without proper sanitization</li>
+                        <li>They display detailed database error messages to users when queries fail</li>
+                    </ol>
+                    <p>
+                        <strong>Your Task:</strong> Exploit the error-based SQL injection vulnerability to extract the flag from the hidden <code>secrets</code> table. The flag is stored in a column called <code>flag_value</code> where the <code>key_name</code> column equals <code>'level7_flag'</code>.
+                    </p>
+                </div>
+                
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            The application likely uses a SQL query similar to:
+                        </p>
+                        <pre class="bg-light p-3 rounded"><code>SELECT id, name, description FROM categories WHERE id = [user_input]</code></pre>
+                        <p>
+                            For error-based SQL injection, you need to:
+                        </p>
+                        <ol>
+                            <li>Craft queries that cause errors containing the data you want to extract</li>
+                            <li>Use SQL functions that can extract and display data in error messages</li>
+                            <li>Chain multiple SQL operations to extract specific data from other tables</li>
+                        </ol>
+                        <p>
+                            Try using techniques like:
+                        </p>
+                        <pre class="bg-light p-3 rounded"><code>1 AND (SELECT 1 FROM (SELECT COUNT(*), CONCAT(flag_value, FLOOR(RAND(0)*2)) AS x FROM secrets GROUP BY x) AS y)</code></pre>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

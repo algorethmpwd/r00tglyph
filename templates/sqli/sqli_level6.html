@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 6: SQL Injection with WAF Bypass - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        {% if sqli_detected %}
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>Success!</strong> You've successfully bypassed the WAF and exploited the SQL injection vulnerability! The challenge has been marked as completed.
+            {% if flag %}
+            <div class="mt-2">
+                <strong>Flag:</strong> <code>{{ flag }}</code>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 6: SQL Injection with WAF Bypass</h2>
+            </div>
+            <div class="card-body">
+                <!-- Challenge Description Popup Button -->
+                <button type="button" class="btn btn-info mb-3" data-bs-toggle="modal" data-bs-target="#challengeDescriptionModal">
+                    <i class="bi bi-info-circle-fill me-2"></i>View Challenge Description
+                </button>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-shield-lock me-2"></i>Secure Product Search</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-warning">
+                            <i class="bi bi-shield-fill-check me-2"></i>
+                            <strong>Security Notice:</strong> This search form is protected by a Web Application Firewall (WAF) that blocks common SQL injection attempts.
+                        </div>
+                        <form action="{{ url_for('sqli_level6') }}" method="get">
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" name="search" placeholder="Search for products..." value="{{ search_term }}">
+                                <button class="btn btn-primary" type="submit">Search</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {% if waf_blocked %}
+                <div class="alert alert-danger">
+                    <i class="bi bi-shield-fill-exclamation me-2"></i>
+                    <strong>WAF Alert:</strong> Potential SQL injection attack detected and blocked. Your request has been logged.
+                </div>
+                {% endif %}
+
+                {% if products %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-list-ul me-2"></i>Search Results</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Product Name</th>
+                                        <th>Category</th>
+                                        <th>Price</th>
+                                        <th>Stock</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for product in products %}
+                                    <tr>
+                                        <td>{{ product.id }}</td>
+                                        <td>{{ product.name }}</td>
+                                        <td>{{ product.category }}</td>
+                                        <td>${{ product.price }}</td>
+                                        <td>{{ product.stock }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {% elif search_performed and not waf_blocked %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    No products found matching your search criteria.
+                </div>
+                {% endif %}
+
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level='sqli6') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Challenge Description Modal -->
+<div class="modal fade" id="challengeDescriptionModal" tabindex="-1" aria-labelledby="challengeDescriptionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="challengeDescriptionModalLabel">Challenge Description: SQL Injection with WAF Bypass</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-dark">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>SecureShop</strong>, a fictional e-commerce platform! This challenge simulates a real-world scenario where a product search feature is protected by a Web Application Firewall (WAF) but is still vulnerable to SQL injection if you can bypass the WAF.
+                    </p>
+                    <p>
+                        The developers of SecureShop have implemented a WAF to protect their search feature from SQL injection attacks. The WAF blocks requests containing common SQL injection patterns like quotes, comments, and SQL keywords. However, there are still ways to bypass the WAF and exploit the underlying SQL injection vulnerability.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Bypass the WAF and exploit the SQL injection vulnerability to reveal a hidden product with ID 999, which contains the flag in its description.
+                    </p>
+                </div>
+                
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            The application likely uses a SQL query similar to:
+                        </p>
+                        <pre class="bg-light p-3 rounded"><code>SELECT id, name, category, price, stock FROM products WHERE name LIKE '%search_term%'</code></pre>
+                        <p>
+                            The WAF is blocking common SQL injection patterns, including:
+                        </p>
+                        <ul>
+                            <li>Single quotes (<code>'</code>) and double quotes (<code>"</code>)</li>
+                            <li>SQL comments (<code>--</code>, <code>#</code>, <code>/**/</code>)</li>
+                            <li>Common SQL keywords like <code>UNION</code>, <code>SELECT</code>, <code>FROM</code>, etc.</li>
+                        </ul>
+                        <p>
+                            To bypass the WAF, you might need to:
+                        </p>
+                        <ol>
+                            <li>Use alternative syntax or encoding to avoid detection</li>
+                            <li>Split SQL keywords to evade pattern matching</li>
+                            <li>Use case variations or special characters to obfuscate your payload</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

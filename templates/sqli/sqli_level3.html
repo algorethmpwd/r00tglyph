@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 3: SQL Injection with UNION - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        {% if sqli_detected %}
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>Success!</strong> You've successfully exploited the SQL injection vulnerability! The challenge has been marked as completed.
+            {% if flag %}
+            <div class="mt-2">
+                <strong>Flag:</strong> <code>{{ flag }}</code>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 3: SQL Injection with UNION</h2>
+            </div>
+            <div class="card-body">
+                <!-- Challenge Description Popup Button -->
+                <button type="button" class="btn btn-info mb-3" data-bs-toggle="modal" data-bs-target="#challengeDescriptionModal">
+                    <i class="bi bi-info-circle-fill me-2"></i>View Challenge Description
+                </button>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-book me-2"></i>Library Book Search</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('sqli_level3') }}" method="get">
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" name="search" placeholder="Search for books by title..." value="{{ search_term }}">
+                                <button class="btn btn-primary" type="submit">Search</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {% if books %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-list-ul me-2"></i>Search Results</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Title</th>
+                                        <th>Author</th>
+                                        <th>Category</th>
+                                        <th>Year</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for book in books %}
+                                    <tr>
+                                        <td>{{ book.id }}</td>
+                                        <td>{{ book.title }}</td>
+                                        <td>{{ book.author }}</td>
+                                        <td>{{ book.category }}</td>
+                                        <td>{{ book.year }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {% elif search_performed %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    No books found matching your search criteria.
+                </div>
+                {% endif %}
+
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level='sqli3') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Challenge Description Modal -->
+<div class="modal fade" id="challengeDescriptionModal" tabindex="-1" aria-labelledby="challengeDescriptionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="challengeDescriptionModalLabel">Challenge Description: SQL Injection with UNION</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-dark">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>LibrarySystem</strong>, a fictional library management system! This challenge simulates a real-world scenario where a book search feature is vulnerable to UNION-based SQL injection.
+                    </p>
+                    <p>
+                        The developers of LibrarySystem have implemented a search feature that allows users to find books by title. However, they've made a critical mistake in how they handle user input in the search query, allowing attackers to use UNION statements to extract data from other tables in the database.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Exploit the SQL injection vulnerability in the search feature to extract data from the hidden <code>users</code> table. The administrator's username is <code>admin</code>, and their password contains the flag. Use a UNION-based SQL injection attack to reveal this information.
+                    </p>
+                </div>
+                
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            The search feature likely uses a SQL query similar to:
+                        </p>
+                        <pre class="bg-light p-3 rounded"><code>SELECT id, title, author, category, year FROM books WHERE title LIKE '%search_term%'</code></pre>
+                        <p>
+                            To use a UNION attack, you need to:
+                        </p>
+                        <ol>
+                            <li>Determine the number of columns in the original query</li>
+                            <li>Ensure the data types in your UNION query match the original query</li>
+                            <li>Use the UNION to query the users table instead of the books table</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

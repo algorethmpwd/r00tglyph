@@ -1791,6 +1791,350 @@ def sqli_level2():
     return render_template('sqli/sqli_level2.html', flag=flag, sqli_detected=sqli_detected,
                           search_term=search_term, search_performed=search_performed, products=products)
 
+# SQL Injection Level 3 - SQL Injection with UNION
+@app.route('/sqli/level3', methods=['GET'])
+def sqli_level3():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    sqli_detected = False
+    search_term = request.args.get('search', '')
+    search_performed = bool(search_term)
+    books = []
+
+    # Default books
+    default_books = [
+        {"id": 1, "title": "The Great Gatsby", "author": "F. Scott Fitzgerald", "category": "Fiction", "year": 1925},
+        {"id": 2, "title": "To Kill a Mockingbird", "author": "Harper Lee", "category": "Fiction", "year": 1960},
+        {"id": 3, "title": "1984", "author": "George Orwell", "category": "Science Fiction", "year": 1949},
+        {"id": 4, "title": "Pride and Prejudice", "author": "Jane Austen", "category": "Romance", "year": 1813},
+        {"id": 5, "title": "The Hobbit", "author": "J.R.R. Tolkien", "category": "Fantasy", "year": 1937}
+    ]
+
+    # Hidden users table (only accessible through UNION-based SQL injection)
+    users = [
+        {"id": 1, "username": "admin", "password": "FLAG{uni0n_b4s3d_sql1_m4st3r}", "role": "admin", "created": 2023}
+    ]
+
+    if search_term:
+        # Check for SQL injection patterns
+        sqli_patterns = ["'", "\"", "--", ";", "UNION", "SELECT", "FROM", "WHERE"]
+
+        # Convert to uppercase for case-insensitive check
+        search_upper = search_term.upper()
+
+        # Check if any SQL injection pattern is in the input
+        for pattern in sqli_patterns:
+            if pattern.upper() in search_upper:
+                # SQL injection detected!
+                sqli_detected = True
+                break
+
+        # Filter books based on search term
+        books = [b for b in default_books if search_term.lower() in b["title"].lower()]
+
+        # If UNION-based SQL injection is detected
+        if sqli_detected and "UNION" in search_upper and "SELECT" in search_upper:
+            # Check if the query is trying to access the users table
+            if "USER" in search_upper or "ADMIN" in search_upper:
+                # Add the admin user to the results, formatted to match the books table structure
+                admin_user = users[0]
+                books.append({
+                    "id": admin_user["id"],
+                    "title": admin_user["username"],
+                    "author": admin_user["password"],
+                    "category": admin_user["role"],
+                    "year": admin_user["created"]
+                })
+
+                # Mark challenge as completed
+                challenge = Challenge.query.filter_by(name="SQL Injection with UNION").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+
+    # Generate a flag for this challenge only if completed
+    challenge = Challenge.query.filter_by(name="SQL Injection with UNION").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('sqli/sqli_level3.html', flag=flag, sqli_detected=sqli_detected,
+                          search_term=search_term, search_performed=search_performed, books=books)
+
+# SQL Injection Level 4 - Blind SQL Injection
+@app.route('/sqli/level4', methods=['GET'])
+def sqli_level4():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    sqli_detected = False
+    user_id = request.args.get('id', '')
+    user_exists = None
+
+    # Hidden users
+    hidden_users = {
+        "1": {"username": "admin", "password": "admin123"},
+        "2": {"username": "user", "password": "password123"},
+        "3": {"username": "guest", "password": "guest"},
+        "42": {"username": "admin_secret", "password": "FLAG{bl1nd_sql1_3xtr4ct10n_pr0}"}
+    }
+
+    if user_id:
+        # Check for SQL injection patterns
+        sqli_patterns = ["'", "\"", "--", ";", "AND", "OR", "=", "SELECT", "FROM", "WHERE", "SUBSTRING", "ASCII"]
+
+        # Convert to uppercase for case-insensitive check
+        user_id_upper = user_id.upper()
+
+        # Check if any SQL injection pattern is in the input
+        for pattern in sqli_patterns:
+            if pattern.upper() in user_id_upper:
+                # SQL injection detected!
+                sqli_detected = True
+                break
+
+        # Check if user exists
+        if sqli_detected:
+            # If the query is trying to find the admin_secret user (ID 42)
+            if "42" in user_id or "admin_secret" in user_id.lower():
+                user_exists = True
+
+                # Mark challenge as completed
+                challenge = Challenge.query.filter_by(name="Blind SQL Injection").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            # If the query is using blind SQL injection techniques to extract data
+            elif "SUBSTRING" in user_id_upper or "ASCII" in user_id_upper or "MID" in user_id_upper or "CHAR" in user_id_upper:
+                user_exists = True
+
+                # Mark challenge as completed
+                challenge = Challenge.query.filter_by(name="Blind SQL Injection").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                # For other SQL injection attempts, return random results to simulate blind injection
+                import random
+                user_exists = random.choice([True, False])
+        else:
+            # Normal user lookup
+            user_exists = user_id in hidden_users
+
+    # Generate a flag for this challenge only if completed
+    challenge = Challenge.query.filter_by(name="Blind SQL Injection").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('sqli/sqli_level4.html', flag=flag, sqli_detected=sqli_detected,
+                          user_id=user_id, user_exists=user_exists)
+
+# SQL Injection Level 5 - Time-Based Blind SQL Injection
+@app.route('/sqli/level5', methods=['GET', 'POST'])
+def sqli_level5():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    sqli_detected = False
+    message = None
+    message_type = "info"
+    response_time = None
+
+    if request.method == 'POST':
+        email = request.form.get('email', '')
+
+        # Check for SQL injection patterns
+        sqli_patterns = ["'", "\"", "--", ";", "SLEEP", "BENCHMARK", "DELAY", "PG_SLEEP", "WAITFOR"]
+
+        # Convert to uppercase for case-insensitive check
+        email_upper = email.upper()
+
+        # Check if any SQL injection pattern is in the input
+        for pattern in sqli_patterns:
+            if pattern.upper() in email_upper:
+                # SQL injection detected!
+                sqli_detected = True
+                break
+
+        # Simulate response time
+        import time
+        start_time = time.time()
+
+        if sqli_detected:
+            # Simulate a time delay for time-based blind SQL injection
+            if "SLEEP" in email_upper or "BENCHMARK" in email_upper or "DELAY" in email_upper or "PG_SLEEP" in email_upper or "WAITFOR" in email_upper:
+                # Simulate a database query that takes time
+                time.sleep(3)
+
+                # Mark challenge as completed
+                challenge = Challenge.query.filter_by(name="Time-Based Blind SQL Injection").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+
+                message = "Thank you for subscribing to our newsletter!"
+                message_type = "success"
+            else:
+                message = "Invalid email format. Please try again."
+                message_type = "danger"
+        else:
+            message = "Thank you for subscribing to our newsletter!"
+            message_type = "success"
+
+        end_time = time.time()
+        response_time = round(end_time - start_time, 2)
+
+    # Generate a flag for this challenge only if completed
+    challenge = Challenge.query.filter_by(name="Time-Based Blind SQL Injection").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('sqli/sqli_level5.html', flag=flag, sqli_detected=sqli_detected,
+                          message=message, message_type=message_type, response_time=response_time)
+
+# SQL Injection Level 6 - SQL Injection with WAF Bypass
+@app.route('/sqli/level6', methods=['GET'])
+def sqli_level6():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    sqli_detected = False
+    waf_blocked = False
+    search_term = request.args.get('search', '')
+    search_performed = bool(search_term)
+    products = []
+
+    # Default products
+    default_products = [
+        {"id": 1, "name": "Premium Smartphone", "category": "Electronics", "price": 1299.99, "stock": 45},
+        {"id": 2, "name": "Ultra Laptop", "category": "Electronics", "price": 2499.99, "stock": 20},
+        {"id": 3, "name": "Noise-Canceling Headphones", "category": "Audio", "price": 349.99, "stock": 78},
+        {"id": 4, "name": "Fitness Smartwatch", "category": "Wearables", "price": 399.99, "stock": 56},
+        {"id": 5, "name": "Portable Bluetooth Speaker", "category": "Audio", "price": 199.99, "stock": 112}
+    ]
+
+    # Secret product (only shown when SQL injection is successful)
+    secret_product = {"id": 999, "name": "Classified Device", "category": "Restricted", "price": 99999.99, "stock": 1}
+
+    if search_term:
+        # WAF rules - block common SQL injection patterns
+        waf_patterns = ["'", "\"", "--", "#", "/*", "*/", ";", "UNION", "SELECT", "FROM", "WHERE", "OR", "AND", "="]
+
+        # Check if any WAF pattern is in the input
+        for pattern in waf_patterns:
+            if pattern in search_term:
+                # WAF blocked the request
+                waf_blocked = True
+                break
+
+        if not waf_blocked:
+            # Check for SQL injection patterns that might bypass the WAF
+            bypass_patterns = ["||", "oR", "AnD", "uNiOn", "sElEcT", "1=1", "/**/", "%27", "0x"]
+
+            # Check if any bypass pattern is in the input
+            for pattern in bypass_patterns:
+                if pattern in search_term:
+                    # SQL injection with WAF bypass detected!
+                    sqli_detected = True
+                    break
+
+            # Filter products based on search term
+            products = [p for p in default_products if search_term.lower() in p["name"].lower()]
+
+            # If SQL injection with WAF bypass is detected
+            if sqli_detected:
+                # Add the secret product to the results
+                products.append(secret_product)
+
+                # Mark challenge as completed
+                challenge = Challenge.query.filter_by(name="SQL Injection with WAF Bypass").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+
+    # Generate a flag for this challenge only if completed
+    challenge = Challenge.query.filter_by(name="SQL Injection with WAF Bypass").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('sqli/sqli_level6.html', flag=flag, sqli_detected=sqli_detected,
+                          search_term=search_term, search_performed=search_performed,
+                          products=products, waf_blocked=waf_blocked)
+
+# SQL Injection Level 7 - Error-Based SQL Injection
+@app.route('/sqli/level7', methods=['GET'])
+def sqli_level7():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    sqli_detected = False
+    category_id = request.args.get('id', '')
+    category = None
+    error_message = None
+
+    # Default categories
+    default_categories = {
+        "1": {"id": 1, "name": "Electronics", "description": "Electronic devices and gadgets"},
+        "2": {"id": 2, "name": "Clothing", "description": "Apparel and fashion items"},
+        "3": {"id": 3, "name": "Books", "description": "Books, e-books, and publications"},
+        "4": {"id": 4, "name": "Home & Garden", "description": "Items for home and garden"},
+        "5": {"id": 5, "name": "Sports & Outdoors", "description": "Sports equipment and outdoor gear"}
+    }
+
+    if category_id:
+        # Check for SQL injection patterns
+        sqli_patterns = ["'", "\"", "--", ";", "UNION", "SELECT", "FROM", "WHERE", "CONCAT", "GROUP BY", "FLOOR", "RAND", "COUNT", "EXTRACTVALUE", "UPDATEXML"]
+
+        # Convert to uppercase for case-insensitive check
+        category_id_upper = category_id.upper()
+
+        # Check if any SQL injection pattern is in the input
+        for pattern in sqli_patterns:
+            if pattern.upper() in category_id_upper:
+                # SQL injection detected!
+                sqli_detected = True
+                break
+
+        if sqli_detected:
+            # Simulate error-based SQL injection
+            if "CONCAT" in category_id_upper or "GROUP BY" in category_id_upper or "FLOOR" in category_id_upper or "RAND" in category_id_upper or "EXTRACTVALUE" in category_id_upper or "UPDATEXML" in category_id_upper:
+                # Generate an error message that contains the flag
+                error_message = "Error: SQLSTATE[42000]: Syntax error or access violation: 1690 BIGINT UNSIGNED value is out of range in '(SELECT 'FLAG{3rr0r_b4s3d_sql1_3xtr4ct10n}' FROM secrets WHERE key_name = 'level7_flag')'"
+
+                # Mark challenge as completed
+                challenge = Challenge.query.filter_by(name="Error-Based SQL Injection").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                # For other SQL injection attempts, return a generic error
+                error_message = "Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '" + category_id + "' at line 1"
+        else:
+            # Normal category lookup
+            if category_id in default_categories:
+                category = default_categories[category_id]
+            else:
+                error_message = "Error: Category not found"
+
+    # Generate a flag for this challenge only if completed
+    challenge = Challenge.query.filter_by(name="Error-Based SQL Injection").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('sqli/sqli_level7.html', flag=flag, sqli_detected=sqli_detected,
+                          category_id=category_id, category=category, error_message=error_message)
+
 # Solutions
 @app.route('/solutions/<level>')
 def solutions(level):

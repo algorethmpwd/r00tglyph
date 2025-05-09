@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 4: Blind SQL Injection - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        {% if sqli_detected %}
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>Success!</strong> You've successfully exploited the blind SQL injection vulnerability! The challenge has been marked as completed.
+            {% if flag %}
+            <div class="mt-2">
+                <strong>Flag:</strong> <code>{{ flag }}</code>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 4: Blind SQL Injection</h2>
+            </div>
+            <div class="card-body">
+                <!-- Challenge Description Popup Button -->
+                <button type="button" class="btn btn-info mb-3" data-bs-toggle="modal" data-bs-target="#challengeDescriptionModal">
+                    <i class="bi bi-info-circle-fill me-2"></i>View Challenge Description
+                </button>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-person-badge me-2"></i>User Profile</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('sqli_level4') }}" method="get">
+                            <div class="mb-3">
+                                <label for="user_id" class="form-label">Enter User ID:</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="user_id" name="id" value="{{ user_id }}" placeholder="e.g., 1">
+                                    <button class="btn btn-primary" type="submit">View Profile</button>
+                                </div>
+                                <div class="form-text">Try viewing different user profiles by changing the ID.</div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {% if user_exists is not none %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-person-circle me-2"></i>User Information</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if user_exists %}
+                        <div class="alert alert-success">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            User with ID {{ user_id }} exists in the database.
+                        </div>
+                        {% else %}
+                        <div class="alert alert-danger">
+                            <i class="bi bi-x-circle-fill me-2"></i>
+                            User with ID {{ user_id }} does not exist in the database.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level='sqli4') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Challenge Description Modal -->
+<div class="modal fade" id="challengeDescriptionModal" tabindex="-1" aria-labelledby="challengeDescriptionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="challengeDescriptionModalLabel">Challenge Description: Blind SQL Injection</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-dark">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>UserPortal</strong>, a fictional user management system! This challenge simulates a real-world scenario where a user profile lookup feature is vulnerable to blind SQL injection.
+                    </p>
+                    <p>
+                        The developers of UserPortal have implemented a feature that allows administrators to check if a user with a specific ID exists in the database. However, they've made a critical mistake in how they handle user input, allowing attackers to perform blind SQL injection attacks.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> The system has a hidden user with the username <code>admin_secret</code>. You need to find this user's ID and extract the flag stored in their password field. Since this is a blind SQL injection vulnerability, you won't see the actual data returned from the database - you'll only see whether a user exists or not based on your query.
+                    </p>
+                </div>
+                
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            The application likely uses a SQL query similar to:
+                        </p>
+                        <pre class="bg-light p-3 rounded"><code>SELECT * FROM users WHERE id = [user_input]</code></pre>
+                        <p>
+                            For blind SQL injection, you need to:
+                        </p>
+                        <ol>
+                            <li>Use boolean conditions to extract information bit by bit</li>
+                            <li>Construct queries that return true or false based on your guesses</li>
+                            <li>Use techniques like binary search to efficiently extract data</li>
+                        </ol>
+                        <p>
+                            Try using conditions like:
+                        </p>
+                        <pre class="bg-light p-3 rounded"><code>1 AND (SELECT 1 FROM users WHERE username = 'admin_secret')</code></pre>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

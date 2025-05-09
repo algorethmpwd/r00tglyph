@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}SQL Injection Level 7 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">SQL Injection Level 7 Solution: Error-Based SQL Injection</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
+                    <p>
+                        This challenge demonstrates an error-based SQL injection vulnerability in a category browser feature. The application directly concatenates user input into SQL queries without proper sanitization and displays detailed database error messages when queries fail, allowing an attacker to extract data through carefully crafted error messages.
+                    </p>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-bug-fill me-2"></i>Vulnerability Explanation</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            The vulnerability exists because the application constructs an SQL query by directly concatenating user input:
+                        </p>
+                        <pre class="bg-light p-3 rounded"><code>SELECT id, name, description FROM categories WHERE id = [user_input]</code></pre>
+                        <p>
+                            Additionally, the application displays detailed database error messages when queries fail, which can reveal information about the database structure and data.
+                        </p>
+                        <p>
+                            Error-based SQL injection is a technique where an attacker crafts SQL queries that intentionally cause errors containing the data they want to extract. This is particularly useful when the application doesn't directly display query results but does show error messages.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Solution</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>To exploit this vulnerability, we need to:</p>
+                        
+                        <h6>1. Verify the vulnerability exists</h6>
+                        <p>
+                            First, we need to confirm that we can cause SQL errors that are displayed to the user:
+                        </p>
+                        <div class="alert alert-secondary">
+                            <code>1 AND (SELECT 1 FROM nonexistent_table)</code>
+                        </div>
+                        <p>
+                            This should cause an error message like "Table 'nonexistent_table' doesn't exist", confirming that error messages are displayed to the user.
+                        </p>
+                        
+                        <h6>2. Check if the secrets table exists</h6>
+                        <p>
+                            Next, we need to check if the secrets table exists:
+                        </p>
+                        <div class="alert alert-secondary">
+                            <code>1 AND (SELECT 1 FROM secrets)</code>
+                        </div>
+                        <p>
+                            If this doesn't cause an error, then the secrets table exists.
+                        </p>
+                        
+                        <h6>3. Extract data using error messages</h6>
+                        <p>
+                            Now we can use various techniques to extract data through error messages. One common technique is to use the XPATH function, which can cause errors that include the data we want to extract:
+                        </p>
+                        <div class="alert alert-secondary">
+                            <code>1 AND extractvalue(1, concat(0x7e, (SELECT flag_value FROM secrets WHERE key_name = 'level7_flag'), 0x7e))</code>
+                        </div>
+                        <p>
+                            This will cause an error message like "XPATH syntax error: '~FLAG{...}~'", revealing the flag.
+                        </p>
+                        <p>
+                            Another technique is to use the UPDATEXML function:
+                        </p>
+                        <div class="alert alert-secondary">
+                            <code>1 AND updatexml(1, concat(0x7e, (SELECT flag_value FROM secrets WHERE key_name = 'level7_flag'), 0x7e), 1)</code>
+                        </div>
+                        <p>
+                            This will also cause an error message containing the flag.
+                        </p>
+                        
+                        <h6>4. Using GROUP BY with COUNT and FLOOR(RAND())</h6>
+                        <p>
+                            Another powerful technique for error-based extraction uses the GROUP BY clause with COUNT and FLOOR(RAND()):
+                        </p>
+                        <div class="alert alert-secondary">
+                            <code>1 AND (SELECT 1 FROM (SELECT COUNT(*), CONCAT(flag_value, FLOOR(RAND(0)*2)) AS x FROM secrets WHERE key_name = 'level7_flag' GROUP BY x) AS y)</code>
+                        </div>
+                        <p>
+                            This causes an error like "Duplicate entry 'FLAG{...}1' for key 'group_key'", revealing the flag.
+                        </p>
+                        
+                        <h6>5. Using BIGINT overflow</h6>
+                        <p>
+                            For databases that support it, BIGINT overflow can also be used:
+                        </p>
+                        <div class="alert alert-secondary">
+                            <code>1 AND (SELECT 1 FROM (SELECT COUNT(*), CONCAT(flag_value, 0x716d7a71, FLOOR(RAND(0)*2)) AS x FROM secrets WHERE key_name = 'level7_flag' GROUP BY x) AS y)</code>
+                        </div>
+                        <p>
+                            This technique works by causing a BIGINT overflow error that includes the extracted data.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-shield-fill-check me-2"></i>Prevention</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>To prevent error-based SQL injection vulnerabilities, developers should:</p>
+                        <ol>
+                            <li>
+                                <strong>Use Parameterized Queries:</strong> Instead of concatenating strings, use prepared statements with parameter binding.
+                                <pre class="bg-light p-3 rounded"><code>cursor.execute("SELECT id, name, description FROM categories WHERE id = ?", (category_id,))</code></pre>
+                            </li>
+                            <li>
+                                <strong>Implement Proper Error Handling:</strong> Never display detailed database error messages to users. Instead, log them securely and display generic error messages.
+                            </li>
+                            <li>
+                                <strong>Use an ORM (Object-Relational Mapping):</strong> ORMs like SQLAlchemy handle parameter sanitization automatically.
+                            </li>
+                            <li>
+                                <strong>Input Validation:</strong> Validate and sanitize all user inputs before using them in queries.
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('sqli_level7') }}" class="btn btn-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
