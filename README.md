@@ -39,6 +39,14 @@ R00tGlyph is a Python-based web application designed to simulate real-world web 
   - Level 21: XSS via Web Bluetooth/USB
   - Level 22: XSS in WebGPU Applications
 
+- **SQL Injection (SQLi)**
+  - Level 1: Basic SQL Injection
+  - Level 2: SQL Injection in Search
+  - Level 3: SQL Injection with UNION
+  - Level 4: Blind SQL Injection
+  - Level 5: Time-Based Blind SQL Injection
+  - Level 6: SQL Injection with WAF Bypass
+
 ## Installation
 
 1. Clone this repository:
@@ -80,13 +88,14 @@ This platform is designed for educational purposes only. The skills learned shou
 
 ## Upcoming Features
 
-- SQL Injection challenges
 - Command Injection challenges
 - CSRF vulnerabilities
 - Server-Side Request Forgery (SSRF)
 - XML External Entity (XXE) Injection
 - Server-Side Template Injection (SSTI)
 - Insecure Deserialization
+- Local File Inclusion (LFI)
+- Remote File Inclusion (RFI)
 
 ## User Progress and Challenge Management
 

@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 1: Basic SQL Injection - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        {% if sqli_detected %}
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>Success!</strong> You've successfully exploited the SQL injection vulnerability! The challenge has been marked as completed.
+            {% if flag %}
+            <div class="mt-2">
+                <strong>Flag:</strong> <code>{{ flag }}</code>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 1: Basic SQL Injection</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>SecureBank</strong>, a fictional banking application! This challenge simulates a real-world scenario where a login form is vulnerable to SQL injection.
+                    </p>
+                    <p>
+                        The developers of SecureBank have created a login system, but they've made a critical mistake in how they handle user input. The application directly concatenates user input into SQL queries without proper sanitization.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Bypass the login form without knowing a valid username or password. Successfully logging in will reveal the flag.
+                    </p>
+                </div>
+
+                {% if error %}
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <strong>Error:</strong> {{ error }}
+                </div>
+                {% endif %}
+
+                {% if success %}
+                <div class="alert alert-success">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <strong>Success!</strong> {{ success }}
+                </div>
+                {% endif %}
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-bank me-2"></i>SecureBank Login</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('sqli_level1') }}" method="post">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Username:</label>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password:</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">Login</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            SQL injection occurs when user input is directly concatenated into SQL queries. Think about how a login query might be structured:
+                        </p>
+                        <pre class="bg-light p-3 rounded"><code>SELECT * FROM users WHERE username = 'input_username' AND password = 'input_password'</code></pre>
+                        <p>
+                            What happens if you can manipulate this query to always return true?
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level='sqli1') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

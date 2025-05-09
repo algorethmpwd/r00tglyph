@@ -1670,10 +1670,135 @@ def xss_level23():
         flag = get_or_create_flag(challenge.id, machine_id)
     return render_template('xss/xss_level23.html', flag=flag, user=user, xss_detected=xss_detected, challenge=challenge, message=message)
 
+# SQL Injection Level 1 - Basic SQL Injection
+@app.route('/sqli/level1', methods=['GET', 'POST'])
+def sqli_level1():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    sqli_detected = False
+    error = None
+    success = None
+
+    if request.method == 'POST':
+        username = request.form.get('username', '')
+        password = request.form.get('password', '')
+
+        # Check for SQL injection patterns
+        sqli_patterns = ["'", "\"", "--", ";", "OR", "=", "UNION", "SELECT", "DROP", "INSERT", "DELETE", "UPDATE"]
+
+        # Convert to uppercase for case-insensitive check
+        username_upper = username.upper()
+        password_upper = password.upper()
+
+        # Check if any SQL injection pattern is in the input
+        for pattern in sqli_patterns:
+            if pattern.upper() in username_upper or pattern.upper() in password_upper:
+                # SQL injection detected!
+                sqli_detected = True
+                break
+
+        # Simulate a vulnerable login system
+        if sqli_detected:
+            # Mark challenge as completed
+            challenge = Challenge.query.filter_by(name="Basic SQL Injection").first()
+            if challenge:
+                completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                if challenge.id not in completed_ids:
+                    update_user_progress(machine_id, challenge.id, challenge.points)
+
+            success = "SQL Injection detected! You've successfully bypassed the login."
+        else:
+            # Normal login attempt (will always fail for this challenge)
+            error = "Invalid username or password."
+
+    # Generate a flag for this challenge only if completed
+    challenge = Challenge.query.filter_by(name="Basic SQL Injection").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('sqli/sqli_level1.html', flag=flag, sqli_detected=sqli_detected, error=error, success=success)
+
+# SQL Injection Level 2 - SQL Injection in Search
+@app.route('/sqli/level2', methods=['GET'])
+def sqli_level2():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    sqli_detected = False
+    search_term = request.args.get('search', '')
+    search_performed = bool(search_term)
+    products = []
+
+    # Default products
+    default_products = [
+        {"id": 1, "name": "Smartphone X", "category": "Electronics", "price": 999.99},
+        {"id": 2, "name": "Laptop Pro", "category": "Electronics", "price": 1499.99},
+        {"id": 3, "name": "Wireless Headphones", "category": "Audio", "price": 199.99},
+        {"id": 4, "name": "Smart Watch", "category": "Wearables", "price": 299.99},
+        {"id": 5, "name": "Bluetooth Speaker", "category": "Audio", "price": 129.99}
+    ]
+
+    # Secret product (only shown when SQL injection is successful)
+    secret_product = {"id": 42, "name": "Secret Gadget", "category": "Classified", "price": 9999.99}
+
+    if search_term:
+        # Check for SQL injection patterns
+        sqli_patterns = ["'", "\"", "--", ";", "OR", "=", "UNION", "SELECT", "DROP", "INSERT", "DELETE", "UPDATE"]
+
+        # Convert to uppercase for case-insensitive check
+        search_upper = search_term.upper()
+
+        # Check if any SQL injection pattern is in the input
+        for pattern in sqli_patterns:
+            if pattern.upper() in search_upper:
+                # SQL injection detected!
+                sqli_detected = True
+                break
+
+        # Filter products based on search term
+        products = [p for p in default_products if search_term.lower() in p["name"].lower()]
+
+        # If SQL injection is detected and specifically looking for product with ID 42
+        if sqli_detected and ("42" in search_term or "id=42" in search_term.lower() or "id = 42" in search_term.lower()):
+            products.append(secret_product)
+
+            # Mark challenge as completed
+            challenge = Challenge.query.filter_by(name="SQL Injection in Search").first()
+            if challenge:
+                completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                if challenge.id not in completed_ids:
+                    update_user_progress(machine_id, challenge.id, challenge.points)
+        # If SQL injection is detected with a generic attack that would return all products
+        elif sqli_detected and ("1=1" in search_term.lower() or "or" in search_term.lower()):
+            products = default_products.copy()
+            products.append(secret_product)
+
+            # Mark challenge as completed
+            challenge = Challenge.query.filter_by(name="SQL Injection in Search").first()
+            if challenge:
+                completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                if challenge.id not in completed_ids:
+                    update_user_progress(machine_id, challenge.id, challenge.points)
+
+    # Generate a flag for this challenge only if completed
+    challenge = Challenge.query.filter_by(name="SQL Injection in Search").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('sqli/sqli_level2.html', flag=flag, sqli_detected=sqli_detected,
+                          search_term=search_term, search_performed=search_performed, products=products)
+
 # Solutions
 @app.route('/solutions/<level>')
 def solutions(level):
-    return render_template(f'solutions/xss_level{level}_solution.html')
+    # Check if it's an XSS or SQLi solution
+    if level.startswith('sqli'):
+        return render_template(f'solutions/{level}_solution.html')
+    else:
+        return render_template(f'solutions/xss_level{level}_solution.html')
 
 
 

