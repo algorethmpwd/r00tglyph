@@ -56,7 +56,7 @@
                             <div class="accordion-body p-0">
                                 <div class="list-group list-group-flush">
                                     {% for challenge in challenges_by_category[category] %}
-                                    <a href="{{ url_for('xss_level' + (loop.index | string)) if category == 'xss' else '#' }}"
+                                    <a href="{{ url_for('xss_level' + (loop.index | string)) if category == 'xss' else (url_for('sqli_level' + (loop.index | string)) if category == 'sqli' else '#') }}"
                                        class="list-group-item list-group-item-action {% if challenge.completed %}list-group-item-success{% endif %}">
                                         <div class="d-flex w-100 justify-content-between align-items-center">
                                             <div>
@@ -89,7 +89,7 @@
                 </div>
 
                 <div class="alert alert-info mt-4">
-                    <strong><i class="bi bi-clock-history"></i> Coming Soon:</strong> SQL Injection, Command Injection, CSRF, and more vulnerability types!
+                    <strong><i class="bi bi-clock-history"></i> Coming Soon:</strong> Command Injection, CSRF, Server-Side Request Forgery (SSRF), and more vulnerability types!
                 </div>
             </div>
         </div>
