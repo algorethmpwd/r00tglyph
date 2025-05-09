@@ -3,8 +3,95 @@
 {% block title %}Level 5: Time-Based Blind SQL Injection - R00tGlyph{% endblock %}
 
 {% block content %}
+<style>
+    .newsletter-header {
+        background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .subscription-container {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        padding: 20px;
+        border: 1px solid #e9ecef;
+        margin-bottom: 20px;
+    }
+    .scenario-box {
+        background-color: #e9f7fe;
+        border-left: 4px solid #17a2b8;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+    }
+    .newsletter-stats {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+    .stat-item {
+        text-align: center;
+        padding: 10px;
+    }
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #43cea2;
+    }
+    .response-container {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        padding: 20px;
+        border: 1px solid #e9ecef;
+        margin-bottom: 20px;
+    }
+    .feature-box {
+        text-align: center;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+        background-color: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+    .feature-box:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .feature-icon {
+        font-size: 2rem;
+        margin-bottom: 10px;
+        color: #43cea2;
+    }
+    .testimonial {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-left: 4px solid #43cea2;
+    }
+    .testimonial-author {
+        font-weight: bold;
+        color: #185a9d;
+    }
+    .time-display {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #185a9d;
+        text-align: center;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        margin-bottom: 15px;
+    }
+</style>
+
 <div class="row">
-    <div class="col-md-8 offset-md-2">
+    <div class="col-md-10 offset-md-1">
         {% if sqli_detected %}
         <div class="alert alert-success">
             <i class="bi bi-check-circle-fill me-2"></i>
@@ -17,65 +104,209 @@
         </div>
         {% endif %}
 
-        <div class="card">
+        <!-- Challenge Description Button -->
+        <button type="button" class="btn btn-info mb-3" data-bs-toggle="modal" data-bs-target="#challengeDescriptionModal">
+            <i class="bi bi-info-circle-fill me-2"></i>View Challenge Description
+        </button>
+
+        <div class="newsletter-header">
+            <div class="d-flex align-items-center justify-content-center">
+                <i class="bi bi-envelope-paper-fill me-2" style="font-size: 2.5rem;"></i>
+                <h1 class="mb-0">NewsletterPro</h1>
+            </div>
+            <p class="text-center mb-0 mt-2">Stay Informed with Our Premium Content</p>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="scenario-box">
+                    <h4><i class="bi bi-exclamation-triangle-fill me-2"></i>Penetration Testing Scenario</h4>
+                    <p>You're conducting a security assessment for MarketingPlus, a digital marketing agency that recently launched a newsletter subscription service called NewsletterPro. The client is concerned about the security of their subscriber database, which contains thousands of email addresses.</p>
+                    <p>During your initial testing, you notice that the subscription form sometimes takes unusually long to process. This behavior might indicate a vulnerability to time-based blind SQL injection, where database queries can be manipulated to cause deliberate delays.</p>
+                    <p><strong>Your objective:</strong> Determine if you can extract sensitive information from the database using time-based techniques, focusing on the server's response time as your only feedback mechanism.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="newsletter-stats">
+                    <h5 class="text-center mb-3"><i class="bi bi-bar-chart-fill me-2"></i>Newsletter Stats</h5>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="stat-item">
+                                <div class="stat-number">50K+</div>
+                                <div>Subscribers</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-item">
+                                <div class="stat-number">12</div>
+                                <div>Topics</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-item">
+                                <div class="stat-number">98%</div>
+                                <div>Delivery Rate</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-item">
+                                <div class="stat-number">Weekly</div>
+                                <div>Updates</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="feature-box">
+                    <div class="feature-icon">
+                        <i class="bi bi-lightning-charge"></i>
+                    </div>
+                    <h5>Instant Delivery</h5>
+                    <p class="text-muted">Get the latest news directly to your inbox</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-box">
+                    <div class="feature-icon">
+                        <i class="bi bi-hand-thumbs-up"></i>
+                    </div>
+                    <h5>Curated Content</h5>
+                    <p class="text-muted">Handpicked articles by industry experts</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-box">
+                    <div class="feature-icon">
+                        <i class="bi bi-lock"></i>
+                    </div>
+                    <h5>Privacy First</h5>
+                    <p class="text-muted">Your data is always secure with us</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="subscription-container">
+            <h4 class="mb-3"><i class="bi bi-envelope-plus me-2"></i>Subscribe to Our Newsletter</h4>
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <form action="{{ url_for('sqli_level5') }}" method="post">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address:</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                <input type="email" class="form-control form-control-lg" id="email" name="email" required placeholder="your@email.com">
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="bi bi-send me-2"></i>Subscribe
+                                </button>
+                            </div>
+                            <div class="form-text">
+                                <i class="bi bi-info-circle me-1"></i>
+                                We'll never share your email with anyone else. You can unsubscribe at any time.
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="bi bi-stars me-2"></i>Premium Benefits</h5>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i>Exclusive content</li>
+                                <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i>Early access</li>
+                                <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i>Special offers</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if message %}
+            <div class="alert alert-{{ message_type }}">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                {{ message }}
+            </div>
+            {% endif %}
+        </div>
+
+        {% if response_time %}
+        <div class="response-container">
+            <h4 class="mb-3"><i class="bi bi-clock-history me-2"></i>Server Response Analytics</h4>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="time-display">
+                        <i class="bi bi-stopwatch me-2"></i>
+                        {{ response_time }} seconds
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <p><strong>Response Time Analysis:</strong></p>
+                    <div class="progress mb-3" style="height: 25px;">
+                        <div class="progress-bar bg-info" role="progressbar" style="width: {{ (response_time / 5) * 100 if response_time < 5 else 100 }}%;" aria-valuenow="{{ response_time }}" aria-valuemin="0" aria-valuemax="5">
+                            {{ response_time }} seconds
+                        </div>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <strong>Performance Metrics:</strong> Normal response times are typically under 0.5 seconds. Longer response times may indicate high server load or database processing delays.
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <h4 class="mb-3"><i class="bi bi-chat-quote me-2"></i>What Our Subscribers Say</h4>
+            </div>
+            <div class="col-md-6">
+                <div class="testimonial">
+                    <p>"The newsletter has been incredibly valuable for staying up-to-date with industry trends. Highly recommended!"</p>
+                    <p class="testimonial-author">- Sarah J., Marketing Director</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="testimonial">
+                    <p>"I look forward to receiving this newsletter every week. The content is always relevant and insightful."</p>
+                    <p class="testimonial-author">- Michael T., Tech Entrepreneur</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
             <div class="card-header bg-dark text-white">
-                <h2 class="text-center">Level 5: Time-Based Blind SQL Injection</h2>
+                <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Technical Notes</h5>
             </div>
             <div class="card-body">
-                <!-- Challenge Description Popup Button -->
-                <button type="button" class="btn btn-info mb-3" data-bs-toggle="modal" data-bs-target="#challengeDescriptionModal">
-                    <i class="bi bi-info-circle-fill me-2"></i>View Challenge Description
-                </button>
+                <p>
+                    <strong>For educational purposes:</strong> This newsletter subscription form is vulnerable to time-based blind SQL injection. In a real application, such vulnerabilities could allow attackers to extract sensitive information from the database.
+                </p>
+                <p>
+                    The backend code might look something like this:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>// Vulnerable code example (PHP)
+$email = $_POST['email'];
 
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0"><i class="bi bi-newspaper me-2"></i>Newsletter Subscription</h4>
-                    </div>
-                    <div class="card-body">
-                        <form action="{{ url_for('sqli_level5') }}" method="post">
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email Address:</label>
-                                <input type="email" class="form-control" id="email" name="email" required placeholder="your@email.com">
-                            </div>
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary">Subscribe</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+$query = "INSERT INTO subscribers (email) VALUES ('$email')";
+$result = mysqli_query($connection, $query);
 
-                {% if message %}
-                <div class="alert alert-{{ message_type }}">
-                    <i class="bi bi-info-circle-fill me-2"></i>
-                    {{ message }}
-                </div>
-                {% endif %}
-
-                {% if response_time %}
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5><i class="bi bi-clock-history me-2"></i>Response Information</h5>
-                    </div>
-                    <div class="card-body">
-                        <p><strong>Response Time:</strong> {{ response_time }} seconds</p>
-                        <div class="progress mb-3" style="height: 25px;">
-                            <div class="progress-bar bg-info" role="progressbar" style="width: {{ (response_time / 5) * 100 if response_time < 5 else 100 }}%;" aria-valuenow="{{ response_time }}" aria-valuemin="0" aria-valuemax="5">
-                                {{ response_time }} seconds
-                            </div>
-                        </div>
-                        <div class="alert alert-info">
-                            <i class="bi bi-info-circle-fill me-2"></i>
-                            Normal response times are typically under 0.5 seconds. Longer response times may indicate that the server is processing a time-consuming query.
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-
-                <div class="mt-4">
-                    <a href="{{ url_for('solutions', level='sqli5') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
-                </div>
+if($result) {
+    echo "Thank you for subscribing to our newsletter!";
+} else {
+    echo "Error: " . mysqli_error($connection);
+}</code></pre>
+                <p>
+                    <strong>Security tip:</strong> To prevent time-based blind SQL injection attacks, use parameterized queries and validate user input before using it in database queries.
+                </p>
             </div>
+        </div>
+
+        <div class="mt-4">
+            <a href="{{ url_for('solutions', level='sqli5') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+            <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
         </div>
     </div>
 </div>
@@ -101,7 +332,29 @@
                         <strong>Your Task:</strong> The system has a hidden configuration table with a key named <code>secret_flag</code>. You need to extract the value of this key, which contains the flag. Since this is a time-based blind SQL injection vulnerability, you won't see the actual data returned from the database - you'll need to use time delays to extract the information.
                     </p>
                 </div>
-                
+
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            Time-based blind SQL injection is a technique used when an attacker can't see the results of their SQL injection directly, but can observe differences in the time it takes for the server to respond.
+                        </p>
+                        <p>
+                            This technique works by injecting SQL code that causes the database to pause or "sleep" for a specified amount of time when a certain condition is true. By measuring the response time, the attacker can determine whether the condition was true or false.
+                        </p>
+                        <p>
+                            Time-based techniques are particularly useful when:
+                        </p>
+                        <ul>
+                            <li>The application doesn't display error messages</li>
+                            <li>Boolean-based blind injection isn't possible</li>
+                            <li>The application doesn't provide any visible feedback about the query results</li>
+                        </ul>
+                    </div>
+                </div>
+
                 <div class="card mb-3">
                     <div class="card-header">
                         <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
@@ -115,7 +368,7 @@
                             For time-based blind SQL injection, you need to:
                         </p>
                         <ol>
-                            <li>Use SQL functions that cause delays (like SLEEP or similar functions)</li>
+                            <li>Use SQL functions that cause delays (like SLEEP, BENCHMARK, pg_sleep, or WAITFOR DELAY)</li>
                             <li>Construct conditional queries that only cause delays when certain conditions are true</li>
                             <li>Extract data character by character based on the presence or absence of delays</li>
                         </ol>
@@ -123,6 +376,33 @@
                             Try using payloads like:
                         </p>
                         <pre class="bg-light p-3 rounded"><code>test@example.com'; IF (SELECT 1 FROM config WHERE key_name = 'secret_flag') SLEEP(3); --</code></pre>
+                        <p>
+                            To extract data character by character, you can use:
+                        </p>
+                        <pre class="bg-light p-3 rounded"><code>test@example.com'; IF (ASCII(SUBSTRING((SELECT value FROM config WHERE key_name = 'secret_flag'), 1, 1)) > 97) SLEEP(3); --</code></pre>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-shield-fill-check me-2"></i>Real-World Impact</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            Time-based blind SQL injection attacks have been used in several major security incidents:
+                        </p>
+                        <ul>
+                            <li><strong>Drupal (2014)</strong>: The "Drupalgeddon" vulnerability (CVE-2014-3704) allowed attackers to use time-based techniques to extract data from vulnerable Drupal sites.</li>
+                            <li><strong>WordPress (2017)</strong>: Several plugins were found vulnerable to time-based blind SQL injection, affecting millions of websites.</li>
+                        </ul>
+                        <p>
+                            For newsletter services like this one, such vulnerabilities could expose:
+                        </p>
+                        <ul>
+                            <li>Subscriber email addresses and personal information</li>
+                            <li>Administrative credentials</li>
+                            <li>Configuration settings and API keys</li>
+                        </ul>
                     </div>
                 </div>
             </div>
