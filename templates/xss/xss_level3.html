@@ -131,14 +131,7 @@
 
                                             <form action="{{ url_for('xss_level3') }}" method="post" class="mb-4">
                                                 <div class="mb-3">
-                                                    <label for="username" class="form-label">Username:</label>
-                                                    <div class="input-group">
-                                                        <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
-                                                        <input type="text" class="form-control" id="username" name="username" value="{{ user.display_name }}" required>
-                                                    </div>
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label for="content" class="form-label">Comment:</label>
+                                                    <label for="content" class="form-label">Comment as <strong>{{ user.display_name }}</strong>:</label>
                                                     <textarea class="form-control" id="content" name="content" rows="3" placeholder="Share your thoughts..." required></textarea>
                                                     <div class="form-text">HTML formatting is allowed to enhance your comment.</div>
                                                 </div>

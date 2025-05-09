@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from app import app, Challenge
 
 with app.app_context():

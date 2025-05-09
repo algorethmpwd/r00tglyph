@@ -141,13 +141,22 @@
                                                     </div>
 
                                                     <div class="mb-3">
+                                                        <label class="form-label">Color Input:</label>
+                                                        <div class="input-group mb-3">
+                                                            <input type="text" id="colorInput" class="form-control" placeholder="Enter color or code (e.g., red, #ff0000)">
+                                                            <button class="btn btn-primary" type="button" id="applyColorBtn">Apply</button>
+                                                        </div>
+                                                        <div class="form-text">Try entering a color name, hex code, or something else...</div>
+                                                    </div>
+
+                                                    <div class="mb-3">
                                                         <label class="form-label">Common Colors:</label>
                                                         <div class="d-flex flex-wrap gap-2">
-                                                            <a href="?color=red" class="btn btn-sm btn-outline-danger">Red</a>
-                                                            <a href="?color=blue" class="btn btn-sm btn-outline-primary">Blue</a>
-                                                            <a href="?color=green" class="btn btn-sm btn-outline-success">Green</a>
-                                                            <a href="?color=yellow" class="btn btn-sm btn-outline-warning">Yellow</a>
-                                                            <a href="?color=purple" class="btn btn-sm btn-outline-secondary">Purple</a>
+                                                            <button type="button" class="btn btn-sm btn-outline-danger color-preset" data-color="red">Red</button>
+                                                            <button type="button" class="btn btn-sm btn-outline-primary color-preset" data-color="blue">Blue</button>
+                                                            <button type="button" class="btn btn-sm btn-outline-success color-preset" data-color="green">Green</button>
+                                                            <button type="button" class="btn btn-sm btn-outline-warning color-preset" data-color="yellow">Yellow</button>
+                                                            <button type="button" class="btn btn-sm btn-outline-secondary color-preset" data-color="purple">Purple</button>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -163,6 +172,14 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Flag container - visible when challenge is completed via AJAX or page load -->
+                <div id="flag-container" style="display: {% if flag and xss_detected %}block{% else %}none{% endif %};">
+                    <div class="alert alert-success">
+                        <i class="bi bi-flag-fill me-2"></i>
+                        <strong>Challenge completed!</strong> Your flag is: <code>{{ flag }}</code>
                     </div>
                 </div>
 
@@ -200,19 +217,84 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script>
-    // Vulnerable code that doesn't sanitize user input
-    function setColor() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const color = urlParams.get('color');
+<!-- DOM XSS functionality is now handled by main.js -->
 
-        if (color) {
-            // Vulnerable line - directly inserting user input into the DOM
-            document.getElementById('colorBox').style = "background-color: " + color;
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Override the alert function to detect XSS
+    const originalAlert = window.alert;
+    window.alert = function(message) {
+        console.log("Alert intercepted:", message);
+
+        // Check if this is the XSS completion message
+        if (message === "XSS Level 2 Completed!") {
+            console.log("XSS Level 2 completed!");
+
+            // Call the original alert to show the message
+            originalAlert(message);
+
+            // Mark as completed without page reload
+            let url = new URL(window.location.href);
+            url.searchParams.set('success', 'true');
+
+            // Use fetch to notify the server
+            fetch(url.toString(), {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Server response:", data);
+
+                // Show the flag
+                const flagContainer = document.getElementById('flag-container');
+                if (flagContainer) {
+                    if (data.flag) {
+                        flagContainer.innerHTML = `
+                            <div class="alert alert-success">
+                                <i class="bi bi-flag-fill me-2"></i>
+                                <strong>Challenge completed!</strong> Your flag is: <code>${data.flag}</code>
+                            </div>
+                        `;
+                    }
+                    flagContainer.style.display = 'block';
+                }
+
+                // Update URL without reloading
+                history.pushState({}, '', url.toString());
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                originalAlert("Error completing challenge. Please try again.");
+            });
+
+            return;
+        }
+
+        // For other alerts, just call the original function
+        originalAlert(message);
+    };
+
+    // If the flag is present and the URL has success=true, reveal the flag
+    {% if flag %}
+    if (window.location.search.includes('success=true')) {
+        if (typeof revealFlag === 'function') {
+            revealFlag();
+        } else {
+            // fallback: just show the flag div
+            var flagDiv = document.getElementById('flag-display');
+            if (flagDiv) flagDiv.style.display = 'block';
+
+            // Also show the flag container
+            var flagContainer = document.getElementById('flag-container');
+            if (flagContainer) {
+                flagContainer.style.display = 'block';
+            }
         }
     }
-
-    // Call the function when the page loads
-    window.onload = setColor;
+    {% endif %}
+});
 </script>
 {% endblock %}

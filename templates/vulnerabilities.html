@@ -17,23 +17,56 @@
                     <small class="text-muted">Note: You need to be logged in to submit flags and track your progress.</small>
                 </div>
 
+                <!-- Overall Progress Bar -->
+                <div class="card mb-3">
+                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-bar-chart-fill me-2"></i>Your Progress</h5>
+                        <span class="badge bg-success">{{ completed_count }} / {{ total_count }} Completed</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="progress" style="height: 25px;">
+                            <div class="progress-bar bg-success" role="progressbar"
+                                 style="width: {{ (completed_count / total_count * 100) if total_count > 0 else 0 }}%;"
+                                 aria-valuenow="{{ completed_count }}" aria-valuemin="0" aria-valuemax="{{ total_count }}">
+                                {{ (completed_count / total_count * 100) | round | int }}%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="accordion" id="challengeAccordion">
                     {% for category in categories %}
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="heading{{ category }}">
                             <button class="accordion-button {% if not loop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ category }}" aria-expanded="{% if loop.first %}true{% else %}false{% endif %}" aria-controls="collapse{{ category }}">
-                                <i class="bi bi-bug-fill me-2"></i>
-                                {{ category.upper() }} Challenges
+                                <div class="d-flex justify-content-between align-items-center w-100">
+                                    <div>
+                                        <i class="bi bi-bug-fill me-2"></i>
+                                        {{ category.upper() }} Challenges
+                                    </div>
+                                    <div>
+                                        <span class="badge bg-success me-2">
+                                            {{ category_completion[category]['completed'] }} / {{ category_completion[category]['total'] }}
+                                        </span>
+                                    </div>
+                                </div>
                             </button>
                         </h2>
                         <div id="collapse{{ category }}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}" aria-labelledby="heading{{ category }}" data-bs-parent="#challengeAccordion">
                             <div class="accordion-body p-0">
                                 <div class="list-group list-group-flush">
-                                    {% for challenge in challenges[category] %}
-                                    <a href="{{ url_for('xss_level' + (loop.index | string)) if category == 'xss' and loop.index <= 9 else '#' }}" class="list-group-item list-group-item-action">
+                                    {% for challenge in challenges_by_category[category] %}
+                                    <a href="{{ url_for('xss_level' + (loop.index | string)) if category == 'xss' else '#' }}"
+                                       class="list-group-item list-group-item-action {% if challenge.completed %}list-group-item-success{% endif %}">
                                         <div class="d-flex w-100 justify-content-between align-items-center">
                                             <div>
-                                                <h5 class="mb-1">{{ challenge.name }}</h5>
+                                                <h5 class="mb-1">
+                                                    {% if challenge.completed %}
+                                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                                    {% endif %}
+                                                    <span class="badge bg-secondary me-2">{{ loop.index }}</span>
+                                                    {{ challenge.name }}
+                                                </h5>
                                                 <p class="mb-1">{{ challenge.description }}</p>
                                             </div>
                                             <div class="text-end">
@@ -41,6 +74,9 @@
                                                     {{ challenge.difficulty | title }}
                                                 </span>
                                                 <span class="badge bg-primary">{{ challenge.points }} pts</span>
+                                                {% if challenge.completed %}
+                                                <span class="badge bg-success d-block mt-1">Completed</span>
+                                                {% endif %}
                                             </div>
                                         </div>
                                     </a>

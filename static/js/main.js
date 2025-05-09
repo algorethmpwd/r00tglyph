@@ -68,18 +68,73 @@ function setupChallengeListeners() {
 function setupDOMXSS() {
     // This function is specifically for the DOM XSS challenge
     if (window.location.pathname.includes('/xss/level2')) {
-        function setColor() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const color = urlParams.get('color');
+        console.log("Setting up DOM XSS for Level 2");
 
-            if (color) {
-                // Vulnerable line - directly inserting user input into the DOM
-                document.getElementById('colorBox').style = "background-color: " + color;
+        // Get the color box element
+        const colorBox = document.getElementById('colorBox');
+        if (!colorBox) {
+            console.error("colorBox element not found");
+            return;
+        }
+
+        // Get the color input and apply button
+        const colorInput = document.getElementById('colorInput');
+        const applyColorBtn = document.getElementById('applyColorBtn');
+
+        // Function to apply color (intentionally vulnerable)
+        function applyColor(color) {
+            if (!color) return;
+
+            console.log("Applying color:", color);
+
+            try {
+                // VULNERABLE CODE: Directly using user input without sanitization
+                // This is intentional for the XSS challenge
+                colorBox.style = "background-color: " + color + "; height: 100%; display: flex; align-items: center; justify-content: center;";
+
+                // Update URL without page reload
+                const url = new URL(window.location.href);
+                url.searchParams.set('color', color);
+                history.pushState({}, '', url.toString());
+
+                console.log("Color applied successfully");
+            } catch (error) {
+                console.error("Error applying color:", error);
             }
         }
 
-        // Call the function when the page loads
-        setColor();
+        // Set up event listeners for the color input and button
+        if (applyColorBtn && colorInput) {
+            applyColorBtn.addEventListener('click', function() {
+                applyColor(colorInput.value);
+            });
+
+            colorInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    applyColor(colorInput.value);
+                }
+            });
+        }
+
+        // Set up event listeners for the preset color buttons
+        const colorPresets = document.querySelectorAll('.color-preset');
+        colorPresets.forEach(button => {
+            button.addEventListener('click', function() {
+                const color = this.getAttribute('data-color');
+                if (colorInput) colorInput.value = color;
+                applyColor(color);
+            });
+        });
+
+        // Check if there's a color in the URL and apply it
+        const urlParams = new URLSearchParams(window.location.search);
+        const color = urlParams.get('color');
+
+        if (color) {
+            if (colorInput) colorInput.value = color;
+            applyColor(color);
+        }
     }
 }
 
@@ -145,37 +200,111 @@ function setupXSSDetection() {
     // Override the alert function to detect when XSS challenges are completed
     const originalAlert = window.alert;
     window.alert = function(message) {
-        // Call the original alert function
-        originalAlert(message);
+        console.log("Alert triggered with message:", message);
 
         // Check if this is a challenge completion message
         if (message && typeof message === 'string') {
             const level = getCurrentXSSLevel();
+            console.log("Current XSS level:", level);
+
             const expectedMessage = `XSS Level ${level} Completed!`;
+            console.log("Expected message:", expectedMessage);
 
             if (message === expectedMessage) {
                 console.log(`Challenge completed: ${expectedMessage}`);
 
-                // Reveal the flag
-                revealFlag();
+                // For level 2 specifically, we need to handle it differently
+                if (level === "2") {
+                    console.log("Level 2 completed, special handling");
 
-                // Reload the page with success parameter if not already present
-                // This ensures the server-side flag generation happens
-                if (!window.location.href.includes('success=true')) {
-                    // Add a small delay to ensure the alert is seen
-                    setTimeout(() => {
-                        let url = new URL(window.location.href);
-                        url.searchParams.set('success', 'true');
-                        window.location.href = url.toString();
-                    }, 1000);
+                    // Call the original alert function after we've processed the message
+                    originalAlert(message);
+
+                    // Prevent default behavior for javascript: URLs
+                    if (window.event) {
+                        window.event.preventDefault();
+                        window.event.stopPropagation();
+                    }
+
+                    // Immediately mark as completed on the server side
+                    let url = new URL(window.location.href);
+                    url.searchParams.set('success', 'true');
+
+                    // Use fetch instead of redirecting to avoid interrupting the flow
+                    fetch(url.toString(), {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    }).then(response => response.json())
+                    .then(data => {
+                        console.log("Server notified of completion, response:", data);
+
+                        // Display the flag in the DOM without reloading
+                        if (data.flag) {
+                            const flagContainer = document.getElementById('flag-container');
+                            if (flagContainer) {
+                                flagContainer.innerHTML = `
+                                    <div class="alert alert-success mt-3">
+                                        <i class="bi bi-flag-fill me-2"></i>
+                                        <strong>Challenge completed!</strong> Your flag is: <code>${data.flag}</code>
+                                    </div>
+                                `;
+                                flagContainer.style.display = 'block';
+                            }
+
+                            // Also update the colorBox to show completion
+                            const colorBox = document.getElementById('colorBox');
+                            if (colorBox) {
+                                colorBox.innerHTML = `
+                                    <div class="alert alert-success m-0">
+                                        <i class="bi bi-check-circle-fill me-2"></i>
+                                        XSS Level 2 Completed!
+                                    </div>
+                                `;
+                            }
+                        }
+
+                        // Update URL without reloading
+                        history.pushState({}, '', url.toString());
+                    }).catch(error => {
+                        console.error("Error notifying server:", error);
+                        originalAlert("Error completing challenge. Please try again.");
+                    });
+
+                    // Return early to prevent the default alert behavior
+                    return;
                 } else {
-                    // If success=true is already in the URL, force a page reload
-                    // This ensures the flag banner is displayed
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1000);
+                    // For other levels, use the original behavior
+                    // Call the original alert function
+                    originalAlert(message);
+
+                    // Reveal the flag
+                    revealFlag();
+
+                    // Reload the page with success parameter if not already present
+                    if (!window.location.href.includes('success=true')) {
+                        // Add a small delay to ensure the alert is seen
+                        setTimeout(() => {
+                            let url = new URL(window.location.href);
+                            url.searchParams.set('success', 'true');
+                            window.location.href = url.toString();
+                        }, 1000);
+                    } else {
+                        // If success=true is already in the URL, force a page reload
+                        // This ensures the flag banner is displayed
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    }
                 }
+            } else {
+                // Not a challenge completion message, just show the alert
+                originalAlert(message);
             }
+        } else {
+            // Not a string message, just show the alert
+            originalAlert(message);
         }
     };
 }
@@ -188,6 +317,30 @@ function getCurrentXSSLevel() {
 }
 
 function revealFlag() {
+    // Check if we're on Level 2 and need special handling
+    if (window.location.pathname.includes('/xss/level2')) {
+        // Check for the flag-container (used by AJAX responses)
+        const flagContainer = document.getElementById('flag-container');
+        if (flagContainer) {
+            flagContainer.style.display = 'block';
+        }
+
+        // For javascript: URLs, prevent page navigation
+        const urlParams = new URLSearchParams(window.location.search);
+        const color = urlParams.get('color');
+
+        if (color && color.toLowerCase().startsWith('javascript:')) {
+            console.log("Preventing navigation for javascript: URL in revealFlag");
+
+            // Update URL to include success=true without reloading
+            if (!window.location.href.includes('success=true')) {
+                let url = new URL(window.location.href);
+                url.searchParams.set('success', 'true');
+                history.pushState({}, '', url.toString());
+            }
+        }
+    }
+
     // Show the flag container
     const flagDisplay = document.getElementById('flag-display');
     if (flagDisplay) {
@@ -204,9 +357,62 @@ function revealFlag() {
         // Get the flag value
         const flagValue = document.getElementById('flag-value')?.textContent;
 
-        // Create a flag banner at the top of the page
         if (flagValue) {
-            // Check if the banner already exists
+            // Show a popup with the flag
+            const flagPopup = document.createElement('div');
+            flagPopup.style.position = 'fixed';
+            flagPopup.style.top = '50%';
+            flagPopup.style.left = '50%';
+            flagPopup.style.transform = 'translate(-50%, -50%)';
+            flagPopup.style.backgroundColor = 'white';
+            flagPopup.style.padding = '20px';
+            flagPopup.style.borderRadius = '10px';
+            flagPopup.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
+            flagPopup.style.zIndex = '2000';
+            flagPopup.style.maxWidth = '90%';
+            flagPopup.style.textAlign = 'center';
+
+            const title = document.createElement('h3');
+            title.textContent = 'Challenge Completed!';
+            title.style.marginBottom = '15px';
+            title.style.color = '#28a745';
+            flagPopup.appendChild(title);
+
+            const flagText = document.createElement('p');
+            flagText.textContent = 'Here\'s your flag:';
+            flagText.style.marginBottom = '10px';
+            flagPopup.appendChild(flagText);
+
+            const flagCode = document.createElement('div');
+            flagCode.textContent = flagValue;
+            flagCode.style.padding = '10px';
+            flagCode.style.backgroundColor = '#f8f9fa';
+            flagCode.style.border = '1px solid #dee2e6';
+            flagCode.style.borderRadius = '4px';
+            flagCode.style.fontFamily = 'monospace';
+            flagCode.style.marginBottom = '15px';
+            flagCode.style.wordBreak = 'break-all';
+            flagPopup.appendChild(flagCode);
+
+            const copyButton = document.createElement('button');
+            copyButton.textContent = 'Copy Flag';
+            copyButton.className = 'btn btn-primary';
+            copyButton.onclick = () => {
+                navigator.clipboard.writeText(flagValue);
+                copyButton.textContent = 'Copied!';
+                setTimeout(() => copyButton.textContent = 'Copy Flag', 2000);
+            };
+            flagPopup.appendChild(copyButton);
+
+            const closeButton = document.createElement('button');
+            closeButton.textContent = 'Close';
+            closeButton.className = 'btn btn-secondary ms-2';
+            closeButton.onclick = () => document.body.removeChild(flagPopup);
+            flagPopup.appendChild(closeButton);
+
+            document.body.appendChild(flagPopup);
+
+            // Create a flag banner at the top of the page
             let flagBanner = document.getElementById('flag-banner');
             if (!flagBanner) {
                 flagBanner = document.createElement('div');

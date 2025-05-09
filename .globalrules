@@ -1,8 +1,28 @@
-Do not change the general structure of the websites.
-Enusure all functionalities are working.
-Add more context to all of the vulnerable sites to make them more realistic. Like when I click something thats a link, it should go somewhere.
-Ensure the css is great in all the levels.
-Ensure the flags are generated after the user solves the level.
-Ensure all other simulated technologies like the wafs are implemented well.
-Ensure the flags are unique and not repeated.
-Ensure all levels are solvable, and the solutions are unique and the ones needing emulated functions work well.
+# R00tGlyph Platform Features
+- The XSS training platform should be called R00tGlyph.
+- Include WAF levels.
+- Implement dark themes.
+- Include social media links (YouTube, Telegram, PayPal).
+- Implement a changing flag system for CTF challenges.
+- Use dropdown navigation for vulnerability types.
+- Have more contextual information in the levels.
+- R00tGlyph should hide flags until challenges are solved.
+- Cross check to see if all levels are solvable, working, and have flags being generated after solving.
+- Simulate realistic websites in levels.
+- Add a bit more features on each level. Just to make it more interesting. Like make it more like a real world scenario. clickable buttons and links that actually do something instead of just text on the page, etc.
+- Preserve user progress during updates.
+- R00tGlyph should display challenge descriptions in a popup when a level opens, but after that it should not open until the user clicks the button show challenge description, and provide a flag icon that reveals a flag submission popup when clicked.
+- The challenge description popup should not appear after form submissions.
+- R00tGlyph should include more advanced XSS challenges that require tools like Burpsuite and header-based payloads.
+- Ensure all levels are solvable and a flag is generated for each level. The flag can appear at the top of the page where a user can copy and submit it.
+- R00tGlyph should display a flag at the top of the page after a level has been solved.
+- Add a flag -h for help menu and --reset to reset the database in the R00tGlyph platform.
+- R00tGlyph should update the vulnerabilities count on homepage.
+
+# R00tGlyph Functionality
+- The user questions the need for login functionality in R00tGlyph since it will run on the user's local machine.
+- The user wants to try the other XSS challenge levels first before continuing with implementation.
+
+# General
+- The current year is 2025.
+`

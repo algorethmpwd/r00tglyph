@@ -20,11 +20,11 @@
                                 <h3>{{ user.display_name }}</h3>
                                 <p class="text-muted">Machine ID: {{ user.machine_id[:8] }}...</p>
                                 <p class="badge bg-success">Score: {{ user.score }} points</p>
-                                
+
                                 <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#editProfile">
                                     <i class="bi bi-pencil-fill me-1"></i> Edit Profile
                                 </button>
-                                
+
                                 <div class="collapse mt-3" id="editProfile">
                                     <form method="post" action="{{ url_for('profile') }}">
                                         <div class="mb-3">
@@ -65,23 +65,23 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="card">
                     <div class="card-header">
                         <h5><i class="bi bi-graph-up me-2"></i>Progress</h5>
                     </div>
                     <div class="card-body">
                         <div class="progress mb-3" style="height: 25px;">
-                            {% set total_challenges = 6 %}
+                            {% set total_challenges = total_challenge_count %}
                             {% set completed = completed_challenges|length %}
-                            {% set percentage = (completed / total_challenges * 100)|int %}
-                            
-                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ percentage }}%;" 
+                            {% set percentage = (completed / total_challenges * 100)|int if total_challenges > 0 else 0 %}
+
+                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ percentage }}%;"
                                  aria-valuenow="{{ percentage }}" aria-valuemin="0" aria-valuemax="100">
                                 {{ percentage }}% Complete
                             </div>
                         </div>
-                        
+
                         <div class="row text-center">
                             <div class="col-md-4">
                                 <div class="card bg-light">
@@ -102,7 +102,7 @@
                             <div class="col-md-4">
                                 <div class="card bg-light">
                                     <div class="card-body">
-                                        <h3>{{ total_challenges - completed }}</h3>
+                                        <h3>{{ remaining_challenge_count }}</h3>
                                         <p class="mb-0">Challenges Remaining</p>
                                     </div>
                                 </div>
@@ -110,7 +110,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="text-center mt-4">
                     <a href="{{ url_for('vulnerabilities') }}" class="btn btn-primary">
                         <i class="bi bi-lightning-fill me-2"></i>Continue Hacking

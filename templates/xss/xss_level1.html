@@ -5,6 +5,18 @@
 {% block content %}
 <div class="row">
     <div class="col-md-8 offset-md-2">
+        {% if xss_detected %}
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>Success!</strong> You've successfully exploited the XSS vulnerability! The challenge has been marked as completed.
+            {% if flag %}
+            <div class="mt-2">
+                <strong>Flag:</strong> <code>{{ flag }}</code>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        
         <div class="card">
             <div class="card-header bg-dark text-white">
                 <h2 class="text-center">Level 1: Basic Reflected XSS</h2>
@@ -309,26 +321,25 @@
                 </div>
 
                 {% if flag %}
-                <!-- Hidden flag container that will be revealed when the challenge is solved -->
-                <div id="flag-display" style="display: none;">
+                <div id="flag-display" class="mb-3">
                     <div class="alert alert-success">
                         <i class="bi bi-check-circle-fill me-2"></i>
                         <strong>Congratulations!</strong> You've solved the challenge.
                     </div>
-                    <div class="flag-container">
+                    <div class="flag-container mb-2">
                         <span class="flag-label">Your Flag</span>
                         <code id="flag-value">{{ flag }}</code>
                     </div>
+                    <!-- Visible flag submission form -->
+                    <form id="flag-submission-form" class="mt-3">
+                        <input type="hidden" name="challenge_id" value="{{ challenge.id }}">
+                        <div class="input-group">
+                            <input type="text" name="flag" class="form-control" value="{{ flag }}" readonly>
+                            <button type="submit" class="btn btn-success">Submit Flag</button>
+                        </div>
+                    </form>
+                    <div id="flag-result" class="alert" style="display: none;"></div>
                 </div>
-
-                <!-- Hidden form for the main page flag submission -->
-                <form id="flag-submission-form" style="display: none;">
-                    <input type="hidden" name="challenge_id" value="1">
-                    <input type="text" name="flag" value="">
-                </form>
-
-                <!-- Result container for flag submission -->
-                <div id="flag-result" class="alert" style="display: none;"></div>
                 {% endif %}
 
                 <div class="mt-4">
