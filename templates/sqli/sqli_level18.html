@@ -1,0 +1,646 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 18: SQL Injection in Cloud Functions - R00tGlyph{% endblock %}
+
+{% block content %}
+<style>
+    .cloud-header {
+        background: linear-gradient(135deg, #4895ef 0%, #3f37c9 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .code-box {
+        background-color: #1e1e1e;
+        color: #d4d4d4;
+        padding: 15px;
+        border-radius: 5px;
+        font-family: monospace;
+        overflow-x: auto;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    .code-keyword {
+        color: #569cd6;
+    }
+    .code-string {
+        color: #ce9178;
+    }
+    .code-comment {
+        color: #6a9955;
+    }
+    .code-function {
+        color: #dcdcaa;
+    }
+    .code-class {
+        color: #4ec9b0;
+    }
+    .code-variable {
+        color: #9cdcfe;
+    }
+    .admin-note {
+        background-color: rgba(255, 193, 7, 0.1);
+        border-left: 4px solid var(--bs-warning);
+        padding: 15px;
+        margin-top: 20px;
+        border-radius: 5px;
+    }
+    .cloud-console {
+        background-color: #212529;
+        color: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        font-family: monospace;
+        margin-bottom: 20px;
+    }
+    .cloud-console-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #495057;
+    }
+    .cloud-console-buttons {
+        display: flex;
+    }
+    .cloud-console-button {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 6px;
+    }
+    .cloud-console-button.red {
+        background-color: #e63946;
+    }
+    .cloud-console-button.yellow {
+        background-color: #ffb703;
+    }
+    .cloud-console-button.green {
+        background-color: #2a9d8f;
+    }
+    .cloud-console-title {
+        color: #adb5bd;
+    }
+    .cloud-console-content {
+        height: 300px;
+        overflow-y: auto;
+    }
+    .cloud-console-prompt {
+        color: #4cc9f0;
+        margin-right: 5px;
+    }
+    .cloud-console-command {
+        color: #f8f9fa;
+    }
+    .cloud-console-output {
+        color: #adb5bd;
+        margin-bottom: 10px;
+    }
+    .cloud-console-input {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+    }
+    .cloud-console-input input {
+        background-color: transparent;
+        border: none;
+        color: #f8f9fa;
+        flex-grow: 1;
+        font-family: monospace;
+        outline: none;
+    }
+    .cloud-function {
+        background-color: #f8f9fa;
+        border-left: 4px solid #4895ef;
+        padding: 15px;
+        margin-top: 20px;
+        border-radius: 5px;
+        font-family: monospace;
+    }
+    .cloud-function-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .cloud-function-name {
+        font-weight: bold;
+        color: #3f37c9;
+    }
+    .cloud-function-status {
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        background-color: #2a9d8f;
+        color: white;
+    }
+    .cloud-function-details {
+        display: flex;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+    }
+    .cloud-function-detail {
+        margin-right: 20px;
+        margin-bottom: 5px;
+    }
+    .cloud-function-detail-label {
+        font-weight: bold;
+        color: #6c757d;
+    }
+    .cloud-function-logs {
+        background-color: #f1f3f5;
+        padding: 10px;
+        border-radius: 5px;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    .cloud-function-log {
+        margin-bottom: 5px;
+        font-size: 0.9rem;
+    }
+    .cloud-function-log-timestamp {
+        color: #6c757d;
+    }
+    .cloud-function-log-level {
+        padding: 1px 5px;
+        border-radius: 3px;
+        margin: 0 5px;
+        font-size: 0.8rem;
+    }
+    .cloud-function-log-level.info {
+        background-color: #4895ef;
+        color: white;
+    }
+    .cloud-function-log-level.error {
+        background-color: #e63946;
+        color: white;
+    }
+    .cloud-function-log-level.warning {
+        background-color: #ffb703;
+        color: #212529;
+    }
+    .cloud-function-log-message {
+        color: #212529;
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        {% if sqli_detected %}
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>Success!</strong> You've successfully exploited the SQL injection vulnerability in the cloud function! The challenge has been marked as completed.
+            {% if flag %}
+            <div class="mt-2">
+                <strong>Flag:</strong> <code>{{ flag }}</code>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Challenge description -->
+        <div class="alert alert-dark challenge-description">
+            <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+            <p>
+                Welcome to <strong>CloudData</strong>, a fictional cloud-based data processing platform! This challenge simulates a real-world scenario where a serverless cloud function is vulnerable to SQL injection.
+            </p>
+            <p>
+                The developers of CloudData have built a modern data processing platform using serverless cloud functions. However, they've made a critical mistake: they're using user input from event triggers directly in SQL queries without proper validation or parameterization.
+            </p>
+            <p>
+                <strong>Your Task:</strong> Exploit the SQL injection vulnerability in the cloud function to access sensitive data. The flag is hidden in a restricted database table that should not be accessible to regular users.
+            </p>
+
+            <div class="card mb-3 border-secondary">
+                <div class="card-header bg-secondary text-white">
+                    <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">
+                        <strong>Client:</strong> Cloud Security Team<br>
+                        <strong>Target:</strong> CloudData Data Processing Function<br>
+                        <strong>Vulnerability:</strong> SQL Injection in Cloud Function<br>
+                        <strong>Objective:</strong> Access restricted data containing sensitive information
+                    </p>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        Serverless cloud functions are a modern computing model where code runs in response to events without the need to manage servers. These functions are commonly used for data processing, API backends, and automation tasks.
+                    </p>
+                    <p>
+                        SQL injection in cloud functions occurs when:
+                    </p>
+                    <ul>
+                        <li>The function processes data from event triggers or HTTP requests</li>
+                        <li>This data is used directly in SQL queries without proper validation or parameterization</li>
+                        <li>The function fails to properly sanitize or escape special characters in the input data</li>
+                    </ul>
+                    <p>
+                        This type of vulnerability is particularly dangerous because:
+                    </p>
+                    <ul>
+                        <li>Cloud functions often have broad permissions to access various resources</li>
+                        <li>Serverless architectures may have less security oversight than traditional applications</li>
+                        <li>Event-driven processing can make it harder to trace the source of malicious input</li>
+                        <li>Developers may focus on functionality rather than security in "glue code" functions</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        The CloudData function likely processes events similar to:
+                    </p>
+                    <div class="code-box">
+                        <span class="code-comment">// Example cloud function event (JSON)</span><br>
+                        {<br>
+                        &nbsp;&nbsp;<span class="code-string">"action"</span>: <span class="code-string">"processData"</span>,<br>
+                        &nbsp;&nbsp;<span class="code-string">"dataset"</span>: <span class="code-string">"sales_2023"</span>,<br>
+                        &nbsp;&nbsp;<span class="code-string">"filter"</span>: <span class="code-string">"region=US"</span>,<br>
+                        &nbsp;&nbsp;<span class="code-string">"format"</span>: <span class="code-string">"json"</span><br>
+                        }
+                    </div>
+                    <p>
+                        And then uses the values in SQL queries like:
+                    </p>
+                    <div class="code-box">
+                        <span class="code-comment">// Example of vulnerable SQL query in cloud function</span><br>
+                        <span class="code-keyword">const</span> <span class="code-variable">query</span> = <span class="code-string">`SELECT * FROM ${dataset} WHERE ${filter} LIMIT 1000`</span>;<br>
+                        <span class="code-keyword">const</span> <span class="code-variable">results</span> = <span class="code-keyword">await</span> <span class="code-variable">db</span>.<span class="code-function">query</span>(<span class="code-variable">query</span>);
+                    </div>
+                    <p>
+                        To exploit this vulnerability, you'll need to:
+                    </p>
+                    <ol>
+                        <li>Understand the event format processed by the cloud function</li>
+                        <li>Identify which fields in the events are vulnerable to SQL injection</li>
+                        <li>Craft a malicious event that includes SQL injection code</li>
+                        <li>Trigger the function with the malicious event</li>
+                        <li>Analyze the response to extract the sensitive information</li>
+                    </ol>
+                    <p>
+                        For this challenge, we've provided a simulated cloud console that allows you to interact with the function.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-shield-fill-check me-2"></i>Real-World Impact</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        SQL injection vulnerabilities in cloud functions have affected several real-world applications:
+                    </p>
+                    <ul>
+                        <li><strong>Data Processing Pipelines</strong>: ETL functions that process and transform data from various sources.</li>
+                        <li><strong>Serverless APIs</strong>: API backends implemented as cloud functions that interact with databases.</li>
+                        <li><strong>Event-Driven Applications</strong>: Functions that respond to events from message queues, storage changes, or other triggers.</li>
+                    </ul>
+                    <p>
+                        For cloud-based platforms like CloudData, such vulnerabilities could lead to:
+                    </p>
+                    <ul>
+                        <li>Unauthorized access to sensitive business data</li>
+                        <li>Exposure of customer information</li>
+                        <li>Cross-account data leakage</li>
+                        <li>Complete compromise of the database</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 18: SQL Injection in Cloud Functions</h2>
+            </div>
+            <div class="card-body">
+                <div class="cloud-header">
+                    <div class="d-flex align-items-center justify-content-center">
+                        <i class="bi bi-cloud-fill me-2" style="font-size: 2.5rem;"></i>
+                        <h1 class="mb-0">CloudData</h1>
+                    </div>
+                    <p class="text-center mb-0 mt-2">Serverless Data Processing Platform</p>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <div class="scenario-box">
+                            <h4><i class="bi bi-exclamation-triangle-fill me-2"></i>Penetration Testing Scenario</h4>
+                            <p>You've been hired to perform a security assessment of CloudData, a cloud-based data processing platform that uses serverless functions to process and analyze data from various sources.</p>
+                            <p>During your initial testing, you notice that one of the cloud functions might be vulnerable to SQL injection. The function seems to use data from event triggers directly in database queries.</p>
+                            <p><strong>Your objective:</strong> Exploit the SQL injection vulnerability in the cloud function to access restricted data that contains the flag.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="portal-stats">
+                            <h5 class="text-center mb-3"><i class="bi bi-bar-chart-fill me-2"></i>Platform Statistics</h5>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">100+</div>
+                                        <div>Functions</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">50+</div>
+                                        <div>Datasets</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">99.9%</div>
+                                        <div>Uptime</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">24/7</div>
+                                        <div>Support</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cloud-console">
+                    <div class="cloud-console-header">
+                        <div class="cloud-console-buttons">
+                            <div class="cloud-console-button red"></div>
+                            <div class="cloud-console-button yellow"></div>
+                            <div class="cloud-console-button green"></div>
+                        </div>
+                        <div class="cloud-console-title">CloudData Console</div>
+                        <div></div>
+                    </div>
+                    <div class="cloud-console-content" id="console-content">
+                        <div class="cloud-console-output">Welcome to CloudData Console. Type 'help' for available commands.</div>
+                        <div class="cloud-console-output">Connected to CloudData region: us-east-1</div>
+                        <div class="cloud-console-output">User: penetration-tester@example.com (read-only access)</div>
+                        <div class="cloud-console-command">
+                            <span class="cloud-console-prompt">$</span>
+                            <span>list-functions</span>
+                        </div>
+                        <div class="cloud-console-output">
+                            Available functions:<br>
+                            1. data-processor (active)<br>
+                            2. user-authenticator (active)<br>
+                            3. notification-sender (active)<br>
+                            4. log-analyzer (inactive)
+                        </div>
+                        <div class="cloud-console-command">
+                            <span class="cloud-console-prompt">$</span>
+                            <span>describe-function data-processor</span>
+                        </div>
+                        <div class="cloud-console-output">
+                            Function: data-processor<br>
+                            Runtime: Node.js 16.x<br>
+                            Memory: 512 MB<br>
+                            Timeout: 60 seconds<br>
+                            Description: Processes data from various datasets based on specified filters.<br>
+                            Trigger: HTTP API, Event Bus<br>
+                            <br>
+                            Example event:<br>
+                            {<br>
+                            &nbsp;&nbsp;"action": "processData",<br>
+                            &nbsp;&nbsp;"dataset": "sales_2023",<br>
+                            &nbsp;&nbsp;"filter": "region='US'",<br>
+                            &nbsp;&nbsp;"format": "json"<br>
+                            }
+                        </div>
+                        <div class="cloud-console-command">
+                            <span class="cloud-console-prompt">$</span>
+                            <span>list-datasets</span>
+                        </div>
+                        <div class="cloud-console-output">
+                            Available datasets:<br>
+                            1. sales_2023 (public)<br>
+                            2. customers_2023 (public)<br>
+                            3. products_2023 (public)<br>
+                            4. employees_2023 (restricted)<br>
+                            5. financial_2023 (restricted)
+                        </div>
+                    </div>
+                    <div class="cloud-console-input">
+                        <span class="cloud-console-prompt">$</span>
+                        <input type="text" id="console-input" placeholder="Type a command...">
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-lightning-fill me-2"></i>Invoke Cloud Function</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('sqli_level18') }}" method="post">
+                            <div class="mb-3">
+                                <label for="function-name" class="form-label">Function Name:</label>
+                                <input type="text" class="form-control" id="function-name" name="function_name" value="data-processor" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label for="event-data" class="form-label">Event Data (JSON):</label>
+                                <textarea class="form-control font-monospace" id="event-data" name="event_data" rows="8">{{ event_data if event_data else '{\n  "action": "processData",\n  "dataset": "sales_2023",\n  "filter": "region=\'US\'",\n  "format": "json"\n}' }}</textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-play-fill me-2"></i>Invoke Function
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                {% if function_response %}
+                <div class="cloud-function">
+                    <div class="cloud-function-header">
+                        <div class="cloud-function-name">data-processor</div>
+                        <div class="cloud-function-status">Executed</div>
+                    </div>
+                    <div class="cloud-function-details">
+                        <div class="cloud-function-detail">
+                            <span class="cloud-function-detail-label">Duration:</span>
+                            <span>{{ function_duration }} ms</span>
+                        </div>
+                        <div class="cloud-function-detail">
+                            <span class="cloud-function-detail-label">Memory Used:</span>
+                            <span>{{ function_memory }} MB</span>
+                        </div>
+                        <div class="cloud-function-detail">
+                            <span class="cloud-function-detail-label">Status:</span>
+                            <span>{{ function_status }}</span>
+                        </div>
+                    </div>
+                    <div class="cloud-function-logs">
+                        {% for log in function_logs %}
+                        <div class="cloud-function-log">
+                            <span class="cloud-function-log-timestamp">{{ log.timestamp }}</span>
+                            <span class="cloud-function-log-level {{ log.level }}">{{ log.level }}</span>
+                            <span class="cloud-function-log-message">{{ log.message }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-3">
+                        <h5>Response:</h5>
+                        <pre>{{ function_response|safe }}</pre>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="admin-note">
+                    <h5><i class="bi bi-shield-lock me-2"></i>Developer Note</h5>
+                    <p>Reminder to the development team: The restricted table 'security_flags' contains sensitive information and should not be accessible through the data-processor function. Make sure our function properly validates input before executing database queries.</p>
+                    <p class="mb-0"><small class="text-muted">Note: This message is for internal use only and should not be visible to regular users.</small></p>
+                </div>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level='sqli18') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const consoleContent = document.getElementById('console-content');
+        const consoleInput = document.getElementById('console-input');
+
+        // Console command history
+        let commandHistory = [];
+        let historyIndex = -1;
+
+        // Handle console input
+        consoleInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                const command = consoleInput.value.trim();
+
+                if (command) {
+                    // Add command to history
+                    commandHistory.push(command);
+                    historyIndex = commandHistory.length;
+
+                    // Display command
+                    const commandElement = document.createElement('div');
+                    commandElement.className = 'cloud-console-command';
+                    commandElement.innerHTML = `<span class="cloud-console-prompt">$</span><span>${command}</span>`;
+                    consoleContent.appendChild(commandElement);
+
+                    // Process command
+                    processCommand(command);
+
+                    // Clear input
+                    consoleInput.value = '';
+
+                    // Scroll to bottom
+                    consoleContent.scrollTop = consoleContent.scrollHeight;
+                }
+
+                event.preventDefault();
+            } else if (event.key === 'ArrowUp') {
+                // Navigate command history (up)
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    consoleInput.value = commandHistory[historyIndex];
+                }
+                event.preventDefault();
+            } else if (event.key === 'ArrowDown') {
+                // Navigate command history (down)
+                if (historyIndex < commandHistory.length - 1) {
+                    historyIndex++;
+                    consoleInput.value = commandHistory[historyIndex];
+                } else {
+                    historyIndex = commandHistory.length;
+                    consoleInput.value = '';
+                }
+                event.preventDefault();
+            }
+        });
+
+        // Process console command
+        function processCommand(command) {
+            let output = '';
+
+            if (command === 'help') {
+                output = `Available commands:
+- help: Display this help message
+- list-functions: List available cloud functions
+- describe-function [name]: Show details of a specific function
+- list-datasets: List available datasets
+- invoke-function [name] [event]: Invoke a function with an event
+- clear: Clear the console`;
+            } else if (command === 'list-functions') {
+                output = `Available functions:
+1. data-processor (active)
+2. user-authenticator (active)
+3. notification-sender (active)
+4. log-analyzer (inactive)`;
+            } else if (command.startsWith('describe-function')) {
+                const functionName = command.split(' ')[1];
+
+                if (functionName === 'data-processor') {
+                    output = `Function: data-processor
+Runtime: Node.js 16.x
+Memory: 512 MB
+Timeout: 60 seconds
+Description: Processes data from various datasets based on specified filters.
+Trigger: HTTP API, Event Bus
+
+Example event:
+{
+  "action": "processData",
+  "dataset": "sales_2023",
+  "filter": "region='US'",
+  "format": "json"
+}`;
+                } else if (functionName) {
+                    output = `Function not found: ${functionName}`;
+                } else {
+                    output = 'Usage: describe-function [name]';
+                }
+            } else if (command === 'list-datasets') {
+                output = `Available datasets:
+1. sales_2023 (public)
+2. customers_2023 (public)
+3. products_2023 (public)
+4. employees_2023 (restricted)
+5. financial_2023 (restricted)`;
+            } else if (command.startsWith('invoke-function')) {
+                output = 'Please use the "Invoke Cloud Function" form below to invoke functions.';
+            } else if (command === 'clear') {
+                // Clear console
+                consoleContent.innerHTML = '';
+                return;
+            } else {
+                output = `Command not found: ${command}. Type 'help' for available commands.`;
+            }
+
+            // Display output
+            const outputElement = document.createElement('div');
+            outputElement.className = 'cloud-console-output';
+            outputElement.innerHTML = output;
+            consoleContent.appendChild(outputElement);
+        }
+
+        // Focus console input when clicking on console
+        document.querySelector('.cloud-console').addEventListener('click', function() {
+            consoleInput.focus();
+        });
+    });
+</script>
+{% endblock %}

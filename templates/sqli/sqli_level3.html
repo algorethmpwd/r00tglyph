@@ -12,14 +12,6 @@
         margin-bottom: 20px;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
-    .search-container {
-        background-color: #f8f9fa;
-        border-radius: 10px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        padding: 20px;
-        border: 1px solid #e9ecef;
-        margin-bottom: 20px;
-    }
     .book-card {
         transition: all 0.3s ease;
         margin-bottom: 15px;
@@ -29,29 +21,7 @@
         box-shadow: 0 10px 20px rgba(0,0,0,0.1);
     }
     .featured-book {
-        border-left: 4px solid #28a745;
-    }
-    .scenario-box {
-        background-color: #e9f7fe;
-        border-left: 4px solid #17a2b8;
-        padding: 15px;
-        margin-bottom: 20px;
-        border-radius: 5px;
-    }
-    .library-stats {
-        background-color: #f8f9fa;
-        padding: 15px;
-        border-radius: 5px;
-        margin-bottom: 20px;
-    }
-    .stat-item {
-        text-align: center;
-        padding: 10px;
-    }
-    .stat-number {
-        font-size: 2rem;
-        font-weight: bold;
-        color: #007bff;
+        border-left: 4px solid var(--bs-success);
     }
     .search-result-table {
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
@@ -66,14 +36,7 @@
         padding: 12px 15px;
     }
     .search-result-table tbody tr:hover {
-        background-color: #f1f1f1;
-    }
-    .admin-panel-note {
-        background-color: #fff3cd;
-        border-left: 4px solid #ffc107;
-        padding: 15px;
-        margin-top: 20px;
-        border-radius: 5px;
+        background-color: rgba(0, 0, 0, 0.05);
     }
 </style>
 
@@ -91,10 +54,97 @@
         </div>
         {% endif %}
 
-        <!-- Challenge Description Button -->
-        <button type="button" class="btn btn-info mb-3" data-bs-toggle="modal" data-bs-target="#challengeDescriptionModal">
-            <i class="bi bi-info-circle-fill me-2"></i>View Challenge Description
-        </button>
+        <!-- Challenge description -->
+        <div class="alert alert-dark challenge-description">
+            <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+            <p>
+                Welcome to the <strong>City Public Library</strong>, a fictional library management system! This challenge simulates a real-world scenario where a book search feature is vulnerable to UNION-based SQL injection.
+            </p>
+            <p>
+                The developers of the library system have implemented a search feature that allows users to find books by title. However, they've made a critical mistake in how they handle user input in the search query, allowing attackers to use UNION statements to extract data from other tables in the database.
+            </p>
+            <p>
+                <strong>Your Task:</strong> Exploit the SQL injection vulnerability in the search feature to extract data from the hidden <code>users</code> table. The administrator's username is <code>admin</code>, and their password contains the flag. Use a UNION-based SQL injection attack to reveal this information.
+            </p>
+                    <div class="card mb-3 border-secondary">
+                        <div class="card-header bg-secondary text-white">
+                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-0">
+                                <strong>Client:</strong> Security Testing Client<br>
+                                <strong>Target:</strong> SQL Injection Vulnerability<br>
+                                <strong>Vulnerability:</strong> Suspected SQL Injection<br>
+                                <strong>Objective:</strong> Exploit the vulnerability to extract data
+                            </p>
+                        </div>
+                    </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        UNION-based SQL injection is a technique that allows an attacker to combine the results of two or more SELECT statements into a single result set. This can be used to extract data from different tables in the database.
+                    </p>
+                    <p>
+                        For a UNION query to work, two key requirements must be met:
+                    </p>
+                    <ol>
+                        <li>The number of columns in all SELECT statements must be the same</li>
+                        <li>The data types of each column in the SELECT statements must be compatible</li>
+                    </ol>
+                    <p>
+                        This technique is particularly powerful because it allows attackers to extract data from tables that weren't intended to be accessible through the vulnerable interface.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        The search feature likely uses a SQL query similar to:
+                    </p>
+                    <pre class="bg-light p-3 rounded"><code>SELECT id, title, author, category, year FROM books WHERE title LIKE '%search_term%'</code></pre>
+                    <p>
+                        To use a UNION attack, you need to:
+                    </p>
+                    <ol>
+                        <li>Determine the number of columns in the original query (try using ORDER BY)</li>
+                        <li>Ensure the data types in your UNION query match the original query</li>
+                        <li>Use the UNION to query the users table instead of the books table</li>
+                        <li>Consider how to handle the LIKE operator in the original query</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-shield-fill-check me-2"></i>Real-World Impact</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        UNION-based SQL injection attacks have been used in several major data breaches:
+                    </p>
+                    <ul>
+                        <li><strong>TalkTalk (2015)</strong>: Attackers used UNION-based SQL injection to steal personal data of over 150,000 customers.</li>
+                        <li><strong>Heartland Payment Systems (2008)</strong>: SQL injection was used to steal over 100 million credit card numbers.</li>
+                    </ul>
+                    <p>
+                        For libraries and educational institutions, such vulnerabilities could expose:
+                    </p>
+                    <ul>
+                        <li>Patron personal information and borrowing history</li>
+                        <li>Staff credentials and administrative access</li>
+                        <li>Financial records and payment information</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
 
         <div class="library-header">
             <div class="d-flex align-items-center justify-content-center">
@@ -114,7 +164,7 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="library-stats">
+                <div class="portal-stats">
                     <h5 class="text-center mb-3"><i class="bi bi-bar-chart-fill me-2"></i>Library Statistics</h5>
                     <div class="row">
                         <div class="col-6">
@@ -146,7 +196,7 @@
             </div>
         </div>
 
-        <div class="search-container">
+        <div class="search-container login-container">
             <h4 class="mb-3"><i class="bi bi-search me-2"></i>Book Catalog Search</h4>
             <form action="{{ url_for('sqli_level3') }}" method="get">
                 <div class="input-group mb-3">
@@ -240,38 +290,13 @@
         </div>
         {% endif %}
 
-        <div class="admin-panel-note">
+        <div class="admin-note">
             <h5><i class="bi bi-shield-lock me-2"></i>Staff Note</h5>
             <p>Reminder to all library staff: The admin panel is accessible only to authorized personnel. The system administrator (username: <code>admin</code>) has full access to all library records. Please contact IT support if you need access to the admin panel.</p>
             <p class="mb-0"><small class="text-muted">Note: This message is visible only to library staff and should not be displayed to patrons.</small></p>
         </div>
 
-        <div class="card mt-4">
-            <div class="card-header bg-dark text-white">
-                <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Technical Notes</h5>
-            </div>
-            <div class="card-body">
-                <p>
-                    <strong>For educational purposes:</strong> This search feature is vulnerable to UNION-based SQL injection. In a real library system, such vulnerabilities would expose sensitive patron and staff information.
-                </p>
-                <p>
-                    The backend code might look something like this:
-                </p>
-                <pre class="bg-light p-3 rounded"><code>// Vulnerable code example (PHP)
-$search = $_GET['search'];
 
-$query = "SELECT id, title, author, category, year FROM books WHERE title LIKE '%$search%'";
-$result = mysqli_query($connection, $query);
-
-// Display results
-while($row = mysqli_fetch_assoc($result)) {
-    // Output book information
-}</code></pre>
-                <p>
-                    <strong>Security tip:</strong> To prevent UNION-based SQL injection attacks, use parameterized queries and validate user input before using it in database queries.
-                </p>
-            </div>
-        </div>
 
         <div class="mt-4">
             <a href="{{ url_for('solutions', level='sqli3') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
@@ -280,97 +305,5 @@ while($row = mysqli_fetch_assoc($result)) {
     </div>
 </div>
 
-<!-- Challenge Description Modal -->
-<div class="modal fade" id="challengeDescriptionModal" tabindex="-1" aria-labelledby="challengeDescriptionModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title" id="challengeDescriptionModalLabel">Challenge Description: SQL Injection with UNION</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-dark">
-                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-                    <p>
-                        Welcome to the <strong>City Public Library</strong>, a fictional library management system! This challenge simulates a real-world scenario where a book search feature is vulnerable to UNION-based SQL injection.
-                    </p>
-                    <p>
-                        The developers of the library system have implemented a search feature that allows users to find books by title. However, they've made a critical mistake in how they handle user input in the search query, allowing attackers to use UNION statements to extract data from other tables in the database.
-                    </p>
-                    <p>
-                        <strong>Your Task:</strong> Exploit the SQL injection vulnerability in the search feature to extract data from the hidden <code>users</code> table. The administrator's username is <code>admin</code>, and their password contains the flag. Use a UNION-based SQL injection attack to reveal this information.
-                    </p>
-                </div>
 
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>
-                            UNION-based SQL injection is a technique that allows an attacker to combine the results of two or more SELECT statements into a single result set. This can be used to extract data from different tables in the database.
-                        </p>
-                        <p>
-                            For a UNION query to work, two key requirements must be met:
-                        </p>
-                        <ol>
-                            <li>The number of columns in all SELECT statements must be the same</li>
-                            <li>The data types of each column in the SELECT statements must be compatible</li>
-                        </ol>
-                        <p>
-                            This technique is particularly powerful because it allows attackers to extract data from tables that weren't intended to be accessible through the vulnerable interface.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>
-                            The search feature likely uses a SQL query similar to:
-                        </p>
-                        <pre class="bg-light p-3 rounded"><code>SELECT id, title, author, category, year FROM books WHERE title LIKE '%search_term%'</code></pre>
-                        <p>
-                            To use a UNION attack, you need to:
-                        </p>
-                        <ol>
-                            <li>Determine the number of columns in the original query (try using ORDER BY)</li>
-                            <li>Ensure the data types in your UNION query match the original query</li>
-                            <li>Use the UNION to query the users table instead of the books table</li>
-                            <li>Consider how to handle the LIKE operator in the original query</li>
-                        </ol>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <h5><i class="bi bi-shield-fill-check me-2"></i>Real-World Impact</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>
-                            UNION-based SQL injection attacks have been used in several major data breaches:
-                        </p>
-                        <ul>
-                            <li><strong>TalkTalk (2015)</strong>: Attackers used UNION-based SQL injection to steal personal data of over 150,000 customers.</li>
-                            <li><strong>Heartland Payment Systems (2008)</strong>: SQL injection was used to steal over 100 million credit card numbers.</li>
-                        </ul>
-                        <p>
-                            For libraries and educational institutions, such vulnerabilities could expose:
-                        </p>
-                        <ul>
-                            <li>Patron personal information and borrowing history</li>
-                            <li>Staff credentials and administrative access</li>
-                            <li>Financial records and payment information</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}

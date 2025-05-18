@@ -8,28 +8,6 @@
         max-width: 200px;
         margin-bottom: 20px;
     }
-    .secure-bank-header {
-        background: linear-gradient(135deg, #1e5799 0%,#207cca 51%,#2989d8 100%);
-        color: white;
-        padding: 15px;
-        border-radius: 5px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    .login-container {
-        background-color: #f8f9fa;
-        border-radius: 10px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        padding: 30px;
-        border: 1px solid #e9ecef;
-    }
-    .news-ticker {
-        background-color: #f8f9fa;
-        padding: 10px;
-        border-radius: 5px;
-        margin-bottom: 20px;
-        border-left: 4px solid #007bff;
-    }
     .ticker-content {
         white-space: nowrap;
         overflow: hidden;
@@ -38,30 +16,6 @@
     @keyframes ticker {
         0% { transform: translateX(100%); }
         100% { transform: translateX(-100%); }
-    }
-    .feature-box {
-        text-align: center;
-        padding: 15px;
-        margin-bottom: 20px;
-        border-radius: 5px;
-        background-color: #f8f9fa;
-        transition: all 0.3s ease;
-    }
-    .feature-box:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-    }
-    .feature-icon {
-        font-size: 2rem;
-        margin-bottom: 10px;
-        color: #007bff;
-    }
-    .scenario-box {
-        background-color: #e9f7fe;
-        border-left: 4px solid #17a2b8;
-        padding: 15px;
-        margin-bottom: 20px;
-        border-radius: 5px;
     }
 </style>
 
@@ -79,18 +33,109 @@
         </div>
         {% endif %}
 
-        <!-- Challenge Description Button -->
-        <button type="button" class="btn btn-info mb-3" data-bs-toggle="modal" data-bs-target="#challengeDescriptionModal">
-            <i class="bi bi-info-circle-fill me-2"></i>View Challenge Description
-        </button>
+        <!-- Hidden challenge description that will be used by JavaScript -->
+        <div class="alert alert-dark challenge-description">
+            <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+            <p>
+                Welcome to <strong>SecureBank</strong>, a fictional banking application! This challenge simulates a real-world scenario where a login form is vulnerable to SQL injection.
+            </p>
+            <p>
+                The developers of SecureBank have created a login system, but they've made a critical mistake in how they handle user input. The application directly concatenates user input into SQL queries without proper sanitization.
+            </p>
+            <p>
+                <strong>Your Task:</strong> Bypass the login form without knowing a valid username or password. Successfully logging in will reveal the flag.
+            </p>
 
-        <div class="secure-bank-header text-center">
-            <div class="d-flex align-items-center justify-content-center">
-                <i class="bi bi-bank2 me-2" style="font-size: 2.5rem;"></i>
-                <h1 class="mb-0">SecureBank™</h1>
+            <div class="card mb-3 border-secondary">
+                <div class="card-header bg-secondary text-white">
+                    <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">
+                        <strong>Client:</strong> SecureBank Financial Services<br>
+                        <strong>Target:</strong> Online Banking Login Portal<br>
+                        <strong>Vulnerability:</strong> Suspected SQL Injection<br>
+                        <strong>Objective:</strong> Bypass authentication without valid credentials
+                    </p>
+                </div>
             </div>
-            <p class="mb-0 mt-2">Your Trusted Financial Partner Since 2023</p>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        SQL injection is one of the most common web application vulnerabilities. It occurs when user input is incorrectly filtered and directly included in SQL queries. This can allow attackers to:
+                    </p>
+                    <ul>
+                        <li>Bypass authentication</li>
+                        <li>Access, modify, or delete data in a database</li>
+                        <li>Execute administrative operations on the database</li>
+                    </ul>
+                    <p>
+                        In 2023, SQL injection remains in the OWASP Top 10 Web Application Security Risks, despite being well-understood, because many developers still make implementation mistakes.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        SQL injection occurs when user input is directly concatenated into SQL queries. Think about how a login query might be structured:
+                    </p>
+                    <pre class="bg-light p-3 rounded"><code>SELECT * FROM users WHERE username = 'input_username' AND password = 'input_password'</code></pre>
+                    <p>
+                        What happens if you can manipulate this query to always return true? Consider:
+                    </p>
+                    <ul>
+                        <li>How can you use SQL syntax like quotes and comments to alter the query?</li>
+                        <li>Can you make the WHERE clause always evaluate to true?</li>
+                        <li>What SQL operators might help you bypass the password check?</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-shield-fill-check me-2"></i>Real-World Impact</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        SQL injection vulnerabilities have led to numerous high-profile data breaches:
+                    </p>
+                    <ul>
+                        <li><strong>Equifax (2017)</strong>: Attackers exploited an SQL injection vulnerability to access personal data of 147 million people.</li>
+                        <li><strong>Yahoo (2012)</strong>: SQL injection was used in a breach that exposed 450,000 user credentials.</li>
+                        <li><strong>Sony Pictures (2011)</strong>: Attackers used SQL injection to steal personal information of millions of customers.</li>
+                    </ul>
+                    <p>
+                        For financial institutions like banks, such vulnerabilities can be catastrophic, potentially allowing attackers to:
+                    </p>
+                    <ul>
+                        <li>Access customer account information</li>
+                        <li>Manipulate transaction records</li>
+                        <li>Transfer funds without authorization</li>
+                    </ul>
+                </div>
+            </div>
         </div>
+
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 1: Basic SQL Injection</h2>
+            </div>
+            <div class="card-body">
+                <div class="secure-bank-header text-center">
+                    <div class="d-flex align-items-center justify-content-center">
+                        <i class="bi bi-bank2 me-2" style="font-size: 2.5rem;"></i>
+                        <h1 class="mb-0">SecureBank™</h1>
+                    </div>
+                    <p class="mb-0 mt-2">Your Trusted Financial Partner Since 2023</p>
+                </div>
 
         <div class="news-ticker">
             <div class="ticker-content">
@@ -182,134 +227,16 @@
             </div>
         </div>
 
-        <div class="card mt-4">
-            <div class="card-header bg-dark text-white">
-                <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Technical Notes</h5>
+
+
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level='sqli1') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
             </div>
-            <div class="card-body">
-                <p>
-                    <strong>For educational purposes:</strong> This login form is vulnerable to SQL injection. In a real banking application, such vulnerabilities would be critical security flaws.
-                </p>
-                <p>
-                    The backend code might look something like this:
-                </p>
-                <pre class="bg-light p-3 rounded"><code>// Vulnerable code example (PHP)
-$username = $_POST['username'];
-$password = $_POST['password'];
-
-$query = "SELECT * FROM users WHERE username = '$username' AND password = '$password'";
-$result = mysqli_query($connection, $query);
-
-if(mysqli_num_rows($result) > 0) {
-    // User authenticated successfully
-    $_SESSION['authenticated'] = true;
-    // Redirect to dashboard
-} else {
-    // Authentication failed
-    echo "Invalid username or password";
-}</code></pre>
-                <p>
-                    <strong>Security tip:</strong> Always use parameterized queries or prepared statements to prevent SQL injection attacks.
-                </p>
-            </div>
-        </div>
-
-        <div class="mt-4">
-            <a href="{{ url_for('solutions', level='sqli1') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
-            <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
         </div>
     </div>
 </div>
 
-<!-- Challenge Description Modal -->
-<div class="modal fade" id="challengeDescriptionModal" tabindex="-1" aria-labelledby="challengeDescriptionModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title" id="challengeDescriptionModalLabel">Challenge Description: Basic SQL Injection</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-dark">
-                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-                    <p>
-                        Welcome to <strong>SecureBank</strong>, a fictional banking application! This challenge simulates a real-world scenario where a login form is vulnerable to SQL injection.
-                    </p>
-                    <p>
-                        The developers of SecureBank have created a login system, but they've made a critical mistake in how they handle user input. The application directly concatenates user input into SQL queries without proper sanitization.
-                    </p>
-                    <p>
-                        <strong>Your Task:</strong> Bypass the login form without knowing a valid username or password. Successfully logging in will reveal the flag.
-                    </p>
-                </div>
 
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>
-                            SQL injection is one of the most common web application vulnerabilities. It occurs when user input is incorrectly filtered and directly included in SQL queries. This can allow attackers to:
-                        </p>
-                        <ul>
-                            <li>Bypass authentication</li>
-                            <li>Access, modify, or delete data in a database</li>
-                            <li>Execute administrative operations on the database</li>
-                        </ul>
-                        <p>
-                            In 2023, SQL injection remains in the OWASP Top 10 Web Application Security Risks, despite being well-understood, because many developers still make implementation mistakes.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>
-                            SQL injection occurs when user input is directly concatenated into SQL queries. Think about how a login query might be structured:
-                        </p>
-                        <pre class="bg-light p-3 rounded"><code>SELECT * FROM users WHERE username = 'input_username' AND password = 'input_password'</code></pre>
-                        <p>
-                            What happens if you can manipulate this query to always return true? Consider:
-                        </p>
-                        <ul>
-                            <li>How can you use SQL syntax like quotes and comments to alter the query?</li>
-                            <li>Can you make the WHERE clause always evaluate to true?</li>
-                            <li>What SQL operators might help you bypass the password check?</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <h5><i class="bi bi-shield-fill-check me-2"></i>Real-World Impact</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>
-                            SQL injection vulnerabilities have led to numerous high-profile data breaches:
-                        </p>
-                        <ul>
-                            <li><strong>Equifax (2017)</strong>: Attackers exploited an SQL injection vulnerability to access personal data of 147 million people.</li>
-                            <li><strong>Yahoo (2012)</strong>: SQL injection was used in a breach that exposed 450,000 user credentials.</li>
-                            <li><strong>Sony Pictures (2011)</strong>: Attackers used SQL injection to steal personal information of millions of customers.</li>
-                        </ul>
-                        <p>
-                            For financial institutions like banks, such vulnerabilities can be catastrophic, potentially allowing attackers to:
-                        </p>
-                        <ul>
-                            <li>Access customer account information</li>
-                            <li>Manipulate transaction records</li>
-                            <li>Transfer funds without authorization</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}

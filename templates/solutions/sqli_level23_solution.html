@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: SQL Injection Level 23{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h2 class="text-center">Solution: Level 23 - SQL Injection in ORM Layer</h2>
+            </div>
+            <div class="card-body">
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates a SQL injection vulnerability in an Object-Relational Mapping (ORM) layer. ORM frameworks provide an abstraction layer between application code and the database, allowing developers to work with objects instead of writing raw SQL queries.
+                </p>
+                <p>
+                    The vulnerability occurs because:
+                </p>
+                <ul>
+                    <li>The application dynamically constructs ORM queries using string concatenation</li>
+                    <li>User input is directly incorporated into these queries without proper validation or parameterization</li>
+                    <li>The application fails to properly sanitize or escape special characters in the input</li>
+                </ul>
+                <p>
+                    This type of vulnerability is particularly dangerous because developers often assume that using an ORM automatically protects against SQL injection, and the abstraction layer can make it harder to identify and fix vulnerabilities.
+                </p>
+
+                <h3>The Vulnerable Code</h3>
+                <p>
+                    The vulnerability exists in how the application constructs and executes ORM queries. Here's a simplified example of the vulnerable code:
+                </p>
+                <pre class="bg-light p-3 rounded"><code># Vulnerable code example (Python with SQLAlchemy)
+def search_articles(search_term, filter_by, sort_by, sort_order):
+    # Vulnerable query construction
+    query = f"db.session.query(Article).filter(Article.{filter_by}.like('%{search_term}%'))"
+
+    if sort_by:
+        if sort_order == 'asc':
+            query += f".order_by(Article.{sort_by})"
+        else:
+            query += f".order_by(Article.{sort_by}.desc())"
+
+    # Execute the dynamically constructed query
+    result = eval(query)
+    return result</code></pre>
+                <p>
+                    The vulnerability is in the direct use of user-provided values (<code>filter_by</code>, <code>search_term</code>, and <code>sort_by</code>) in the query string without proper validation or parameterization. The use of <code>eval()</code> to execute the dynamically constructed query makes this vulnerability particularly dangerous.
+                </p>
+
+                <h3>Solution</h3>
+                <p>To exploit this vulnerability, follow these steps:</p>
+
+                <h4>1. Understand the ORM Query Structure</h4>
+                <p>
+                    First, we need to understand how the ORM constructs and executes queries. In this case, the application is using SQLAlchemy-like syntax to build queries, where:
+                </p>
+                <ul>
+                    <li><code>db.session.query(Article)</code> starts a query for Article objects</li>
+                    <li><code>filter(Article.field.like('%value%'))</code> adds a filter condition</li>
+                    <li><code>order_by(Article.field)</code> adds a sorting condition</li>
+                </ul>
+
+                <h4>2. Identify the Vulnerable Parameters</h4>
+                <p>
+                    The application allows users to specify the search term, filter field, and sort field. All of these parameters could potentially be vulnerable to injection. For this challenge, we'll focus on exploiting the <code>filter_by</code> parameter to access the restricted <code>admin_flag</code> field mentioned in the developer note.
+                </p>
+
+                <h4>3. Craft an ORM Injection Payload</h4>
+                <p>
+                    We can craft a payload that exploits the vulnerability to access the restricted <code>admin_flag</code> field. There are several approaches we can take:
+                </p>
+
+                <h5>Approach 1: Field Name Manipulation</h5>
+                <p>
+                    If the application doesn't properly validate the field names, we might be able to directly specify the <code>admin_flag</code> field:
+                </p>
+                <div class="alert alert-secondary">
+                    <p><strong>Filter By:</strong> admin_flag</p>
+                    <p><strong>Search Term:</strong> flag</p>
+                </div>
+                <p>
+                    This approach tries to filter articles based on the <code>admin_flag</code> field containing the word "flag".
+                </p>
+
+                <h5>Approach 2: SQL Injection in Filter Field</h5>
+                <p>
+                    We can inject SQL code into the <code>filter_by</code> parameter to break out of the intended query structure:
+                </p>
+                <div class="alert alert-secondary">
+                    <p><strong>Filter By:</strong> title') or Article.admin_flag.like('%flag%</p>
+                    <p><strong>Search Term:</strong> anything</p>
+                </div>
+                <p>
+                    This payload attempts to modify the filter condition to include articles where the <code>admin_flag</code> field contains the word "flag". The resulting query would look like:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>db.session.query(Article).filter(Article.title') or Article.admin_flag.like('%flag%.like('%anything%'))</code></pre>
+                <p>
+                    This is syntactically incorrect, but it demonstrates the concept. A more sophisticated payload would be needed to create a valid query.
+                </p>
+
+                <h5>Approach 3: Using String Concatenation</h5>
+                <p>
+                    We can use string concatenation to create a more complex payload:
+                </p>
+                <div class="alert alert-secondary">
+                    <p><strong>Filter By:</strong> title') or 1=1) #</p>
+                    <p><strong>Search Term:</strong> anything</p>
+                </div>
+                <p>
+                    This payload attempts to create a filter condition that always evaluates to true, potentially exposing all articles including restricted ones. The <code>#</code> character comments out the rest of the query to prevent syntax errors.
+                </p>
+
+                <h5>Approach 4: Targeting the admin_flag Field</h5>
+                <p>
+                    Based on the developer note, we know there's an <code>admin_flag</code> field that contains sensitive information. We can craft a payload specifically targeting this field:
+                </p>
+                <div class="alert alert-secondary">
+                    <p><strong>Search Term:</strong> anything</p>
+                    <p><strong>Filter By:</strong> admin_flag</p>
+                </div>
+                <p>
+                    This simple approach tries to directly filter on the <code>admin_flag</code> field, which might work if the application doesn't properly validate field names.
+                </p>
+
+                <h4>4. Execute the Query</h4>
+                <p>
+                    To exploit the vulnerability, we need to execute our crafted query. In the challenge interface, we can enter our payload in the appropriate fields and click the "Search Articles" button.
+                </p>
+                <p>
+                    When the server processes our query, it will execute the injected code and potentially return the flag from the restricted article.
+                </p>
+
+                <h3>Real-world Impact</h3>
+                <p>
+                    ORM injection vulnerabilities are particularly relevant in:
+                </p>
+                <ul>
+                    <li><strong>Content Management Systems</strong>: Many modern CMS platforms use ORM frameworks for database access</li>
+                    <li><strong>E-commerce Platforms</strong>: Online stores use ORM frameworks to manage product catalogs and customer data</li>
+                    <li><strong>Enterprise Applications</strong>: Business applications use ORM frameworks to interact with complex database schemas</li>
+                    <li><strong>Web Applications</strong>: Modern web applications often use ORM frameworks to simplify database interactions</li>
+                </ul>
+                <p>
+                    The impact of these vulnerabilities can be severe:
+                </p>
+                <ul>
+                    <li>Unauthorized access to sensitive user data</li>
+                    <li>Exposure of unpublished or restricted content</li>
+                    <li>Manipulation of database records</li>
+                    <li>Complete compromise of the database</li>
+                </ul>
+
+                <h3>Prevention</h3>
+                <p>To prevent ORM injection vulnerabilities, developers should:</p>
+                <ul>
+                    <li>
+                        <strong>Use Parameterized Queries</strong> or query builders:
+                        <pre class="bg-light p-3 rounded"><code># Safe code example (Python with SQLAlchemy)
+def search_articles(search_term, filter_by, sort_by, sort_order):
+    # Validate field names against whitelist
+    allowed_fields = ['title', 'content', 'author']
+    if filter_by not in allowed_fields:
+        raise ValueError("Invalid filter field")
+
+    if sort_by and sort_by not in allowed_fields + ['id', 'created_at']:
+        raise ValueError("Invalid sort field")
+
+    # Use safe query construction
+    query = db.session.query(Article)
+
+    # Dynamically select the filter field
+    filter_field = getattr(Article, filter_by)
+    query = query.filter(filter_field.like(f'%{search_term}%'))
+
+    # Dynamically select the sort field
+    if sort_by:
+        sort_field = getattr(Article, sort_by)
+        if sort_order == 'desc':
+            sort_field = sort_field.desc()
+        query = query.order_by(sort_field)
+
+    return query.all()</code></pre>
+                    </li>
+                    <li>
+                        <strong>Validate and Sanitize User Input</strong>:
+                        <ul>
+                            <li>Validate input types and formats</li>
+                            <li>Use whitelists for allowed values</li>
+                            <li>Implement strict validation rules for query parameters</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Implement Proper Access Controls</strong>:
+                        <ul>
+                            <li>Use authentication and authorization for database access</li>
+                            <li>Apply the principle of least privilege to database users</li>
+                            <li>Implement field-level access control</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Avoid Dynamic Query Construction</strong>:
+                        <ul>
+                            <li>Avoid using <code>eval()</code> or similar functions to execute dynamically constructed queries</li>
+                            <li>Use ORM features like query builders and filter objects instead of string concatenation</li>
+                            <li>Use prepared statements or parameterized queries</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('sqli_level23') }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

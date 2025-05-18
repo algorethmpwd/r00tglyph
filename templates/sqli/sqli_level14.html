@@ -1,0 +1,371 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 14: SQL Injection with Advanced WAF Bypass - R00tGlyph{% endblock %}
+
+{% block content %}
+<style>
+    .waf-header {
+        background: linear-gradient(135deg, #3a0ca3 0%, #4361ee 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .code-box {
+        background-color: #1e1e1e;
+        color: #d4d4d4;
+        padding: 15px;
+        border-radius: 5px;
+        font-family: monospace;
+        overflow-x: auto;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    .code-keyword {
+        color: #569cd6;
+    }
+    .code-string {
+        color: #ce9178;
+    }
+    .code-comment {
+        color: #6a9955;
+    }
+    .code-function {
+        color: #dcdcaa;
+    }
+    .code-class {
+        color: #4ec9b0;
+    }
+    .code-variable {
+        color: #9cdcfe;
+    }
+    .admin-note {
+        background-color: rgba(255, 193, 7, 0.1);
+        border-left: 4px solid var(--bs-warning);
+        padding: 15px;
+        margin-top: 20px;
+        border-radius: 5px;
+    }
+    .waf-log {
+        background-color: #f8f9fa;
+        border-left: 4px solid #3a0ca3;
+        padding: 15px;
+        margin-top: 20px;
+        border-radius: 5px;
+        font-family: monospace;
+    }
+    .waf-record {
+        margin-bottom: 5px;
+        padding: 5px;
+        border-bottom: 1px solid #eee;
+    }
+    .waf-record:last-child {
+        border-bottom: none;
+    }
+    .waf-timestamp {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    .waf-rule {
+        color: #dc3545;
+        font-weight: bold;
+    }
+    .waf-action {
+        color: #0d6efd;
+    }
+    .waf-ip {
+        color: #198754;
+    }
+    .product-card {
+        transition: all 0.3s ease;
+        margin-bottom: 15px;
+        border-left: 4px solid #3a0ca3;
+    }
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        {% if sqli_detected %}
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>Success!</strong> You've successfully bypassed the advanced WAF and exploited the SQL injection vulnerability! The challenge has been marked as completed.
+            {% if flag %}
+            <div class="mt-2">
+                <strong>Flag:</strong> <code>{{ flag }}</code>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Challenge description -->
+        <div class="alert alert-dark challenge-description">
+            <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+            <p>
+                Welcome to <strong>SecureShop</strong>, a fictional e-commerce platform! This challenge simulates a real-world scenario where a web application is protected by an advanced Web Application Firewall (WAF) but still vulnerable to SQL injection.
+            </p>
+            <p>
+                The developers of SecureShop have implemented a sophisticated WAF to protect their e-commerce platform from SQL injection attacks. However, they've made a critical mistake: the WAF has blind spots and can be bypassed with advanced techniques.
+            </p>
+            <p>
+                <strong>Your Task:</strong> Bypass the advanced WAF and exploit the SQL injection vulnerability to access sensitive product information. The flag is hidden in a restricted product entry.
+            </p>
+
+            <div class="card mb-3 border-secondary">
+                <div class="card-header bg-secondary text-white">
+                    <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">
+                        <strong>Client:</strong> E-commerce Security Team<br>
+                        <strong>Target:</strong> SecureShop Product Search Functionality<br>
+                        <strong>Vulnerability:</strong> SQL Injection behind Advanced WAF<br>
+                        <strong>Objective:</strong> Bypass WAF protections and access restricted product data
+                    </p>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        Web Application Firewalls (WAFs) are security systems that monitor, filter, and block HTTP traffic to and from web applications. They're designed to protect against various attacks, including SQL injection.
+                    </p>
+                    <p>
+                        Advanced WAFs use sophisticated techniques to detect and block SQL injection attempts:
+                    </p>
+                    <ul>
+                        <li>Pattern matching and regular expressions to identify malicious payloads</li>
+                        <li>Behavioral analysis to detect anomalous query patterns</li>
+                        <li>Contextual parsing to understand the intent of requests</li>
+                        <li>Machine learning algorithms to adapt to new attack vectors</li>
+                    </ul>
+                    <p>
+                        However, even advanced WAFs can have weaknesses:
+                    </p>
+                    <ul>
+                        <li>Evasion techniques using encoding, obfuscation, and alternative syntax</li>
+                        <li>Blind spots in rule coverage</li>
+                        <li>False positives leading to overly permissive configurations</li>
+                        <li>Inability to understand complex application logic</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        The SecureShop application likely uses SQL queries similar to:
+                    </p>
+                    <div class="code-box">
+                        <span class="code-comment">-- Example of vulnerable SQL query</span><br>
+                        <span class="code-keyword">SELECT</span> product_id, name, description, price, category<br>
+                        <span class="code-keyword">FROM</span> products<br>
+                        <span class="code-keyword">WHERE</span> category = '<span class="code-variable">user_input</span>' <span class="code-keyword">AND</span> active = 1
+                    </div>
+                    <p>
+                        The WAF is configured to block common SQL injection patterns, including:
+                    </p>
+                    <ul>
+                        <li>SQL keywords like SELECT, UNION, FROM, WHERE</li>
+                        <li>Comment sequences like -- and /*</li>
+                        <li>Common SQL injection characters like ' and "</li>
+                        <li>Numeric operators like = and ></li>
+                    </ul>
+                    <p>
+                        To bypass the WAF, you'll need to:
+                    </p>
+                    <ol>
+                        <li>Understand how the WAF detects and blocks SQL injection attempts</li>
+                        <li>Use advanced evasion techniques like encoding, case manipulation, or alternative syntax</li>
+                        <li>Craft a payload that appears legitimate to the WAF but executes as SQL injection</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-shield-fill-check me-2"></i>Real-World Impact</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        WAF bypass vulnerabilities have led to several high-profile security incidents:
+                    </p>
+                    <ul>
+                        <li><strong>Equifax Breach (2017)</strong>: Attackers bypassed WAF protections to exploit a vulnerability in Apache Struts.</li>
+                        <li><strong>Capital One Breach (2019)</strong>: A WAF misconfiguration allowed attackers to access sensitive customer data.</li>
+                    </ul>
+                    <p>
+                        For e-commerce platforms like SecureShop, such vulnerabilities could lead to:
+                    </p>
+                    <ul>
+                        <li>Theft of customer payment information</li>
+                        <li>Exposure of proprietary product data</li>
+                        <li>Manipulation of prices and inventory</li>
+                        <li>Complete compromise of the database</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 14: SQL Injection with Advanced WAF Bypass</h2>
+            </div>
+            <div class="card-body">
+                <div class="waf-header">
+                    <div class="d-flex align-items-center justify-content-center">
+                        <i class="bi bi-shield-lock-fill me-2" style="font-size: 2.5rem;"></i>
+                        <h1 class="mb-0">SecureShop</h1>
+                    </div>
+                    <p class="text-center mb-0 mt-2">Enterprise E-commerce Platform with Advanced Security</p>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <div class="scenario-box">
+                            <h4><i class="bi bi-exclamation-triangle-fill me-2"></i>Penetration Testing Scenario</h4>
+                            <p>You've been hired to perform a security assessment of SecureShop, an e-commerce platform that claims to have industry-leading security measures. The platform uses an advanced WAF to protect against SQL injection attacks.</p>
+                            <p>During your initial testing, you notice that the product search functionality might be vulnerable to SQL injection, but the WAF is blocking your standard payloads. You'll need to use advanced WAF bypass techniques to exploit the vulnerability.</p>
+                            <p><strong>Your objective:</strong> Bypass the WAF and exploit the SQL injection vulnerability to access a restricted product that contains the flag.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="portal-stats">
+                            <h5 class="text-center mb-3"><i class="bi bi-bar-chart-fill me-2"></i>Platform Statistics</h5>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">10K+</div>
+                                        <div>Products</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">5K+</div>
+                                        <div>Customers</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">99.9%</div>
+                                        <div>Uptime</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">24/7</div>
+                                        <div>Support</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-search me-2"></i>Product Search</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('sqli_level14') }}" method="post">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="category" class="form-label">Category:</label>
+                                    <select class="form-select" id="category" name="category">
+                                        <option value="Electronics" {% if category == 'Electronics' %}selected{% endif %}>Electronics</option>
+                                        <option value="Clothing" {% if category == 'Clothing' %}selected{% endif %}>Clothing</option>
+                                        <option value="Home" {% if category == 'Home' %}selected{% endif %}>Home & Kitchen</option>
+                                        <option value="Books" {% if category == 'Books' %}selected{% endif %}>Books</option>
+                                        <option value="Sports" {% if category == 'Sports' %}selected{% endif %}>Sports & Outdoors</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="search_term" class="form-label">Search Term:</label>
+                                    <input type="text" class="form-control" id="search_term" name="search_term" value="{{ search_term if search_term else '' }}" placeholder="Enter product name or description">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-search me-2"></i>Search Products
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                {% if error %}
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    {{ error }}
+                </div>
+                {% endif %}
+
+                {% if waf_blocked %}
+                <div class="alert alert-warning">
+                    <i class="bi bi-shield-exclamation me-2"></i>
+                    <strong>WAF Alert:</strong> Potential SQL injection attack detected and blocked!
+                </div>
+                {% endif %}
+
+                {% if products %}
+                <div class="products-container">
+                    <h4 class="mb-3"><i class="bi bi-box-seam me-2"></i>Search Results</h4>
+
+                    <div class="row">
+                        {% for product in products %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card product-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ product.name }}</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">{{ product.category }}</h6>
+                                    <p class="card-text">{{ product.description }}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-primary">${{ product.price }}</span>
+                                        <small class="text-muted">ID: {{ product.id }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if waf_logs %}
+                <div class="waf-log">
+                    <h5 class="mb-3"><i class="bi bi-shield-fill me-2"></i>WAF Logs</h5>
+
+                    {% for log in waf_logs %}
+                    <div class="waf-record">
+                        <span class="waf-timestamp">[{{ log.timestamp }}]</span>
+                        <span class="waf-rule">Rule #{{ log.rule_id }}: {{ log.rule_name }}</span>
+                        <span class="waf-action">({{ log.action }})</span>
+                        <span class="waf-ip">from {{ log.ip }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="admin-note">
+                    <h5><i class="bi bi-shield-lock me-2"></i>Developer Note</h5>
+                    <p>Reminder to the development team: Our advanced WAF is configured to block all known SQL injection patterns. The restricted product (ID: 999) should not be accessible through the search functionality. Make sure to regularly update the WAF rules to protect against new attack vectors.</p>
+                    <p class="mb-0"><small class="text-muted">Note: This message is for internal use only and should not be visible to regular users.</small></p>
+                </div>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level='sqli14') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

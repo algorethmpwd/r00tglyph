@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: SQL Injection Level 22{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h2 class="text-center">Solution: Level 22 - SQL Injection in NoSQL Database</h2>
+            </div>
+            <div class="card-body">
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates a SQL injection vulnerability in a NoSQL database. NoSQL databases store data in formats other than traditional tables, such as documents, key-value pairs, or graphs. Despite the name "NoSQL," these databases are still vulnerable to injection attacks, often called NoSQL injection.
+                </p>
+                <p>
+                    The vulnerability occurs because:
+                </p>
+                <ul>
+                    <li>The application constructs database queries using string concatenation</li>
+                    <li>User input is directly incorporated into these queries without proper validation or parameterization</li>
+                    <li>The application fails to properly sanitize or escape special characters in the input</li>
+                </ul>
+                <p>
+                    This type of vulnerability is particularly dangerous because developers may assume NoSQL databases are immune to SQL injection, and traditional SQL injection protection mechanisms may not be effective against NoSQL injection.
+                </p>
+
+                <h3>The Vulnerable Code</h3>
+                <p>
+                    The vulnerability exists in how the application constructs and executes NoSQL queries. Here's a simplified example of the vulnerable code:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>// Vulnerable code example (Node.js with MongoDB)
+app.post('/query', (req, res) => {
+  const collection = req.body.collection;
+  const queryString = req.body.query;
+
+  try {
+    // Vulnerable query construction
+    const query = JSON.parse(queryString);
+
+    // Execute the query
+    db.collection(collection).find(query).toArray((err, results) => {
+      if (err) {
+        return res.status(500).json({ error: 'Database error' });
+      }
+
+      res.json({ results });
+    });
+  } catch (error) {
+    res.status(400).json({ error: 'Invalid query format' });
+  }
+});</code></pre>
+                <p>
+                    The vulnerability is in the direct parsing and execution of user-provided JSON queries without proper validation or sanitization.
+                </p>
+
+                <h3>Solution</h3>
+                <p>To exploit this vulnerability, follow these steps:</p>
+
+                <h4>1. Understand the NoSQL Query Structure</h4>
+                <p>
+                    First, we need to understand how the NoSQL database constructs and executes queries. In this case, the application is using a MongoDB-like query structure, where queries are JSON objects that specify the conditions for document selection.
+                </p>
+
+                <h4>2. Identify the Vulnerable Parameters</h4>
+                <p>
+                    The application allows users to specify both the collection to query and the query itself. Both of these parameters could potentially be vulnerable to injection. For this challenge, we'll focus on exploiting the collection parameter to access the restricted 'secrets' collection mentioned in the developer note.
+                </p>
+
+                <h4>3. Craft a NoSQL Injection Payload</h4>
+                <p>
+                    We can craft a payload that exploits the vulnerability to access the restricted 'secrets' collection. There are several approaches we can take:
+                </p>
+
+                <h5>Approach 1: Collection Name Manipulation</h5>
+                <p>
+                    If the application doesn't properly validate the collection name, we might be able to directly specify the 'secrets' collection:
+                </p>
+                <div class="alert alert-secondary">
+                    <p><strong>Collection:</strong> secrets</p>
+                    <p><strong>Query:</strong></p>
+                    <pre><code>{}</code></pre>
+                </div>
+                <p>
+                    This simple approach tries to query all documents in the 'secrets' collection by providing an empty query object.
+                </p>
+
+                <h5>Approach 2: JSON Injection in Query</h5>
+                <p>
+                    If the application constructs the query using string concatenation before parsing it as JSON, we might be able to break out of the intended query structure:
+                </p>
+                <div class="alert alert-secondary">
+                    <p><strong>Collection:</strong> articles</p>
+                    <p><strong>Query:</strong></p>
+                    <pre><code>{"author": "John Doe", "$where": "this.collection === 'secrets'"}</code></pre>
+                </div>
+                <p>
+                    This payload attempts to use the <code>$where</code> operator to execute JavaScript code that checks if the document belongs to the 'secrets' collection.
+                </p>
+
+                <h5>Approach 3: Operator Injection</h5>
+                <p>
+                    MongoDB supports various operators that can be used to construct complex queries. We can use these operators to access data from other collections:
+                </p>
+                <div class="alert alert-secondary">
+                    <p><strong>Collection:</strong> articles</p>
+                    <p><strong>Query:</strong></p>
+                    <pre><code>{"$lookup": {"from": "secrets", "localField": "_id", "foreignField": "_id", "as": "secret_data"}}</code></pre>
+                </div>
+                <p>
+                    This payload uses the <code>$lookup</code> operator to perform a left outer join with the 'secrets' collection, potentially exposing its contents.
+                </p>
+
+                <h5>Approach 4: JavaScript Execution</h5>
+                <p>
+                    MongoDB allows executing JavaScript code in queries using operators like <code>$where</code> and <code>$function</code>:
+                </p>
+                <div class="alert alert-secondary">
+                    <p><strong>Collection:</strong> articles</p>
+                    <p><strong>Query:</strong></p>
+                    <pre><code>{"$where": "return db.secrets.findOne() !== null"}</code></pre>
+                </div>
+                <p>
+                    This payload attempts to execute JavaScript code that queries the 'secrets' collection directly.
+                </p>
+
+                <h4>4. Execute the Query</h4>
+                <p>
+                    To exploit the vulnerability, we need to execute our crafted query. In the challenge interface, we can select the appropriate collection and enter our payload in the Query field, then click the "Execute Query" button.
+                </p>
+                <p>
+                    When the server processes our query, it will execute the injected code and potentially return the flag from the 'secrets' collection.
+                </p>
+
+                <h3>Real-world Impact</h3>
+                <p>
+                    NoSQL injection vulnerabilities are particularly relevant in:
+                </p>
+                <ul>
+                    <li><strong>Content Management Systems</strong>: Many modern CMS platforms use NoSQL databases for content storage</li>
+                    <li><strong>Mobile Applications</strong>: Backend services for mobile apps often use NoSQL databases for flexibility</li>
+                    <li><strong>IoT Platforms</strong>: Internet of Things platforms use NoSQL databases to store sensor data and device information</li>
+                    <li><strong>Microservices Architectures</strong>: Microservices often use NoSQL databases for their flexibility and scalability</li>
+                </ul>
+                <p>
+                    The impact of these vulnerabilities can be severe:
+                </p>
+                <ul>
+                    <li>Unauthorized access to sensitive user data</li>
+                    <li>Authentication bypass and privilege escalation</li>
+                    <li>Manipulation of database records</li>
+                    <li>Complete compromise of the database</li>
+                </ul>
+
+                <h3>Prevention</h3>
+                <p>To prevent NoSQL injection vulnerabilities, developers should:</p>
+                <ul>
+                    <li>
+                        <strong>Use Parameterized Queries</strong> or query builders:
+                        <pre class="bg-light p-3 rounded"><code>// Safe code example (Node.js with MongoDB)
+app.post('/query', (req, res) => {
+  const collection = req.body.collection;
+  const author = req.body.author;
+
+  // Validate collection name against whitelist
+  const allowedCollections = ['articles', 'users', 'products'];
+  if (!allowedCollections.includes(collection)) {
+    return res.status(400).json({ error: 'Invalid collection' });
+  }
+
+  // Use safe query construction
+  const query = { author: author };
+
+  // Execute the query
+  db.collection(collection).find(query).toArray((err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error' });
+    }
+
+    res.json({ results });
+  });
+});</code></pre>
+                    </li>
+                    <li>
+                        <strong>Validate and Sanitize User Input</strong>:
+                        <ul>
+                            <li>Validate input types and formats</li>
+                            <li>Use whitelists for allowed values</li>
+                            <li>Implement strict validation rules for query parameters</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Implement Proper Access Controls</strong>:
+                        <ul>
+                            <li>Use authentication and authorization for database access</li>
+                            <li>Apply the principle of least privilege to database users</li>
+                            <li>Implement collection-level access control</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Disable Dangerous Features</strong>:
+                        <ul>
+                            <li>Disable JavaScript execution in queries if not needed</li>
+                            <li>Restrict the use of powerful operators like <code>$where</code> and <code>$function</code></li>
+                            <li>Use database configuration options to limit potential attack vectors</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('sqli_level22') }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

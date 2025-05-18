@@ -1,0 +1,434 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 23: SQL Injection in ORM Layer - R00tGlyph{% endblock %}
+
+{% block content %}
+<style>
+    .orm-header {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .code-box {
+        background-color: #1e1e1e;
+        color: #d4d4d4;
+        padding: 15px;
+        border-radius: 5px;
+        font-family: monospace;
+        overflow-x: auto;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    .code-keyword {
+        color: #569cd6;
+    }
+    .code-string {
+        color: #ce9178;
+    }
+    .code-comment {
+        color: #6a9955;
+    }
+    .code-function {
+        color: #dcdcaa;
+    }
+    .code-class {
+        color: #4ec9b0;
+    }
+    .code-variable {
+        color: #9cdcfe;
+    }
+    .admin-note {
+        background-color: rgba(255, 193, 7, 0.1);
+        border-left: 4px solid var(--bs-warning);
+        padding: 15px;
+        margin-top: 20px;
+        border-radius: 5px;
+    }
+    .article-card {
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-left: 4px solid #3b82f6;
+        transition: all 0.3s ease;
+    }
+    .article-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .article-id {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+    }
+    .article-title {
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #3b82f6;
+    }
+    .article-content {
+        margin-bottom: 10px;
+    }
+    .article-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    .query-builder {
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    .query-builder-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .query-builder-title {
+        font-weight: bold;
+        color: #3b82f6;
+    }
+    .query-builder-content {
+        margin-bottom: 15px;
+    }
+    .query-result {
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        padding: 15px;
+        margin-top: 20px;
+        border-left: 4px solid #3b82f6;
+    }
+    .query-result-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .query-result-title {
+        font-weight: bold;
+        color: #3b82f6;
+    }
+    .query-result-content {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    .orm-query {
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        padding: 15px;
+        margin-top: 20px;
+        border-left: 4px solid #3b82f6;
+        font-family: monospace;
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        {% if sqli_detected %}
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>Success!</strong> You've successfully exploited the SQL injection vulnerability in the ORM layer! The challenge has been marked as completed.
+            {% if flag %}
+            <div class="mt-2">
+                <strong>Flag:</strong> <code>{{ flag }}</code>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Challenge description -->
+        <div class="alert alert-dark challenge-description">
+            <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+            <p>
+                Welcome to <strong>ArticleBase</strong>, a fictional content management system! This challenge simulates a real-world scenario where an Object-Relational Mapping (ORM) layer is vulnerable to SQL injection.
+            </p>
+            <p>
+                The developers of ArticleBase have built a modern CMS using an ORM framework to interact with the database. However, they've made a critical mistake: they're dynamically constructing ORM queries using string concatenation and not properly validating user input.
+            </p>
+            <p>
+                <strong>Your Task:</strong> Exploit the SQL injection vulnerability in the ORM layer to access sensitive data. The flag is hidden in a restricted article that should not be accessible to regular users.
+            </p>
+
+            <div class="card mb-3 border-secondary">
+                <div class="card-header bg-secondary text-white">
+                    <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">
+                        <strong>Client:</strong> Web Application Security Team<br>
+                        <strong>Target:</strong> ArticleBase CMS<br>
+                        <strong>Vulnerability:</strong> SQL Injection in ORM Layer<br>
+                        <strong>Objective:</strong> Access restricted data containing sensitive information
+                    </p>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        Object-Relational Mapping (ORM) frameworks provide an abstraction layer between application code and the database, allowing developers to work with objects instead of writing raw SQL queries. Popular ORM frameworks include SQLAlchemy (Python), Hibernate (Java), Entity Framework (C#), and Sequelize (JavaScript).
+                    </p>
+                    <p>
+                        SQL injection in ORM layers occurs when:
+                    </p>
+                    <ul>
+                        <li>Developers dynamically construct ORM queries using string concatenation</li>
+                        <li>User input is directly incorporated into these queries without proper validation or parameterization</li>
+                        <li>The application fails to properly sanitize or escape special characters in the input</li>
+                    </ul>
+                    <p>
+                        This type of vulnerability is particularly dangerous because:
+                    </p>
+                    <ul>
+                        <li>Developers often assume that using an ORM automatically protects against SQL injection</li>
+                        <li>ORM frameworks provide powerful query capabilities that can be exploited</li>
+                        <li>The abstraction layer can make it harder to identify and fix vulnerabilities</li>
+                        <li>Traditional SQL injection protection mechanisms may not be effective against ORM-specific vulnerabilities</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        The ArticleBase CMS likely constructs ORM queries similar to:
+                    </p>
+                    <div class="code-box">
+                        <span class="code-comment"># Example SQLAlchemy ORM query</span><br>
+                        <span class="code-variable">articles</span> = <span class="code-variable">db</span>.<span class="code-variable">session</span>.<span class="code-function">query</span>(<span class="code-class">Article</span>).<span class="code-function">filter</span>(<span class="code-class">Article</span>.<span class="code-variable">title</span>.<span class="code-function">like</span>(<span class="code-string">f'%{search_term}%'</span>)).<span class="code-function">all</span>()
+                    </div>
+                    <p>
+                        And then uses these queries to retrieve data from the database:
+                    </p>
+                    <div class="code-box">
+                        <span class="code-comment"># Example of vulnerable ORM query construction</span><br>
+                        <span class="code-keyword">def</span> <span class="code-function">search_articles</span>(<span class="code-variable">search_term</span>, <span class="code-variable">filter_by</span>, <span class="code-variable">sort_by</span>):<br>
+                        &nbsp;&nbsp;<span class="code-comment"># Vulnerable query construction</span><br>
+                        &nbsp;&nbsp;<span class="code-variable">query</span> = <span class="code-string">f"db.session.query(Article).filter(Article.{filter_by}.like('%{search_term}%'))"</span><br>
+                        &nbsp;&nbsp;<br>
+                        &nbsp;&nbsp;<span class="code-keyword">if</span> <span class="code-variable">sort_by</span>:<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-variable">query</span> += <span class="code-string">f".order_by(Article.{sort_by})"</span><br>
+                        &nbsp;&nbsp;<br>
+                        &nbsp;&nbsp;<span class="code-comment"># Execute the dynamically constructed query</span><br>
+                        &nbsp;&nbsp;<span class="code-variable">result</span> = <span class="code-function">eval</span>(<span class="code-variable">query</span>)<br>
+                        &nbsp;&nbsp;<span class="code-keyword">return</span> <span class="code-variable">result</span>
+                    </div>
+                    <p>
+                        To exploit this vulnerability, you'll need to:
+                    </p>
+                    <ol>
+                        <li>Understand how the ORM constructs and executes queries</li>
+                        <li>Identify which fields or parameters are vulnerable to injection</li>
+                        <li>Craft a malicious input that breaks out of the intended query structure</li>
+                        <li>Execute the query against the database</li>
+                        <li>Analyze the response to extract the sensitive information</li>
+                    </ol>
+                    <p>
+                        For this challenge, we've provided a simulated article search interface that allows you to interact with the ORM layer.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-shield-fill-check me-2"></i>Real-World Impact</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        SQL injection vulnerabilities in ORM layers have affected several real-world applications:
+                    </p>
+                    <ul>
+                        <li><strong>Content Management Systems</strong>: Many modern CMS platforms use ORM frameworks for database access.</li>
+                        <li><strong>E-commerce Platforms</strong>: Online stores use ORM frameworks to manage product catalogs and customer data.</li>
+                        <li><strong>Enterprise Applications</strong>: Business applications use ORM frameworks to interact with complex database schemas.</li>
+                    </ul>
+                    <p>
+                        For applications like ArticleBase, such vulnerabilities could lead to:
+                    </p>
+                    <ul>
+                        <li>Unauthorized access to sensitive user data</li>
+                        <li>Exposure of unpublished or restricted content</li>
+                        <li>Manipulation of database records</li>
+                        <li>Complete compromise of the database</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 23: SQL Injection in ORM Layer</h2>
+            </div>
+            <div class="card-body">
+                <div class="orm-header">
+                    <div class="d-flex align-items-center justify-content-center">
+                        <i class="bi bi-file-earmark-text-fill me-2" style="font-size: 2.5rem;"></i>
+                        <h1 class="mb-0">ArticleBase</h1>
+                    </div>
+                    <p class="text-center mb-0 mt-2">Modern Content Management System</p>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <div class="scenario-box">
+                            <h4><i class="bi bi-exclamation-triangle-fill me-2"></i>Penetration Testing Scenario</h4>
+                            <p>You've been hired to perform a security assessment of ArticleBase, a content management system that uses an ORM framework to interact with the database.</p>
+                            <p>During your initial testing, you notice that the article search functionality might be vulnerable to SQL injection. The application seems to construct ORM queries using string concatenation and not properly validating user input.</p>
+                            <p><strong>Your objective:</strong> Exploit the SQL injection vulnerability in the ORM layer to access restricted data that contains the flag.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="portal-stats">
+                            <h5 class="text-center mb-3"><i class="bi bi-bar-chart-fill me-2"></i>Platform Statistics</h5>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">500+</div>
+                                        <div>Articles</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">50+</div>
+                                        <div>Authors</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">10+</div>
+                                        <div>Categories</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">24/7</div>
+                                        <div>Support</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="query-builder">
+                    <div class="query-builder-header">
+                        <div class="query-builder-title">
+                            <i class="bi bi-search me-2"></i>Article Search
+                        </div>
+                    </div>
+                    <div class="query-builder-content">
+                        <form action="{{ url_for('sqli_level23') }}" method="post">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="search_term" class="form-label">Search Term:</label>
+                                    <input type="text" class="form-control" id="search_term" name="search_term" value="{{ search_term }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="filter_by" class="form-label">Filter By:</label>
+                                    <select class="form-select" id="filter_by" name="filter_by">
+                                        <option value="title" {% if filter_by == 'title' %}selected{% endif %}>Title</option>
+                                        <option value="content" {% if filter_by == 'content' %}selected{% endif %}>Content</option>
+                                        <option value="author" {% if filter_by == 'author' %}selected{% endif %}>Author</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="sort_by" class="form-label">Sort By:</label>
+                                    <select class="form-select" id="sort_by" name="sort_by">
+                                        <option value="id" {% if sort_by == 'id' %}selected{% endif %}>ID</option>
+                                        <option value="title" {% if sort_by == 'title' %}selected{% endif %}>Title</option>
+                                        <option value="author" {% if sort_by == 'author' %}selected{% endif %}>Author</option>
+                                        <option value="created_at" {% if sort_by == 'created_at' %}selected{% endif %}>Date</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="sort_order" class="form-label">Sort Order:</label>
+                                    <select class="form-select" id="sort_order" name="sort_order">
+                                        <option value="asc" {% if sort_order == 'asc' %}selected{% endif %}>Ascending</option>
+                                        <option value="desc" {% if sort_order == 'desc' %}selected{% endif %}>Descending</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-search me-2"></i>Search Articles
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                {% if error %}
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    {{ error }}
+                </div>
+                {% endif %}
+
+                {% if orm_query %}
+                <div class="orm-query">
+                    <strong>Generated ORM Query:</strong><br>
+                    {{ orm_query }}
+                </div>
+                {% endif %}
+
+                {% if results %}
+                <div class="query-result">
+                    <div class="query-result-header">
+                        <div class="query-result-title">
+                            <i class="bi bi-list-ul me-2"></i>Search Results
+                        </div>
+                        <div>
+                            <span class="badge bg-secondary">{{ results|length }} articles</span>
+                        </div>
+                    </div>
+                    <div class="query-result-content">
+                        {% for article in results %}
+                        <div class="article-card">
+                            <div class="article-id">ID: {{ article.id }}</div>
+                            <div class="article-title">{{ article.title }}</div>
+                            <div class="article-content">{{ article.content }}</div>
+                            <div class="article-meta">
+                                <div>
+                                    <i class="bi bi-person-fill me-1"></i>{{ article.author }}
+                                </div>
+                                <div>
+                                    <i class="bi bi-calendar-fill me-1"></i>{{ article.created_at }}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="admin-note">
+                    <h5><i class="bi bi-shield-lock me-2"></i>Developer Note</h5>
+                    <p>Reminder to the development team: The admin_flag field in the Article model contains sensitive information and should not be accessible through the search functionality. Make sure our ORM queries properly validate and sanitize user input before execution.</p>
+                    <p class="mb-0"><small class="text-muted">Note: This message is for internal use only and should not be visible to regular users.</small></p>
+                </div>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level='sqli23') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

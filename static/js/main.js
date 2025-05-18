@@ -449,8 +449,8 @@ function revealFlag() {
 }
 
 function setupChallengeDescriptionPopup() {
-    // Check if we're on a challenge page
-    if (window.location.pathname.includes('/xss/level')) {
+    // Check if we're on a challenge page (XSS or SQLi)
+    if (window.location.pathname.includes('/xss/level') || window.location.pathname.includes('/sqli/level')) {
         // Create modal for challenge description
         const challengeDescription = document.querySelector('.challenge-description');
         if (challengeDescription) {
@@ -462,13 +462,22 @@ function setupChallengeDescriptionPopup() {
             modal.setAttribute('aria-labelledby', 'challengeDescriptionModalLabel');
             modal.setAttribute('aria-hidden', 'true');
 
+            // Get challenge type and level from URL
+            const path = window.location.pathname;
+            let challengeType = 'Challenge';
+            if (path.includes('/xss/')) {
+                challengeType = 'XSS';
+            } else if (path.includes('/sqli/')) {
+                challengeType = 'SQL Injection';
+            }
+
             // Create modal content
             modal.innerHTML = `
                 <div class="modal-dialog modal-dialog-centered modal-lg">
                     <div class="modal-content">
                         <div class="modal-header bg-dark text-white">
                             <h5 class="modal-title" id="challengeDescriptionModalLabel">
-                                <i class="bi bi-info-circle-fill me-2"></i>Challenge Description
+                                <i class="bi bi-info-circle-fill me-2"></i>${challengeType} Challenge Description
                             </h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
@@ -492,15 +501,30 @@ function setupChallengeDescriptionPopup() {
 
             // Create a button to show the description again
             const descriptionButton = document.createElement('button');
-            descriptionButton.className = 'btn btn-sm btn-outline-info mb-3';
-            descriptionButton.innerHTML = '<i class="bi bi-info-circle-fill me-2"></i>Show Challenge Description';
+            descriptionButton.className = 'btn btn-info mb-3';
+            descriptionButton.innerHTML = '<i class="bi bi-info-circle-fill me-2"></i>View Challenge Description';
             descriptionButton.setAttribute('data-bs-toggle', 'modal');
             descriptionButton.setAttribute('data-bs-target', '#challengeDescriptionModal');
 
-            // Insert the button before the first card in the challenge
-            const firstCard = document.querySelector('.card');
-            if (firstCard && firstCard.parentNode) {
-                firstCard.parentNode.insertBefore(descriptionButton, firstCard);
+            // Insert the button at the appropriate location
+            // For SQLi challenges, we want it at the top of the content
+            if (window.location.pathname.includes('/sqli/level')) {
+                const contentDiv = document.querySelector('.row > .col-md-10, .row > .col-md-8');
+                if (contentDiv) {
+                    // Insert at the beginning of the content div, after any success alerts
+                    const firstAlert = contentDiv.querySelector('.alert');
+                    if (firstAlert) {
+                        contentDiv.insertBefore(descriptionButton, firstAlert.nextSibling);
+                    } else {
+                        contentDiv.insertBefore(descriptionButton, contentDiv.firstChild);
+                    }
+                }
+            } else {
+                // For XSS challenges, keep the existing behavior
+                const firstCard = document.querySelector('.card');
+                if (firstCard && firstCard.parentNode) {
+                    firstCard.parentNode.insertBefore(descriptionButton, firstCard);
+                }
             }
 
             // Show the modal automatically only on first visit, not after form submissions
@@ -520,8 +544,8 @@ function setupChallengeDescriptionPopup() {
 }
 
 function setupFlagSubmissionPopup() {
-    // Check if we're on a challenge page
-    if (window.location.pathname.includes('/xss/level')) {
+    // Check if we're on a challenge page (XSS or SQLi)
+    if (window.location.pathname.includes('/xss/level') || window.location.pathname.includes('/sqli/level')) {
         // Create flag submission icon
         const flagIcon = document.createElement('div');
         flagIcon.id = 'flag-submission-icon';
@@ -594,8 +618,16 @@ function setupFlagSubmissionPopup() {
 
         // Get challenge ID from URL
         const path = window.location.pathname;
-        const match = path.match(/\/xss\/level(\d+)/);
-        const challengeId = match ? match[1] : '1';
+        let challengeId = '1';
+
+        // Extract challenge ID based on challenge type
+        if (path.includes('/xss/level')) {
+            const match = path.match(/\/xss\/level(\d+)/);
+            challengeId = match ? match[1] : '1';
+        } else if (path.includes('/sqli/level')) {
+            const match = path.match(/\/sqli\/level(\d+)/);
+            challengeId = match ? match[1] : '1';
+        }
 
         // Populate popup content
         flagPopup.innerHTML = `

@@ -22,17 +22,90 @@
                 <h2 class="text-center">Level 2: SQL Injection in Search</h2>
             </div>
             <div class="card-body">
+                <!-- Challenge description -->
                 <div class="alert alert-dark challenge-description">
                     <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
                     <p>
-                        Welcome to <strong>TechGadgets</strong>, a fictional e-commerce website! This challenge simulates a real-world scenario where a product search feature is vulnerable to SQL injection.
+                        Welcome to <strong>TechMart</strong>, a fictional e-commerce website! This challenge simulates a real-world scenario where a product search feature is vulnerable to SQL injection.
                     </p>
                     <p>
-                        The developers of TechGadgets have implemented a search feature that allows users to find products by name. However, they've made a critical mistake in how they handle user input in the search query.
+                        The developers of TechMart have implemented a search feature that allows users to find products by name. However, they've made a critical mistake in how they handle user input in the search query.
                     </p>
                     <p>
-                        <strong>Your Task:</strong> Exploit the SQL injection vulnerability in the search feature to reveal hidden products. Find the secret product with ID 42 to reveal the flag.
+                        <strong>Your Task:</strong> Use SQL injection to find a hidden product with ID 42 that doesn't appear in normal search results. Successfully finding this product will reveal the flag.
                     </p>
+
+                    <div class="card mb-3 border-secondary">
+                        <div class="card-header bg-secondary text-white">
+                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-0">
+                                <strong>Client:</strong> TechMart E-commerce Platform<br>
+                                <strong>Target:</strong> Product Search Functionality<br>
+                                <strong>Vulnerability:</strong> Suspected SQL Injection<br>
+                                <strong>Objective:</strong> Extract hidden product data not meant to be publicly visible
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>
+                                This challenge focuses on a different type of SQL injection than Level 1. Instead of bypassing authentication, you'll need to manipulate a search query to extract information that should be hidden.
+                            </p>
+                            <p>
+                                In real-world applications, search features are common places for SQL injection vulnerabilities because:
+                            </p>
+                            <ul>
+                                <li>They often need to handle complex user input</li>
+                                <li>Developers may focus more on making search work correctly than on security</li>
+                                <li>Search queries often use the LIKE operator, which introduces additional complexity</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>
+                                The search feature likely uses a SQL query similar to:
+                            </p>
+                            <pre class="bg-light p-3 rounded"><code>SELECT id, name, category, price FROM products WHERE name LIKE '%search_term%'</code></pre>
+                            <p>
+                                Consider these techniques:
+                            </p>
+                            <ul>
+                                <li>Can you use SQL operators to modify the WHERE clause?</li>
+                                <li>How might you use the OR operator to expand the search results?</li>
+                                <li>What condition would always evaluate to true for all records?</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-shield-fill-check me-2"></i>Real-World Impact</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>
+                                SQL injection in search features can have serious consequences for e-commerce sites:
+                            </p>
+                            <ul>
+                                <li><strong>Data Exposure</strong>: Attackers can access sensitive product information, including unreleased products or internal pricing</li>
+                                <li><strong>Financial Impact</strong>: Exposing wholesale prices or discount codes can lead to financial losses</li>
+                                <li><strong>Competitive Disadvantage</strong>: Competitors could extract your entire product catalog</li>
+                            </ul>
+                            <p>
+                                In 2019, a major retailer suffered a breach where attackers used SQL injection in a product search feature to extract customer payment information stored in the same database.
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="card mb-4">

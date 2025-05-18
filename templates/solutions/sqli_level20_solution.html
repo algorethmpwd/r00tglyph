@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: SQL Injection Level 20{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h2 class="text-center">Solution: Level 20 - SQL Injection in Stored Procedures</h2>
+            </div>
+            <div class="card-body">
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates a SQL injection vulnerability in a stored procedure. Stored procedures are precompiled collections of SQL statements stored in a database. They are commonly used to encapsulate complex logic, improve performance, and enforce security by restricting direct table access.
+                </p>
+                <p>
+                    The vulnerability occurs because:
+                </p>
+                <ul>
+                    <li>The stored procedure uses dynamic SQL (SQL constructed at runtime)</li>
+                    <li>User input is concatenated directly into the dynamic SQL without proper validation or parameterization</li>
+                    <li>The procedure fails to properly sanitize or escape special characters in the input</li>
+                </ul>
+                <p>
+                    This type of vulnerability is particularly dangerous because stored procedures often run with elevated privileges and may have access to sensitive data not directly accessible to users.
+                </p>
+
+                <h3>The Vulnerable Code</h3>
+                <p>
+                    The vulnerability exists in how the stored procedure constructs and executes dynamic SQL. Here's a simplified example of the vulnerable code:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>-- Vulnerable stored procedure
+CREATE PROCEDURE SearchProducts(@category VARCHAR(50), @searchTerm VARCHAR(100))
+AS
+BEGIN
+    DECLARE @sql NVARCHAR(1000)
+
+    -- Vulnerable dynamic SQL construction
+    SET @sql = 'SELECT * FROM products WHERE category = ''' + @category + ''' AND active = 1'
+
+    IF @searchTerm <> ''
+        SET @sql = @sql + ' AND (name LIKE ''%' + @searchTerm + '%'' OR description LIKE ''%' + @searchTerm + '%'')'
+
+    -- Execute the dynamic SQL
+    EXEC(@sql)
+END</code></pre>
+                <p>
+                    The vulnerability is in the direct concatenation of the <code>@category</code> and <code>@searchTerm</code> parameters into the dynamic SQL string without proper sanitization or parameterization.
+                </p>
+
+                <h3>Solution</h3>
+                <p>To exploit this vulnerability, follow these steps:</p>
+
+                <h4>1. Understand the Stored Procedure</h4>
+                <p>
+                    First, we need to understand how the stored procedure works. Based on the challenge description and the procedure details, the <code>SearchProducts</code> procedure:
+                </p>
+                <ul>
+                    <li>Takes two parameters: <code>@category</code> and <code>@searchTerm</code></li>
+                    <li>Constructs a dynamic SQL query using these parameters</li>
+                    <li>Executes the query to search for products</li>
+                </ul>
+
+                <h4>2. Identify the Vulnerable Parameters</h4>
+                <p>
+                    Both the <code>@category</code> and <code>@searchTerm</code> parameters are likely vulnerable to SQL injection, as they are directly concatenated into the dynamic SQL string. For this challenge, we'll focus on the <code>@category</code> parameter.
+                </p>
+
+                <h4>3. Craft a SQL Injection Payload</h4>
+                <p>
+                    We can craft a payload that exploits the SQL injection vulnerability in the <code>@category</code> parameter to access the restricted table mentioned in the developer note:
+                </p>
+                <div class="alert alert-secondary">
+                    <code>Electronics' UNION SELECT * FROM system_flags --</code>
+                </div>
+                <p>
+                    When this payload is used as the <code>@category</code> parameter, the resulting dynamic SQL will be:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>SELECT * FROM products WHERE category = 'Electronics' UNION SELECT * FROM system_flags --' AND active = 1</code></pre>
+                <p>
+                    This query will return all products in the Electronics category as well as all rows from the system_flags table, which contains the flag. The <code>--</code> comments out the rest of the query, preventing syntax errors.
+                </p>
+
+                <h4>4. Alternative Approach: Using the Search Term Parameter</h4>
+                <p>
+                    If the <code>@category</code> parameter is properly sanitized, we can try injecting through the <code>@searchTerm</code> parameter:
+                </p>
+                <div class="alert alert-secondary">
+                    <code>' OR 1=1 UNION SELECT * FROM system_flags --</code>
+                </div>
+                <p>
+                    When this payload is used as the <code>@searchTerm</code> parameter, the resulting dynamic SQL will be:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>SELECT * FROM products WHERE category = 'Electronics' AND active = 1 AND (name LIKE '%' OR 1=1 UNION SELECT * FROM system_flags --%' OR description LIKE '%' OR 1=1 UNION SELECT * FROM system_flags --%')</code></pre>
+                <p>
+                    This query will return all products as well as all rows from the system_flags table.
+                </p>
+
+                <h4>5. More Advanced Approach: Using Subqueries</h4>
+                <p>
+                    For a more sophisticated approach, we can use a subquery in the <code>@category</code> parameter:
+                </p>
+                <div class="alert alert-secondary">
+                    <code>Electronics' AND 1=0 UNION SELECT id, flag, flag, flag, flag FROM system_flags --</code>
+                </div>
+                <p>
+                    This payload ensures that no products are returned (due to <code>AND 1=0</code>) and only the data from the system_flags table is included in the results. The multiple <code>flag</code> columns in the SELECT statement are to match the number of columns in the products table.
+                </p>
+
+                <h4>6. Execute the Stored Procedure with the Malicious Input</h4>
+                <p>
+                    To exploit the vulnerability, we need to execute the stored procedure with our crafted payload. In the challenge interface, we can enter our payload in the Category field and click the "Execute Procedure" button.
+                </p>
+                <p>
+                    When the procedure executes our payload, it will run the injected SQL query and return the flag from the system_flags table.
+                </p>
+
+                <h3>Real-world Impact</h3>
+                <p>
+                    SQL injection vulnerabilities in stored procedures are particularly relevant in:
+                </p>
+                <ul>
+                    <li><strong>Enterprise Resource Planning (ERP) Systems</strong>: Many ERP systems use stored procedures extensively for business logic</li>
+                    <li><strong>Financial Applications</strong>: Banking and financial systems often use stored procedures for transaction processing</li>
+                    <li><strong>Healthcare Systems</strong>: Medical record systems use stored procedures to access and update patient data</li>
+                    <li><strong>Content Management Systems (CMS)</strong>: Many CMS platforms use stored procedures for content retrieval and management</li>
+                </ul>
+                <p>
+                    The impact of these vulnerabilities can be severe:
+                </p>
+                <ul>
+                    <li>Unauthorized access to sensitive business data</li>
+                    <li>Exposure of customer information</li>
+                    <li>Manipulation of critical database records</li>
+                    <li>Complete compromise of the database</li>
+                </ul>
+
+                <h3>Prevention</h3>
+                <p>To prevent SQL injection vulnerabilities in stored procedures, developers should:</p>
+                <ul>
+                    <li>
+                        <strong>Use Parameterized Queries</strong> or prepared statements within stored procedures:
+                        <pre class="bg-light p-3 rounded"><code>-- Safe stored procedure using sp_executesql
+CREATE PROCEDURE SearchProducts(@category VARCHAR(50), @searchTerm VARCHAR(100))
+AS
+BEGIN
+    DECLARE @sql NVARCHAR(1000)
+    DECLARE @params NVARCHAR(1000)
+
+    -- Safe dynamic SQL construction
+    SET @sql = 'SELECT * FROM products WHERE category = @cat AND active = 1'
+
+    IF @searchTerm <> ''
+        SET @sql = @sql + ' AND (name LIKE ''%'' + @search + ''%'' OR description LIKE ''%'' + @search + ''%'')'
+
+    SET @params = '@cat VARCHAR(50), @search VARCHAR(100)'
+
+    -- Execute the dynamic SQL with parameters
+    EXEC sp_executesql @sql, @params, @cat = @category, @search = @searchTerm
+END</code></pre>
+                    </li>
+                    <li>
+                        <strong>Validate and Sanitize Input Parameters</strong>:
+                        <ul>
+                            <li>Validate input types and formats</li>
+                            <li>Use whitelists for allowed values</li>
+                            <li>Implement strict validation rules for each parameter</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Avoid Dynamic SQL When Possible</strong>:
+                        <ul>
+                            <li>Use static SQL statements whenever possible</li>
+                            <li>If dynamic SQL is necessary, use parameterized queries</li>
+                            <li>Consider using stored procedure parameters directly in static SQL</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Implement Proper Access Controls</strong>:
+                        <ul>
+                            <li>Apply the principle of least privilege to stored procedures</li>
+                            <li>Use database roles and permissions to restrict access</li>
+                            <li>Audit stored procedure execution for suspicious activity</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('sqli_level20') }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

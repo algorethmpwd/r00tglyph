@@ -1,0 +1,496 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 17: SQL Injection in Mobile App Backend - R00tGlyph{% endblock %}
+
+{% block content %}
+<style>
+    .mobile-header {
+        background: linear-gradient(135deg, #7209b7 0%, #3f37c9 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .code-box {
+        background-color: #1e1e1e;
+        color: #d4d4d4;
+        padding: 15px;
+        border-radius: 5px;
+        font-family: monospace;
+        overflow-x: auto;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    .code-keyword {
+        color: #569cd6;
+    }
+    .code-string {
+        color: #ce9178;
+    }
+    .code-comment {
+        color: #6a9955;
+    }
+    .code-function {
+        color: #dcdcaa;
+    }
+    .code-class {
+        color: #4ec9b0;
+    }
+    .code-variable {
+        color: #9cdcfe;
+    }
+    .admin-note {
+        background-color: rgba(255, 193, 7, 0.1);
+        border-left: 4px solid var(--bs-warning);
+        padding: 15px;
+        margin-top: 20px;
+        border-radius: 5px;
+    }
+    .mobile-device {
+        width: 300px;
+        height: 600px;
+        background-color: #f8f9fa;
+        border-radius: 30px;
+        border: 10px solid #343a40;
+        margin: 0 auto;
+        position: relative;
+        overflow: hidden;
+    }
+    .mobile-screen {
+        width: 100%;
+        height: 100%;
+        background-color: white;
+        overflow-y: auto;
+        padding: 10px;
+    }
+    .mobile-notch {
+        width: 120px;
+        height: 25px;
+        background-color: #343a40;
+        border-radius: 0 0 15px 15px;
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+    }
+    .mobile-app-header {
+        background-color: #7209b7;
+        color: white;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+    .mobile-nav {
+        display: flex;
+        justify-content: space-around;
+        background-color: #f8f9fa;
+        padding: 10px 0;
+        border-top: 1px solid #dee2e6;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        left: 0;
+    }
+    .mobile-nav-item {
+        text-align: center;
+        font-size: 0.8rem;
+    }
+    .mobile-nav-icon {
+        font-size: 1.5rem;
+        margin-bottom: 5px;
+    }
+    .product-item {
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+    .product-image {
+        width: 100%;
+        height: 100px;
+        background-color: #e9ecef;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 10px;
+    }
+    .product-title {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .product-price {
+        color: #7209b7;
+        font-weight: bold;
+    }
+    .api-response {
+        background-color: #f8f9fa;
+        border-left: 4px solid #7209b7;
+        padding: 15px;
+        margin-top: 20px;
+        border-radius: 5px;
+        font-family: monospace;
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        {% if sqli_detected %}
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>Success!</strong> You've successfully exploited the SQL injection vulnerability in the mobile app API! The challenge has been marked as completed.
+            {% if flag %}
+            <div class="mt-2">
+                <strong>Flag:</strong> <code>{{ flag }}</code>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Challenge description -->
+        <div class="alert alert-dark challenge-description">
+            <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+            <p>
+                Welcome to <strong>ShopMobile</strong>, a fictional e-commerce mobile application! This challenge simulates a real-world scenario where a mobile app's backend API is vulnerable to SQL injection.
+            </p>
+            <p>
+                The developers of ShopMobile have built a modern e-commerce platform with a mobile app frontend and a RESTful API backend. However, they've made a critical mistake: they're using user input from mobile API requests directly in SQL queries without proper validation or parameterization.
+            </p>
+            <p>
+                <strong>Your Task:</strong> Exploit the SQL injection vulnerability in the mobile app's backend API to access sensitive product information. The flag is hidden in a restricted product that should not be accessible to regular users.
+            </p>
+
+            <div class="card mb-3 border-secondary">
+                <div class="card-header bg-secondary text-white">
+                    <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">
+                        <strong>Client:</strong> Mobile Application Security Team<br>
+                        <strong>Target:</strong> ShopMobile API Backend<br>
+                        <strong>Vulnerability:</strong> SQL Injection in Mobile API<br>
+                        <strong>Objective:</strong> Access restricted product data containing sensitive information
+                    </p>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        Mobile applications typically communicate with backend servers through APIs, often using JSON or XML for data exchange. These APIs can be vulnerable to the same types of injection attacks as web applications, including SQL injection.
+                    </p>
+                    <p>
+                        SQL injection in mobile app backends occurs when:
+                    </p>
+                    <ul>
+                        <li>The backend API processes data received from the mobile app</li>
+                        <li>This data is used directly in SQL queries without proper validation or parameterization</li>
+                        <li>The API fails to properly sanitize or escape special characters in the mobile app's requests</li>
+                    </ul>
+                    <p>
+                        This type of vulnerability is particularly dangerous because:
+                    </p>
+                    <ul>
+                        <li>Mobile API traffic is often less scrutinized than web traffic</li>
+                        <li>Mobile apps may use custom authentication mechanisms that bypass traditional security controls</li>
+                        <li>API endpoints may be designed for machine-to-machine communication and lack proper input validation</li>
+                        <li>Developers may assume that since the API is only accessed by their mobile app, it's inherently secure</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        The ShopMobile API likely processes requests similar to:
+                    </p>
+                    <div class="code-box">
+                        <span class="code-comment">// Example API request (JSON)</span><br>
+                        {<br>
+                        &nbsp;&nbsp;<span class="code-string">"action"</span>: <span class="code-string">"getProducts"</span>,<br>
+                        &nbsp;&nbsp;<span class="code-string">"category"</span>: <span class="code-string">"electronics"</span>,<br>
+                        &nbsp;&nbsp;<span class="code-string">"sort"</span>: <span class="code-string">"price_asc"</span>,<br>
+                        &nbsp;&nbsp;<span class="code-string">"limit"</span>: <span class="code-variable">10</span><br>
+                        }
+                    </div>
+                    <p>
+                        And then uses the values in SQL queries like:
+                    </p>
+                    <div class="code-box">
+                        <span class="code-comment">// Example of vulnerable SQL query</span><br>
+                        <span class="code-keyword">SELECT</span> product_id, name, description, price, image_url<br>
+                        <span class="code-keyword">FROM</span> products<br>
+                        <span class="code-keyword">WHERE</span> category = '<span class="code-variable">$category</span>' <span class="code-keyword">AND</span> active = 1<br>
+                        <span class="code-keyword">ORDER BY</span> <span class="code-variable">$sort</span><br>
+                        <span class="code-keyword">LIMIT</span> <span class="code-variable">$limit</span>
+                    </div>
+                    <p>
+                        To exploit this vulnerability, you'll need to:
+                    </p>
+                    <ol>
+                        <li>Understand the API request format used by the mobile app</li>
+                        <li>Identify which fields in the API requests are vulnerable to SQL injection</li>
+                        <li>Craft a malicious API request that includes SQL injection code</li>
+                        <li>Send the request to the API endpoint</li>
+                        <li>Analyze the response to extract the sensitive information</li>
+                    </ol>
+                    <p>
+                        For this challenge, we've provided a simulated mobile app interface that allows you to interact with the API.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-shield-fill-check me-2"></i>Real-World Impact</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        SQL injection vulnerabilities in mobile app backends have affected several real-world applications:
+                    </p>
+                    <ul>
+                        <li><strong>E-commerce Apps</strong>: Multiple shopping apps have exposed customer data through vulnerable APIs.</li>
+                        <li><strong>Banking Apps</strong>: Financial applications have had transaction data exposed through API vulnerabilities.</li>
+                        <li><strong>Social Media Apps</strong>: User profile data has been compromised through insecure mobile backends.</li>
+                    </ul>
+                    <p>
+                        For mobile e-commerce applications like ShopMobile, such vulnerabilities could lead to:
+                    </p>
+                    <ul>
+                        <li>Unauthorized access to customer data</li>
+                        <li>Exposure of payment information</li>
+                        <li>Manipulation of product prices</li>
+                        <li>Complete compromise of the database</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 17: SQL Injection in Mobile App Backend</h2>
+            </div>
+            <div class="card-body">
+                <div class="mobile-header">
+                    <div class="d-flex align-items-center justify-content-center">
+                        <i class="bi bi-phone-fill me-2" style="font-size: 2.5rem;"></i>
+                        <h1 class="mb-0">ShopMobile</h1>
+                    </div>
+                    <p class="text-center mb-0 mt-2">Mobile E-commerce Application</p>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <div class="scenario-box">
+                            <h4><i class="bi bi-exclamation-triangle-fill me-2"></i>Penetration Testing Scenario</h4>
+                            <p>You've been hired to perform a security assessment of ShopMobile, a popular e-commerce mobile application. The app allows users to browse products, make purchases, and track orders.</p>
+                            <p>During your initial testing, you notice that the mobile app's backend API might be vulnerable to SQL injection. The API seems to use data from mobile app requests directly in database queries.</p>
+                            <p><strong>Your objective:</strong> Exploit the SQL injection vulnerability in the mobile app's backend API to access a restricted product that contains the flag.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="portal-stats">
+                            <h5 class="text-center mb-3"><i class="bi bi-bar-chart-fill me-2"></i>Application Statistics</h5>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">1M+</div>
+                                        <div>Downloads</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">10K+</div>
+                                        <div>Products</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">4.8</div>
+                                        <div>App Rating</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">24/7</div>
+                                        <div>Support</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mobile-device">
+                            <div class="mobile-notch"></div>
+                            <div class="mobile-screen">
+                                <div class="mobile-app-header">
+                                    <h4 class="mb-0">ShopMobile</h4>
+                                </div>
+
+                                <div class="mb-3">
+                                    <input type="text" class="form-control form-control-sm" placeholder="Search products..." id="mobile-search">
+                                </div>
+
+                                <div class="d-flex justify-content-between mb-3">
+                                    <select class="form-select form-select-sm" id="mobile-category">
+                                        <option value="all">All Categories</option>
+                                        <option value="electronics">Electronics</option>
+                                        <option value="clothing">Clothing</option>
+                                        <option value="home">Home & Kitchen</option>
+                                        <option value="books">Books</option>
+                                    </select>
+                                    <select class="form-select form-select-sm ms-2" id="mobile-sort">
+                                        <option value="price_asc">Price: Low to High</option>
+                                        <option value="price_desc">Price: High to Low</option>
+                                        <option value="name_asc">Name: A to Z</option>
+                                        <option value="name_desc">Name: Z to A</option>
+                                    </select>
+                                </div>
+
+                                <div id="mobile-products">
+                                    <!-- Products will be loaded here -->
+                                    <div class="product-item">
+                                        <div class="product-image">
+                                            <i class="bi bi-phone" style="font-size: 2rem;"></i>
+                                        </div>
+                                        <div class="product-title">Smartphone X</div>
+                                        <div class="product-price">$999.99</div>
+                                    </div>
+                                    <div class="product-item">
+                                        <div class="product-image">
+                                            <i class="bi bi-laptop" style="font-size: 2rem;"></i>
+                                        </div>
+                                        <div class="product-title">Laptop Pro</div>
+                                        <div class="product-price">$1299.99</div>
+                                    </div>
+                                    <div class="product-item">
+                                        <div class="product-image">
+                                            <i class="bi bi-headphones" style="font-size: 2rem;"></i>
+                                        </div>
+                                        <div class="product-title">Wireless Headphones</div>
+                                        <div class="product-price">$199.99</div>
+                                    </div>
+                                </div>
+
+                                <div class="mobile-nav">
+                                    <div class="mobile-nav-item">
+                                        <div class="mobile-nav-icon"><i class="bi bi-house"></i></div>
+                                        <div>Home</div>
+                                    </div>
+                                    <div class="mobile-nav-item">
+                                        <div class="mobile-nav-icon"><i class="bi bi-search"></i></div>
+                                        <div>Search</div>
+                                    </div>
+                                    <div class="mobile-nav-item">
+                                        <div class="mobile-nav-icon"><i class="bi bi-cart"></i></div>
+                                        <div>Cart</div>
+                                    </div>
+                                    <div class="mobile-nav-item">
+                                        <div class="mobile-nav-icon"><i class="bi bi-person"></i></div>
+                                        <div>Profile</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h4 class="mb-0"><i class="bi bi-code-slash me-2"></i>Mobile API Request</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="api-endpoint" class="form-label">API Endpoint:</label>
+                                    <input type="text" class="form-control" id="api-endpoint" value="/api/v1/products" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="api-request" class="form-label">API Request (JSON):</label>
+                                    <textarea class="form-control font-monospace" id="api-request" rows="8">{{ api_request if api_request else '{\n  "action": "getProducts",\n  "category": "electronics",\n  "sort": "price_asc",\n  "limit": 10\n}' }}</textarea>
+                                </div>
+                                <form action="{{ url_for('sqli_level17') }}" method="post">
+                                    <input type="hidden" name="api_request" id="hidden-api-request">
+                                    <button type="submit" class="btn btn-primary" id="send-api-request">
+                                        <i class="bi bi-send me-2"></i>Send API Request
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        {% if api_response %}
+                        <div class="api-response">
+                            <h5 class="mb-3"><i class="bi bi-arrow-return-right me-2"></i>API Response</h5>
+                            <pre>{{ api_response|safe }}</pre>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="admin-note">
+                    <h5><i class="bi bi-shield-lock me-2"></i>Developer Note</h5>
+                    <p>Reminder to the development team: The restricted product (ID: 999) contains sensitive information and should not be accessible through the mobile app. Make sure our API properly validates user permissions before returning product data.</p>
+                    <p class="mb-0"><small class="text-muted">Note: This message is for internal use only and should not be visible to regular users.</small></p>
+                </div>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level='sqli17') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const apiRequest = document.getElementById('api-request');
+        const hiddenApiRequest = document.getElementById('hidden-api-request');
+        const sendApiRequestButton = document.getElementById('send-api-request');
+
+        // Update hidden input with API request value when form is submitted
+        sendApiRequestButton.addEventListener('click', function() {
+            hiddenApiRequest.value = apiRequest.value;
+        });
+
+        // Mobile app UI interactions (for demonstration only)
+        const mobileCategory = document.getElementById('mobile-category');
+        const mobileSort = document.getElementById('mobile-sort');
+        const mobileSearch = document.getElementById('mobile-search');
+
+        // Update API request when mobile UI elements change
+        mobileCategory.addEventListener('change', updateApiRequest);
+        mobileSort.addEventListener('change', updateApiRequest);
+        mobileSearch.addEventListener('input', updateApiRequest);
+
+        function updateApiRequest() {
+            const category = mobileCategory.value;
+            const sort = mobileSort.value;
+            const search = mobileSearch.value;
+
+            let request = {
+                action: "getProducts",
+                category: category === "all" ? "" : category,
+                sort: sort,
+                limit: 10
+            };
+
+            if (search) {
+                request.search = search;
+            }
+
+            apiRequest.value = JSON.stringify(request, null, 2);
+        }
+    });
+</script>
+{% endblock %}

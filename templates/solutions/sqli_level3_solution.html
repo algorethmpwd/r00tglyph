@@ -1,115 +1,111 @@
 {% extends 'base.html' %}
 
-{% block title %}SQL Injection Level 3 Solution - R00tGlyph{% endblock %}
+{% block title %}Solution: SQL Injection Level 3{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-md-8 offset-md-2">
         <div class="card">
-            <div class="card-header bg-dark text-white">
-                <h2 class="text-center">SQL Injection Level 3 Solution: SQL Injection with UNION</h2>
+            <div class="card-header bg-success text-white">
+                <h2 class="text-center">Solution: Level 3 - SQL Injection with UNION</h2>
             </div>
             <div class="card-body">
-                <div class="alert alert-info">
-                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
-                    <p>
-                        This challenge demonstrates a UNION-based SQL injection vulnerability in a book search feature. The application directly concatenates user input into SQL queries without proper sanitization, allowing an attacker to use UNION statements to extract data from other tables in the database.
-                    </p>
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates a UNION-based SQL injection vulnerability in a book search feature. The application directly concatenates user input into SQL queries without proper sanitization, allowing an attacker to use UNION statements to extract data from other tables in the database.
+                </p>
+                <p>
+                    The vulnerability exists because the application constructs an SQL query by directly concatenating user input:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>SELECT id, title, author, category, year FROM books WHERE title LIKE '%search_term%'</code></pre>
+                <p>
+                    This allows an attacker to manipulate the query's structure by injecting SQL code. When the application executes this query, the injected SQL becomes part of the command, potentially changing its behavior.
+                </p>
+                <p>
+                    UNION-based SQL injection is particularly powerful because it allows an attacker to append results from a completely different query to the original query's results. This can be used to extract data from other tables in the database.
+                </p>
+
+                <h3>Solution</h3>
+                <p>To exploit this vulnerability, we need to:</p>
+
+                <h4>1. Determine the number of columns in the original query</h4>
+                <p>
+                    First, we need to find out how many columns the original query returns. We can do this by using the ORDER BY clause:
+                </p>
+                <div class="alert alert-secondary">
+                    <code>' ORDER BY 1--</code>
                 </div>
-                
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5><i class="bi bi-bug-fill me-2"></i>Vulnerability Explanation</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>
-                            The vulnerability exists because the application constructs an SQL query by directly concatenating user input:
-                        </p>
-                        <pre class="bg-light p-3 rounded"><code>SELECT id, title, author, category, year FROM books WHERE title LIKE '%search_term%'</code></pre>
-                        <p>
-                            This allows an attacker to manipulate the query's structure by injecting SQL code. When the application executes this query, the injected SQL becomes part of the command, potentially changing its behavior.
-                        </p>
-                        <p>
-                            UNION-based SQL injection is particularly powerful because it allows an attacker to append results from a completely different query to the original query's results. This can be used to extract data from other tables in the database.
-                        </p>
-                    </div>
+                <p>
+                    We can increment the number until we get an error, which tells us the number of columns. In this case, the query returns 5 columns: id, title, author, category, and year.
+                </p>
+
+                <h4>2. Craft a UNION query to extract data from the users table</h4>
+                <p>
+                    Now that we know the original query returns 5 columns, we can craft a UNION query to extract data from the users table:
+                </p>
+                <div class="alert alert-secondary">
+                    <code>' UNION SELECT id, username, password, 'admin', 2023 FROM users WHERE username='admin'--</code>
                 </div>
-                
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5><i class="bi bi-code-slash me-2"></i>Solution</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>To exploit this vulnerability, we need to:</p>
-                        
-                        <h6>1. Determine the number of columns in the original query</h6>
-                        <p>
-                            First, we need to find out how many columns the original query returns. We can do this by using the ORDER BY clause:
-                        </p>
-                        <div class="alert alert-secondary">
-                            <code>' ORDER BY 1--</code>
-                        </div>
-                        <p>
-                            We can increment the number until we get an error, which tells us the number of columns. In this case, the query returns 5 columns: id, title, author, category, and year.
-                        </p>
-                        
-                        <h6>2. Craft a UNION query to extract data from the users table</h6>
-                        <p>
-                            Now that we know the original query returns 5 columns, we can craft a UNION query to extract data from the users table:
-                        </p>
-                        <div class="alert alert-secondary">
-                            <code>' UNION SELECT id, username, password, 'admin', 2023 FROM users WHERE username='admin'--</code>
-                        </div>
-                        <p>
-                            This query will:
-                        </p>
-                        <ul>
-                            <li>Terminate the original query with a single quote</li>
-                            <li>Use UNION to append results from a new query</li>
-                            <li>Select data from the users table, matching the number and types of columns from the original query</li>
-                            <li>Filter for the admin user</li>
-                            <li>Comment out the rest of the original query with --</li>
-                        </ul>
-                        <p>
-                            The results will show the admin's password, which contains the flag.
-                        </p>
-                        
-                        <h6>3. Alternative approach using NULL values</h6>
-                        <p>
-                            If you're not sure about the column types, you can use NULL values which are compatible with any data type:
-                        </p>
-                        <div class="alert alert-secondary">
-                            <code>' UNION SELECT NULL, username, password, NULL, NULL FROM users WHERE username='admin'--</code>
-                        </div>
-                    </div>
+                <p>
+                    This query will:
+                </p>
+                <ul>
+                    <li>Terminate the original query with a single quote</li>
+                    <li>Use UNION to append results from a new query</li>
+                    <li>Select data from the users table, matching the number and types of columns from the original query</li>
+                    <li>Filter for the admin user</li>
+                    <li>Comment out the rest of the original query with --</li>
+                </ul>
+                <p>
+                    The results will show the admin's password, which contains the flag.
+                </p>
+
+                <h4>3. Alternative approach using NULL values</h4>
+                <p>
+                    If you're not sure about the column types, you can use NULL values which are compatible with any data type:
+                </p>
+                <div class="alert alert-secondary">
+                    <code>' UNION SELECT NULL, username, password, NULL, NULL FROM users WHERE username='admin'--</code>
                 </div>
-                
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5><i class="bi bi-shield-fill-check me-2"></i>Prevention</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>To prevent UNION-based SQL injection vulnerabilities, developers should:</p>
-                        <ol>
-                            <li>
-                                <strong>Use Parameterized Queries:</strong> Instead of concatenating strings, use prepared statements with parameter binding.
-                                <pre class="bg-light p-3 rounded"><code>cursor.execute("SELECT id, title, author, category, year FROM books WHERE title LIKE ?", ('%' + search_term + '%',))</code></pre>
-                            </li>
-                            <li>
-                                <strong>Use an ORM (Object-Relational Mapping):</strong> ORMs like SQLAlchemy handle parameter sanitization automatically.
-                            </li>
-                            <li>
-                                <strong>Implement Proper Access Controls:</strong> Ensure that database users have the minimum necessary privileges.
-                            </li>
-                            <li>
-                                <strong>Input Validation:</strong> Validate and sanitize all user inputs before using them in queries.
-                            </li>
-                        </ol>
-                    </div>
-                </div>
-                
+
+                <h3>Real-world Impact</h3>
+                <p>
+                    UNION-based SQL injection attacks have been used in several major data breaches:
+                </p>
+                <ul>
+                    <li><strong>TalkTalk (2015)</strong>: Attackers used UNION-based SQL injection to steal personal data of over 150,000 customers.</li>
+                    <li><strong>Heartland Payment Systems (2008)</strong>: SQL injection was used to steal over 100 million credit card numbers.</li>
+                </ul>
+                <p>
+                    For libraries and educational institutions, such vulnerabilities could expose:
+                </p>
+                <ul>
+                    <li>Patron personal information and borrowing history</li>
+                    <li>Staff credentials and administrative access</li>
+                    <li>Financial records and payment information</li>
+                </ul>
+
+                <h3>Prevention</h3>
+                <p>To prevent UNION-based SQL injection vulnerabilities, developers should:</p>
+                <ul>
+                    <li>
+                        <strong>Use Parameterized Queries:</strong> Instead of concatenating strings, use prepared statements with parameter binding.
+                        <pre class="bg-light p-3 rounded"><code>cursor.execute("SELECT id, title, author, category, year FROM books WHERE title LIKE ?", ('%' + search_term + '%',))</code></pre>
+                    </li>
+                    <li>
+                        <strong>Use an ORM (Object-Relational Mapping):</strong> ORMs like SQLAlchemy handle parameter sanitization automatically.
+                    </li>
+                    <li>
+                        <strong>Implement Proper Access Controls:</strong> Ensure that database users have the minimum necessary privileges.
+                    </li>
+                    <li>
+                        <strong>Input Validation:</strong> Validate and sanitize all user inputs before using them in queries.
+                    </li>
+                </ul>
+
                 <div class="mt-4">
-                    <a href="{{ url_for('sqli_level3') }}" class="btn btn-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                    <a href="{{ url_for('sqli_level3') }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
                 </div>
             </div>
         </div>

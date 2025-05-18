@@ -1,120 +1,131 @@
 {% extends 'base.html' %}
 
-{% block title %}SQL Injection Level 1 Solution - R00tGlyph{% endblock %}
+{% block title %}Solution: SQL Injection Level 1{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-md-8 offset-md-2">
         <div class="card">
-            <div class="card-header bg-dark text-white">
-                <h2 class="text-center">SQL Injection Level 1 Solution: Basic SQL Injection</h2>
+            <div class="card-header bg-success text-white">
+                <h2 class="text-center">Solution: Level 1 - Basic SQL Injection</h2>
             </div>
             <div class="card-body">
-                <div class="alert alert-info">
-                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
-                    <p>
-                        This challenge demonstrates a basic SQL injection vulnerability in a login form. The application directly concatenates user input into SQL queries without proper sanitization, allowing an attacker to bypass authentication.
-                    </p>
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates a basic SQL injection vulnerability in a login form. The application directly concatenates user input into SQL queries without proper sanitization, allowing an attacker to bypass authentication.
+                </p>
+                <p>
+                    The vulnerability exists because the application constructs an SQL query by directly concatenating user input:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>// Vulnerable code example (PHP)
+$username = $_POST['username'];
+$password = $_POST['password'];
+
+$query = "SELECT * FROM users WHERE username = '$username' AND password = '$password'";
+$result = mysqli_query($connection, $query);
+
+if(mysqli_num_rows($result) > 0) {
+    // User authenticated successfully
+    $_SESSION['authenticated'] = true;
+    // Redirect to dashboard
+} else {
+    // Authentication failed
+    echo "Invalid username or password";
+}</code></pre>
+                <p>
+                    This allows an attacker to manipulate the query's structure by injecting SQL code. When the application executes this query, the injected SQL becomes part of the command, potentially changing its behavior.
+                </p>
+
+                <h3>Solution</h3>
+                <p>There are several ways to exploit this vulnerability:</p>
+
+                <h4>1. Using OR with True Statement</h4>
+                <p>
+                    Enter the following in the username field:
+                </p>
+                <div class="alert alert-secondary">
+                    <code>admin' OR '1'='1</code>
                 </div>
-                
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5><i class="bi bi-bug-fill me-2"></i>Vulnerability Explanation</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>
-                            The vulnerability exists because the application constructs an SQL query by directly concatenating user input:
-                        </p>
-                        <pre class="bg-light p-3 rounded"><code>query = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'"</code></pre>
-                        <p>
-                            This allows an attacker to manipulate the query's structure by injecting SQL code. When the application executes this query, the injected SQL becomes part of the command, potentially changing its behavior.
-                        </p>
-                    </div>
+                <p>
+                    And anything (or nothing) in the password field.
+                </p>
+                <p>
+                    This transforms the query to:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>SELECT * FROM users WHERE username = 'admin' OR '1'='1' AND password = 'anything'</code></pre>
+                <p>
+                    Since <code>'1'='1'</code> is always true, this condition will match any row in the users table, effectively bypassing the authentication.
+                </p>
+
+                <h4>2. Using Comment to Ignore the Rest</h4>
+                <p>
+                    Enter the following in the username field:
+                </p>
+                <div class="alert alert-secondary">
+                    <code>admin'--</code>
                 </div>
-                
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5><i class="bi bi-code-slash me-2"></i>Solution</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>There are several ways to exploit this vulnerability:</p>
-                        
-                        <h6>1. Using OR with True Statement</h6>
-                        <p>
-                            Enter the following in the username field:
-                        </p>
-                        <div class="alert alert-secondary">
-                            <code>admin' OR '1'='1</code>
-                        </div>
-                        <p>
-                            And anything (or nothing) in the password field.
-                        </p>
-                        <p>
-                            This transforms the query to:
-                        </p>
-                        <pre class="bg-light p-3 rounded"><code>SELECT * FROM users WHERE username = 'admin' OR '1'='1' AND password = 'anything'</code></pre>
-                        <p>
-                            Since <code>'1'='1'</code> is always true, this condition will match any row in the users table, effectively bypassing the authentication.
-                        </p>
-                        
-                        <h6>2. Using Comment to Ignore the Rest</h6>
-                        <p>
-                            Enter the following in the username field:
-                        </p>
-                        <div class="alert alert-secondary">
-                            <code>admin'--</code>
-                        </div>
-                        <p>
-                            This transforms the query to:
-                        </p>
-                        <pre class="bg-light p-3 rounded"><code>SELECT * FROM users WHERE username = 'admin'-- ' AND password = 'anything'</code></pre>
-                        <p>
-                            The <code>--</code> is an SQL comment that causes the rest of the query to be ignored. This means the password check is completely bypassed.
-                        </p>
-                        
-                        <h6>3. Using OR with Always True Condition</h6>
-                        <p>
-                            Enter the following in the username field:
-                        </p>
-                        <div class="alert alert-secondary">
-                            <code>' OR 1=1--</code>
-                        </div>
-                        <p>
-                            This transforms the query to:
-                        </p>
-                        <pre class="bg-light p-3 rounded"><code>SELECT * FROM users WHERE username = '' OR 1=1-- ' AND password = 'anything'</code></pre>
-                        <p>
-                            This will return all rows from the users table because <code>1=1</code> is always true, and the password check is commented out.
-                        </p>
-                    </div>
+                <p>
+                    This transforms the query to:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>SELECT * FROM users WHERE username = 'admin'-- ' AND password = 'anything'</code></pre>
+                <p>
+                    The <code>--</code> is an SQL comment that causes the rest of the query to be ignored. This means the password check is completely bypassed.
+                </p>
+
+                <h4>3. Using OR with Always True Condition</h4>
+                <p>
+                    Enter the following in the username field:
+                </p>
+                <div class="alert alert-secondary">
+                    <code>' OR 1=1--</code>
                 </div>
-                
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5><i class="bi bi-shield-fill-check me-2"></i>Prevention</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>To prevent SQL injection vulnerabilities, developers should:</p>
-                        <ol>
-                            <li>
-                                <strong>Use Parameterized Queries:</strong> Instead of concatenating strings, use prepared statements with parameter binding.
-                                <pre class="bg-light p-3 rounded"><code>cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))</code></pre>
-                            </li>
-                            <li>
-                                <strong>Use an ORM (Object-Relational Mapping):</strong> ORMs like SQLAlchemy handle parameter sanitization automatically.
-                            </li>
-                            <li>
-                                <strong>Input Validation:</strong> Validate and sanitize all user inputs before using them in queries.
-                            </li>
-                            <li>
-                                <strong>Principle of Least Privilege:</strong> Use database accounts with minimal permissions needed for the application.
-                            </li>
-                        </ol>
-                    </div>
-                </div>
-                
+                <p>
+                    This transforms the query to:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>SELECT * FROM users WHERE username = '' OR 1=1-- ' AND password = 'anything'</code></pre>
+                <p>
+                    This will return all rows from the users table because <code>1=1</code> is always true, and the password check is commented out.
+                </p>
+
+                <h3>Real-world Impact</h3>
+                <p>
+                    SQL injection vulnerabilities have led to numerous high-profile data breaches:
+                </p>
+                <ul>
+                    <li><strong>Equifax (2017)</strong>: Attackers exploited an SQL injection vulnerability to access personal data of 147 million people.</li>
+                    <li><strong>Yahoo (2012)</strong>: SQL injection was used in a breach that exposed 450,000 user credentials.</li>
+                    <li><strong>Sony Pictures (2011)</strong>: Attackers used SQL injection to steal personal information of millions of customers.</li>
+                </ul>
+                <p>
+                    For financial institutions like banks, such vulnerabilities can be catastrophic, potentially allowing attackers to:
+                </p>
+                <ul>
+                    <li>Access customer account information</li>
+                    <li>Manipulate transaction records</li>
+                    <li>Transfer funds without authorization</li>
+                </ul>
+
+                <h3>Prevention</h3>
+                <p>To prevent SQL injection vulnerabilities, developers should:</p>
+                <ul>
+                    <li>
+                        <strong>Use Parameterized Queries:</strong> Instead of concatenating strings, use prepared statements with parameter binding.
+                        <pre class="bg-light p-3 rounded"><code>cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))</code></pre>
+                    </li>
+                    <li>
+                        <strong>Use an ORM (Object-Relational Mapping):</strong> ORMs like SQLAlchemy handle parameter sanitization automatically.
+                    </li>
+                    <li>
+                        <strong>Input Validation:</strong> Validate and sanitize all user inputs before using them in queries.
+                    </li>
+                    <li>
+                        <strong>Principle of Least Privilege:</strong> Use database accounts with minimal permissions needed for the application.
+                    </li>
+                </ul>
+
                 <div class="mt-4">
-                    <a href="{{ url_for('sqli_level1') }}" class="btn btn-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                    <a href="{{ url_for('sqli_level1') }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
                 </div>
             </div>
         </div>

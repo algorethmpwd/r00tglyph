@@ -1,0 +1,597 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 16: SQL Injection in WebSockets - R00tGlyph{% endblock %}
+
+{% block content %}
+<style>
+    .websocket-header {
+        background: linear-gradient(135deg, #4cc9f0 0%, #4361ee 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .code-box {
+        background-color: #1e1e1e;
+        color: #d4d4d4;
+        padding: 15px;
+        border-radius: 5px;
+        font-family: monospace;
+        overflow-x: auto;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    .code-keyword {
+        color: #569cd6;
+    }
+    .code-string {
+        color: #ce9178;
+    }
+    .code-comment {
+        color: #6a9955;
+    }
+    .code-function {
+        color: #dcdcaa;
+    }
+    .code-class {
+        color: #4ec9b0;
+    }
+    .code-variable {
+        color: #9cdcfe;
+    }
+    .admin-note {
+        background-color: rgba(255, 193, 7, 0.1);
+        border-left: 4px solid var(--bs-warning);
+        padding: 15px;
+        margin-top: 20px;
+        border-radius: 5px;
+    }
+    .chat-container {
+        height: 400px;
+        overflow-y: auto;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        border: 1px solid #dee2e6;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    .message {
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 5px;
+        max-width: 80%;
+    }
+    .message-user {
+        background-color: #4cc9f0;
+        color: white;
+        margin-left: auto;
+    }
+    .message-system {
+        background-color: #e9ecef;
+        color: #495057;
+    }
+    .message-other {
+        background-color: #4361ee;
+        color: white;
+    }
+    .message-error {
+        background-color: #dc3545;
+        color: white;
+    }
+    .message-success {
+        background-color: #198754;
+        color: white;
+    }
+    .user-list {
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        border: 1px solid #dee2e6;
+        padding: 15px;
+        height: 400px;
+        overflow-y: auto;
+    }
+    .user-item {
+        padding: 5px 10px;
+        border-radius: 5px;
+        margin-bottom: 5px;
+        background-color: #e9ecef;
+    }
+    .user-item.active {
+        background-color: #4cc9f0;
+        color: white;
+    }
+    .connection-status {
+        padding: 5px 10px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        font-weight: bold;
+    }
+    .connection-status.connected {
+        background-color: #198754;
+        color: white;
+    }
+    .connection-status.disconnected {
+        background-color: #dc3545;
+        color: white;
+    }
+    .connection-status.connecting {
+        background-color: #ffc107;
+        color: black;
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        {% if sqli_detected %}
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>Success!</strong> You've successfully exploited the SQL injection vulnerability in the WebSocket API! The challenge has been marked as completed.
+            {% if flag %}
+            <div class="mt-2">
+                <strong>Flag:</strong> <code>{{ flag }}</code>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Challenge description -->
+        <div class="alert alert-dark challenge-description">
+            <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+            <p>
+                Welcome to <strong>ChatSync</strong>, a fictional real-time chat application! This challenge simulates a real-world scenario where a WebSocket-based API is vulnerable to SQL injection.
+            </p>
+            <p>
+                The developers of ChatSync have built a modern chat application using WebSockets for real-time communication. However, they've made a critical mistake: they're using user input from WebSocket messages directly in SQL queries without proper validation or parameterization.
+            </p>
+            <p>
+                <strong>Your Task:</strong> Exploit the SQL injection vulnerability in the WebSocket API to access sensitive user data. The flag is hidden in a private message that should not be accessible to you.
+            </p>
+
+            <div class="card mb-3 border-secondary">
+                <div class="card-header bg-secondary text-white">
+                    <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">
+                        <strong>Client:</strong> Real-time Application Security Team<br>
+                        <strong>Target:</strong> ChatSync WebSocket API<br>
+                        <strong>Vulnerability:</strong> SQL Injection in WebSocket Messages<br>
+                        <strong>Objective:</strong> Access private messages containing sensitive information
+                    </p>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        WebSockets provide a persistent connection between a client and server, allowing for real-time, bidirectional communication. Unlike traditional HTTP requests, WebSocket connections remain open, enabling the server to push data to the client without the client having to request it.
+                    </p>
+                    <p>
+                        SQL injection in WebSockets occurs when:
+                    </p>
+                    <ul>
+                        <li>The application processes data received through WebSocket messages</li>
+                        <li>This data is used directly in SQL queries without proper validation or parameterization</li>
+                        <li>The application fails to properly sanitize or escape special characters in the WebSocket messages</li>
+                    </ul>
+                    <p>
+                        This type of vulnerability is particularly dangerous because:
+                    </p>
+                    <ul>
+                        <li>WebSocket traffic is often less monitored than HTTP traffic</li>
+                        <li>Traditional security tools may not inspect WebSocket communications</li>
+                        <li>WebSocket connections can persist for long periods, allowing for more complex attacks</li>
+                        <li>The real-time nature of WebSockets can make it harder to detect and respond to attacks</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        The ChatSync application likely processes WebSocket messages similar to:
+                    </p>
+                    <div class="code-box">
+                        <span class="code-comment">// Example WebSocket message format (JSON)</span><br>
+                        {<br>
+                        &nbsp;&nbsp;<span class="code-string">"action"</span>: <span class="code-string">"getMessages"</span>,<br>
+                        &nbsp;&nbsp;<span class="code-string">"roomId"</span>: <span class="code-string">"general"</span>,<br>
+                        &nbsp;&nbsp;<span class="code-string">"limit"</span>: <span class="code-variable">10</span><br>
+                        }
+                    </div>
+                    <p>
+                        And then uses the values in SQL queries like:
+                    </p>
+                    <div class="code-box">
+                        <span class="code-comment">// Example of vulnerable SQL query</span><br>
+                        <span class="code-keyword">SELECT</span> message_id, user_id, content, timestamp<br>
+                        <span class="code-keyword">FROM</span> messages<br>
+                        <span class="code-keyword">WHERE</span> room_id = '<span class="code-variable">$roomId</span>' <span class="code-keyword">ORDER BY</span> timestamp <span class="code-keyword">DESC</span> <span class="code-keyword">LIMIT</span> <span class="code-variable">$limit</span>
+                    </div>
+                    <p>
+                        To exploit this vulnerability, you'll need to:
+                    </p>
+                    <ol>
+                        <li>Understand the WebSocket message format used by the application</li>
+                        <li>Identify which fields in the WebSocket messages are vulnerable to SQL injection</li>
+                        <li>Craft a malicious WebSocket message that includes SQL injection code</li>
+                        <li>Send the message through the WebSocket connection</li>
+                        <li>Analyze the response to extract the sensitive information</li>
+                    </ol>
+                    <p>
+                        For this challenge, we've provided a simulated WebSocket interface that allows you to send messages and see the responses.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-shield-fill-check me-2"></i>Real-World Impact</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        WebSocket-based SQL injection vulnerabilities have affected several real-world applications:
+                    </p>
+                    <ul>
+                        <li><strong>Chat Applications</strong>: Multiple chat platforms have been vulnerable to SQL injection through WebSocket messages.</li>
+                        <li><strong>Real-time Dashboards</strong>: Business intelligence dashboards using WebSockets for real-time updates have been exploited.</li>
+                        <li><strong>Collaborative Editing Tools</strong>: Document collaboration tools have exposed database access through WebSocket vulnerabilities.</li>
+                    </ul>
+                    <p>
+                        For real-time applications like ChatSync, such vulnerabilities could lead to:
+                    </p>
+                    <ul>
+                        <li>Unauthorized access to private messages</li>
+                        <li>Exposure of user credentials and personal information</li>
+                        <li>Manipulation of message content</li>
+                        <li>Complete compromise of the database</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 16: SQL Injection in WebSockets</h2>
+            </div>
+            <div class="card-body">
+                <div class="websocket-header">
+                    <div class="d-flex align-items-center justify-content-center">
+                        <i class="bi bi-chat-dots-fill me-2" style="font-size: 2.5rem;"></i>
+                        <h1 class="mb-0">ChatSync</h1>
+                    </div>
+                    <p class="text-center mb-0 mt-2">Real-time Chat Application</p>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <div class="scenario-box">
+                            <h4><i class="bi bi-exclamation-triangle-fill me-2"></i>Penetration Testing Scenario</h4>
+                            <p>You've been hired to perform a security assessment of ChatSync, a real-time chat application that uses WebSockets for communication. The application allows users to join chat rooms and exchange messages in real-time.</p>
+                            <p>During your initial testing, you notice that the WebSocket API might be vulnerable to SQL injection. The application seems to use data from WebSocket messages directly in database queries.</p>
+                            <p><strong>Your objective:</strong> Exploit the SQL injection vulnerability in the WebSocket API to access a private message that contains the flag.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="portal-stats">
+                            <h5 class="text-center mb-3"><i class="bi bi-bar-chart-fill me-2"></i>Application Statistics</h5>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">10K+</div>
+                                        <div>Users</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">50+</div>
+                                        <div>Rooms</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">99.9%</div>
+                                        <div>Uptime</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">24/7</div>
+                                        <div>Support</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-9">
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h4 class="mb-0"><i class="bi bi-chat-square-text-fill me-2"></i>Chat Room: <span id="current-room">general</span></h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="connection-status" id="connection-status">
+                                    <i class="bi bi-plug-fill me-2"></i>Connection Status: Simulated
+                                </div>
+
+                                <div class="chat-container" id="chat-container">
+                                    <div class="message message-system">
+                                        <strong>System:</strong> Welcome to ChatSync! You are now connected to the general room.
+                                    </div>
+                                    <div class="message message-system">
+                                        <strong>System:</strong> Use the WebSocket API to send and receive messages.
+                                    </div>
+                                </div>
+
+                                <div class="card mb-3">
+                                    <div class="card-header bg-secondary text-white">
+                                        <h5 class="mb-0"><i class="bi bi-code-slash me-2"></i>WebSocket API</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label for="ws-message" class="form-label">WebSocket Message (JSON):</label>
+                                            <textarea class="form-control font-monospace" id="ws-message" rows="5">{{ ws_message if ws_message else '{\n  "action": "getMessages",\n  "roomId": "general",\n  "limit": 10\n}' }}</textarea>
+                                        </div>
+                                        <button type="button" class="btn btn-primary" id="send-message">
+                                            <i class="bi bi-send me-2"></i>Send Message
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card mb-4">
+                            <div class="card-header bg-secondary text-white">
+                                <h5 class="mb-0"><i class="bi bi-people-fill me-2"></i>Available Rooms</h5>
+                            </div>
+                            <div class="card-body p-2">
+                                <div class="list-group">
+                                    <button type="button" class="list-group-item list-group-item-action active" data-room="general">
+                                        <i class="bi bi-hash me-2"></i>general
+                                    </button>
+                                    <button type="button" class="list-group-item list-group-item-action" data-room="random">
+                                        <i class="bi bi-hash me-2"></i>random
+                                    </button>
+                                    <button type="button" class="list-group-item list-group-item-action" data-room="tech">
+                                        <i class="bi bi-hash me-2"></i>tech
+                                    </button>
+                                    <button type="button" class="list-group-item list-group-item-action" data-room="admin">
+                                        <i class="bi bi-hash me-2"></i>admin <span class="badge bg-danger">Private</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header bg-secondary text-white">
+                                <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>API Documentation</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="small">Available actions:</p>
+                                <ul class="small">
+                                    <li><code>getMessages</code>: Get messages from a room</li>
+                                    <li><code>sendMessage</code>: Send a message to a room</li>
+                                    <li><code>joinRoom</code>: Join a chat room</li>
+                                    <li><code>getUsers</code>: Get users in a room</li>
+                                </ul>
+                                <p class="small">Example:</p>
+                                <pre class="small bg-light p-2">{
+  "action": "getMessages",
+  "roomId": "general",
+  "limit": 10
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-note">
+                    <h5><i class="bi bi-shield-lock me-2"></i>Developer Note</h5>
+                    <p>Reminder to the development team: The private message with ID 999 in the admin room contains sensitive information and should only be accessible to administrators. Make sure our WebSocket API properly validates user permissions before returning messages.</p>
+                    <p class="mb-0"><small class="text-muted">Note: This message is for internal use only and should not be visible to regular users.</small></p>
+                </div>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level='sqli16') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const chatContainer = document.getElementById('chat-container');
+        const wsMessage = document.getElementById('ws-message');
+        const sendButton = document.getElementById('send-message');
+        const roomButtons = document.querySelectorAll('[data-room]');
+        const currentRoomElement = document.getElementById('current-room');
+
+        let currentRoom = 'general';
+
+        // Simulate WebSocket connection
+        function simulateWebSocketResponse(message) {
+            try {
+                const data = JSON.parse(message);
+
+                // Add user message to chat
+                const userMessageElement = document.createElement('div');
+                userMessageElement.className = 'message message-user';
+                userMessageElement.innerHTML = `<strong>You (WebSocket):</strong> ${JSON.stringify(data, null, 2)}`;
+                chatContainer.appendChild(userMessageElement);
+
+                // Simulate server response based on the action
+                let responseElement = document.createElement('div');
+
+                if (data.action === 'getMessages') {
+                    // Check for SQL injection in roomId
+                    if (typeof data.roomId === 'string' &&
+                        (data.roomId.includes("'") ||
+                         data.roomId.includes('"') ||
+                         data.roomId.includes('--') ||
+                         data.roomId.includes('/*') ||
+                         data.roomId.includes('UNION') ||
+                         data.roomId.toLowerCase().includes('union'))) {
+
+                        // SQL injection detected - return the flag
+                        responseElement.className = 'message message-success';
+                        responseElement.innerHTML = `<strong>System:</strong> SQL Injection detected! You've successfully exploited the vulnerability.<br><br>
+                            <strong>Retrieved message:</strong><br>
+                            <pre>{
+  "id": 999,
+  "userId": 1,
+  "username": "admin",
+  "content": "The flag is: R00T{w3bs0ck3t_sql1_1nj3ct10n_3xpl01t3d}",
+  "roomId": "admin",
+  "timestamp": "2025-05-15T14:30:00Z"
+}</pre>`;
+
+                        // Mark challenge as completed
+                        fetch('{{ url_for("sqli_level16") }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                sqli_detected: true,
+                                ws_message: message
+                            }),
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Reload the page to show the success message
+                                window.location.reload();
+                            }
+                        });
+                    } else if (data.roomId === 'admin') {
+                        // Admin room - access denied
+                        responseElement.className = 'message message-error';
+                        responseElement.innerHTML = `<strong>System:</strong> Access denied. You don't have permission to access the admin room.`;
+                    } else {
+                        // Normal response
+                        responseElement.className = 'message message-other';
+                        responseElement.innerHTML = `<strong>System:</strong> Retrieved ${data.limit || 10} messages from room "${data.roomId}":<br><br>
+                            <pre>[
+  {
+    "id": 1,
+    "userId": 2,
+    "username": "jane",
+    "content": "Hello everyone!",
+    "roomId": "${data.roomId}",
+    "timestamp": "2025-05-15T14:30:00Z"
+  },
+  {
+    "id": 2,
+    "userId": 3,
+    "username": "bob",
+    "content": "Hi Jane, how are you?",
+    "roomId": "${data.roomId}",
+    "timestamp": "2025-05-15T14:31:00Z"
+  }
+]</pre>`;
+                    }
+                } else if (data.action === 'sendMessage') {
+                    // Send message
+                    responseElement.className = 'message message-other';
+                    responseElement.innerHTML = `<strong>System:</strong> Message sent to room "${data.roomId}".`;
+                } else if (data.action === 'joinRoom') {
+                    // Join room
+                    if (data.roomId === 'admin') {
+                        // Admin room - access denied
+                        responseElement.className = 'message message-error';
+                        responseElement.innerHTML = `<strong>System:</strong> Access denied. You don't have permission to join the admin room.`;
+                    } else {
+                        // Normal response
+                        responseElement.className = 'message message-other';
+                        responseElement.innerHTML = `<strong>System:</strong> You've joined room "${data.roomId}".`;
+                        currentRoom = data.roomId;
+                        currentRoomElement.textContent = currentRoom;
+
+                        // Update active room button
+                        roomButtons.forEach(button => {
+                            if (button.dataset.room === currentRoom) {
+                                button.classList.add('active');
+                            } else {
+                                button.classList.remove('active');
+                            }
+                        });
+                    }
+                } else if (data.action === 'getUsers') {
+                    // Get users
+                    if (data.roomId === 'admin') {
+                        // Admin room - access denied
+                        responseElement.className = 'message message-error';
+                        responseElement.innerHTML = `<strong>System:</strong> Access denied. You don't have permission to access the admin room.`;
+                    } else {
+                        // Normal response
+                        responseElement.className = 'message message-other';
+                        responseElement.innerHTML = `<strong>System:</strong> Users in room "${data.roomId}":<br><br>
+                            <pre>[
+  {
+    "id": 1,
+    "username": "admin",
+    "status": "online"
+  },
+  {
+    "id": 2,
+    "username": "jane",
+    "status": "online"
+  },
+  {
+    "id": 3,
+    "username": "bob",
+    "status": "away"
+  }
+]</pre>`;
+                    }
+                } else {
+                    // Unknown action
+                    responseElement.className = 'message message-error';
+                    responseElement.innerHTML = `<strong>System:</strong> Unknown action: ${data.action}`;
+                }
+
+                chatContainer.appendChild(responseElement);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            } catch (error) {
+                // JSON parse error
+                const errorElement = document.createElement('div');
+                errorElement.className = 'message message-error';
+                errorElement.innerHTML = `<strong>System:</strong> Error parsing JSON: ${error.message}`;
+                chatContainer.appendChild(errorElement);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+        }
+
+        // Send button click handler
+        sendButton.addEventListener('click', function() {
+            const message = wsMessage.value;
+            simulateWebSocketResponse(message);
+        });
+
+        // Room button click handler
+        roomButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const roomId = this.dataset.room;
+                const message = JSON.stringify({
+                    action: 'joinRoom',
+                    roomId: roomId
+                }, null, 2);
+                wsMessage.value = message;
+                simulateWebSocketResponse(message);
+            });
+        });
+    });
+</script>
+{% endblock %}

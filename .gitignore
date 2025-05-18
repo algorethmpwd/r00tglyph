@@ -1,3 +1,13 @@
 .qodo
 \n
 \n.pub
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+.env
+*.log
+*.tmp
+.DS_Store
+instance/
+backup/

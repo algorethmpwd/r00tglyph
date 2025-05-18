@@ -1,0 +1,361 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 13: Out-of-band SQL Injection - R00tGlyph{% endblock %}
+
+{% block content %}
+<style>
+    .oob-header {
+        background: linear-gradient(135deg, #ff5722 0%, #e91e63 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .code-box {
+        background-color: #1e1e1e;
+        color: #d4d4d4;
+        padding: 15px;
+        border-radius: 5px;
+        font-family: monospace;
+        overflow-x: auto;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    .code-keyword {
+        color: #569cd6;
+    }
+    .code-string {
+        color: #ce9178;
+    }
+    .code-comment {
+        color: #6a9955;
+    }
+    .code-function {
+        color: #dcdcaa;
+    }
+    .code-class {
+        color: #4ec9b0;
+    }
+    .code-variable {
+        color: #9cdcfe;
+    }
+    .admin-note {
+        background-color: rgba(255, 193, 7, 0.1);
+        border-left: 4px solid var(--bs-warning);
+        padding: 15px;
+        margin-top: 20px;
+        border-radius: 5px;
+    }
+    .dns-log {
+        background-color: #f8f9fa;
+        border-left: 4px solid #ff5722;
+        padding: 15px;
+        margin-top: 20px;
+        border-radius: 5px;
+        font-family: monospace;
+    }
+    .dns-record {
+        margin-bottom: 5px;
+        padding: 5px;
+        border-bottom: 1px solid #eee;
+    }
+    .dns-record:last-child {
+        border-bottom: none;
+    }
+    .dns-timestamp {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    .dns-query {
+        color: #212529;
+        font-weight: bold;
+    }
+    .dns-type {
+        color: #0d6efd;
+    }
+    .dns-source {
+        color: #198754;
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        {% if sqli_detected %}
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>Success!</strong> You've successfully exploited the out-of-band SQL injection vulnerability! The challenge has been marked as completed.
+            {% if flag %}
+            <div class="mt-2">
+                <strong>Flag:</strong> <code>{{ flag }}</code>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Challenge description -->
+        <div class="alert alert-dark challenge-description">
+            <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+            <p>
+                Welcome to <strong>DataAggregator</strong>, a fictional financial data aggregation service! This challenge simulates a real-world scenario where a web application is vulnerable to out-of-band SQL injection.
+            </p>
+            <p>
+                The developers of DataAggregator have built a service that aggregates financial data from various sources. However, they've made a critical mistake: they're using user input directly in SQL queries and the database server has network access that can be exploited for data exfiltration.
+            </p>
+            <p>
+                <strong>Your Task:</strong> Exploit the out-of-band SQL injection vulnerability to extract sensitive data. The flag is hidden in the database and can only be retrieved using out-of-band techniques.
+            </p>
+
+            <div class="card mb-3 border-secondary">
+                <div class="card-header bg-secondary text-white">
+                    <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">
+                        <strong>Client:</strong> Financial Services Security Team<br>
+                        <strong>Target:</strong> DataAggregator Stock Search Functionality<br>
+                        <strong>Vulnerability:</strong> Suspected Out-of-band SQL Injection<br>
+                        <strong>Objective:</strong> Extract sensitive data using DNS or HTTP exfiltration
+                    </p>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        Out-of-band SQL injection is an advanced technique where the attacker extracts data through channels other than the application's normal response. This is particularly useful when:
+                    </p>
+                    <ul>
+                        <li>The application doesn't display error messages</li>
+                        <li>Blind SQL injection is too slow or unreliable</li>
+                        <li>The application has strict output filtering</li>
+                        <li>The database server has network access</li>
+                    </ul>
+                    <p>
+                        Common out-of-band channels include:
+                    </p>
+                    <ul>
+                        <li><strong>DNS Queries</strong>: Using database functions to trigger DNS lookups that contain exfiltrated data</li>
+                        <li><strong>HTTP Requests</strong>: Using database functions to make HTTP requests to attacker-controlled servers</li>
+                        <li><strong>File System Operations</strong>: Writing data to files that can be accessed through other vulnerabilities</li>
+                        <li><strong>Email</strong>: Using database mail functions to send exfiltrated data</li>
+                    </ul>
+                    <p>
+                        These techniques are particularly powerful because they can bypass many security controls and allow data exfiltration even when the application itself doesn't reveal any information.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        The DataAggregator application likely uses SQL queries similar to:
+                    </p>
+                    <div class="code-box">
+                        <span class="code-comment">-- Example of vulnerable SQL query</span><br>
+                        <span class="code-keyword">SELECT</span> stock_symbol, company_name, current_price, change_percent<br>
+                        <span class="code-keyword">FROM</span> stocks<br>
+                        <span class="code-keyword">WHERE</span> stock_symbol = '<span class="code-variable">user_input</span>' <span class="code-keyword">OR</span> company_name <span class="code-keyword">LIKE</span> '%<span class="code-variable">user_input</span>%'
+                    </div>
+                    <p>
+                        To exploit this vulnerability using DNS exfiltration, you'll need to:
+                    </p>
+                    <ol>
+                        <li>Identify database functions that can trigger DNS lookups (e.g., <code>LOAD_FILE</code>, <code>UTL_HTTP</code>, <code>xp_dirtree</code>)</li>
+                        <li>Craft a payload that extracts sensitive data and includes it in a DNS query</li>
+                        <li>Monitor DNS traffic to capture the exfiltrated data</li>
+                    </ol>
+                    <p>
+                        For this challenge, we've provided a simulated DNS logger that will capture any DNS queries made by the database server. You can use this to verify your exploitation and retrieve the flag.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-shield-fill-check me-2"></i>Real-World Impact</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        Out-of-band SQL injection vulnerabilities have been found in several high-profile applications:
+                    </p>
+                    <ul>
+                        <li><strong>Oracle (CVE-2018-3004)</strong>: A vulnerability in Oracle Database allowed attackers to exfiltrate data via DNS queries.</li>
+                        <li><strong>Microsoft SQL Server (CVE-2020-0618)</strong>: A vulnerability in SQL Server Reporting Services allowed out-of-band data exfiltration.</li>
+                    </ul>
+                    <p>
+                        For financial services like DataAggregator, such vulnerabilities could lead to:
+                    </p>
+                    <ul>
+                        <li>Theft of sensitive financial data</li>
+                        <li>Exposure of customer information</li>
+                        <li>Regulatory compliance violations</li>
+                        <li>Reputational damage and financial losses</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 13: Out-of-band SQL Injection</h2>
+            </div>
+            <div class="card-body">
+                <div class="oob-header">
+                    <div class="d-flex align-items-center justify-content-center">
+                        <i class="bi bi-graph-up-arrow me-2" style="font-size: 2.5rem;"></i>
+                        <h1 class="mb-0">DataAggregator</h1>
+                    </div>
+                    <p class="text-center mb-0 mt-2">Financial Data Aggregation Service</p>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <div class="scenario-box">
+                            <h4><i class="bi bi-exclamation-triangle-fill me-2"></i>Penetration Testing Scenario</h4>
+                            <p>You've been hired to perform a security assessment of DataAggregator, a financial data aggregation service. The service allows users to search for stock information and financial data from various sources.</p>
+                            <p>During your initial testing, you notice that the stock search functionality might be vulnerable to SQL injection. However, the application doesn't display error messages or return the results of your injected queries directly.</p>
+                            <p><strong>Your objective:</strong> Exploit the out-of-band SQL injection vulnerability to extract sensitive data, including the flag hidden in the database.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="portal-stats">
+                            <h5 class="text-center mb-3"><i class="bi bi-bar-chart-fill me-2"></i>Service Statistics</h5>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">10K+</div>
+                                        <div>Stocks</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">50+</div>
+                                        <div>Data Sources</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">99.9%</div>
+                                        <div>Uptime</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="stat-number">24/7</div>
+                                        <div>Support</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-search me-2"></i>Stock Search</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('sqli_level13') }}" method="post">
+                            <div class="mb-3">
+                                <label for="search_term" class="form-label">Search for Stock Symbol or Company Name:</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="search_term" name="search_term" value="{{ search_term if search_term else '' }}" placeholder="e.g., AAPL, Microsoft">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-search me-2"></i>Search
+                                    </button>
+                                </div>
+                                <small class="form-text text-muted">Enter a stock symbol (e.g., AAPL) or company name (e.g., Microsoft)</small>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {% if error %}
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    {{ error }}
+                </div>
+                {% endif %}
+
+                {% if stocks %}
+                <div class="stocks-container">
+                    <h4 class="mb-3"><i class="bi bi-graph-up-arrow me-2"></i>Search Results</h4>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Symbol</th>
+                                    <th>Company Name</th>
+                                    <th>Current Price</th>
+                                    <th>Change</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for stock in stocks %}
+                                <tr>
+                                    <td><strong>{{ stock.symbol }}</strong></td>
+                                    <td>{{ stock.name }}</td>
+                                    <td>${{ stock.price }}</td>
+                                    <td class="{% if stock.change >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                        {{ stock.change }}%
+                                        {% if stock.change >= 0 %}
+                                        <i class="bi bi-arrow-up-right"></i>
+                                        {% else %}
+                                        <i class="bi bi-arrow-down-right"></i>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h4 class="mb-0"><i class="bi bi-hdd-network-fill me-2"></i>DNS Logger (Simulated)</h4>
+                    </div>
+                    <div class="card-body">
+                        <p>This simulated DNS logger captures any DNS queries made by the database server. Use this to verify your out-of-band SQL injection and retrieve the flag.</p>
+                        
+                        <div class="dns-log">
+                            {% if dns_logs %}
+                                {% for log in dns_logs %}
+                                <div class="dns-record">
+                                    <span class="dns-timestamp">[{{ log.timestamp }}]</span>
+                                    <span class="dns-query">{{ log.query }}</span>
+                                    <span class="dns-type">({{ log.type }})</span>
+                                    <span class="dns-source">from {{ log.source }}</span>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-muted">No DNS queries logged yet. Try exploiting the out-of-band SQL injection vulnerability.</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-note">
+                    <h5><i class="bi bi-shield-lock me-2"></i>Developer Note</h5>
+                    <p>Reminder to the development team: The database server should not have outbound network access in production. For development purposes, we've enabled network access, but this should be restricted before going live.</p>
+                    <p class="mb-0"><small class="text-muted">Note: This message is for internal use only and should not be visible to regular users.</small></p>
+                </div>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level='sqli13') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

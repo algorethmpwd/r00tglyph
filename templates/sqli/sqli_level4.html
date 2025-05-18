@@ -12,14 +12,6 @@
         margin-bottom: 20px;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
-    .user-lookup-container {
-        background-color: #f8f9fa;
-        border-radius: 10px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        padding: 20px;
-        border: 1px solid #e9ecef;
-        margin-bottom: 20px;
-    }
     .user-card {
         transition: all 0.3s ease;
         margin-bottom: 15px;
@@ -28,18 +20,12 @@
         transform: translateY(-5px);
         box-shadow: 0 10px 20px rgba(0,0,0,0.1);
     }
-    .scenario-box {
-        background-color: #e9f7fe;
-        border-left: 4px solid #17a2b8;
-        padding: 15px;
-        margin-bottom: 20px;
-        border-radius: 5px;
-    }
     .portal-stats {
-        background-color: #f8f9fa;
+        background-color: var(--bs-body-bg);
         padding: 15px;
         border-radius: 5px;
         margin-bottom: 20px;
+        border: 1px solid var(--bs-border-color);
     }
     .stat-item {
         text-align: center;
@@ -48,39 +34,20 @@
     .stat-number {
         font-size: 2rem;
         font-weight: bold;
-        color: #6a11cb;
+        color: var(--bs-primary);
     }
-    .result-container {
-        background-color: #f8f9fa;
+    .user-lookup-container, .result-container {
         border-radius: 10px;
         box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         padding: 20px;
-        border: 1px solid #e9ecef;
         margin-bottom: 20px;
     }
     .admin-note {
-        background-color: #fff3cd;
-        border-left: 4px solid #ffc107;
+        background-color: rgba(255, 193, 7, 0.1);
+        border-left: 4px solid var(--bs-warning);
         padding: 15px;
         margin-top: 20px;
         border-radius: 5px;
-    }
-    .feature-box {
-        text-align: center;
-        padding: 15px;
-        margin-bottom: 20px;
-        border-radius: 5px;
-        background-color: #f8f9fa;
-        transition: all 0.3s ease;
-    }
-    .feature-box:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-    }
-    .feature-icon {
-        font-size: 2rem;
-        margin-bottom: 10px;
-        color: #6a11cb;
     }
 </style>
 
@@ -98,10 +65,104 @@
         </div>
         {% endif %}
 
-        <!-- Challenge Description Button -->
-        <button type="button" class="btn btn-info mb-3" data-bs-toggle="modal" data-bs-target="#challengeDescriptionModal">
-            <i class="bi bi-info-circle-fill me-2"></i>View Challenge Description
-        </button>
+        <!-- Challenge description -->
+        <div class="alert alert-dark challenge-description">
+            <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+            <p>
+                Welcome to <strong>UserPortal Pro</strong>, a fictional user management system! This challenge simulates a real-world scenario where a user profile lookup feature is vulnerable to blind SQL injection.
+            </p>
+            <p>
+                The developers of UserPortal have implemented a feature that allows administrators to check if a user with a specific ID exists in the database. However, they've made a critical mistake in how they handle user input, allowing attackers to perform blind SQL injection attacks.
+            </p>
+            <p>
+                <strong>Your Task:</strong> The system has a hidden user with the username <code>admin_secret</code>. You need to find this user's ID and extract the flag stored in their password field. Since this is a blind SQL injection vulnerability, you won't see the actual data returned from the database - you'll only see whether a user exists or not based on your query.
+            </p>
+                    <div class="card mb-3 border-secondary">
+                        <div class="card-header bg-secondary text-white">
+                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-0">
+                                <strong>Client:</strong> Security Testing Client<br>
+                                <strong>Target:</strong> SQL Injection Vulnerability<br>
+                                <strong>Vulnerability:</strong> Suspected SQL Injection<br>
+                                <strong>Objective:</strong> Exploit the vulnerability to extract data
+                            </p>
+                        </div>
+                    </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        Blind SQL injection is a type of SQL injection attack that asks the database true/false questions and determines the answer based on the application's response. It's used when the application doesn't display SQL error messages or the results of the query.
+                    </p>
+                    <p>
+                        There are two main types of blind SQL injection:
+                    </p>
+                    <ul>
+                        <li><strong>Boolean-based:</strong> The attacker can determine if a condition is true or false based on whether the application behaves differently (like showing "user exists" vs "user doesn't exist").</li>
+                        <li><strong>Time-based:</strong> The attacker can determine if a condition is true or false based on how long the database takes to respond.</li>
+                    </ul>
+                    <p>
+                        This challenge focuses on boolean-based blind SQL injection, where you'll need to extract data one bit at a time by asking yes/no questions.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        The application likely uses a SQL query similar to:
+                    </p>
+                    <pre class="bg-light p-3 rounded"><code>SELECT * FROM users WHERE id = [user_input]</code></pre>
+                    <p>
+                        For blind SQL injection, you need to:
+                    </p>
+                    <ol>
+                        <li>Use boolean conditions to extract information bit by bit</li>
+                        <li>Construct queries that return true or false based on your guesses</li>
+                        <li>Use techniques like binary search to efficiently extract data</li>
+                    </ol>
+                    <p>
+                        Try using conditions like:
+                    </p>
+                    <pre class="bg-light p-3 rounded"><code>1 AND (SELECT 1 FROM users WHERE username = 'admin_secret')</code></pre>
+                    <p>
+                        To extract data character by character, you can use:
+                    </p>
+                    <pre class="bg-light p-3 rounded"><code>1 AND ASCII(SUBSTRING((SELECT password FROM users WHERE username = 'admin_secret'), 1, 1)) > 97</code></pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-shield-fill-check me-2"></i>Real-World Impact</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        Blind SQL injection attacks have been used in several major data breaches:
+                    </p>
+                    <ul>
+                        <li><strong>British Airways (2018)</strong>: Attackers used blind SQL injection as part of an attack that compromised 380,000 customer payment details.</li>
+                        <li><strong>Cisco (2018)</strong>: A vulnerability in Cisco's Prime License Manager allowed blind SQL injection attacks.</li>
+                    </ul>
+                    <p>
+                        For user management systems like this one, such vulnerabilities could expose:
+                    </p>
+                    <ul>
+                        <li>User credentials and personal information</li>
+                        <li>Administrative account details</li>
+                        <li>Internal company structure and hierarchy</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
 
         <div class="portal-header">
             <div class="d-flex align-items-center justify-content-center">
@@ -183,7 +244,7 @@
             </div>
         </div>
 
-        <div class="user-lookup-container">
+        <div class="user-lookup-container login-container">
             <h4 class="mb-3"><i class="bi bi-search me-2"></i>Admin User Lookup</h4>
             <div class="alert alert-secondary">
                 <i class="bi bi-info-circle-fill me-2"></i>
@@ -207,7 +268,7 @@
         </div>
 
         {% if user_exists is not none %}
-        <div class="result-container">
+        <div class="result-container login-container">
             <h4 class="mb-3"><i class="bi bi-person-circle me-2"></i>Verification Result</h4>
             {% if user_exists %}
             <div class="alert alert-success">
@@ -237,35 +298,7 @@
             <p class="mb-0"><small class="text-muted">Note: This message is visible only to system administrators and should not be displayed to regular users.</small></p>
         </div>
 
-        <div class="card mt-4">
-            <div class="card-header bg-dark text-white">
-                <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Technical Notes</h5>
-            </div>
-            <div class="card-body">
-                <p>
-                    <strong>For educational purposes:</strong> This user verification feature is vulnerable to blind SQL injection. In a real user management system, such vulnerabilities could expose sensitive user information despite not displaying it directly.
-                </p>
-                <p>
-                    The backend code might look something like this:
-                </p>
-                <pre class="bg-light p-3 rounded"><code>// Vulnerable code example (PHP)
-$user_id = $_GET['id'];
 
-$query = "SELECT * FROM users WHERE id = $user_id";
-$result = mysqli_query($connection, $query);
-
-if(mysqli_num_rows($result) > 0) {
-    // User exists
-    echo "User with ID $user_id exists in the database.";
-} else {
-    // User doesn't exist
-    echo "User with ID $user_id does not exist in the database.";
-}</code></pre>
-                <p>
-                    <strong>Security tip:</strong> To prevent blind SQL injection attacks, use parameterized queries and validate user input before using it in database queries.
-                </p>
-            </div>
-        </div>
 
         <div class="mt-4">
             <a href="{{ url_for('solutions', level='sqli4') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
@@ -274,104 +307,5 @@ if(mysqli_num_rows($result) > 0) {
     </div>
 </div>
 
-<!-- Challenge Description Modal -->
-<div class="modal fade" id="challengeDescriptionModal" tabindex="-1" aria-labelledby="challengeDescriptionModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title" id="challengeDescriptionModalLabel">Challenge Description: Blind SQL Injection</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-dark">
-                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-                    <p>
-                        Welcome to <strong>UserPortal Pro</strong>, a fictional user management system! This challenge simulates a real-world scenario where a user profile lookup feature is vulnerable to blind SQL injection.
-                    </p>
-                    <p>
-                        The developers of UserPortal have implemented a feature that allows administrators to check if a user with a specific ID exists in the database. However, they've made a critical mistake in how they handle user input, allowing attackers to perform blind SQL injection attacks.
-                    </p>
-                    <p>
-                        <strong>Your Task:</strong> The system has a hidden user with the username <code>admin_secret</code>. You need to find this user's ID and extract the flag stored in their password field. Since this is a blind SQL injection vulnerability, you won't see the actual data returned from the database - you'll only see whether a user exists or not based on your query.
-                    </p>
-                </div>
 
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>
-                            Blind SQL injection is a type of SQL injection attack that asks the database true/false questions and determines the answer based on the application's response. It's used when the application doesn't display SQL error messages or the results of the query.
-                        </p>
-                        <p>
-                            There are two main types of blind SQL injection:
-                        </p>
-                        <ul>
-                            <li><strong>Boolean-based:</strong> The attacker can determine if a condition is true or false based on whether the application behaves differently (like showing "user exists" vs "user doesn't exist").</li>
-                            <li><strong>Time-based:</strong> The attacker can determine if a condition is true or false based on how long the database takes to respond.</li>
-                        </ul>
-                        <p>
-                            This challenge focuses on boolean-based blind SQL injection, where you'll need to extract data one bit at a time by asking yes/no questions.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>
-                            The application likely uses a SQL query similar to:
-                        </p>
-                        <pre class="bg-light p-3 rounded"><code>SELECT * FROM users WHERE id = [user_input]</code></pre>
-                        <p>
-                            For blind SQL injection, you need to:
-                        </p>
-                        <ol>
-                            <li>Use boolean conditions to extract information bit by bit</li>
-                            <li>Construct queries that return true or false based on your guesses</li>
-                            <li>Use techniques like binary search to efficiently extract data</li>
-                        </ol>
-                        <p>
-                            Try using conditions like:
-                        </p>
-                        <pre class="bg-light p-3 rounded"><code>1 AND (SELECT 1 FROM users WHERE username = 'admin_secret')</code></pre>
-                        <p>
-                            To extract data character by character, you can use:
-                        </p>
-                        <pre class="bg-light p-3 rounded"><code>1 AND ASCII(SUBSTRING((SELECT password FROM users WHERE username = 'admin_secret'), 1, 1)) > 97</code></pre>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <h5><i class="bi bi-shield-fill-check me-2"></i>Real-World Impact</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>
-                            Blind SQL injection attacks have been used in several major data breaches:
-                        </p>
-                        <ul>
-                            <li><strong>British Airways (2018)</strong>: Attackers used blind SQL injection as part of an attack that compromised 380,000 customer payment details.</li>
-                            <li><strong>Cisco (2018)</strong>: A vulnerability in Cisco's Prime License Manager allowed blind SQL injection attacks.</li>
-                        </ul>
-                        <p>
-                            For user management systems like this one, such vulnerabilities could expose:
-                        </p>
-                        <ul>
-                            <li>User credentials and personal information</li>
-                            <li>Administrative account details</li>
-                            <li>Internal company structure and hierarchy</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}

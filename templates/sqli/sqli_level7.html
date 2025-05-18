@@ -22,10 +22,100 @@
                 <h2 class="text-center">Level 7: Error-Based SQL Injection</h2>
             </div>
             <div class="card-body">
-                <!-- Challenge Description Popup Button -->
-                <button type="button" class="btn btn-info mb-3" data-bs-toggle="modal" data-bs-target="#challengeDescriptionModal">
-                    <i class="bi bi-info-circle-fill me-2"></i>View Challenge Description
-                </button>
+                <!-- Challenge description -->
+        <div class="alert alert-dark challenge-description">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>CatalogManager</strong>, a fictional product catalog system! This challenge simulates a real-world scenario where a category browser feature is vulnerable to error-based SQL injection.
+                    </p>
+                    <p>
+                        The developers of CatalogManager have implemented a feature that allows users to browse product categories by ID. However, they've made two critical mistakes:
+                    </p>
+                    <ol>
+                        <li>They directly concatenate user input into SQL queries without proper sanitization</li>
+                        <li>They display detailed database error messages to users when queries fail</li>
+                    </ol>
+                    <p>
+                        <strong>Your Task:</strong> Exploit the error-based SQL injection vulnerability to extract the flag from the hidden <code>secrets</code> table. The flag is stored in a column called <code>flag_value</code> where the <code>key_name</code> column equals <code>'level7_flag'</code>.
+                    </p>
+                    <div class="card mb-3 border-secondary">
+                        <div class="card-header bg-secondary text-white">
+                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-0">
+                                <strong>Client:</strong> Security Testing Client<br>
+                                <strong>Target:</strong> SQL Injection Vulnerability<br>
+                                <strong>Vulnerability:</strong> Suspected SQL Injection<br>
+                                <strong>Objective:</strong> Exploit the vulnerability to extract data
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>
+                                Error-based SQL injection is a technique that exploits the way database errors are handled and displayed by an application. When a database operation fails, the error message often contains detailed information about the database structure and the query that caused the error.
+                            </p>
+                            <p>
+                                By deliberately causing specific errors, attackers can extract data from the database by reading the error messages. This technique is particularly useful when other SQL injection methods (like UNION-based or blind) are not feasible.
+                            </p>
+                            <p>
+                                Error-based SQL injection relies on the application displaying detailed error messages to the user, which is a security misconfiguration that should be avoided in production environments.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>
+                                The application likely uses a SQL query similar to:
+                            </p>
+                            <pre class="bg-light p-3 rounded"><code>SELECT id, name, description FROM categories WHERE id = [user_input]</code></pre>
+                            <p>
+                                For error-based SQL injection, you need to:
+                            </p>
+                            <ol>
+                                <li>Craft queries that cause errors containing the data you want to extract</li>
+                                <li>Use SQL functions that can extract and display data in error messages</li>
+                                <li>Chain multiple SQL operations to extract specific data from other tables</li>
+                            </ol>
+                            <p>
+                                Try using techniques like:
+                            </p>
+                            <pre class="bg-light p-3 rounded"><code>1 AND (SELECT 1 FROM (SELECT COUNT(*), CONCAT(flag_value, FLOOR(RAND(0)*2)) AS x FROM secrets GROUP BY x) AS y)</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-shield-fill-check me-2"></i>Real-World Impact</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>
+                                Error-based SQL injection attacks have been used in several major security incidents:
+                            </p>
+                            <ul>
+                                <li><strong>vBulletin (2019)</strong>: A zero-day vulnerability in vBulletin allowed attackers to use error-based techniques to extract sensitive information.</li>
+                                <li><strong>WordPress Plugins (2020)</strong>: Several popular WordPress plugins were found vulnerable to error-based SQL injection, affecting millions of websites.</li>
+                            </ul>
+                            <p>
+                                For catalog systems like this one, such vulnerabilities could expose:
+                            </p>
+                            <ul>
+                                <li>Internal product information and pricing strategies</li>
+                                <li>Customer data and order history</li>
+                                <li>Administrative credentials and system configuration</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="card mb-4">
                     <div class="card-header bg-primary text-white">
@@ -81,60 +171,5 @@
     </div>
 </div>
 
-<!-- Challenge Description Modal -->
-<div class="modal fade" id="challengeDescriptionModal" tabindex="-1" aria-labelledby="challengeDescriptionModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title" id="challengeDescriptionModalLabel">Challenge Description: Error-Based SQL Injection</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-dark">
-                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-                    <p>
-                        Welcome to <strong>CatalogManager</strong>, a fictional product catalog system! This challenge simulates a real-world scenario where a category browser feature is vulnerable to error-based SQL injection.
-                    </p>
-                    <p>
-                        The developers of CatalogManager have implemented a feature that allows users to browse product categories by ID. However, they've made two critical mistakes:
-                    </p>
-                    <ol>
-                        <li>They directly concatenate user input into SQL queries without proper sanitization</li>
-                        <li>They display detailed database error messages to users when queries fail</li>
-                    </ol>
-                    <p>
-                        <strong>Your Task:</strong> Exploit the error-based SQL injection vulnerability to extract the flag from the hidden <code>secrets</code> table. The flag is stored in a column called <code>flag_value</code> where the <code>key_name</code> column equals <code>'level7_flag'</code>.
-                    </p>
-                </div>
-                
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>
-                            The application likely uses a SQL query similar to:
-                        </p>
-                        <pre class="bg-light p-3 rounded"><code>SELECT id, name, description FROM categories WHERE id = [user_input]</code></pre>
-                        <p>
-                            For error-based SQL injection, you need to:
-                        </p>
-                        <ol>
-                            <li>Craft queries that cause errors containing the data you want to extract</li>
-                            <li>Use SQL functions that can extract and display data in error messages</li>
-                            <li>Chain multiple SQL operations to extract specific data from other tables</li>
-                        </ol>
-                        <p>
-                            Try using techniques like:
-                        </p>
-                        <pre class="bg-light p-3 rounded"><code>1 AND (SELECT 1 FROM (SELECT COUNT(*), CONCAT(flag_value, FLOOR(RAND(0)*2)) AS x FROM secrets GROUP BY x) AS y)</code></pre>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
+
 {% endblock %}

@@ -30,14 +30,21 @@ R00tGlyph is a Python-based web application designed to simulate real-world web 
   - Level 6: XSS with ModSecurity WAF
   - Level 7: XSS via HTTP Headers
   - Level 8: XSS in JSON API
-  - Level 9: XSS in Blog Comments
-  - Level 10: XSS in Markdown Parser
+  - Level 9: XSS with CSP Bypass
+  - Level 10: XSS with Mutation Observer Bypass
   - Level 11: XSS via SVG and CDATA
-  - Level 12: XSS in CSS Context
-  - Level 14: XSS in JSON Configuration
+  - Level 12: Blind XSS with Webhook Exfiltration
+  - Level 13: XSS in PDF Generation
+  - Level 14: XSS via Prototype Pollution
+  - Level 15: XSS via Template Injection
+  - Level 16: XSS in WebAssembly Applications
+  - Level 17: XSS in Progressive Web Apps
+  - Level 18: XSS via Web Components
+  - Level 19: XSS in GraphQL APIs
   - Level 20: XSS in WebRTC Applications
   - Level 21: XSS via Web Bluetooth/USB
   - Level 22: XSS in WebGPU Applications
+  - Level 23: XSS in Federated Identity Systems
 
 - **SQL Injection (SQLi)**
   - Level 1: Basic SQL Injection
@@ -47,6 +54,22 @@ R00tGlyph is a Python-based web application designed to simulate real-world web 
   - Level 5: Time-Based Blind SQL Injection
   - Level 6: SQL Injection with WAF Bypass
   - Level 7: Error-Based SQL Injection
+  - Level 8: Second-Order SQL Injection
+  - Level 9: SQL Injection in REST API
+  - Level 10: NoSQL Injection
+  - Level 11: GraphQL Injection
+  - Level 12: ORM-based SQL Injection
+  - Level 13: Out-of-band SQL Injection
+  - Level 14: SQL Injection with Advanced WAF Bypass
+  - Level 15: SQL Injection via XML
+  - Level 16: SQL Injection in WebSockets
+  - Level 17: SQL Injection in Mobile App Backend
+  - Level 18: SQL Injection in Cloud Functions
+  - Level 19: SQL Injection via File Upload
+  - Level 20: SQL Injection in Stored Procedures
+  - Level 21: SQL Injection in GraphQL API
+  - Level 22: SQL Injection in NoSQL Database
+  - Level 23: SQL Injection in ORM Layer
 
 ## Installation
 
@@ -108,6 +131,9 @@ R00tGlyph includes a comprehensive user progress tracking system:
 - Username changes propagate throughout the application
 - Accurate statistics tracking for completed and incomplete challenges
 - Challenge flags are only revealed upon successful completion
+- All challenges have detailed descriptions in popups
+- Every challenge has a corresponding solution page with detailed explanations
+- The update mechanism preserves user progress when updating to the latest version
 
 ## Repository
 

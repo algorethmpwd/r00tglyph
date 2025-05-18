@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: SQL Injection Level 8{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h2 class="text-center">Solution: Level 8 - Second-Order SQL Injection</h2>
+            </div>
+            <div class="card-body">
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates a second-order (or stored) SQL injection vulnerability. Unlike first-order SQL injection where the attack payload is directly used in a SQL query, second-order SQL injection involves two steps:
+                </p>
+                <ol>
+                    <li>The malicious payload is stored in the database (often after passing through input sanitization)</li>
+                    <li>The payload is later retrieved and used in another SQL query without proper sanitization</li>
+                </ol>
+                <p>
+                    In this challenge, the ConnectSphere application has a vulnerability in how it handles user profile data. While it may sanitize inputs when storing them in the database, it doesn't properly sanitize them when using the stored data in subsequent queries.
+                </p>
+
+                <h3>The Vulnerable Code</h3>
+                <p>
+                    The vulnerability exists in how the application handles the profile viewing functionality. Here's a simplified example of the vulnerable code:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>// When updating a profile (first step)
+$username = sanitize_input($_POST['username']);
+$bio = sanitize_input($_POST['bio']);
+$location = sanitize_input($_POST['location']);
+$website = sanitize_input($_POST['website']);
+
+$query = "INSERT INTO profiles (username, bio, location, website) VALUES ('$username', '$bio', '$location', '$website')";
+// Execute query...
+
+// When viewing a profile (second step)
+$view_user = $_GET['view_user'];
+$query = "SELECT * FROM users WHERE username = '$view_user'";
+// Execute query and display results...</code></pre>
+                <p>
+                    The vulnerability occurs because when someone views a profile, the application uses the stored username to look up the user. If the username contains SQL injection characters, it can manipulate this second query.
+                </p>
+
+                <h3>Solution</h3>
+                <p>To exploit this vulnerability, follow these steps:</p>
+
+                <h4>1. Update Your Profile with a Malicious Username</h4>
+                <p>
+                    First, update your profile with a username that contains a SQL injection payload:
+                </p>
+                <div class="alert alert-secondary">
+                    <code>test' OR '1'='1</code>
+                </div>
+                <p>
+                    Fill in the other fields with normal values and submit the form.
+                </p>
+
+                <h4>2. View Your Profile to Trigger the Injection</h4>
+                <p>
+                    Now, try to view your profile by entering your username in the "View User Profile" form:
+                </p>
+                <div class="alert alert-secondary">
+                    <code>test' OR '1'='1</code>
+                </div>
+                <p>
+                    When the application tries to look up this username, the query becomes:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>SELECT * FROM users WHERE username = 'test' OR '1'='1'</code></pre>
+                <p>
+                    Since <code>'1'='1'</code> is always true, this query will return all users, including the admin user.
+                </p>
+
+                <h4>3. Alternative Approach: Target the Admin Specifically</h4>
+                <p>
+                    For a more targeted approach, you can use a payload that specifically looks for the admin user:
+                </p>
+                <div class="alert alert-secondary">
+                    <code>anything' UNION SELECT * FROM users WHERE username='admin' --</code>
+                </div>
+                <p>
+                    This transforms the query to:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>SELECT * FROM users WHERE username = 'anything' UNION SELECT * FROM users WHERE username='admin' --'</code></pre>
+                <p>
+                    This will return the admin's profile, revealing the flag.
+                </p>
+
+                <h3>Real-world Impact</h3>
+                <p>
+                    Second-order SQL injection vulnerabilities are particularly dangerous because:
+                </p>
+                <ul>
+                    <li><strong>They bypass input sanitization</strong> that only happens at the point of initial storage</li>
+                    <li><strong>They can affect "safe" parts of the application</strong> that don't directly accept user input</li>
+                    <li><strong>They can be triggered by users other than the attacker</strong>, potentially escalating the impact</li>
+                    <li><strong>They are often overlooked</strong> in security testing that focuses only on direct input points</li>
+                </ul>
+                <p>
+                    Notable real-world examples include:
+                </p>
+                <ul>
+                    <li><strong>WordPress (CVE-2017-9061)</strong>: A second-order SQL injection vulnerability allowed attackers to execute arbitrary SQL commands</li>
+                    <li><strong>Joomla (CVE-2015-7857)</strong>: A critical second-order SQL injection vulnerability allowed attackers to gain administrative access</li>
+                </ul>
+
+                <h3>Prevention</h3>
+                <p>To prevent second-order SQL injection vulnerabilities, developers should:</p>
+                <ul>
+                    <li>
+                        <strong>Use parameterized queries consistently</strong> throughout the application, not just at input points:
+                        <pre class="bg-light p-3 rounded"><code>// Parameterized query for viewing a profile
+$stmt = $db->prepare("SELECT * FROM users WHERE username = ?");
+$stmt->bind_param("s", $view_user);
+$stmt->execute();</code></pre>
+                    </li>
+                    <li>
+                        <strong>Sanitize data both when storing and retrieving</strong> it from the database
+                    </li>
+                    <li>
+                        <strong>Use ORMs (Object-Relational Mappers)</strong> that automatically handle SQL escaping
+                    </li>
+                    <li>
+                        <strong>Implement proper input validation</strong> with whitelisting for usernames and other fields
+                    </li>
+                    <li>
+                        <strong>Apply the principle of least privilege</strong> to database accounts
+                    </li>
+                </ul>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('sqli_level8') }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

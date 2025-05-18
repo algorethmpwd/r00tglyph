@@ -12,27 +12,6 @@
         margin-bottom: 20px;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
-    .subscription-container {
-        background-color: #f8f9fa;
-        border-radius: 10px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        padding: 20px;
-        border: 1px solid #e9ecef;
-        margin-bottom: 20px;
-    }
-    .scenario-box {
-        background-color: #e9f7fe;
-        border-left: 4px solid #17a2b8;
-        padding: 15px;
-        margin-bottom: 20px;
-        border-radius: 5px;
-    }
-    .newsletter-stats {
-        background-color: #f8f9fa;
-        padding: 15px;
-        border-radius: 5px;
-        margin-bottom: 20px;
-    }
     .stat-item {
         text-align: center;
         padding: 10px;
@@ -40,51 +19,22 @@
     .stat-number {
         font-size: 2rem;
         font-weight: bold;
-        color: #43cea2;
-    }
-    .response-container {
-        background-color: #f8f9fa;
-        border-radius: 10px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        padding: 20px;
-        border: 1px solid #e9ecef;
-        margin-bottom: 20px;
-    }
-    .feature-box {
-        text-align: center;
-        padding: 15px;
-        margin-bottom: 20px;
-        border-radius: 5px;
-        background-color: #f8f9fa;
-        transition: all 0.3s ease;
-    }
-    .feature-box:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-    }
-    .feature-icon {
-        font-size: 2rem;
-        margin-bottom: 10px;
-        color: #43cea2;
+        color: var(--bs-primary);
     }
     .testimonial {
-        background-color: #f8f9fa;
         border-radius: 10px;
         padding: 15px;
         margin-bottom: 15px;
-        border-left: 4px solid #43cea2;
+        border-left: 4px solid var(--bs-primary);
     }
     .testimonial-author {
         font-weight: bold;
-        color: #185a9d;
     }
     .time-display {
         font-size: 1.5rem;
         font-weight: bold;
-        color: #185a9d;
         text-align: center;
         padding: 10px;
-        background-color: #f8f9fa;
         border-radius: 5px;
         margin-bottom: 15px;
     }
@@ -104,10 +54,105 @@
         </div>
         {% endif %}
 
-        <!-- Challenge Description Button -->
-        <button type="button" class="btn btn-info mb-3" data-bs-toggle="modal" data-bs-target="#challengeDescriptionModal">
-            <i class="bi bi-info-circle-fill me-2"></i>View Challenge Description
-        </button>
+        <!-- Challenge description -->
+        <div class="alert alert-dark challenge-description">
+            <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+            <p>
+                Welcome to <strong>NewsletterPro</strong>, a fictional newsletter subscription service! This challenge simulates a real-world scenario where an email subscription form is vulnerable to time-based blind SQL injection.
+            </p>
+            <p>
+                The developers of NewsletterPro have implemented a feature that allows users to subscribe to newsletters using their email address. However, they've made a critical mistake in how they handle user input, allowing attackers to perform time-based blind SQL injection attacks.
+            </p>
+            <p>
+                <strong>Your Task:</strong> The system has a hidden configuration table with a key named <code>secret_flag</code>. You need to extract the value of this key, which contains the flag. Since this is a time-based blind SQL injection vulnerability, you won't see the actual data returned from the database - you'll need to use time delays to extract the information.
+            </p>
+                    <div class="card mb-3 border-secondary">
+                        <div class="card-header bg-secondary text-white">
+                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-0">
+                                <strong>Client:</strong> Security Testing Client<br>
+                                <strong>Target:</strong> SQL Injection Vulnerability<br>
+                                <strong>Vulnerability:</strong> Suspected SQL Injection<br>
+                                <strong>Objective:</strong> Exploit the vulnerability to extract data
+                            </p>
+                        </div>
+                    </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        Time-based blind SQL injection is a technique used when an attacker can't see the results of their SQL injection directly, but can observe differences in the time it takes for the server to respond.
+                    </p>
+                    <p>
+                        This technique works by injecting SQL code that causes the database to pause or "sleep" for a specified amount of time when a certain condition is true. By measuring the response time, the attacker can determine whether the condition was true or false.
+                    </p>
+                    <p>
+                        Time-based techniques are particularly useful when:
+                    </p>
+                    <ul>
+                        <li>The application doesn't display error messages</li>
+                        <li>Boolean-based blind injection isn't possible</li>
+                        <li>The application doesn't provide any visible feedback about the query results</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        The application likely uses a SQL query similar to:
+                    </p>
+                    <pre class="bg-light p-3 rounded"><code>INSERT INTO subscribers (email) VALUES ('[user_input]')</code></pre>
+                    <p>
+                        For time-based blind SQL injection, you need to:
+                    </p>
+                    <ol>
+                        <li>Use SQL functions that cause delays (like SLEEP, BENCHMARK, pg_sleep, or WAITFOR DELAY)</li>
+                        <li>Construct conditional queries that only cause delays when certain conditions are true</li>
+                        <li>Extract data character by character based on the presence or absence of delays</li>
+                    </ol>
+                    <p>
+                        Try using payloads like:
+                    </p>
+                    <pre class="bg-light p-3 rounded"><code>test@example.com'; IF (SELECT 1 FROM config WHERE key_name = 'secret_flag') SLEEP(3); --</code></pre>
+                    <p>
+                        To extract data character by character, you can use:
+                    </p>
+                    <pre class="bg-light p-3 rounded"><code>test@example.com'; IF (ASCII(SUBSTRING((SELECT value FROM config WHERE key_name = 'secret_flag'), 1, 1)) > 97) SLEEP(3); --</code></pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-shield-fill-check me-2"></i>Real-World Impact</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        Time-based blind SQL injection attacks have been used in several major security incidents:
+                    </p>
+                    <ul>
+                        <li><strong>Drupal (2014)</strong>: The "Drupalgeddon" vulnerability (CVE-2014-3704) allowed attackers to use time-based techniques to extract data from vulnerable Drupal sites.</li>
+                        <li><strong>WordPress (2017)</strong>: Several plugins were found vulnerable to time-based blind SQL injection, affecting millions of websites.</li>
+                    </ul>
+                    <p>
+                        For newsletter services like this one, such vulnerabilities could expose:
+                    </p>
+                    <ul>
+                        <li>Subscriber email addresses and personal information</li>
+                        <li>Administrative credentials</li>
+                        <li>Configuration settings and API keys</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
 
         <div class="newsletter-header">
             <div class="d-flex align-items-center justify-content-center">
@@ -127,7 +172,7 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="newsletter-stats">
+                <div class="portal-stats">
                     <h5 class="text-center mb-3"><i class="bi bi-bar-chart-fill me-2"></i>Newsletter Stats</h5>
                     <div class="row">
                         <div class="col-6">
@@ -189,7 +234,7 @@
             </div>
         </div>
 
-        <div class="subscription-container">
+        <div class="subscription-container login-container">
             <h4 class="mb-3"><i class="bi bi-envelope-plus me-2"></i>Subscribe to Our Newsletter</h4>
             <div class="row mb-4">
                 <div class="col-md-8">
@@ -233,11 +278,11 @@
         </div>
 
         {% if response_time %}
-        <div class="response-container">
+        <div class="response-container login-container">
             <h4 class="mb-3"><i class="bi bi-clock-history me-2"></i>Server Response Analytics</h4>
             <div class="row">
                 <div class="col-md-4">
-                    <div class="time-display">
+                    <div class="time-display login-container">
                         <i class="bi bi-stopwatch me-2"></i>
                         {{ response_time }} seconds
                     </div>
@@ -263,46 +308,20 @@
                 <h4 class="mb-3"><i class="bi bi-chat-quote me-2"></i>What Our Subscribers Say</h4>
             </div>
             <div class="col-md-6">
-                <div class="testimonial">
+                <div class="testimonial login-container">
                     <p>"The newsletter has been incredibly valuable for staying up-to-date with industry trends. Highly recommended!"</p>
                     <p class="testimonial-author">- Sarah J., Marketing Director</p>
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="testimonial">
+                <div class="testimonial login-container">
                     <p>"I look forward to receiving this newsletter every week. The content is always relevant and insightful."</p>
                     <p class="testimonial-author">- Michael T., Tech Entrepreneur</p>
                 </div>
             </div>
         </div>
 
-        <div class="card mt-4">
-            <div class="card-header bg-dark text-white">
-                <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Technical Notes</h5>
-            </div>
-            <div class="card-body">
-                <p>
-                    <strong>For educational purposes:</strong> This newsletter subscription form is vulnerable to time-based blind SQL injection. In a real application, such vulnerabilities could allow attackers to extract sensitive information from the database.
-                </p>
-                <p>
-                    The backend code might look something like this:
-                </p>
-                <pre class="bg-light p-3 rounded"><code>// Vulnerable code example (PHP)
-$email = $_POST['email'];
 
-$query = "INSERT INTO subscribers (email) VALUES ('$email')";
-$result = mysqli_query($connection, $query);
-
-if($result) {
-    echo "Thank you for subscribing to our newsletter!";
-} else {
-    echo "Error: " . mysqli_error($connection);
-}</code></pre>
-                <p>
-                    <strong>Security tip:</strong> To prevent time-based blind SQL injection attacks, use parameterized queries and validate user input before using it in database queries.
-                </p>
-            </div>
-        </div>
 
         <div class="mt-4">
             <a href="{{ url_for('solutions', level='sqli5') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
@@ -311,105 +330,5 @@ if($result) {
     </div>
 </div>
 
-<!-- Challenge Description Modal -->
-<div class="modal fade" id="challengeDescriptionModal" tabindex="-1" aria-labelledby="challengeDescriptionModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title" id="challengeDescriptionModalLabel">Challenge Description: Time-Based Blind SQL Injection</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-dark">
-                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-                    <p>
-                        Welcome to <strong>NewsletterPro</strong>, a fictional newsletter subscription service! This challenge simulates a real-world scenario where an email subscription form is vulnerable to time-based blind SQL injection.
-                    </p>
-                    <p>
-                        The developers of NewsletterPro have implemented a feature that allows users to subscribe to newsletters using their email address. However, they've made a critical mistake in how they handle user input, allowing attackers to perform time-based blind SQL injection attacks.
-                    </p>
-                    <p>
-                        <strong>Your Task:</strong> The system has a hidden configuration table with a key named <code>secret_flag</code>. You need to extract the value of this key, which contains the flag. Since this is a time-based blind SQL injection vulnerability, you won't see the actual data returned from the database - you'll need to use time delays to extract the information.
-                    </p>
-                </div>
 
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>
-                            Time-based blind SQL injection is a technique used when an attacker can't see the results of their SQL injection directly, but can observe differences in the time it takes for the server to respond.
-                        </p>
-                        <p>
-                            This technique works by injecting SQL code that causes the database to pause or "sleep" for a specified amount of time when a certain condition is true. By measuring the response time, the attacker can determine whether the condition was true or false.
-                        </p>
-                        <p>
-                            Time-based techniques are particularly useful when:
-                        </p>
-                        <ul>
-                            <li>The application doesn't display error messages</li>
-                            <li>Boolean-based blind injection isn't possible</li>
-                            <li>The application doesn't provide any visible feedback about the query results</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>
-                            The application likely uses a SQL query similar to:
-                        </p>
-                        <pre class="bg-light p-3 rounded"><code>INSERT INTO subscribers (email) VALUES ('[user_input]')</code></pre>
-                        <p>
-                            For time-based blind SQL injection, you need to:
-                        </p>
-                        <ol>
-                            <li>Use SQL functions that cause delays (like SLEEP, BENCHMARK, pg_sleep, or WAITFOR DELAY)</li>
-                            <li>Construct conditional queries that only cause delays when certain conditions are true</li>
-                            <li>Extract data character by character based on the presence or absence of delays</li>
-                        </ol>
-                        <p>
-                            Try using payloads like:
-                        </p>
-                        <pre class="bg-light p-3 rounded"><code>test@example.com'; IF (SELECT 1 FROM config WHERE key_name = 'secret_flag') SLEEP(3); --</code></pre>
-                        <p>
-                            To extract data character by character, you can use:
-                        </p>
-                        <pre class="bg-light p-3 rounded"><code>test@example.com'; IF (ASCII(SUBSTRING((SELECT value FROM config WHERE key_name = 'secret_flag'), 1, 1)) > 97) SLEEP(3); --</code></pre>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <h5><i class="bi bi-shield-fill-check me-2"></i>Real-World Impact</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>
-                            Time-based blind SQL injection attacks have been used in several major security incidents:
-                        </p>
-                        <ul>
-                            <li><strong>Drupal (2014)</strong>: The "Drupalgeddon" vulnerability (CVE-2014-3704) allowed attackers to use time-based techniques to extract data from vulnerable Drupal sites.</li>
-                            <li><strong>WordPress (2017)</strong>: Several plugins were found vulnerable to time-based blind SQL injection, affecting millions of websites.</li>
-                        </ul>
-                        <p>
-                            For newsletter services like this one, such vulnerabilities could expose:
-                        </p>
-                        <ul>
-                            <li>Subscriber email addresses and personal information</li>
-                            <li>Administrative credentials</li>
-                            <li>Configuration settings and API keys</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}

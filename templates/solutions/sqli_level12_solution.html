@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: SQL Injection Level 12{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h2 class="text-center">Solution: Level 12 - ORM-based SQL Injection</h2>
+            </div>
+            <div class="card-body">
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates a SQL injection vulnerability in an application that uses an Object-Relational Mapping (ORM) framework. While ORMs generally provide protection against SQL injection by using parameterized queries, they can still be vulnerable if developers use raw SQL queries or string concatenation within ORM code.
+                </p>
+                <p>
+                    The vulnerability occurs because the application uses a mix of ORM methods and raw SQL queries:
+                </p>
+                <pre class="bg-light p-3 rounded"><code># Example of vulnerable ORM code (using SQLAlchemy in Python)
+def search_employees(department, search_term):
+    # This is safe, using ORM properly
+    query = session.query(Employee).filter(Employee.department == department)
+    
+    # This is vulnerable, using raw SQL with string concatenation
+    if search_term:
+        raw_sql = f"SELECT * FROM employees WHERE name LIKE '%{search_term}%'"
+        result = session.execute(raw_sql)
+        return result
+    
+    return query.all()</code></pre>
+                <p>
+                    The vulnerability is particularly dangerous because:
+                </p>
+                <ul>
+                    <li>Developers often assume that using an ORM automatically protects them from SQL injection</li>
+                    <li>Code reviews might miss raw SQL queries embedded within ORM code</li>
+                    <li>The application might appear to use parameterized queries in most places</li>
+                    <li>Modern frameworks can give a false sense of security</li>
+                </ul>
+
+                <h3>Solution</h3>
+                <p>To exploit this vulnerability, follow these steps:</p>
+
+                <h4>1. Identify the Vulnerable Parameter</h4>
+                <p>
+                    The employee search functionality accepts two parameters: <code>department</code> and <code>search_term</code>. Since <code>department</code> is selected from a dropdown, it's less likely to be vulnerable. The <code>search_term</code> parameter is more likely to be vulnerable as it accepts free-form text input.
+                </p>
+
+                <h4>2. Test for SQL Injection</h4>
+                <p>
+                    Start by testing basic SQL injection payloads in the <code>search_term</code> parameter:
+                </p>
+                <div class="alert alert-secondary">
+                    <code>' OR '1'='1</code>
+                </div>
+                <p>
+                    If the application is vulnerable, this might return all employees in the selected department, as the query would become:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>SELECT * FROM employees WHERE name LIKE '%' OR '1'='1%'</code></pre>
+                <p>
+                    This condition is always true, so all employees in the database would be returned.
+                </p>
+
+                <h4>3. Access Sensitive Data Using UNION Attack</h4>
+                <p>
+                    To access the CEO's salary information, you can use a UNION attack to combine the results of the original query with a query that targets the CEO:
+                </p>
+                <div class="alert alert-secondary">
+                    <code>' UNION SELECT * FROM employees WHERE position='CEO' --</code>
+                </div>
+                <p>
+                    This transforms the query to:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>SELECT * FROM employees WHERE name LIKE '%' UNION SELECT * FROM employees WHERE position='CEO' --%'</code></pre>
+                <p>
+                    This will return the results of the original query (which might be empty if no employee matches the search term) plus the CEO's information, including the salary that contains the flag.
+                </p>
+
+                <h4>4. Alternative Approach: Using Subqueries</h4>
+                <p>
+                    If the UNION attack doesn't work, you can try using a subquery:
+                </p>
+                <div class="alert alert-secondary">
+                    <code>' OR position='CEO' OR '</code>
+                </div>
+                <p>
+                    This transforms the query to:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>SELECT * FROM employees WHERE name LIKE '%' OR position='CEO' OR '%'</code></pre>
+                <p>
+                    This will return all employees whose name matches the search term OR whose position is 'CEO'.
+                </p>
+
+                <h4>5. Bypassing Additional Filters</h4>
+                <p>
+                    If the application has additional filters, such as only showing employees from the selected department, you might need to bypass those filters:
+                </p>
+                <div class="alert alert-secondary">
+                    <code>' OR (position='CEO' AND department='Executive') --</code>
+                </div>
+                <p>
+                    This ensures that you're targeting the CEO specifically, regardless of which department is selected in the dropdown.
+                </p>
+
+                <h3>Real-world Impact</h3>
+                <p>
+                    ORM-based SQL injection vulnerabilities are particularly relevant in modern applications:
+                </p>
+                <ul>
+                    <li><strong>Modern Web Frameworks</strong>: Many modern frameworks use ORMs for database access</li>
+                    <li><strong>Legacy Code Integration</strong>: Organizations often integrate legacy code with modern frameworks</li>
+                    <li><strong>Complex Queries</strong>: Developers might resort to raw SQL for complex queries that are difficult to express using ORM methods</li>
+                    <li><strong>Performance Optimization</strong>: Raw SQL might be used for performance-critical operations</li>
+                </ul>
+                <p>
+                    Notable real-world examples include:
+                </p>
+                <ul>
+                    <li><strong>Django (CVE-2020-9402)</strong>: A vulnerability in Django's ORM allowed SQL injection through malicious order_by parameters</li>
+                    <li><strong>Hibernate (CVE-2019-14900)</strong>: A vulnerability in Hibernate ORM allowed SQL injection through improper handling of certain queries</li>
+                </ul>
+
+                <h3>Prevention</h3>
+                <p>To prevent ORM-based SQL injection vulnerabilities, developers should:</p>
+                <ul>
+                    <li>
+                        <strong>Avoid Raw SQL Queries</strong> within ORM code:
+                        <pre class="bg-light p-3 rounded"><code># Instead of raw SQL with string concatenation
+raw_sql = f"SELECT * FROM employees WHERE name LIKE '%{search_term}%'"
+result = session.execute(raw_sql)
+
+# Use ORM methods with parameterized queries
+query = session.query(Employee).filter(Employee.name.like(f"%{search_term}%"))</code></pre>
+                    </li>
+                    <li>
+                        <strong>Use Parameterized Queries</strong> if raw SQL is necessary:
+                        <pre class="bg-light p-3 rounded"><code># If raw SQL is necessary, use parameterized queries
+raw_sql = "SELECT * FROM employees WHERE name LIKE :name"
+result = session.execute(raw_sql, {"name": f"%{search_term}%"})</code></pre>
+                    </li>
+                    <li>
+                        <strong>Validate and Sanitize Input</strong> before using it in queries
+                    </li>
+                    <li>
+                        <strong>Use ORM Features</strong> for complex queries instead of resorting to raw SQL
+                    </li>
+                    <li>
+                        <strong>Implement Proper Access Controls</strong> to restrict access to sensitive data
+                    </li>
+                    <li>
+                        <strong>Apply the Principle of Least Privilege</strong> for database accounts
+                    </li>
+                </ul>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('sqli_level12') }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
