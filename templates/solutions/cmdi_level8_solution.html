@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: Command Injection in Log Processing - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Solution: Command Injection in Log Processing</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <strong>Challenge:</strong> Exploit command injection in a log processing system to execute arbitrary commands.
+                </div>
+
+                <h3 class="mt-4">Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates command injection in a log processing system. The application processes log entries and may execute system commands based on log content without proper input validation.
+                </p>
+
+                <h3 class="mt-4">Solution Steps</h3>
+                <ol>
+                    <li>
+                        <p><strong>Identify the vulnerability:</strong> The log processing system accepts log entries that are processed by system commands.</p>
+                    </li>
+                    <li>
+                        <p><strong>Test for command injection:</strong> Try injecting commands in log entries.</p>
+                        <pre class="bg-light p-3 rounded"><code>Normal log entry; whoami</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Extract system information:</strong> Use various commands to gather information.</p>
+                        <pre class="bg-light p-3 rounded"><code>Log entry; id</code></pre>
+                        <pre class="bg-light p-3 rounded"><code>Log entry; uname -a</code></pre>
+                    </li>
+                </ol>
+
+                <h3 class="mt-4">Alternative Payloads</h3>
+                <ul>
+                    <li><code>log entry; whoami</code> - Execute whoami command</li>
+                    <li><code>log entry && id</code> - Execute id command</li>
+                    <li><code>log entry | whoami</code> - Using pipe operator</li>
+                    <li><code>log entry `whoami`</code> - Using command substitution</li>
+                </ul>
+
+                <h3 class="mt-4">Prevention</h3>
+                <ol>
+                    <li><strong>Input Validation:</strong> Validate and sanitize log entries</li>
+                    <li><strong>Safe Processing:</strong> Use safe log processing methods</li>
+                    <li><strong>Sandboxing:</strong> Process logs in isolated environments</li>
+                </ol>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('cmdi_level8') }}" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end"><i class="bi bi-list me-2"></i>All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

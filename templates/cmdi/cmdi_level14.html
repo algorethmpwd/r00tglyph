@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Command Injection Level 14 - WebSocket Integration{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3><i class="bi bi-terminal me-2"></i>Command Injection Level 14</h3>
+                    <div>
+                        <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#challengeModal">
+                            <i class="bi bi-info-circle me-1"></i>Challenge Info
+                        </button>
+                        <a href="{{ url_for('solutions', level='cmdi14') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-lightbulb me-1"></i>Solution
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box mb-4">
+                        <h5><i class="bi bi-broadcast me-2"></i>Real-Time Monitoring System</h5>
+                        <p>You're testing a modern real-time monitoring system that uses WebSockets for live data streaming. The system processes JSON messages to execute monitoring commands and return real-time system information.</p>
+                        <p><strong>Context:</strong> Modern real-time infrastructure monitoring with WebSocket communication</p>
+                        <p><strong>Technology:</strong> WebSocket-based real-time communication and system monitoring</p>
+                    </div>
+
+                    {% if flag %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-flag-fill me-2"></i><strong>Challenge Completed!</strong>
+                        <br>Flag: <code>{{ flag }}</code>
+                    </div>
+                    {% endif %}
+
+                    <div class="alert alert-info mb-4">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>WebSocket Simulation:</strong> This form simulates WebSocket message processing. In a real scenario, you would use WebSocket clients or browser developer tools to send messages.
+                    </div>
+
+                    <form method="POST" class="mb-4">
+                        <div class="mb-3">
+                            <label for="websocket_message" class="form-label">WebSocket Message (JSON):</label>
+                            <textarea class="form-control" id="websocket_message" name="websocket_message" rows="6" 
+                                      style="font-family: monospace;">{{ websocket_message }}</textarea>
+                            <div class="form-text">Enter JSON message for real-time monitoring system.</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send me-2"></i>Send WebSocket Message
+                        </button>
+                    </form>
+
+                    {% if monitoring_result %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h6><i class="bi bi-terminal me-2"></i>Real-Time Monitoring Output</h6>
+                        </div>
+                        <div class="card-body">
+                            <pre class="command-output">{{ monitoring_result }}</pre>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="mt-4">
+                        <h6>WebSocket Injection Techniques:</h6>
+                        <ul>
+                            <li>Inject commands in JSON message values</li>
+                            <li>Try: <code>{"type": "monitor", "target": "server1; ps", "action": "status"}</code></li>
+                            <li>Use different JSON fields for injection</li>
+                            <li>Test real-time command execution</li>
+                        </ul>
+                        
+                        <h6>Modern WebSocket Context:</h6>
+                        <p>WebSockets enable real-time, bidirectional communication between clients and servers. This challenge simulates vulnerabilities in modern applications that use WebSockets for live monitoring, chat systems, gaming, and real-time data streaming.</p>
+                        
+                        <h6>Real-World Tools:</h6>
+                        <ul>
+                            <li><strong>Browser DevTools:</strong> Network tab to inspect WebSocket frames</li>
+                            <li><strong>Burp Suite:</strong> WebSocket message interception and modification</li>
+                            <li><strong>wscat:</strong> Command-line WebSocket client</li>
+                            <li><strong>WebSocket King:</strong> Browser extension for WebSocket testing</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Challenge Info Modal -->
+<div class="modal fade" id="challengeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Command Injection Level 14 - Challenge Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Objective:</h6>
+                <p>Exploit command injection through WebSocket messages in a real-time monitoring system.</p>
+                
+                <h6>Scenario:</h6>
+                <p>You're testing a modern infrastructure monitoring platform that uses WebSockets for real-time communication. The system processes JSON messages containing monitoring commands and executes them to provide live system information.</p>
+                
+                <h6>Learning Goals:</h6>
+                <ul>
+                    <li>Understand command injection in WebSocket communications</li>
+                    <li>Learn about real-time application vulnerabilities</li>
+                    <li>Practice JSON-based payload construction for WebSockets</li>
+                    <li>Explore modern real-time system security</li>
+                </ul>
+                
+                <h6>Modern Technology Context:</h6>
+                <p>This challenge represents vulnerabilities in:</p>
+                <ul>
+                    <li>Real-time monitoring dashboards</li>
+                    <li>Live chat applications</li>
+                    <li>Gaming platforms with real-time features</li>
+                    <li>Collaborative tools (like Google Docs, Slack)</li>
+                    <li>IoT device management platforms</li>
+                    <li>Financial trading platforms</li>
+                </ul>
+                
+                <h6>WebSocket Security Considerations:</h6>
+                <ul>
+                    <li>WebSocket messages bypass traditional HTTP security controls</li>
+                    <li>Real-time nature makes detection more difficult</li>
+                    <li>JSON message processing often lacks proper validation</li>
+                    <li>Persistent connections can be exploited for sustained attacks</li>
+                </ul>
+                
+                <h6>Hints:</h6>
+                <ul>
+                    <li>Inject commands within JSON message values</li>
+                    <li>Try system monitoring commands like 'ps' or 'netstat'</li>
+                    <li>Use command separators within JSON string values</li>
+                    <li>Test different JSON fields for injection opportunities</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

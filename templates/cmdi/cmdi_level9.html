@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Command Injection Level 9 - JSON API Injection{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3><i class="bi bi-terminal me-2"></i>Command Injection Level 9</h3>
+                    <div>
+                        <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#challengeModal">
+                            <i class="bi bi-info-circle me-1"></i>Challenge Info
+                        </button>
+                        <a href="{{ url_for('solutions', level='cmdi9') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-lightbulb me-1"></i>Solution
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box mb-4">
+                        <h5><i class="bi bi-gear me-2"></i>CI/CD Automation Platform</h5>
+                        <p>You're testing a modern CI/CD automation platform that accepts JSON configuration for build processes. The system processes JSON parameters to execute build commands.</p>
+                        <p><strong>Context:</strong> DevOps automation and continuous integration platform</p>
+                    </div>
+
+                    {% if flag %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-flag-fill me-2"></i><strong>Challenge Completed!</strong>
+                        <br>Flag: <code>{{ flag }}</code>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" class="mb-4">
+                        <div class="mb-3">
+                            <label for="build_config" class="form-label">Build Configuration (JSON):</label>
+                            <textarea class="form-control" id="build_config" name="build_config" rows="6" 
+                                      placeholder='{"branch": "main", "environment": "production"}'>{{ build_config }}</textarea>
+                            <div class="form-text">Enter JSON configuration for the build process.</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-play me-2"></i>Start Build
+                        </button>
+                    </form>
+
+                    {% if build_result %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h6><i class="bi bi-terminal me-2"></i>Build Output</h6>
+                        </div>
+                        <div class="card-body">
+                            <pre class="command-output">{{ build_result }}</pre>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="mt-4">
+                        <h6>JSON Injection Tips:</h6>
+                        <ul>
+                            <li>Inject commands in JSON string values</li>
+                            <li>Try: <code>{"branch": "main; uname", "environment": "production"}</code></li>
+                            <li>Use command separators within JSON values</li>
+                            <li>Test different JSON fields for injection points</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Challenge Info Modal -->
+<div class="modal fade" id="challengeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Command Injection Level 9 - Challenge Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Objective:</h6>
+                <p>Exploit command injection through JSON API parameters in a CI/CD platform.</p>
+                
+                <h6>Scenario:</h6>
+                <p>You're testing a modern DevOps automation platform that processes JSON configuration for build processes. The application parses JSON and uses values in system commands without proper validation.</p>
+                
+                <h6>Learning Goals:</h6>
+                <ul>
+                    <li>Understand command injection in JSON APIs</li>
+                    <li>Learn to exploit modern CI/CD platforms</li>
+                    <li>Practice JSON-based payload construction</li>
+                    <li>Explore DevOps security vulnerabilities</li>
+                </ul>
+                
+                <h6>Modern Context:</h6>
+                <p>This challenge simulates vulnerabilities commonly found in modern DevOps tools like Jenkins, GitLab CI, GitHub Actions, and other automation platforms that process user-provided configuration.</p>
+                
+                <h6>Hints:</h6>
+                <ul>
+                    <li>Inject commands within JSON string values</li>
+                    <li>Try system information commands like 'uname'</li>
+                    <li>Use command separators (;, &, |) within JSON values</li>
+                    <li>Test different JSON fields for injection opportunities</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

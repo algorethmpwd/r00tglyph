@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Command Injection Level 1 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Command Injection Level 1 Solution: Basic Command Injection</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    This page explains how to solve the Basic Command Injection challenge.
+                </div>
+                
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This challenge features a basic command injection vulnerability in a ping utility. The application takes user input (an IP address) and passes it directly to a system command without proper sanitization.
+                </p>
+                <p>
+                    The vulnerability occurs because the application likely constructs a command like this on the server:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>ping [user_input]</code></pre>
+                <p>
+                    When user input is directly included in a system command without proper validation or sanitization, attackers can inject additional commands using shell metacharacters like semicolons (;), pipes (|), or ampersands (&).
+                </p>
+                
+                <h3>Solution</h3>
+                <p>To solve this challenge, you can use command injection to read the flag.txt file:</p>
+                
+                <h4>1. Using semicolon (;) to execute multiple commands:</h4>
+                <div class="alert alert-secondary">
+                    <code>127.0.0.1; cat flag.txt</code>
+                </div>
+                <p>
+                    This input will cause the server to execute two commands:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>ping 127.0.0.1
+cat flag.txt</code></pre>
+                <p>
+                    The first command pings the localhost, and the second command reads the contents of flag.txt.
+                </p>
+                
+                <h4>2. Using pipe (|) to chain commands:</h4>
+                <div class="alert alert-secondary">
+                    <code>127.0.0.1 | cat flag.txt</code>
+                </div>
+                
+                <h4>3. Using AND operator (&&) to execute commands sequentially:</h4>
+                <div class="alert alert-secondary">
+                    <code>127.0.0.1 && cat flag.txt</code>
+                </div>
+                
+                <h3>Prevention</h3>
+                <p>
+                    To prevent command injection vulnerabilities, developers should:
+                </p>
+                <ol>
+                    <li><strong>Avoid using system commands</strong> when possible. Use language-specific functions instead.</li>
+                    <li><strong>Validate user input</strong> strictly. For a ping utility, only allow valid IP addresses or hostnames.</li>
+                    <li><strong>Use parameterized APIs</strong> that separate commands from arguments.</li>
+                    <li><strong>Implement a whitelist</strong> of allowed characters and reject input containing anything else.</li>
+                    <li><strong>Run commands with minimal privileges</strong> to limit the impact of successful attacks.</li>
+                </ol>
+                
+                <h3>Real-World Impact</h3>
+                <p>
+                    Command injection vulnerabilities continue to be discovered in real-world applications. In 2023, several high-profile cases included:
+                </p>
+                <ul>
+                    <li>A network monitoring tool that allowed attackers to execute arbitrary commands through a vulnerable ping feature</li>
+                    <li>An IoT device management platform where command injection in the device name field led to remote code execution</li>
+                    <li>A cloud infrastructure tool where command injection in API parameters allowed attackers to access sensitive data</li>
+                </ul>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('cmdi_level1') }}" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

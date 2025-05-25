@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: Command Injection in SSH Commands - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Solution: Command Injection in SSH Commands</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <strong>Challenge:</strong> Exploit command injection vulnerabilities in a remote SSH command execution platform.
+                </div>
+
+                <h3 class="mt-4">Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates command injection in an enterprise server management platform that executes SSH commands on remote production servers. The system processes user-provided commands and executes them remotely without proper input validation.
+                </p>
+
+                <h3 class="mt-4">Solution Steps</h3>
+                <ol>
+                    <li>
+                        <p><strong>Test basic injection:</strong> Try basic command injection in SSH command field.</p>
+                        <pre class="bg-light p-3 rounded"><code>systemctl status nginx; whoami</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Use command chaining:</strong> Chain multiple commands for better results.</p>
+                        <pre class="bg-light p-3 rounded"><code>systemctl status nginx && id</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Test host parameter:</strong> Try injection in the host parameter as well.</p>
+                        <pre class="bg-light p-3 rounded"><code>production-server.company.com; whoami</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Use Burp Suite:</strong> Intercept requests and modify parameters.</p>
+                        <p>Use Burp Suite to intercept the HTTP request and modify both host and command parameters.</p>
+                    </li>
+                </ol>
+
+                <h3 class="mt-4">SSH Command Payloads</h3>
+                <ul>
+                    <li><code>systemctl status nginx; whoami</code> - Command chaining with semicolon</li>
+                    <li><code>systemctl status nginx && id</code> - Conditional execution</li>
+                    <li><code>systemctl status nginx | whoami</code> - Pipe operator</li>
+                    <li><code>systemctl status nginx & id</code> - Background execution</li>
+                    <li><code>systemctl status $(whoami)</code> - Command substitution</li>
+                </ul>
+
+                <h3 class="mt-4">Burp Suite Testing</h3>
+                <p>Steps to test with Burp Suite:</p>
+                <ol>
+                    <li>Configure browser to use Burp proxy</li>
+                    <li>Submit a normal request through the web interface</li>
+                    <li>Intercept the request in Burp Suite</li>
+                    <li>Modify the command parameter: <code>systemctl status nginx; whoami</code></li>
+                    <li>Forward the modified request</li>
+                    <li>Observe the response for command execution evidence</li>
+                </ol>
+
+                <h3 class="mt-4">Enterprise Management Context</h3>
+                <p>SSH command injection vulnerabilities are common in:</p>
+                <ul>
+                    <li>Server management platforms</li>
+                    <li>DevOps automation tools</li>
+                    <li>Cloud infrastructure management</li>
+                    <li>Remote administration interfaces</li>
+                </ul>
+
+                <h3 class="mt-4">Management Tools</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Enterprise Tools:</h6>
+                        <ul>
+                            <li>Ansible</li>
+                            <li>Puppet</li>
+                            <li>Chef</li>
+                            <li>SaltStack</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Cloud Platforms:</h6>
+                        <ul>
+                            <li>AWS Systems Manager</li>
+                            <li>Azure Run Command</li>
+                            <li>GCP Compute Engine</li>
+                            <li>DigitalOcean Droplets</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3 class="mt-4">Security Tool Integration</h3>
+                <p>Professional testing tools for this challenge:</p>
+                <ul>
+                    <li><strong>Burp Suite Professional:</strong> Advanced request manipulation</li>
+                    <li><strong>OWASP ZAP:</strong> Automated security scanning</li>
+                    <li><strong>Custom Scripts:</strong> Automated command injection testing</li>
+                    <li><strong>Postman:</strong> API testing and manipulation</li>
+                </ul>
+
+                <h3 class="mt-4">Prevention</h3>
+                <ol>
+                    <li><strong>Input Validation:</strong> Validate all SSH command parameters</li>
+                    <li><strong>Command Allowlisting:</strong> Only allow specific, predefined commands</li>
+                    <li><strong>Parameterized Commands:</strong> Use parameterized command execution</li>
+                    <li><strong>Least Privilege:</strong> Run SSH commands with minimal privileges</li>
+                </ol>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('cmdi_level22') }}" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end"><i class="bi bi-list me-2"></i>All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

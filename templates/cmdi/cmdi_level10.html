@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Command Injection Level 10 - Environment Variables{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3><i class="bi bi-terminal me-2"></i>Command Injection Level 10</h3>
+                    <div>
+                        <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#challengeModal">
+                            <i class="bi bi-info-circle me-1"></i>Challenge Info
+                        </button>
+                        <a href="{{ url_for('solutions', level='cmdi10') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-lightbulb me-1"></i>Solution
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box mb-4">
+                        <h5><i class="bi bi-box me-2"></i>Container Deployment Platform</h5>
+                        <p>You're testing a containerized application deployment platform that allows setting environment variables for deployed applications. The system processes environment variables during container initialization.</p>
+                        <p><strong>Context:</strong> Modern container orchestration and deployment system</p>
+                    </div>
+
+                    {% if flag %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-flag-fill me-2"></i><strong>Challenge Completed!</strong>
+                        <br>Flag: <code>{{ flag }}</code>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" class="mb-4">
+                        <div class="mb-3">
+                            <label for="app_name" class="form-label">Application Name:</label>
+                            <input type="text" class="form-control" id="app_name" name="app_name" 
+                                   value="{{ app_name }}" placeholder="Enter application name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="env_vars" class="form-label">Environment Variables:</label>
+                            <textarea class="form-control" id="env_vars" name="env_vars" rows="4" 
+                                      placeholder="KEY1=value1&#10;KEY2=value2">{{ env_vars }}</textarea>
+                            <div class="form-text">Enter environment variables in KEY=value format, one per line.</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-box-arrow-up me-2"></i>Deploy Application
+                        </button>
+                    </form>
+
+                    {% if deploy_result %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h6><i class="bi bi-terminal me-2"></i>Deployment Output</h6>
+                        </div>
+                        <div class="card-body">
+                            <pre class="command-output">{{ deploy_result }}</pre>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="mt-4">
+                        <h6>Environment Variable Injection Tips:</h6>
+                        <ul>
+                            <li>Inject commands in environment variable values</li>
+                            <li>Try: <code>PATH=/usr/bin; whoami</code></li>
+                            <li>Use command substitution: <code>VAR=$(whoami)</code></li>
+                            <li>Test different environment variable names</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Challenge Info Modal -->
+<div class="modal fade" id="challengeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Command Injection Level 10 - Challenge Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Objective:</h6>
+                <p>Exploit command injection through environment variables in a container deployment platform.</p>
+                
+                <h6>Scenario:</h6>
+                <p>You're testing a modern container orchestration platform that allows users to set environment variables for deployed applications. The system processes these variables during container initialization, creating an opportunity for command injection.</p>
+                
+                <h6>Learning Goals:</h6>
+                <ul>
+                    <li>Understand command injection via environment variables</li>
+                    <li>Learn about container security vulnerabilities</li>
+                    <li>Practice exploitation in containerized environments</li>
+                    <li>Explore modern deployment platform security</li>
+                </ul>
+                
+                <h6>Modern Context:</h6>
+                <p>This challenge simulates vulnerabilities in platforms like Docker, Kubernetes, AWS ECS, and other container orchestration systems where environment variables are processed during deployment.</p>
+                
+                <h6>Hints:</h6>
+                <ul>
+                    <li>Inject commands in environment variable values</li>
+                    <li>Try commands like 'whoami' or 'id' to identify the execution context</li>
+                    <li>Use command separators within environment variable values</li>
+                    <li>Consider how environment variables are processed during container startup</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

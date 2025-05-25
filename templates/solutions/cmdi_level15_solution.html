@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: Command Injection in Serverless Functions - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Solution: Command Injection in Serverless Functions</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <strong>Challenge:</strong> Exploit command injection in an AWS Lambda function deployment platform.
+                </div>
+
+                <h3 class="mt-4">Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates command injection in a serverless function deployment platform. The system processes function code and configuration, potentially allowing command injection through deployment parameters.
+                </p>
+
+                <h3 class="mt-4">Solution Steps</h3>
+                <ol>
+                    <li>
+                        <p><strong>Analyze function configuration:</strong> The deployment platform accepts function code and runtime configuration.</p>
+                    </li>
+                    <li>
+                        <p><strong>Inject commands in function code:</strong> Try injecting commands in the function code itself.</p>
+                        <pre class="bg-light p-3 rounded"><code>import os; os.system('whoami')</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Test environment variables:</strong> Try injection in environment variable values.</p>
+                        <pre class="bg-light p-3 rounded"><code>ENV_VAR=value; whoami</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Use runtime-specific injection:</strong> Leverage runtime-specific command execution.</p>
+                        <pre class="bg-light p-3 rounded"><code>import subprocess; subprocess.run(['id'])</code></pre>
+                    </li>
+                </ol>
+
+                <h3 class="mt-4">Alternative Payloads</h3>
+                <ul>
+                    <li><code>import os; os.system('whoami')</code> - Direct system call</li>
+                    <li><code>import subprocess; subprocess.run(['id'])</code> - Subprocess execution</li>
+                    <li><code>__import__('os').system('hostname')</code> - Dynamic import</li>
+                    <li><code>ENV_VAR=value; whoami</code> - Environment variable injection</li>
+                </ul>
+
+                <h3 class="mt-4">Serverless Security Context</h3>
+                <p>Serverless functions present unique security challenges:</p>
+                <ul>
+                    <li>Limited runtime environment visibility</li>
+                    <li>Shared execution environments</li>
+                    <li>Cold start vulnerabilities</li>
+                    <li>Event-driven attack vectors</li>
+                </ul>
+
+                <h3 class="mt-4">Cloud Platforms</h3>
+                <ul>
+                    <li>AWS Lambda</li>
+                    <li>Azure Functions</li>
+                    <li>Google Cloud Functions</li>
+                    <li>Vercel Functions</li>
+                </ul>
+
+                <h3 class="mt-4">Prevention</h3>
+                <ol>
+                    <li><strong>Code Analysis:</strong> Analyze function code for dangerous patterns</li>
+                    <li><strong>Runtime Restrictions:</strong> Implement runtime security controls</li>
+                    <li><strong>Environment Isolation:</strong> Isolate function execution environments</li>
+                    <li><strong>Input Validation:</strong> Validate all function inputs and configurations</li>
+                </ol>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('cmdi_level15') }}" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end"><i class="bi bi-list me-2"></i>All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

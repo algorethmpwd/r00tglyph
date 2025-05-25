@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: Command Injection in WebSocket Connections - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Solution: Command Injection in WebSocket Connections</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <strong>Challenge:</strong> Exploit command injection through WebSocket messages in a real-time monitoring system.
+                </div>
+
+                <h3 class="mt-4">Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates command injection in a WebSocket-based real-time monitoring system. The system processes WebSocket messages and executes commands based on message content without proper validation.
+                </p>
+
+                <h3 class="mt-4">Solution Steps</h3>
+                <ol>
+                    <li>
+                        <p><strong>Connect to WebSocket:</strong> Establish a WebSocket connection to the monitoring system.</p>
+                    </li>
+                    <li>
+                        <p><strong>Send malicious messages:</strong> Try injecting commands in WebSocket message payloads.</p>
+                        <pre class="bg-light p-3 rounded"><code>{"action": "monitor", "target": "server1; whoami"}</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Test different message fields:</strong> Try injection in various message parameters.</p>
+                        <pre class="bg-light p-3 rounded"><code>{"action": "status && id", "target": "server1"}</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Use real-time injection:</strong> Send multiple messages to exploit the real-time nature.</p>
+                        <pre class="bg-light p-3 rounded"><code>{"action": "monitor", "command": "ps | whoami"}</code></pre>
+                    </li>
+                </ol>
+
+                <h3 class="mt-4">WebSocket Testing Tools</h3>
+                <p>Use these tools to test WebSocket vulnerabilities:</p>
+                <ul>
+                    <li><strong>Burp Suite:</strong> WebSocket testing capabilities</li>
+                    <li><strong>wscat:</strong> Command-line WebSocket client</li>
+                    <li><strong>Browser DevTools:</strong> Built-in WebSocket debugging</li>
+                    <li><strong>Custom scripts:</strong> Python websocket-client library</li>
+                </ul>
+
+                <h3 class="mt-4">Alternative Payloads</h3>
+                <ul>
+                    <li><code>{"action": "monitor", "target": "server1; whoami"}</code></li>
+                    <li><code>{"action": "status && id", "target": "server1"}</code></li>
+                    <li><code>{"command": "ps | whoami", "target": "server1"}</code></li>
+                    <li><code>{"action": "monitor", "params": "$(whoami)"}</code></li>
+                </ul>
+
+                <h3 class="mt-4">Real-Time System Context</h3>
+                <p>WebSocket vulnerabilities are common in:</p>
+                <ul>
+                    <li>Real-time monitoring dashboards</li>
+                    <li>Chat applications</li>
+                    <li>Live data streaming systems</li>
+                    <li>IoT device management platforms</li>
+                </ul>
+
+                <h3 class="mt-4">Prevention</h3>
+                <ol>
+                    <li><strong>Message Validation:</strong> Validate all WebSocket message content</li>
+                    <li><strong>Input Sanitization:</strong> Sanitize all message parameters</li>
+                    <li><strong>Authentication:</strong> Implement proper WebSocket authentication</li>
+                    <li><strong>Rate Limiting:</strong> Implement message rate limiting</li>
+                </ol>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('cmdi_level14') }}" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end"><i class="bi bi-list me-2"></i>All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

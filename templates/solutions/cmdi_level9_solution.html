@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: Command Injection in JSON APIs - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Solution: Command Injection in JSON APIs</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <strong>Challenge:</strong> Exploit command injection through JSON API parameters in a CI/CD automation platform.
+                </div>
+
+                <h3 class="mt-4">Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates command injection in a CI/CD automation platform that processes JSON build configurations. The system executes commands based on JSON parameters without proper validation.
+                </p>
+
+                <h3 class="mt-4">Solution Steps</h3>
+                <ol>
+                    <li>
+                        <p><strong>Analyze the JSON structure:</strong> The build configuration accepts parameters like branch, environment, etc.</p>
+                    </li>
+                    <li>
+                        <p><strong>Inject commands in JSON values:</strong> Try injecting commands in various JSON fields.</p>
+                        <pre class="bg-light p-3 rounded"><code>{"branch": "main; whoami", "environment": "production"}</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Test different JSON fields:</strong> Try injection in multiple fields.</p>
+                        <pre class="bg-light p-3 rounded"><code>{"branch": "main", "environment": "production; id"}</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Use command chaining:</strong> Chain multiple commands for better results.</p>
+                        <pre class="bg-light p-3 rounded"><code>{"branch": "main && uname -a", "environment": "production"}</code></pre>
+                    </li>
+                </ol>
+
+                <h3 class="mt-4">Alternative Payloads</h3>
+                <ul>
+                    <li><code>{"branch": "main; whoami", "environment": "production"}</code></li>
+                    <li><code>{"branch": "main", "environment": "prod && id"}</code></li>
+                    <li><code>{"branch": "main | whoami", "environment": "production"}</code></li>
+                    <li><code>{"branch": "main", "environment": "$(whoami)"}</code></li>
+                </ul>
+
+                <h3 class="mt-4">Modern CI/CD Context</h3>
+                <p>This vulnerability is common in:</p>
+                <ul>
+                    <li>Jenkins build systems</li>
+                    <li>GitLab CI/CD pipelines</li>
+                    <li>GitHub Actions</li>
+                    <li>Azure DevOps</li>
+                </ul>
+
+                <h3 class="mt-4">Prevention</h3>
+                <ol>
+                    <li><strong>JSON Schema Validation:</strong> Validate JSON structure and content</li>
+                    <li><strong>Parameter Sanitization:</strong> Sanitize all JSON values</li>
+                    <li><strong>Allowlist Validation:</strong> Only allow specific values for parameters</li>
+                    <li><strong>Container Isolation:</strong> Run builds in isolated containers</li>
+                </ol>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('cmdi_level9') }}" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end"><i class="bi bi-list me-2"></i>All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

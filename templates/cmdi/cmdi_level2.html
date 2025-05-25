@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 2: Command Injection with Basic Filters - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        {% if cmdi_detected %}
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>Success!</strong> You've successfully bypassed the filters and exploited the command injection vulnerability! The challenge has been marked as completed.
+            {% if flag %}
+            <div class="mt-2">
+                <strong>Flag:</strong> <code>{{ flag }}</code>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if waf_blocked %}
+        <div class="alert alert-danger">
+            <i class="bi bi-shield-exclamation me-2"></i>
+            <strong>WAF Alert!</strong> {{ dns_result }}
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 2: Command Injection with Basic Filters</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>DNSLookup</strong>, a fictional DNS lookup tool! This challenge simulates a real-world scenario where a DNS lookup utility is vulnerable to command injection, but has basic security filters in place.
+                    </p>
+                    <p>
+                        The developers of DNSLookup have implemented basic security filters to prevent command injection attacks. However, their filtering is incomplete and can be bypassed.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Bypass the security filters and exploit the command injection vulnerability to read the contents of the flag.txt file on the server.
+                    </p>
+
+                    <div class="alert alert-warning">
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> The application blocks obvious command injection characters like semicolons and pipes, but there are other ways to execute commands.
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h5><i class="bi bi-info-circle-fill me-2"></i>Additional Hints</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>
+                                When basic command injection characters are blocked, consider alternative techniques:
+                            </p>
+                            <ul>
+                                <li>Command substitution using $() or ``</li>
+                                <li>Environment variables like $IFS for spaces</li>
+                                <li>Bash parameter expansion ${...}</li>
+                                <li>URL encoding to bypass filters</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-globe me-2"></i>DNS Lookup Tool</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('cmdi_level2') }}" method="post">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">Domain</span>
+                                <input type="text" class="form-control" name="domain" placeholder="Enter domain (e.g., example.com)" value="{{ domain }}">
+                                <button class="btn btn-primary" type="submit">Lookup</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {% if dns_result and not waf_blocked %}
+                <div class="card mb-4">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>DNS Lookup Results</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded"><code>{{ dns_result }}</code></pre>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            Many applications implement basic security filters to prevent command injection attacks. These filters often block obvious command injection characters like semicolons (;), pipes (|), and ampersands (&).
+                        </p>
+                        <p>
+                            However, these filters are often incomplete and can be bypassed using alternative techniques. In 2023, researchers found that:
+                        </p>
+                        <ul>
+                            <li>Over 60% of WAF bypass techniques use environment variables</li>
+                            <li>Command substitution using $() or `` is often overlooked</li>
+                            <li>String concatenation and variable expansion can bypass filters</li>
+                        </ul>
+                    </div>
+                </div>
+
+
+
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level='cmdi2') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

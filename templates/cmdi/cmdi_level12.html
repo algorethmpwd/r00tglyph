@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Command Injection Level 12 - Nmap Integration{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3><i class="bi bi-terminal me-2"></i>Command Injection Level 12</h3>
+                    <div>
+                        <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#challengeModal">
+                            <i class="bi bi-info-circle me-1"></i>Challenge Info
+                        </button>
+                        <a href="{{ url_for('solutions', level='cmdi12') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-lightbulb me-1"></i>Solution
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box mb-4">
+                        <h5><i class="bi bi-shield-check me-2"></i>Security Scanning Platform</h5>
+                        <p>You're testing a security scanning platform that integrates with Nmap for network reconnaissance. The system allows users to specify scan targets and options for automated security assessments.</p>
+                        <p><strong>Context:</strong> Enterprise security assessment and vulnerability scanning platform</p>
+                        <p><strong>Tools Required:</strong> Understanding of Nmap command-line options and network scanning</p>
+                    </div>
+
+                    {% if flag %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-flag-fill me-2"></i><strong>Challenge Completed!</strong>
+                        <br>Flag: <code>{{ flag }}</code>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" class="mb-4">
+                        <div class="mb-3">
+                            <label for="target_network" class="form-label">Target Network/Host:</label>
+                            <input type="text" class="form-control" id="target_network" name="target_network" 
+                                   value="{{ target_network }}" placeholder="192.168.1.0/24 or example.com">
+                            <div class="form-text">Enter the target network or host for scanning.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="scan_options" class="form-label">Nmap Scan Options:</label>
+                            <input type="text" class="form-control" id="scan_options" name="scan_options" 
+                                   value="{{ scan_options }}" placeholder="-sS -O -A">
+                            <div class="form-text">Specify Nmap command-line options for the scan.</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search me-2"></i>Start Nmap Scan
+                        </button>
+                    </form>
+
+                    {% if nmap_result %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h6><i class="bi bi-terminal me-2"></i>Nmap Scan Results</h6>
+                        </div>
+                        <div class="card-body">
+                            <pre class="command-output">{{ nmap_result }}</pre>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="mt-4">
+                        <h6>Nmap Command Injection Tips:</h6>
+                        <ul>
+                            <li>Inject commands in target or options fields</li>
+                            <li>Try: <code>192.168.1.1; uname -a</code></li>
+                            <li>Use command separators with Nmap options</li>
+                            <li>Example: <code>-sS; whoami</code></li>
+                        </ul>
+                        
+                        <h6>Common Nmap Options:</h6>
+                        <ul>
+                            <li><code>-sS</code> - TCP SYN scan</li>
+                            <li><code>-sU</code> - UDP scan</li>
+                            <li><code>-O</code> - OS detection</li>
+                            <li><code>-A</code> - Aggressive scan</li>
+                            <li><code>-p</code> - Port specification</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Challenge Info Modal -->
+<div class="modal fade" id="challengeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Command Injection Level 12 - Challenge Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Objective:</h6>
+                <p>Exploit command injection in a security scanning platform that integrates with Nmap.</p>
+                
+                <h6>Scenario:</h6>
+                <p>You're testing an enterprise security assessment platform that allows users to configure and execute Nmap scans. The application constructs Nmap commands using user input without proper validation, creating opportunities for command injection.</p>
+                
+                <h6>Learning Goals:</h6>
+                <ul>
+                    <li>Understand command injection in security tools</li>
+                    <li>Learn about Nmap integration vulnerabilities</li>
+                    <li>Practice exploitation in security assessment platforms</li>
+                    <li>Explore enterprise security tool weaknesses</li>
+                </ul>
+                
+                <h6>Real-World Context:</h6>
+                <p>This challenge simulates vulnerabilities found in:</p>
+                <ul>
+                    <li>Enterprise vulnerability scanners</li>
+                    <li>Security assessment platforms</li>
+                    <li>Network monitoring tools</li>
+                    <li>Penetration testing frameworks</li>
+                </ul>
+                
+                <h6>Tools Integration:</h6>
+                <p><strong>Nmap</strong> - Network discovery and security auditing tool commonly integrated into security platforms for automated scanning and reconnaissance.</p>
+                
+                <h6>Hints:</h6>
+                <ul>
+                    <li>Inject commands in both target and options fields</li>
+                    <li>Try system information commands like 'uname'</li>
+                    <li>Use command separators (;, &, |) with Nmap parameters</li>
+                    <li>Consider how the application constructs the Nmap command</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

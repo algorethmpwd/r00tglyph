@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Command Injection Level 15 - Serverless Functions{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3><i class="bi bi-terminal me-2"></i>Command Injection Level 15</h3>
+                    <div>
+                        <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#challengeModal">
+                            <i class="bi bi-info-circle me-1"></i>Challenge Info
+                        </button>
+                        <a href="{{ url_for('solutions', level='cmdi15') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-lightbulb me-1"></i>Solution
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box mb-4">
+                        <h5><i class="bi bi-cloud me-2"></i>AWS Lambda Function Platform</h5>
+                        <p>You're testing a serverless computing platform that processes AWS Lambda function payloads. The system executes functions based on JSON event data, potentially allowing command injection through function parameters.</p>
+                        <p><strong>Context:</strong> Modern serverless computing and cloud functions</p>
+                        <p><strong>Technology:</strong> AWS Lambda, serverless architecture, event-driven computing</p>
+                    </div>
+
+                    {% if flag %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-flag-fill me-2"></i><strong>Challenge Completed!</strong>
+                        <br>Flag: <code>{{ flag }}</code>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" class="mb-4">
+                        <div class="mb-3">
+                            <label for="function_payload" class="form-label">Lambda Function Payload (JSON):</label>
+                            <textarea class="form-control" id="function_payload" name="function_payload" rows="6" 
+                                      style="font-family: monospace;">{{ function_payload }}</textarea>
+                            <div class="form-text">Enter JSON payload for Lambda function execution.</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-cloud-arrow-up me-2"></i>Execute Lambda Function
+                        </button>
+                    </form>
+
+                    {% if lambda_result %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h6><i class="bi bi-terminal me-2"></i>Lambda Execution Output</h6>
+                        </div>
+                        <div class="card-body">
+                            <pre class="command-output">{{ lambda_result }}</pre>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="mt-4">
+                        <h6>Serverless Injection Techniques:</h6>
+                        <ul>
+                            <li>Inject commands in JSON payload values</li>
+                            <li>Try: <code>{"event": "process_data", "input": "file.txt; env", "options": "--format json"}</code></li>
+                            <li>Exploit function environment variables</li>
+                            <li>Use serverless-specific attack vectors</li>
+                        </ul>
+                        
+                        <h6>Serverless Security Context:</h6>
+                        <p>Serverless functions are increasingly popular for scalable, event-driven applications. This challenge explores vulnerabilities in serverless environments where function inputs can lead to command injection.</p>
+                        
+                        <h6>Real-World Serverless Platforms:</h6>
+                        <ul>
+                            <li><strong>AWS Lambda:</strong> Amazon's serverless compute service</li>
+                            <li><strong>Google Cloud Functions:</strong> Google's serverless platform</li>
+                            <li><strong>Azure Functions:</strong> Microsoft's serverless offering</li>
+                            <li><strong>Vercel Functions:</strong> Edge computing functions</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Challenge Info Modal -->
+<div class="modal fade" id="challengeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Command Injection Level 15 - Challenge Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Objective:</h6>
+                <p>Exploit command injection vulnerabilities in a serverless function platform.</p>
+                
+                <h6>Scenario:</h6>
+                <p>You're testing an AWS Lambda-based serverless platform that processes JSON event payloads. The system executes functions based on user-provided data, but lacks proper input validation, creating opportunities for command injection.</p>
+                
+                <h6>Learning Goals:</h6>
+                <ul>
+                    <li>Understand serverless security vulnerabilities</li>
+                    <li>Learn about command injection in cloud functions</li>
+                    <li>Practice JSON payload manipulation</li>
+                    <li>Explore cloud-native security concepts</li>
+                </ul>
+                
+                <h6>Serverless Security Considerations:</h6>
+                <ul>
+                    <li>Function isolation and sandboxing</li>
+                    <li>Environment variable exposure</li>
+                    <li>Cold start vulnerabilities</li>
+                    <li>Event source validation</li>
+                </ul>
+                
+                <h6>Modern Context:</h6>
+                <p>This challenge represents vulnerabilities in:</p>
+                <ul>
+                    <li>Microservices architectures</li>
+                    <li>Event-driven applications</li>
+                    <li>API gateways and serverless backends</li>
+                    <li>Cloud-native applications</li>
+                </ul>
+                
+                <h6>Hints:</h6>
+                <ul>
+                    <li>Inject commands in JSON payload values</li>
+                    <li>Try accessing environment variables with 'env' or 'printenv'</li>
+                    <li>Use command separators within JSON strings</li>
+                    <li>Test different payload fields for injection opportunities</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

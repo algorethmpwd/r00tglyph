@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: Advanced Shell Features Command Injection - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Solution: Advanced Shell Features Command Injection</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <strong>Challenge:</strong> Exploit command injection using advanced shell features like process substitution and parameter expansion.
+                </div>
+
+                <h3 class="mt-4">Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates command injection using advanced shell features. The system processes shell commands with sophisticated parsing, allowing exploitation through process substitution, parameter expansion, and other advanced shell constructs.
+                </p>
+
+                <h3 class="mt-4">Solution Steps</h3>
+                <ol>
+                    <li>
+                        <p><strong>Test basic injection:</strong> Start with simple command injection to confirm vulnerability.</p>
+                        <pre class="bg-light p-3 rounded"><code>test; whoami</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Use process substitution:</strong> Try process substitution for command execution.</p>
+                        <pre class="bg-light p-3 rounded"><code>test <(whoami)</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Parameter expansion:</strong> Use parameter expansion techniques.</p>
+                        <pre class="bg-light p-3 rounded"><code>test ${USER:-$(whoami)}</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Advanced substitution:</strong> Combine multiple shell features.</p>
+                        <pre class="bg-light p-3 rounded"><code>test $(echo whoami | sh)</code></pre>
+                    </li>
+                </ol>
+
+                <h3 class="mt-4">Advanced Shell Techniques</h3>
+                <ul>
+                    <li><code>test <(whoami)</code> - Process substitution</li>
+                    <li><code>test ${USER:-$(whoami)}</code> - Parameter expansion with command substitution</li>
+                    <li><code>test $(($(whoami | wc -c)))</code> - Arithmetic expansion with command substitution</li>
+                    <li><code>test >(whoami)</code> - Output process substitution</li>
+                    <li><code>test ${!USER}</code> - Indirect parameter expansion</li>
+                </ul>
+
+                <h3 class="mt-4">Shell Feature Categories</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Substitution Types:</h6>
+                        <ul>
+                            <li>Command substitution: <code>$(cmd)</code></li>
+                            <li>Process substitution: <code><(cmd)</code></li>
+                            <li>Parameter expansion: <code>${var}</code></li>
+                            <li>Arithmetic expansion: <code>$((expr))</code></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Advanced Features:</h6>
+                        <ul>
+                            <li>Brace expansion: <code>{a,b,c}</code></li>
+                            <li>Tilde expansion: <code>~user</code></li>
+                            <li>Pathname expansion: <code>*.txt</code></li>
+                            <li>Quote removal</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3 class="mt-4">Real-World Context</h3>
+                <p>Advanced shell injection is found in:</p>
+                <ul>
+                    <li>Complex shell script processors</li>
+                    <li>Advanced configuration systems</li>
+                    <li>Template engines with shell integration</li>
+                    <li>DevOps automation tools</li>
+                </ul>
+
+                <h3 class="mt-4">Prevention</h3>
+                <ol>
+                    <li><strong>Avoid Shell Execution:</strong> Use language-specific APIs instead of shell commands</li>
+                    <li><strong>Strict Parsing:</strong> Implement strict input parsing and validation</li>
+                    <li><strong>Sandboxing:</strong> Execute commands in restricted environments</li>
+                    <li><strong>Feature Restriction:</strong> Disable advanced shell features when possible</li>
+                </ol>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('cmdi_level16') }}" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end"><i class="bi bi-list me-2"></i>All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

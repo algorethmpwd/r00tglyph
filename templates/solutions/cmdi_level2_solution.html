@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Command Injection Level 2 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Command Injection Level 2 Solution: Command Injection with Basic Filters</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    This page explains how to solve the Command Injection with Basic Filters challenge.
+                </div>
+                
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This challenge features a command injection vulnerability in a DNS lookup utility that has basic security filters in place. The application blocks obvious command injection characters like semicolons (;), pipes (|), and ampersands (&), but it doesn't block all possible injection techniques.
+                </p>
+                <p>
+                    The vulnerability occurs because the application likely constructs a command like this on the server:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>nslookup [user_input]</code></pre>
+                <p>
+                    While the application blocks obvious command injection characters, it fails to block other techniques like command substitution using $() or backticks (`).
+                </p>
+                
+                <h3>Solution</h3>
+                <p>To solve this challenge, you can use alternative command injection techniques to bypass the filters:</p>
+                
+                <h4>1. Using command substitution with $():</h4>
+                <div class="alert alert-secondary">
+                    <code>example.com$(cat flag.txt)</code>
+                </div>
+                <p>
+                    This input will cause the server to execute the command inside $() and include its output in the original command.
+                </p>
+                
+                <h4>2. Using backticks (`) for command substitution:</h4>
+                <div class="alert alert-secondary">
+                    <code>example.com`cat flag.txt`</code>
+                </div>
+                
+                <h4>3. Using Bash parameter expansion:</h4>
+                <div class="alert alert-secondary">
+                    <code>example.com$(cat${IFS}flag.txt)</code>
+                </div>
+                <p>
+                    This technique uses the $IFS environment variable (Internal Field Separator) to represent a space, bypassing filters that block spaces.
+                </p>
+                
+                <h3>Prevention</h3>
+                <p>
+                    To prevent command injection vulnerabilities with proper filtering:
+                </p>
+                <ol>
+                    <li><strong>Avoid using system commands</strong> when possible. Use language-specific functions instead.</li>
+                    <li><strong>Implement strict input validation</strong> using a whitelist approach, only allowing specific characters.</li>
+                    <li><strong>Use parameterized APIs</strong> that separate commands from arguments.</li>
+                    <li><strong>Consider using a library</strong> specifically designed for the task (e.g., a DNS resolution library) rather than calling system commands.</li>
+                    <li><strong>Implement context-aware output encoding</strong> to prevent injection in different contexts.</li>
+                </ol>
+                
+                <h3>Real-World Impact</h3>
+                <p>
+                    Filter bypass techniques are commonly used in real-world attacks. In 2023, security researchers found:
+                </p>
+                <ul>
+                    <li>A network security tool that blocked common injection characters but was vulnerable to command substitution</li>
+                    <li>A cloud management platform where attackers used environment variables to bypass filters</li>
+                    <li>An IoT management system where Bash parameter expansion was used to bypass security controls</li>
+                </ul>
+                
+                <h3>Advanced Techniques</h3>
+                <p>
+                    For more advanced filter bypasses, consider:
+                </p>
+                <ul>
+                    <li>Using environment variables: <code>${PATH:0:1}</code> (evaluates to "/")</li>
+                    <li>Brace expansion: <code>{cat,flag.txt}</code> (equivalent to "cat flag.txt" in Bash)</li>
+                    <li>URL encoding: <code>%0acat%20flag.txt</code> (newline followed by command)</li>
+                </ul>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('cmdi_level2') }}" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

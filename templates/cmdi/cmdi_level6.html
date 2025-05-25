@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 6: Command Injection via Environment Variables - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        {% if cmdi_detected %}
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>Success!</strong> You've successfully exploited the command injection vulnerability! The challenge has been marked as completed.
+            {% if flag %}
+            <div class="mt-2">
+                <strong>Flag:</strong> <code>{{ flag }}</code>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 6: Command Injection via Environment Variables</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>EnvConfig</strong>, a fictional environment configuration tool! This challenge simulates a real-world scenario where a system that uses environment variables is vulnerable to command injection.
+                    </p>
+                    <p>
+                        The developers of EnvConfig have created a tool that allows users to set environment variables for their applications. However, they've made a critical mistake in how they handle user input.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Exploit the command injection vulnerability in the environment variable processor to read the contents of the flag.txt file on the server.
+                    </p>
+
+                    <div class="alert alert-warning">
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> The application uses environment variables in commands. What happens if you include command injection characters in the environment variable value?
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h5><i class="bi bi-info-circle-fill me-2"></i>Additional Hints</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>
+                                When exploiting command injection via environment variables, consider:
+                            </p>
+                            <ul>
+                                <li>How environment variables might be used in system commands</li>
+                                <li>What command injection characters can be included in environment variable values</li>
+                                <li>How to craft environment variable values that will execute additional commands</li>
+                            </ul>
+                            <p>
+                                Try using command substitution techniques like <code>$(command)</code> or backticks.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-gear-fill me-2"></i>Environment Configuration Tool</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('cmdi_level6') }}" method="post">
+                            <div class="mb-3">
+                                <label for="command" class="form-label">Environment Variable Command</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">export APP_ENV=</span>
+                                    <input type="text" class="form-control" id="command" name="command" placeholder="Enter environment variable value (e.g., production)" value="{{ command }}">
+                                    <button class="btn btn-primary" type="submit">Set Environment</button>
+                                </div>
+                                <div class="form-text">Set the environment variable for the application.</div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {% if output %}
+                <div class="card mb-4">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Command Output</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded"><code>{{ output }}</code></pre>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            Command injection via environment variables is a web security vulnerability that allows an attacker to execute arbitrary operating system commands by manipulating environment variables that are used in system commands.
+                        </p>
+                        <p>
+                            In 2023-2024, this type of vulnerability remains a significant threat, especially in:
+                        </p>
+                        <ul>
+                            <li>DevOps automation tools</li>
+                            <li>Configuration management systems</li>
+                            <li>Containerized applications</li>
+                            <li>CI/CD pipelines</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level='cmdi6') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

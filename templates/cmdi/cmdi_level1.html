@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 1: Basic Command Injection - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        {% if cmdi_detected %}
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>Success!</strong> You've successfully exploited the command injection vulnerability! The challenge has been marked as completed.
+            {% if flag %}
+            <div class="mt-2">
+                <strong>Flag:</strong> <code>{{ flag }}</code>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 1: Basic Command Injection</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>NetTools</strong>, a fictional network administration tool! This challenge simulates a real-world scenario where a ping utility is vulnerable to command injection.
+                    </p>
+                    <p>
+                        The developers of NetTools have created a simple ping utility that allows users to check if a server is online. However, they've made a critical mistake in how they handle user input.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Exploit the command injection vulnerability to read the contents of the flag.txt file on the server.
+                    </p>
+
+                    <div class="alert alert-warning">
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Think about how the ping command might be executed on the server. What happens if you add additional commands?
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h5><i class="bi bi-info-circle-fill me-2"></i>Additional Hints</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>
+                                Command injection occurs when user input is directly passed to system commands. Think about how a ping command might be structured:
+                            </p>
+                            <pre class="bg-light p-3 rounded"><code>ping [user_input]</code></pre>
+                            <p>
+                                What happens if you can add additional commands? Consider:
+                            </p>
+                            <ul>
+                                <li>How can you use command separators like semicolons (;) or pipes (|)?</li>
+                                <li>What commands might help you read files on the system?</li>
+                                <li>How can you chain multiple commands together?</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-hdd-network-fill me-2"></i>Network Ping Tool</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('cmdi_level1') }}" method="post">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">IP Address</span>
+                                <input type="text" class="form-control" name="ip" placeholder="Enter IP address (e.g., 8.8.8.8)" value="{{ ip_address }}">
+                                <button class="btn btn-primary" type="submit">Ping</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {% if ping_result %}
+                <div class="card mb-4">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Ping Results</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded"><code>{{ ping_result }}</code></pre>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            Command injection is a web security vulnerability that allows an attacker to execute arbitrary operating system commands on the server that is running an application. It occurs when an application passes unsafe user-supplied data to a system shell.
+                        </p>
+                        <p>
+                            In 2023, command injection vulnerabilities remain a significant threat, especially in:
+                        </p>
+                        <ul>
+                            <li>Network administration tools</li>
+                            <li>DevOps automation platforms</li>
+                            <li>IoT device management interfaces</li>
+                            <li>Cloud infrastructure management tools</li>
+                        </ul>
+                    </div>
+                </div>
+
+
+
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level='cmdi1') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

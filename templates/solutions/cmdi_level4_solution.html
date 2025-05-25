@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}Command Injection Level 4 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Command Injection Level 4 Solution: Command Injection with Advanced WAF Bypass</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    This page explains how to solve the Command Injection with Advanced WAF Bypass challenge.
+                </div>
+                
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This challenge features a command injection vulnerability in a URL scanning tool that is protected by an advanced Web Application Firewall (WAF). The WAF blocks obvious command injection characters, common commands, and even spaces, but it can still be bypassed using sophisticated techniques.
+                </p>
+                <p>
+                    The vulnerability occurs because the application likely constructs a command like this on the server:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>curl [user_input]</code></pre>
+                <p>
+                    While the WAF blocks many injection techniques, it doesn't account for all possible bypass methods, particularly those involving environment variables, Bash parameter expansion, and URL encoding.
+                </p>
+                
+                <h3>Solution</h3>
+                <p>To solve this challenge, you need to use advanced WAF bypass techniques:</p>
+                
+                <h4>1. Using environment variables to bypass space filters:</h4>
+                <div class="alert alert-secondary">
+                    <code>example.com${IFS}cat${IFS}flag.txt</code>
+                </div>
+                <p>
+                    This technique uses the $IFS environment variable (Internal Field Separator) to represent a space, bypassing filters that block spaces.
+                </p>
+                
+                <h4>2. Using Bash parameter expansion to construct commands:</h4>
+                <div class="alert alert-secondary">
+                    <code>example.com${HOME:0:1}${HOME:0:1}cat${IFS}flag.txt</code>
+                </div>
+                <p>
+                    This technique uses Bash parameter expansion to construct characters that might be blocked. ${HOME:0:1} typically evaluates to "/".
+                </p>
+                
+                <h4>3. Using URL encoding to bypass pattern matching:</h4>
+                <div class="alert alert-secondary">
+                    <code>example.com%0acat%20flag.txt</code>
+                </div>
+                <p>
+                    This technique uses URL encoding to represent a newline (%0a) and a space (%20), which might bypass pattern matching in the WAF.
+                </p>
+                
+                <h4>4. Using Bash brace expansion:</h4>
+                <div class="alert alert-secondary">
+                    <code>example.com{,cat${IFS}flag.txt}</code>
+                </div>
+                
+                <h3>Prevention</h3>
+                <p>
+                    To prevent advanced WAF bypass techniques:
+                </p>
+                <ol>
+                    <li><strong>Avoid using system commands</strong> when possible. Use language-specific functions instead.</li>
+                    <li><strong>Implement context-aware input validation</strong> that understands the syntax of the command being executed.</li>
+                    <li><strong>Use a positive security model</strong> (whitelist) rather than a negative security model (blacklist).</li>
+                    <li><strong>Implement multiple layers of defense</strong>, including input validation, output encoding, and proper error handling.</li>
+                    <li><strong>Use a dedicated security library</strong> for WAF functionality rather than implementing it from scratch.</li>
+                    <li><strong>Keep WAF rules updated</strong> to address new bypass techniques.</li>
+                </ol>
+                
+                <h3>Real-World Impact</h3>
+                <p>
+                    Advanced WAF bypass techniques have been used in real-world attacks. In 2023, security researchers found:
+                </p>
+                <ul>
+                    <li>A cloud security service where attackers used environment variables to bypass WAF protections</li>
+                    <li>A web application firewall that was bypassed using Bash parameter expansion</li>
+                    <li>A security scanning tool where URL encoding was used to bypass pattern matching</li>
+                </ul>
+                
+                <h3>Advanced Techniques</h3>
+                <p>
+                    For even more advanced WAF bypasses, consider:
+                </p>
+                <ul>
+                    <li>Using multiple layers of encoding: <code>example.com$(echo -e "\x63\x61\x74\x20\x66\x6c\x61\x67\x2e\x74\x78\x74")</code></li>
+                    <li>Using alternative environment variables: <code>example.com${PATH:0:1}bin${PATH:0:1}cat${IFS}flag.txt</code></li>
+                    <li>Using Bash arithmetic expansion: <code>example.com$((1))cat${IFS}flag.txt</code></li>
+                </ul>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('cmdi_level4') }}" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

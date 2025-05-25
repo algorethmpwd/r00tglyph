@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 5: Command Injection in Cloud Functions - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        {% if cmdi_detected %}
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>Success!</strong> You've successfully exploited the command injection vulnerability in the cloud function! The challenge has been marked as completed.
+            {% if flag %}
+            <div class="mt-2">
+                <strong>Flag:</strong> <code>{{ flag }}</code>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 5: Command Injection in Cloud Functions</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>CloudExec</strong>, a fictional serverless function execution platform! This challenge simulates a real-world scenario where a cloud function execution platform is vulnerable to command injection.
+                    </p>
+                    <p>
+                        The developers of CloudExec have created a platform that allows users to execute serverless functions. However, they've made a critical mistake in how they handle function parameters.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Exploit the command injection vulnerability in the cloud function execution platform to read the contents of the flag.txt file on the server.
+                    </p>
+
+                    <div class="alert alert-warning">
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> The application passes function parameters to a system command. What happens if you include command injection characters in the parameters?
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h5><i class="bi bi-info-circle-fill me-2"></i>Additional Hints</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>
+                                When exploiting command injection in cloud functions, consider:
+                            </p>
+                            <ul>
+                                <li>How function parameters might be used in system commands</li>
+                                <li>What command injection characters can be included in JSON parameters</li>
+                                <li>How to craft parameters that will execute additional commands</li>
+                                <li>How to escape JSON strings to inject commands</li>
+                            </ul>
+                            <p>
+                                Try including command injection characters in the function parameters.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-cloud me-2"></i>Cloud Function Executor</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('cmdi_level5') }}" method="post">
+                            <div class="mb-3">
+                                <label for="function_name" class="form-label">Function Name</label>
+                                <select class="form-select" id="function_name" name="function_name">
+                                    <option value="processImage" {% if function_name == 'processImage' %}selected{% endif %}>processImage</option>
+                                    <option value="generateReport" {% if function_name == 'generateReport' %}selected{% endif %}>generateReport</option>
+                                    <option value="sendNotification" {% if function_name == 'sendNotification' %}selected{% endif %}>sendNotification</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="function_params" class="form-label">Function Parameters (JSON)</label>
+                                <textarea class="form-control" id="function_params" name="function_params" rows="4" placeholder='{"param1": "value1", "param2": "value2"}'>{{ function_params }}</textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Execute Function</button>
+                        </form>
+                    </div>
+                </div>
+
+                {% if execution_result %}
+                <div class="card mb-4">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Execution Results</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded"><code>{{ execution_result }}</code></pre>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            Serverless computing and cloud functions are increasingly popular in modern application architectures. However, they can introduce security vulnerabilities if not implemented correctly.
+                        </p>
+                        <p>
+                            In 2023, security researchers found that:
+                        </p>
+                        <ul>
+                            <li>Over 20% of cloud function vulnerabilities involve command injection</li>
+                            <li>Function parameters are often passed directly to system commands without proper sanitization</li>
+                            <li>Serverless environments often have unique security challenges due to their ephemeral nature</li>
+                            <li>Cloud functions may have access to sensitive cloud resources and credentials</li>
+                        </ul>
+                    </div>
+                </div>
+
+
+
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level='cmdi5') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

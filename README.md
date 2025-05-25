@@ -1,75 +1,53 @@
-# R00tGlyph
+# R00tGlyph - Advanced Web Security Training Platform
 
-An advanced web security training platform for practicing and learning about web vulnerabilities in a safe, controlled environment.
-
-## Overview
-
-R00tGlyph is a Python-based web application designed to simulate real-world web vulnerabilities. It provides a CTF-style environment where users can practice exploiting vulnerabilities, earn points by capturing flags, and learn about security best practices.
+R00tGlyph is a comprehensive web security training platform designed to help security professionals, developers, and ethical hackers learn and practice various web application vulnerabilities in a controlled environment. All challenges are based on current 2024-2025 vulnerability trends and real-world scenarios.
 
 ## Features
 
-- Progressive learning path from basic to advanced vulnerabilities
-- CTF-style flag submission system with unique flags for each user
-- Multiple dark themes (Dark, Cyberpunk, Hacker)
-- Detailed explanations and solution guides
-- Real-world context for advanced examples
-- WAF emulation for advanced challenges
-- User authentication and scoreboard
-- Expandable framework for adding more vulnerability types
-- Challenge tracking and completion status
-- User profile with progress statistics
+- **69 Comprehensive Challenges**: 23 levels each for XSS, SQL Injection, and Command Injection
+- **Modern Vulnerability Contexts**: Challenges simulate real-world applications (fintech, healthcare, e-commerce, cloud platforms)
+- **Tool Integration**: Levels require use of industry-standard tools (Burp Suite, SQLMap, Nmap, etc.)
+- **Progressive Difficulty**: From beginner to expert level challenges
+- **User Progress Tracking**: Track your progress and achievements across all categories
+- **Flag-based Challenges**: Each challenge has a unique flag to capture
+- **Responsive Design**: Works on desktop and mobile devices with full dark mode support
+- **Clean Architecture**: Streamlined codebase with single database management
 
-## Current Vulnerability Types
+## Challenge Categories
 
-- **Cross-Site Scripting (XSS)**
-  - Level 1: Basic Reflected XSS
-  - Level 2: DOM-based XSS
-  - Level 3: Stored XSS
-  - Level 4: XSS with Basic Filters
-  - Level 5: XSS with Advanced Filters
-  - Level 6: XSS with ModSecurity WAF
-  - Level 7: XSS via HTTP Headers
-  - Level 8: XSS in JSON API
-  - Level 9: XSS with CSP Bypass
-  - Level 10: XSS with Mutation Observer Bypass
-  - Level 11: XSS via SVG and CDATA
-  - Level 12: Blind XSS with Webhook Exfiltration
-  - Level 13: XSS in PDF Generation
-  - Level 14: XSS via Prototype Pollution
-  - Level 15: XSS via Template Injection
-  - Level 16: XSS in WebAssembly Applications
-  - Level 17: XSS in Progressive Web Apps
-  - Level 18: XSS via Web Components
-  - Level 19: XSS in GraphQL APIs
-  - Level 20: XSS in WebRTC Applications
-  - Level 21: XSS via Web Bluetooth/USB
-  - Level 22: XSS in WebGPU Applications
-  - Level 23: XSS in Federated Identity Systems
+### Cross-Site Scripting (XSS) - 23 Levels
+Modern web application XSS vulnerabilities covering:
+- **Levels 1-3**: Basic reflected, DOM-based, and stored XSS in modern frameworks
+- **Levels 4-6**: Filter bypass techniques in enterprise applications
+- **Levels 7-9**: Advanced techniques (HTTP headers, JSON APIs, CSP bypass)
+- **Levels 10-15**: Expert techniques (mutation observers, SVG, blind XSS, PDF generation, prototype pollution, template injection)
+- **Levels 16-23**: Cutting-edge contexts (WebAssembly, PWAs, Web Components, GraphQL, WebRTC, Web APIs, WebGPU, federated identity)
 
-- **SQL Injection (SQLi)**
-  - Level 1: Basic SQL Injection
-  - Level 2: SQL Injection in Search
-  - Level 3: SQL Injection with UNION
-  - Level 4: Blind SQL Injection
-  - Level 5: Time-Based Blind SQL Injection
-  - Level 6: SQL Injection with WAF Bypass
-  - Level 7: Error-Based SQL Injection
-  - Level 8: Second-Order SQL Injection
-  - Level 9: SQL Injection in REST API
-  - Level 10: NoSQL Injection
-  - Level 11: GraphQL Injection
-  - Level 12: ORM-based SQL Injection
-  - Level 13: Out-of-band SQL Injection
-  - Level 14: SQL Injection with Advanced WAF Bypass
-  - Level 15: SQL Injection via XML
-  - Level 16: SQL Injection in WebSockets
-  - Level 17: SQL Injection in Mobile App Backend
-  - Level 18: SQL Injection in Cloud Functions
-  - Level 19: SQL Injection via File Upload
-  - Level 20: SQL Injection in Stored Procedures
-  - Level 21: SQL Injection in GraphQL API
-  - Level 22: SQL Injection in NoSQL Database
-  - Level 23: SQL Injection in ORM Layer
+### SQL Injection (SQLi) - 23 Levels
+Modern database injection vulnerabilities covering:
+- **Levels 1-4**: Basic injection, search, UNION, and blind techniques
+- **Levels 5-8**: Advanced techniques (time-based, WAF bypass, second-order, JSON parameters)
+- **Levels 9-15**: Expert techniques with tools (SQLMap, stored procedures, ORM, XML, Burp Suite, column names, ORDER BY, error-based)
+- **Levels 16-23**: Modern contexts (LIMIT clause, boolean-based blind, subqueries, out-of-band, GraphQL, NoSQL, cloud databases)
+
+### Command Injection (CMDi) - 23 Levels
+Modern system command injection vulnerabilities covering:
+- **Levels 1-4**: Basic injection, filters, blind techniques, file upload chaining
+- **Levels 5-8**: Advanced techniques (API parameters, WAF bypass, time-based, Burp Suite integration)
+- **Levels 9-15**: Expert techniques (JSON APIs, environment variables, XML processing, Nmap integration, GraphQL, WebSockets, serverless)
+- **Levels 16-23**: Modern contexts (process substitution, containers, template engines, message queues, out-of-band, cloud functions, SSH, advanced chaining)
+
+## Tools Integration
+
+R00tGlyph challenges are designed to work with real bug bounty and penetration testing tools:
+- **Burp Suite**: Web application security testing
+- **SQLMap**: Automated SQL injection testing
+- **Nmap**: Network discovery and security auditing
+- **Nuclei**: Vulnerability scanner
+- **FFUF**: Web fuzzer
+- **Gobuster**: Directory/file enumeration
+- **Sublist3r**: Subdomain enumeration
+- **Waybackurls**: Historical URL discovery
 
 ## Installation
 
@@ -112,7 +90,6 @@ This platform is designed for educational purposes only. The skills learned shou
 
 ## Upcoming Features
 
-- Command Injection challenges
 - CSRF vulnerabilities
 - Server-Side Request Forgery (SSRF)
 - XML External Entity (XXE) Injection

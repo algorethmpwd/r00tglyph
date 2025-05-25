@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: Command Injection in GraphQL APIs - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Solution: Command Injection in GraphQL APIs</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <strong>Challenge:</strong> Exploit command injection through GraphQL query parameters in a modern API gateway.
+                </div>
+
+                <h3 class="mt-4">Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates command injection in a GraphQL API that processes user queries and executes system commands based on query parameters without proper validation.
+                </p>
+
+                <h3 class="mt-4">Solution Steps</h3>
+                <ol>
+                    <li>
+                        <p><strong>Analyze GraphQL structure:</strong> The API accepts GraphQL queries with various parameters.</p>
+                    </li>
+                    <li>
+                        <p><strong>Inject commands in query variables:</strong> Try injecting commands in GraphQL variable values.</p>
+                        <pre class="bg-light p-3 rounded"><code>query { user(name: "admin; whoami") { id } }</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Test different query fields:</strong> Try injection in multiple GraphQL fields.</p>
+                        <pre class="bg-light p-3 rounded"><code>query { search(term: "test && id") { results } }</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Use GraphQL mutations:</strong> Try command injection in mutation operations.</p>
+                        <pre class="bg-light p-3 rounded"><code>mutation { createUser(name: "user | whoami") { id } }</code></pre>
+                    </li>
+                </ol>
+
+                <h3 class="mt-4">Alternative Payloads</h3>
+                <ul>
+                    <li><code>query { user(name: "admin; whoami") { id } }</code></li>
+                    <li><code>query { search(term: "test && id") { results } }</code></li>
+                    <li><code>mutation { createUser(name: "user | whoami") { id } }</code></li>
+                    <li><code>query { data(filter: "$(whoami)") { value } }</code></li>
+                </ul>
+
+                <h3 class="mt-4">GraphQL Security Context</h3>
+                <p>GraphQL APIs are increasingly common and vulnerable to:</p>
+                <ul>
+                    <li>Query complexity attacks</li>
+                    <li>Injection vulnerabilities</li>
+                    <li>Information disclosure</li>
+                    <li>Authorization bypass</li>
+                </ul>
+
+                <h3 class="mt-4">Modern GraphQL Platforms</h3>
+                <ul>
+                    <li>Apollo GraphQL</li>
+                    <li>GraphQL Yoga</li>
+                    <li>Hasura</li>
+                    <li>AWS AppSync</li>
+                </ul>
+
+                <h3 class="mt-4">Prevention</h3>
+                <ol>
+                    <li><strong>Query Validation:</strong> Validate all GraphQL query parameters</li>
+                    <li><strong>Input Sanitization:</strong> Sanitize all user-provided values</li>
+                    <li><strong>Query Complexity Limits:</strong> Implement query complexity analysis</li>
+                    <li><strong>Authorization:</strong> Implement proper field-level authorization</li>
+                </ol>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('cmdi_level13') }}" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end"><i class="bi bi-list me-2"></i>All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Command Injection Level 8 - Burp Suite Integration{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3><i class="bi bi-terminal me-2"></i>Command Injection Level 8</h3>
+                    <div>
+                        <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#challengeModal">
+                            <i class="bi bi-info-circle me-1"></i>Challenge Info
+                        </button>
+                        <a href="{{ url_for('solutions', level='cmdi8') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-lightbulb me-1"></i>Solution
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box mb-4">
+                        <h5><i class="bi bi-building me-2"></i>IoT Device Management Portal</h5>
+                        <p>You're testing an IoT device management portal that allows administrators to manage connected devices. The system processes device IDs to perform various management operations.</p>
+                        <p><strong>Context:</strong> Enterprise IoT infrastructure management system</p>
+                        <p><strong>Tools Required:</strong> Burp Suite for request interception and modification</p>
+                    </div>
+
+                    {% if flag %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-flag-fill me-2"></i><strong>Challenge Completed!</strong>
+                        <br>Flag: <code>{{ flag }}</code>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" class="mb-4">
+                        <div class="mb-3">
+                            <label for="device_id" class="form-label">Device ID:</label>
+                            <input type="text" class="form-control" id="device_id" name="device_id" 
+                                   value="{{ device_id }}" placeholder="Enter device ID (e.g., IOT-001)">
+                            <div class="form-text">Enter the device ID to manage. Use Burp Suite to intercept and modify requests.</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-gear me-2"></i>Manage Device
+                        </button>
+                    </form>
+
+                    {% if management_result %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h6><i class="bi bi-terminal me-2"></i>Management Output</h6>
+                        </div>
+                        <div class="card-body">
+                            <pre class="command-output">{{ management_result }}</pre>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="mt-4">
+                        <h6>Burp Suite Integration Tips:</h6>
+                        <ul>
+                            <li>Configure your browser to use Burp Suite as a proxy</li>
+                            <li>Intercept the POST request when submitting the form</li>
+                            <li>Modify the device_id parameter to include command injection payloads</li>
+                            <li>Look for command execution in the response</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Challenge Info Modal -->
+<div class="modal fade" id="challengeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Command Injection Level 8 - Challenge Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Objective:</h6>
+                <p>Use Burp Suite to exploit command injection in an IoT device management portal.</p>
+                
+                <h6>Scenario:</h6>
+                <p>You're testing an enterprise IoT management system that processes device IDs. The application is vulnerable to command injection, but you need to use Burp Suite to properly exploit it.</p>
+                
+                <h6>Learning Goals:</h6>
+                <ul>
+                    <li>Learn to use Burp Suite for web application testing</li>
+                    <li>Understand request interception and modification</li>
+                    <li>Practice command injection in IoT contexts</li>
+                    <li>Explore enterprise device management vulnerabilities</li>
+                </ul>
+                
+                <h6>Tools Required:</h6>
+                <ul>
+                    <li><strong>Burp Suite</strong> - Web application security testing platform</li>
+                    <li>Browser configured to use Burp as proxy</li>
+                </ul>
+                
+                <h6>Hints:</h6>
+                <ul>
+                    <li>Set up Burp Suite proxy and configure your browser</li>
+                    <li>Submit a normal request first to see the baseline behavior</li>
+                    <li>Intercept the request and modify the device_id parameter</li>
+                    <li>Try commands like 'ps' or 'netstat' to gather system information</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

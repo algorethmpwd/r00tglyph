@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Command Injection Level 13 - GraphQL API{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3><i class="bi bi-terminal me-2"></i>Command Injection Level 13</h3>
+                    <div>
+                        <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#challengeModal">
+                            <i class="bi bi-info-circle me-1"></i>Challenge Info
+                        </button>
+                        <a href="{{ url_for('solutions', level='cmdi13') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-lightbulb me-1"></i>Solution
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box mb-4">
+                        <h5><i class="bi bi-diagram-3 me-2"></i>GraphQL API Management Platform</h5>
+                        <p>You're testing a modern GraphQL API management platform that processes GraphQL queries and mutations. The system executes queries against a backend database and may be vulnerable to command injection through GraphQL resolvers.</p>
+                        <p><strong>Context:</strong> Modern API management with GraphQL technology</p>
+                        <p><strong>Technology:</strong> GraphQL, API resolvers, query processing</p>
+                    </div>
+
+                    {% if flag %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-flag-fill me-2"></i><strong>Challenge Completed!</strong>
+                        <br>Flag: <code>{{ flag }}</code>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" class="mb-4">
+                        <div class="mb-3">
+                            <label for="graphql_query" class="form-label">GraphQL Query:</label>
+                            <textarea class="form-control" id="graphql_query" name="graphql_query" rows="8" 
+                                      style="font-family: monospace;">{{ graphql_query }}</textarea>
+                            <div class="form-text">Enter your GraphQL query or mutation.</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-play me-2"></i>Execute GraphQL Query
+                        </button>
+                    </form>
+
+                    {% if graphql_result %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h6><i class="bi bi-terminal me-2"></i>GraphQL Execution Result</h6>
+                        </div>
+                        <div class="card-body">
+                            <pre class="command-output">{{ graphql_result }}</pre>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="mt-4">
+                        <h6>GraphQL Injection Techniques:</h6>
+                        <ul>
+                            <li>Inject commands in query arguments</li>
+                            <li>Try: <code>query { user(id: "1; whoami") { name } }</code></li>
+                            <li>Use mutations for command execution</li>
+                            <li>Exploit resolver functions</li>
+                        </ul>
+                        
+                        <h6>Modern GraphQL Context:</h6>
+                        <p>GraphQL is increasingly used in modern applications for flexible API queries. This challenge explores vulnerabilities in GraphQL resolvers and query processing that can lead to command injection.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Challenge Info Modal -->
+<div class="modal fade" id="challengeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Command Injection Level 13 - Challenge Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Objective:</h6>
+                <p>Exploit command injection vulnerabilities in a GraphQL API management platform.</p>
+                
+                <h6>Scenario:</h6>
+                <p>You're testing a modern API platform that uses GraphQL for flexible data querying. The system processes GraphQL queries and mutations, but the resolvers may be vulnerable to command injection attacks.</p>
+                
+                <h6>Learning Goals:</h6>
+                <ul>
+                    <li>Understand GraphQL security vulnerabilities</li>
+                    <li>Learn about command injection in API resolvers</li>
+                    <li>Practice GraphQL query manipulation</li>
+                    <li>Explore modern API security concepts</li>
+                </ul>
+                
+                <h6>GraphQL Security:</h6>
+                <ul>
+                    <li>Query complexity attacks</li>
+                    <li>Resolver-based injection</li>
+                    <li>Introspection vulnerabilities</li>
+                    <li>Authorization bypass</li>
+                </ul>
+                
+                <h6>Hints:</h6>
+                <ul>
+                    <li>Try injecting commands in query arguments</li>
+                    <li>Use GraphQL mutations for command execution</li>
+                    <li>Explore different resolver functions</li>
+                    <li>Test both queries and mutations</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

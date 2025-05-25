@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: Command Injection via Environment Variables - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Solution: Command Injection via Environment Variables</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <strong>Challenge:</strong> Exploit the command injection vulnerability in the environment variable processor to read the contents of the flag.txt file on the server.
+                </div>
+
+                <h3 class="mt-4">Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates a command injection vulnerability in a system that processes environment variables. The application takes user input and uses it to set an environment variable, but it doesn't properly sanitize the input before using it in a system command.
+                </p>
+                <p>
+                    In Unix-like systems, environment variables can be set using the <code>export</code> command. For example, <code>export APP_ENV=production</code> sets the <code>APP_ENV</code> environment variable to "production". However, if the application doesn't properly validate the input, an attacker can inject additional commands using shell metacharacters.
+                </p>
+
+                <h3 class="mt-4">Solution Steps</h3>
+                <ol>
+                    <li>
+                        <p><strong>Identify the vulnerability:</strong> The application allows users to set an environment variable value, which is then used in a system command.</p>
+                    </li>
+                    <li>
+                        <p><strong>Inject a command:</strong> We can use command substitution to execute additional commands. In bash, command substitution can be done using <code>$(command)</code> or backticks.</p>
+                        <p>For example, we can try:</p>
+                        <pre class="bg-light p-3 rounded"><code>$(cat flag.txt)</code></pre>
+                        <p>This will execute the <code>cat flag.txt</code> command and use its output as the environment variable value.</p>
+                    </li>
+                    <li>
+                        <p><strong>Submit the payload:</strong> Enter the payload in the environment variable value field and click "Set Environment".</p>
+                    </li>
+                    <li>
+                        <p><strong>Observe the result:</strong> The application will execute the command and display the flag in the output.</p>
+                    </li>
+                </ol>
+
+                <h3 class="mt-4">Alternative Payloads</h3>
+                <p>There are several ways to exploit this vulnerability:</p>
+                <ul>
+                    <li><code>$(cat flag.txt)</code> - Using command substitution with $()</li>
+                    <li><code>`cat flag.txt`</code> - Using command substitution with backticks</li>
+                    <li><code>production;cat flag.txt</code> - Using command chaining with semicolon</li>
+                    <li><code>production && cat flag.txt</code> - Using logical AND operator</li>
+                    <li><code>production | cat flag.txt</code> - Using pipe operator</li>
+                </ul>
+
+                <h3 class="mt-4">Prevention</h3>
+                <p>To prevent command injection vulnerabilities in environment variable processing:</p>
+                <ol>
+                    <li>
+                        <p><strong>Input Validation:</strong> Validate and sanitize user input before using it in environment variables.</p>
+                    </li>
+                    <li>
+                        <p><strong>Use Safe APIs:</strong> Avoid using shell commands to set environment variables. Instead, use language-specific APIs that don't involve shell interpretation.</p>
+                    </li>
+                    <li>
+                        <p><strong>Allowlist Approach:</strong> Only allow specific characters or patterns in environment variable values.</p>
+                    </li>
+                    <li>
+                        <p><strong>Containerization:</strong> Use containerization to isolate applications and limit the impact of successful command injection attacks.</p>
+                    </li>
+                    <li>
+                        <p><strong>Principle of Least Privilege:</strong> Run applications with the minimum privileges required to function properly.</p>
+                    </li>
+                </ol>
+
+                <h3 class="mt-4">Real-World Examples</h3>
+                <p>
+                    Command injection via environment variables has been found in various real-world applications:
+                </p>
+                <ul>
+                    <li>CI/CD pipeline configurations that use environment variables from user input</li>
+                    <li>Container orchestration systems that pass environment variables to containers</li>
+                    <li>DevOps automation tools that use environment variables for configuration</li>
+                    <li>Web applications that use environment variables for feature flags or configuration</li>
+                </ul>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('cmdi_level6') }}" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end"><i class="bi bi-list me-2"></i>All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

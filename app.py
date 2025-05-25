@@ -232,6 +232,54 @@ def reset_database():
                      description="Exploit XSS vulnerabilities in WebGPU applications.", points=2100),
             Challenge(name="XSS in Federated Identity Systems", category="xss", difficulty="expert",
                      description="Exploit XSS vulnerabilities in federated identity systems.", points=2200),
+
+            # Command Injection Challenges
+            Challenge(name="Basic Command Injection", category="cmdi", difficulty="beginner",
+                     description="Find and exploit a basic command injection vulnerability.", points=100),
+            Challenge(name="Command Injection with Filters", category="cmdi", difficulty="beginner",
+                     description="Bypass basic command injection filters.", points=200),
+            Challenge(name="Blind Command Injection", category="cmdi", difficulty="intermediate",
+                     description="Exploit a blind command injection vulnerability.", points=300),
+            Challenge(name="Command Injection via File Upload", category="cmdi", difficulty="intermediate",
+                     description="Exploit command injection through file upload functionality.", points=400),
+            Challenge(name="Command Injection in API Parameters", category="cmdi", difficulty="intermediate",
+                     description="Find command injection in API parameters.", points=500),
+            Challenge(name="Command Injection with WAF Bypass", category="cmdi", difficulty="advanced",
+                     description="Bypass WAF protection to exploit command injection.", points=600),
+            Challenge(name="Time-Based Blind Command Injection", category="cmdi", difficulty="advanced",
+                     description="Exploit time-based blind command injection.", points=700),
+            Challenge(name="Command Injection in Log Processing", category="cmdi", difficulty="advanced",
+                     description="Exploit command injection in log processing systems.", points=800),
+            Challenge(name="Command Injection in JSON APIs", category="cmdi", difficulty="advanced",
+                     description="Find command injection vulnerabilities in JSON APIs.", points=900),
+            Challenge(name="Command Injection in XML Processing", category="cmdi", difficulty="advanced",
+                     description="Exploit command injection in XML processing.", points=1000),
+            Challenge(name="Advanced Command Injection WAF Bypass", category="cmdi", difficulty="expert",
+                     description="Advanced WAF bypass techniques for command injection.", points=1100),
+            Challenge(name="Command Injection in DevOps Tools", category="cmdi", difficulty="expert",
+                     description="Exploit command injection in DevOps automation tools.", points=1200),
+            Challenge(name="Command Injection in GraphQL APIs", category="cmdi", difficulty="expert",
+                     description="Find command injection in GraphQL API implementations.", points=1300),
+            Challenge(name="Command Injection in WebSocket Connections", category="cmdi", difficulty="expert",
+                     description="Exploit command injection through WebSocket connections.", points=1400),
+            Challenge(name="Command Injection in Serverless Functions", category="cmdi", difficulty="expert",
+                     description="Exploit command injection in serverless function environments.", points=1500),
+            Challenge(name="Advanced Shell Features Command Injection", category="cmdi", difficulty="expert",
+                     description="Exploit advanced shell features for command injection.", points=1600),
+            Challenge(name="Command Injection in Container Environments", category="cmdi", difficulty="expert",
+                     description="Exploit command injection in containerized applications.", points=1700),
+            Challenge(name="Command Injection via Template Engines", category="cmdi", difficulty="expert",
+                     description="Exploit command injection through template engines.", points=1800),
+            Challenge(name="Command Injection in Message Queues", category="cmdi", difficulty="expert",
+                     description="Find command injection in message queue systems.", points=1900),
+            Challenge(name="Out-of-Band Command Injection", category="cmdi", difficulty="expert",
+                     description="Exploit out-of-band command injection techniques.", points=2000),
+            Challenge(name="Command Injection in Cloud Functions", category="cmdi", difficulty="expert",
+                     description="Exploit command injection in cloud function platforms.", points=2100),
+            Challenge(name="Command Injection in SSH Commands", category="cmdi", difficulty="expert",
+                     description="Exploit command injection in SSH command execution.", points=2200),
+            Challenge(name="Advanced Command Injection Chaining", category="cmdi", difficulty="expert",
+                     description="Chain multiple command injection techniques for maximum impact.", points=2300),
         ]
         db.session.add_all(challenges)
         db.session.commit()
@@ -2983,7 +3031,6 @@ def sqli_level13():
 # SQL Injection Level 14 - SQL Injection with Advanced WAF Bypass
 @app.route('/sqli/level14', methods=['GET', 'POST'])
 def sqli_level14():
-    import json
     machine_id = get_machine_id()
     user = get_local_user()
     flag = None
@@ -3083,7 +3130,6 @@ def sqli_level14():
 # SQL Injection Level 15 - SQL Injection via XML
 @app.route('/sqli/level15', methods=['GET', 'POST'])
 def sqli_level15():
-    import json
     machine_id = get_machine_id()
     user = get_local_user()
     flag = None
@@ -3163,7 +3209,6 @@ def sqli_level15():
 # SQL Injection Level 16 - SQL Injection in WebSockets
 @app.route('/sqli/level16', methods=['GET', 'POST'])
 def sqli_level16():
-    import json
     machine_id = get_machine_id()
     user = get_local_user()
     flag = None
@@ -3482,7 +3527,6 @@ def sqli_level18():
 # SQL Injection Level 19 - SQL Injection via File Upload
 @app.route('/sqli/level19', methods=['GET', 'POST'])
 def sqli_level19():
-    import json
     machine_id = get_machine_id()
     user = get_local_user()
     flag = None
@@ -3606,7 +3650,6 @@ def sqli_level19():
 # SQL Injection Level 20 - SQL Injection in Stored Procedures
 @app.route('/sqli/level20', methods=['GET', 'POST'])
 def sqli_level20():
-    import json
     machine_id = get_machine_id()
     user = get_local_user()
     flag = None
@@ -3703,7 +3746,6 @@ def sqli_level20():
 # SQL Injection Level 21 - SQL Injection in GraphQL API
 @app.route('/sqli/level21', methods=['GET', 'POST'])
 def sqli_level21():
-    import json
     machine_id = get_machine_id()
     user = get_local_user()
     flag = None
@@ -3848,7 +3890,6 @@ def sqli_level21():
 # SQL Injection Level 22 - SQL Injection in NoSQL Database
 @app.route('/sqli/level22', methods=['GET', 'POST'])
 def sqli_level22():
-    import json
     machine_id = get_machine_id()
     user = get_local_user()
     flag = None
@@ -3861,7 +3902,6 @@ def sqli_level22():
     if request.method == 'POST':
         try:
             # Parse the query JSON
-            import json
             import re
 
             query_obj = json.loads(query)
@@ -3998,7 +4038,6 @@ def sqli_level22():
 # SQL Injection Level 23 - SQL Injection in ORM Layer
 @app.route('/sqli/level23', methods=['GET', 'POST'])
 def sqli_level23():
-    import json
     machine_id = get_machine_id()
     user = get_local_user()
     flag = None
@@ -4151,8 +4190,46 @@ def sqli_level23():
 # Solutions
 @app.route('/solutions/<level>')
 def solutions(level):
-    # Check if it's an XSS or SQLi solution
-    if level.startswith('sqli'):
+    # Check if it's a CMDI solution
+    if level.startswith('cmdi'):
+        # Get the challenge object to pass to the template
+        challenge_name_map = {
+            'cmdi1': 'Basic Command Injection',
+            'cmdi2': 'Command Injection with Filters',
+            'cmdi3': 'Blind Command Injection',
+            'cmdi4': 'Command Injection via File Upload',
+            'cmdi5': 'Command Injection in API Parameters',
+            'cmdi6': 'Command Injection with WAF Bypass',
+            'cmdi7': 'Time-Based Blind Command Injection',
+            'cmdi8': 'Command Injection in Log Processing',
+            'cmdi9': 'Command Injection in JSON APIs',
+            'cmdi10': 'Command Injection in XML Processing',
+            'cmdi11': 'Command Injection with WAF Bypass',
+            'cmdi12': 'Command Injection in DevOps Tools',
+            'cmdi13': 'Command Injection in GraphQL APIs',
+            'cmdi14': 'Command Injection in WebSocket Connections',
+            'cmdi15': 'Command Injection in Serverless Functions',
+            'cmdi16': 'Advanced Shell Features Command Injection',
+            'cmdi17': 'Command Injection in Container Environments',
+            'cmdi18': 'Command Injection via Template Engines',
+            'cmdi19': 'Command Injection in Message Queues',
+            'cmdi20': 'Out-of-Band Command Injection',
+            'cmdi21': 'Command Injection in Cloud Functions',
+            'cmdi22': 'Command Injection in SSH Commands',
+            'cmdi23': 'Advanced Command Injection Chaining'
+        }
+        challenge_name = challenge_name_map.get(level)
+        challenge = Challenge.query.filter_by(name=challenge_name).first() if challenge_name else None
+
+        # Extract level number, handling both single and double-digit levels
+        if level.startswith('cmdi'):
+            level_num = level[4:]  # Extract everything after 'cmdi'
+        else:
+            level_num = level  # Use the full level string
+
+        return render_template(f'solutions/cmdi_level{level_num}_solution.html', challenge=challenge)
+    # Check if it's an SQLi solution
+    elif level.startswith('sqli'):
         # Get the challenge object to pass to the template
         challenge_name_map = {
             'sqli1': 'Basic SQL Injection',
@@ -4226,6 +4303,1358 @@ def solutions(level):
             return render_template('error.html', error="Invalid solution level format")
 
 
+
+# Command Injection Level 1 - Basic Command Injection
+@app.route('/cmdi/level1', methods=['GET', 'POST'])
+def cmdi_level1():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    cmdi_detected = False
+    hostname = request.form.get('hostname', '')
+    ping_result = ''
+
+    if request.method == 'POST':
+        # Simulate a basic ping tool with command injection vulnerability
+        if hostname:
+            # Check for command injection patterns
+            cmdi_patterns = ['&', '|', ';', '`', '$', '(', ')', '\\', '<', '>']
+
+            for pattern in cmdi_patterns:
+                if pattern in hostname:
+                    cmdi_detected = True
+                    # Simulate command execution
+                    ping_result = f"PING {hostname.split()[0]} (192.168.1.1): 56 data bytes\n"
+                    ping_result += "64 bytes from 192.168.1.1: icmp_seq=0 ttl=64 time=1.234 ms\n"
+                    ping_result += "--- ping statistics ---\n"
+                    ping_result += "1 packets transmitted, 1 packets received, 0.0% packet loss\n\n"
+
+                    # Add command injection output
+                    if 'whoami' in hostname:
+                        ping_result += "Command injection detected!\n"
+                        ping_result += "Current user: www-data\n"
+                        ping_result += "Flag: R00T{b4s1c_cmd1_1nj3ct10n_pwn3d}\n"
+                    elif 'id' in hostname:
+                        ping_result += "uid=33(www-data) gid=33(www-data) groups=33(www-data)\n"
+                        ping_result += "Flag: R00T{b4s1c_cmd1_1nj3ct10n_pwn3d}\n"
+
+                    # Mark challenge as completed
+                    challenge = Challenge.query.filter_by(name="Basic Command Injection").first()
+                    if challenge:
+                        completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                        if challenge.id not in completed_ids:
+                            update_user_progress(machine_id, challenge.id, challenge.points)
+                    break
+            else:
+                # Normal ping output
+                ping_result = f"PING {hostname} (192.168.1.1): 56 data bytes\n"
+                ping_result += "64 bytes from 192.168.1.1: icmp_seq=0 ttl=64 time=1.234 ms\n"
+                ping_result += "--- ping statistics ---\n"
+                ping_result += "1 packets transmitted, 1 packets received, 0.0% packet loss\n"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Basic Command Injection").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('cmdi/cmdi_level1.html', flag=flag, cmdi_detected=cmdi_detected,
+                          hostname=hostname, ping_result=ping_result, challenge=challenge)
+
+# Command Injection Level 2 - Command Injection with Filters
+@app.route('/cmdi/level2', methods=['GET', 'POST'])
+def cmdi_level2():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    cmdi_detected = False
+    command = request.form.get('command', '')
+    output = ''
+    filtered = False
+
+    if request.method == 'POST':
+        # Simulate a deployment tool with basic filtering
+        if command:
+            # Basic filter - remove obvious command injection characters
+            filtered_command = command.replace('&', '').replace('|', '').replace(';', '')
+
+            if filtered_command != command:
+                filtered = True
+                output = "Security filter activated: Dangerous characters removed\n"
+                output += f"Filtered command: {filtered_command}\n\n"
+
+            # Check for bypass techniques
+            bypass_patterns = ['$(', '`', '{', '}', '\\', '<', '>']
+
+            for pattern in bypass_patterns:
+                if pattern in command:
+                    cmdi_detected = True
+                    output += f"Executing deployment command: {command.split()[0]}\n"
+                    output += "Deployment started...\n"
+                    output += "Extracting files...\n"
+
+                    # Add command injection output
+                    if 'whoami' in command or 'id' in command:
+                        output += "\nUnexpected output detected:\n"
+                        output += "root\n"
+                        output += "Flag: R00T{f1lt3r_byp4ss_cmd1_pwn3d}\n"
+
+                    # Mark challenge as completed
+                    challenge = Challenge.query.filter_by(name="Command Injection with Filters").first()
+                    if challenge:
+                        completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                        if challenge.id not in completed_ids:
+                            update_user_progress(machine_id, challenge.id, challenge.points)
+                    break
+            else:
+                # Normal deployment output
+                output += f"Executing deployment command: {filtered_command}\n"
+                output += "Deployment completed successfully\n"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Command Injection with Filters").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('cmdi/cmdi_level2.html', flag=flag, cmdi_detected=cmdi_detected,
+                          command=command, output=output, filtered=filtered, challenge=challenge)
+
+# Command Injection Level 3 - Blind Command Injection
+@app.route('/cmdi/level3', methods=['GET', 'POST'])
+def cmdi_level3():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    cmdi_detected = False
+    email = request.form.get('email', '')
+    status = ''
+
+    if request.method == 'POST':
+        # Simulate a notification system with blind command injection
+        if email:
+            # Check for command injection patterns
+            cmdi_patterns = ['&', '|', ';', '`', '$', '(', ')', '\\']
+
+            for pattern in cmdi_patterns:
+                if pattern in email:
+                    cmdi_detected = True
+                    status = "Email notification sent successfully"
+
+                    # Mark challenge as completed (blind - no visible output)
+                    challenge = Challenge.query.filter_by(name="Blind Command Injection").first()
+                    if challenge:
+                        completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                        if challenge.id not in completed_ids:
+                            update_user_progress(machine_id, challenge.id, challenge.points)
+                    break
+            else:
+                status = "Email notification sent successfully"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Blind Command Injection").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('cmdi/cmdi_level3.html', flag=flag, cmdi_detected=cmdi_detected,
+                          email=email, status=status, challenge=challenge)
+
+# Command Injection Level 4 - Command Injection via File Upload
+@app.route('/cmdi/level4', methods=['GET', 'POST'])
+def cmdi_level4():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    cmdi_detected = False
+    filename = request.form.get('filename', '')
+    upload_result = ''
+
+    if request.method == 'POST':
+        # Simulate a file upload system with command injection in filename processing
+        if filename:
+            # Check for command injection in filename
+            cmdi_patterns = ['&', '|', ';', '`', '$', '(', ')']
+
+            for pattern in cmdi_patterns:
+                if pattern in filename:
+                    cmdi_detected = True
+                    upload_result = f"Processing file: {filename.split()[0]}\n"
+                    upload_result += "File uploaded successfully\n"
+                    upload_result += "Running post-processing...\n\n"
+
+                    # Add command injection output
+                    if 'whoami' in filename:
+                        upload_result += "Post-processing output:\n"
+                        upload_result += "Current user: apache\n"
+                        upload_result += "Flag: R00T{f1l3_upl04d_cmd1_pwn3d}\n"
+
+                    # Mark challenge as completed
+                    challenge = Challenge.query.filter_by(name="Command Injection via File Upload").first()
+                    if challenge:
+                        completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                        if challenge.id not in completed_ids:
+                            update_user_progress(machine_id, challenge.id, challenge.points)
+                    break
+            else:
+                upload_result = f"Processing file: {filename}\n"
+                upload_result += "File uploaded successfully\n"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Command Injection via File Upload").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('cmdi/cmdi_level4.html', flag=flag, cmdi_detected=cmdi_detected,
+                          filename=filename, upload_result=upload_result, challenge=challenge)
+
+# Command Injection Level 5 - Command Injection in API Parameters
+@app.route('/cmdi/level5', methods=['GET', 'POST'])
+def cmdi_level5():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    cmdi_detected = False
+    service_name = request.form.get('service_name', '')
+    api_result = ''
+
+    if request.method == 'POST':
+        # Simulate a microservices API with command injection
+        if service_name:
+            # Check for command injection patterns
+            cmdi_patterns = ['&', '|', ';', '`', '$', '(', ')', '\\']
+
+            for pattern in cmdi_patterns:
+                if pattern in service_name:
+                    cmdi_detected = True
+                    api_result = f"Checking service status: {service_name.split()[0]}\n"
+                    api_result += "Service is running\n"
+                    api_result += "Health check: OK\n\n"
+
+                    # Add command injection output
+                    if 'env' in service_name or 'printenv' in service_name:
+                        api_result += "Environment variables:\n"
+                        api_result += "PATH=/usr/local/sbin:/usr/local/bin\n"
+                        api_result += "FLAG=R00T{4p1_cmd1_1nj3ct10n_pwn3d}\n"
+
+                    # Mark challenge as completed
+                    challenge = Challenge.query.filter_by(name="Command Injection in API Parameters").first()
+                    if challenge:
+                        completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                        if challenge.id not in completed_ids:
+                            update_user_progress(machine_id, challenge.id, challenge.points)
+                    break
+            else:
+                api_result = f"Checking service status: {service_name}\n"
+                api_result += "Service is running\n"
+                api_result += "Health check: OK\n"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Command Injection in API Parameters").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('cmdi/cmdi_level5.html', flag=flag, cmdi_detected=cmdi_detected,
+                          service_name=service_name, api_result=api_result, challenge=challenge)
+
+# Command Injection Level 6 - Command Injection with WAF Bypass
+@app.route('/cmdi/level6', methods=['GET', 'POST'])
+def cmdi_level6():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    cmdi_detected = False
+    target = request.form.get('target', '')
+    scan_result = ''
+    waf_blocked = False
+
+    if request.method == 'POST':
+        # Simulate a network scanner with WAF protection
+        if target:
+            # WAF patterns to block
+            waf_patterns = ['&', '|', ';', 'whoami', 'id', 'cat', 'ls']
+
+            # Check if WAF should block
+            for pattern in waf_patterns:
+                if pattern in target.lower():
+                    waf_blocked = True
+                    scan_result = "⚠️ WAF Alert: Malicious input detected and blocked!"
+                    break
+
+            if not waf_blocked:
+                # Check for WAF bypass techniques
+                bypass_patterns = ['`', '$', '(', ')', '\\', '{', '}']
+
+                for pattern in bypass_patterns:
+                    if pattern in target:
+                        cmdi_detected = True
+                        scan_result = f"Scanning target: {target.split()[0]}\n"
+                        scan_result += "Port scan completed\n"
+                        scan_result += "Open ports: 22, 80, 443\n\n"
+
+                        # Add command injection output
+                        if 'w' in target and 'h' in target:  # Obfuscated whoami
+                            scan_result += "System information:\n"
+                            scan_result += "Current user: scanner\n"
+                            scan_result += "Flag: R00T{w4f_byp4ss_cmd1_pwn3d}\n"
+
+                        # Mark challenge as completed
+                        challenge = Challenge.query.filter_by(name="Command Injection with WAF Bypass").first()
+                        if challenge:
+                            completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                            if challenge.id not in completed_ids:
+                                update_user_progress(machine_id, challenge.id, challenge.points)
+                        break
+                else:
+                    scan_result = f"Scanning target: {target}\n"
+                    scan_result += "Port scan completed\n"
+                    scan_result += "Open ports: 22, 80, 443\n"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Command Injection with WAF Bypass").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('cmdi/cmdi_level6.html', flag=flag, cmdi_detected=cmdi_detected,
+                          target=target, scan_result=scan_result, waf_blocked=waf_blocked, challenge=challenge)
+
+# Command Injection Level 7 - Time-Based Blind Command Injection
+@app.route('/cmdi/level7', methods=['GET', 'POST'])
+def cmdi_level7():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    cmdi_detected = False
+    hostname = request.form.get('hostname', '')
+    check_result = ''
+    response_time = 0
+
+    if request.method == 'POST':
+        # Simulate a server status checker with time-based blind command injection vulnerability
+        if hostname:
+            import time
+            start_time = time.time()
+
+            # Check for command injection in the hostname
+            cmdi_patterns = ['$', '`', '(', ')', '\\', '|', '&', ';', '<', '>', '{', '}']
+
+            # Check if any command injection pattern is in the hostname
+            for pattern in cmdi_patterns:
+                if pattern in hostname:
+                    # Command injection detected!
+                    cmdi_detected = True
+
+                    # Simulate command execution with time delay
+                    check_result = f"Checking status of {hostname.split()[0]}...\n\n"
+
+                    # Simulate time delay based on the command
+                    if 'sleep' in hostname:
+                        # Extract sleep duration
+                        try:
+                            sleep_duration = int(hostname.split('sleep')[1].strip().split()[0])
+                            time.sleep(min(sleep_duration, 10))  # Cap at 10 seconds for safety
+                        except:
+                            time.sleep(2)  # Default sleep if we can't parse the duration
+
+                    # Add the flag to the output if a specific pattern is detected
+                    if ('cat' in hostname or 'type' in hostname) and 'flag' in hostname:
+                        check_result += "Server status: Online\n"
+                        # Mark challenge as completed
+                        challenge = Challenge.query.filter_by(name="Time-Based Blind Command Injection").first()
+                        if challenge:
+                            completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                            if challenge.id not in completed_ids:
+                                update_user_progress(machine_id, challenge.id, challenge.points)
+                    elif 'grep' in hostname and 'flag' in hostname:
+                        check_result += "Server status: Online\n"
+                        # Mark challenge as completed
+                        challenge = Challenge.query.filter_by(name="Time-Based Blind Command Injection").first()
+                        if challenge:
+                            completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                            if challenge.id not in completed_ids:
+                                update_user_progress(machine_id, challenge.id, challenge.points)
+                    else:
+                        check_result += "Server status: Online\n"
+
+                    break
+
+            # If no command injection detected, perform a regular status check
+            if not cmdi_detected:
+                check_result = f"Checking status of {hostname}...\n\n"
+                check_result += "Server status: Online\n"
+                time.sleep(0.5)  # Small delay for normal operation
+
+            # Calculate response time
+            response_time = round(time.time() - start_time, 2)
+
+    # Generate a flag for this challenge only if completed
+    challenge = Challenge.query.filter_by(name="Time-Based Blind Command Injection").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('cmdi/cmdi_level7.html', flag=flag, cmdi_detected=cmdi_detected,
+                          hostname=hostname, check_result=check_result,
+                          response_time=response_time, challenge=challenge)
+
+# Command Injection Level 8 - Command Injection with Burp Suite
+@app.route('/cmdi/level8', methods=['GET', 'POST'])
+def cmdi_level8():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    cmdi_detected = False
+    device_id = request.form.get('device_id', '')
+    management_result = ''
+
+    if request.method == 'POST':
+        # Simulate an IoT device management portal
+        if device_id:
+            # Check for command injection patterns
+            cmdi_patterns = ['&', '|', ';', '`', '$', '(', ')', '\\']
+
+            for pattern in cmdi_patterns:
+                if pattern in device_id:
+                    cmdi_detected = True
+                    management_result = f"Managing device: {device_id.split()[0]}\n"
+                    management_result += "Device status: Online\n"
+                    management_result += "Firmware version: 2.1.4\n\n"
+
+                    # Add command injection output
+                    if 'ps' in device_id or 'netstat' in device_id:
+                        management_result += "System processes:\n"
+                        management_result += "PID  COMMAND\n"
+                        management_result += "1    /sbin/init\n"
+                        management_result += "Flag: R00T{burp_su1t3_cmd1_pwn3d}\n"
+
+                    # Mark challenge as completed
+                    challenge = Challenge.query.filter_by(name="Command Injection with Burp Suite").first()
+                    if challenge:
+                        completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                        if challenge.id not in completed_ids:
+                            update_user_progress(machine_id, challenge.id, challenge.points)
+                    break
+            else:
+                management_result = f"Managing device: {device_id}\n"
+                management_result += "Device status: Online\n"
+                management_result += "Firmware version: 2.1.4\n"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Command Injection with Burp Suite").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('cmdi/cmdi_level8.html', flag=flag, cmdi_detected=cmdi_detected,
+                          device_id=device_id, management_result=management_result, challenge=challenge)
+
+# Command Injection Level 9 - Command Injection in JSON APIs
+@app.route('/cmdi/level9', methods=['GET', 'POST'])
+def cmdi_level9():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    cmdi_detected = False
+    build_config = request.form.get('build_config', '{"branch": "main", "environment": "production"}')
+    build_result = ''
+
+    if request.method == 'POST':
+        # Simulate a CI/CD automation platform
+        if build_config:
+            try:
+                config = json.loads(build_config)
+
+                # Check for command injection in JSON values
+                cmdi_patterns = ['&', '|', ';', '`', '$', '(', ')', '\\']
+
+                for key, value in config.items():
+                    if isinstance(value, str):
+                        for pattern in cmdi_patterns:
+                            if pattern in value:
+                                cmdi_detected = True
+                                build_result = f"Starting build for branch: {str(value).split()[0]}\n"
+                                build_result += "Build environment: production\n"
+                                build_result += "Build status: Running\n\n"
+
+                                # Add command injection output
+                                if 'uname' in value:
+                                    build_result += "Build system info:\n"
+                                    build_result += "Linux buildserver 5.4.0-74-generic\n"
+                                    build_result += "Flag: R00T{j50n_4p1_cmd1_pwn3d}\n"
+
+                                # Mark challenge as completed
+                                challenge = Challenge.query.filter_by(name="Command Injection in JSON APIs").first()
+                                if challenge:
+                                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                                    if challenge.id not in completed_ids:
+                                        update_user_progress(machine_id, challenge.id, challenge.points)
+                                break
+                        if cmdi_detected:
+                            break
+
+                if not cmdi_detected:
+                    build_result = f"Starting build for branch: {config.get('branch', 'main')}\n"
+                    build_result += f"Build environment: {config.get('environment', 'production')}\n"
+                    build_result += "Build completed successfully\n"
+
+            except json.JSONDecodeError:
+                build_result = "Error: Invalid JSON configuration"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Command Injection in JSON APIs").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('cmdi/cmdi_level9.html', flag=flag, cmdi_detected=cmdi_detected,
+                          build_config=build_config, build_result=build_result, challenge=challenge)
+
+# Command Injection Level 10 - Command Injection via Environment Variables
+@app.route('/cmdi/level10', methods=['GET', 'POST'])
+def cmdi_level10():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    cmdi_detected = False
+    app_name = request.form.get('app_name', '')
+    env_vars = request.form.get('env_vars', '')
+    deploy_result = ''
+
+    if request.method == 'POST':
+        # Simulate a containerized app deployment
+        if app_name and env_vars:
+            # Check for command injection in environment variables
+            cmdi_patterns = ['&', '|', ';', '`', '$', '(', ')', '\\']
+
+            for pattern in cmdi_patterns:
+                if pattern in env_vars:
+                    cmdi_detected = True
+                    deploy_result = f"Deploying application: {app_name}\n"
+                    deploy_result += "Setting environment variables...\n"
+                    deploy_result += "Container started successfully\n\n"
+
+                    # Add command injection output
+                    if 'whoami' in env_vars or 'id' in env_vars:
+                        deploy_result += "Container initialization output:\n"
+                        deploy_result += "User: container-user\n"
+                        deploy_result += "Flag: R00T{3nv_v4r5_cmd1_pwn3d}\n"
+
+                    # Mark challenge as completed
+                    challenge = Challenge.query.filter_by(name="Command Injection via Environment Variables").first()
+                    if challenge:
+                        completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                        if challenge.id not in completed_ids:
+                            update_user_progress(machine_id, challenge.id, challenge.points)
+                    break
+            else:
+                deploy_result = f"Deploying application: {app_name}\n"
+                deploy_result += "Setting environment variables...\n"
+                deploy_result += "Container started successfully\n"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Command Injection via Environment Variables").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('cmdi/cmdi_level10.html', flag=flag, cmdi_detected=cmdi_detected,
+                          app_name=app_name, env_vars=env_vars, deploy_result=deploy_result, challenge=challenge)
+
+# Command Injection Level 11 - Command Injection in XML Processing
+@app.route('/cmdi/level11', methods=['GET', 'POST'])
+def cmdi_level11():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    cmdi_detected = False
+    xml_config = request.form.get('xml_config', '<?xml version="1.0"?><config><service>web</service><action>restart</action></config>')
+    processing_result = ''
+
+    if request.method == 'POST':
+        # Simulate a legacy enterprise system with XML processing
+        if xml_config:
+            # Check for command injection in XML content
+            cmdi_patterns = ['&', '|', ';', '`', '$', '(', ')', '\\']
+
+            for pattern in cmdi_patterns:
+                if pattern in xml_config:
+                    cmdi_detected = True
+                    processing_result = "Processing XML configuration...\n"
+                    processing_result += "Parsing XML structure...\n"
+                    processing_result += "Executing service management commands...\n\n"
+
+                    # Add command injection output
+                    if 'whoami' in xml_config or 'id' in xml_config:
+                        processing_result += "Service management output:\n"
+                        processing_result += "Current system user: enterprise-admin\n"
+                        processing_result += "Flag: R00T{xml_pr0c3ss1ng_cmd1_pwn3d}\n"
+
+                    # Mark challenge as completed
+                    challenge = Challenge.query.filter_by(name="Command Injection in XML Processing").first()
+                    if challenge:
+                        completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                        if challenge.id not in completed_ids:
+                            update_user_progress(machine_id, challenge.id, challenge.points)
+                    break
+            else:
+                processing_result = "Processing XML configuration...\n"
+                processing_result += "Configuration applied successfully\n"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Command Injection in XML Processing").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('cmdi/cmdi_level11.html', flag=flag, cmdi_detected=cmdi_detected,
+                          xml_config=xml_config, processing_result=processing_result, challenge=challenge)
+
+# Command Injection Level 12 - Command Injection with Nmap
+@app.route('/cmdi/level12', methods=['GET', 'POST'])
+def cmdi_level12():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    cmdi_detected = False
+    target_network = request.form.get('target_network', '')
+    scan_options = request.form.get('scan_options', '-sS -O')
+    nmap_result = ''
+
+    if request.method == 'POST':
+        # Simulate a security tool with Nmap integration
+        if target_network:
+            # Check for command injection in Nmap parameters
+            cmdi_patterns = ['&', '|', ';', '`', '$', '(', ')', '\\']
+
+            for pattern in cmdi_patterns:
+                if pattern in target_network or pattern in scan_options:
+                    cmdi_detected = True
+                    nmap_result = f"Starting Nmap scan on {target_network.split()[0]}\n"
+                    nmap_result += f"Scan options: {scan_options.split()[0]}\n"
+                    nmap_result += "Nmap scan report for target network\n"
+                    nmap_result += "Host is up (0.0010s latency)\n"
+                    nmap_result += "PORT     STATE SERVICE\n"
+                    nmap_result += "22/tcp   open  ssh\n"
+                    nmap_result += "80/tcp   open  http\n"
+                    nmap_result += "443/tcp  open  https\n\n"
+
+                    # Add command injection output
+                    if 'uname' in target_network or 'uname' in scan_options:
+                        nmap_result += "System information leaked:\n"
+                        nmap_result += "Linux security-scanner 5.15.0-72-generic\n"
+                        nmap_result += "Flag: R00T{nm4p_1nt3gr4t10n_cmd1_pwn3d}\n"
+
+                    # Mark challenge as completed
+                    challenge = Challenge.query.filter_by(name="Command Injection with Nmap").first()
+                    if challenge:
+                        completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                        if challenge.id not in completed_ids:
+                            update_user_progress(machine_id, challenge.id, challenge.points)
+                    break
+            else:
+                nmap_result = f"Starting Nmap scan on {target_network}\n"
+                nmap_result += f"Scan options: {scan_options}\n"
+                nmap_result += "Scan completed successfully\n"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Command Injection with Nmap").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('cmdi/cmdi_level12.html', flag=flag, cmdi_detected=cmdi_detected,
+                          target_network=target_network, scan_options=scan_options, nmap_result=nmap_result, challenge=challenge)
+
+# Command Injection Level 13 - Command Injection in GraphQL
+@app.route('/cmdi/level13', methods=['GET', 'POST'])
+def cmdi_level13():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    cmdi_detected = False
+    graphql_query = request.form.get('graphql_query', 'query { systemInfo(hostname: "localhost") { status } }')
+    query_result = ''
+
+    if request.method == 'POST':
+        # Simulate a GraphQL API with command injection
+        if graphql_query:
+            # Check for command injection in GraphQL query parameters
+            cmdi_patterns = ['&', '|', ';', '`', '$', '(', ')', '\\']
+
+            for pattern in cmdi_patterns:
+                if pattern in graphql_query:
+                    cmdi_detected = True
+                    query_result = "Executing GraphQL query...\n"
+                    query_result += "Resolving systemInfo field...\n"
+                    query_result += "{\n"
+                    query_result += '  "data": {\n'
+                    query_result += '    "systemInfo": {\n'
+                    query_result += '      "status": "online"\n'
+
+                    # Add command injection output
+                    if 'whoami' in graphql_query:
+                        query_result += '    },\n'
+                        query_result += '    "debug": {\n'
+                        query_result += '      "user": "graphql-api",\n'
+                        query_result += '      "flag": "R00T{gr4phql_cmd1_1nj3ct10n_pwn3d}"\n'
+                        query_result += '    }\n'
+                    else:
+                        query_result += '    }\n'
+
+                    query_result += '  }\n'
+                    query_result += '}\n'
+
+                    # Mark challenge as completed
+                    challenge = Challenge.query.filter_by(name="Command Injection in GraphQL").first()
+                    if challenge:
+                        completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                        if challenge.id not in completed_ids:
+                            update_user_progress(machine_id, challenge.id, challenge.points)
+                    break
+            else:
+                query_result = "Executing GraphQL query...\n"
+                query_result += "{\n"
+                query_result += '  "data": {\n'
+                query_result += '    "systemInfo": {\n'
+                query_result += '      "status": "online"\n'
+                query_result += '    }\n'
+                query_result += '  }\n'
+                query_result += '}\n'
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Command Injection in GraphQL").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('cmdi/cmdi_level13.html', flag=flag, cmdi_detected=cmdi_detected,
+                          graphql_query=graphql_query, query_result=query_result, challenge=challenge)
+
+# Command Injection Level 14 - Command Injection via WebSockets
+@app.route('/cmdi/level14', methods=['GET', 'POST'])
+def cmdi_level14():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    cmdi_detected = False
+    websocket_message = request.form.get('websocket_message', '{"type": "monitor", "target": "server1", "action": "status"}')
+    monitoring_result = ''
+
+    if request.method == 'POST':
+        # Simulate a real-time monitoring system with WebSocket command injection
+        if websocket_message:
+            try:
+                message = json.loads(websocket_message)
+
+                # Check for command injection in WebSocket message
+                cmdi_patterns = ['&', '|', ';', '`', '$', '(', ')', '\\']
+
+                for key, value in message.items():
+                    if isinstance(value, str):
+                        for pattern in cmdi_patterns:
+                            if pattern in value:
+                                cmdi_detected = True
+                                monitoring_result = "WebSocket connection established\n"
+                                monitoring_result += f"Processing message type: {message.get('type', 'unknown')}\n"
+                                monitoring_result += f"Target: {str(value).split()[0]}\n"
+                                monitoring_result += "Real-time monitoring active...\n\n"
+
+                                # Add command injection output
+                                if 'ps' in value or 'netstat' in value:
+                                    monitoring_result += "System monitoring data:\n"
+                                    monitoring_result += "Active connections: 42\n"
+                                    monitoring_result += "System load: 0.8\n"
+                                    monitoring_result += "Flag: R00T{w3bs0ck3t_cmd1_pwn3d}\n"
+
+                                # Mark challenge as completed
+                                challenge = Challenge.query.filter_by(name="Command Injection via WebSockets").first()
+                                if challenge:
+                                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                                    if challenge.id not in completed_ids:
+                                        update_user_progress(machine_id, challenge.id, challenge.points)
+                                break
+                        if cmdi_detected:
+                            break
+
+                if not cmdi_detected:
+                    monitoring_result = "WebSocket connection established\n"
+                    monitoring_result += f"Processing message type: {message.get('type', 'unknown')}\n"
+                    monitoring_result += "Monitoring data retrieved successfully\n"
+
+            except json.JSONDecodeError:
+                monitoring_result = "Error: Invalid WebSocket message format"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Command Injection via WebSockets").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('cmdi/cmdi_level14.html', flag=flag, cmdi_detected=cmdi_detected,
+                          websocket_message=websocket_message, monitoring_result=monitoring_result, challenge=challenge)
+
+# Command Injection Level 15 - Command Injection in Serverless Functions
+@app.route('/cmdi/level15', methods=['GET', 'POST'])
+def cmdi_level15():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    cmdi_detected = False
+    function_payload = request.form.get('function_payload', '{"event": "process_data", "input": "sample.txt", "options": "--format json"}')
+    lambda_result = ''
+
+    if request.method == 'POST':
+        # Simulate AWS Lambda function with command injection
+        if function_payload:
+            try:
+                payload = json.loads(function_payload)
+
+                # Check for command injection in Lambda payload
+                cmdi_patterns = ['&', '|', ';', '`', '$', '(', ')', '\\']
+
+                for key, value in payload.items():
+                    if isinstance(value, str):
+                        for pattern in cmdi_patterns:
+                            if pattern in value:
+                                cmdi_detected = True
+                                lambda_result = "AWS Lambda Function Execution\n"
+                                lambda_result += "Function: data-processor-v2\n"
+                                lambda_result += "Runtime: python3.9\n"
+                                lambda_result += f"Processing event: {payload.get('event', 'unknown')}\n"
+                                lambda_result += "Execution started...\n\n"
+
+                                # Add command injection output
+                                if 'env' in value or 'printenv' in value:
+                                    lambda_result += "Lambda environment variables:\n"
+                                    lambda_result += "AWS_REGION=us-east-1\n"
+                                    lambda_result += "AWS_LAMBDA_FUNCTION_NAME=data-processor\n"
+                                    lambda_result += "SECRET_FLAG=R00T{s3rv3rl3ss_cmd1_pwn3d}\n"
+
+                                # Mark challenge as completed
+                                challenge = Challenge.query.filter_by(name="Command Injection in Serverless Functions").first()
+                                if challenge:
+                                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                                    if challenge.id not in completed_ids:
+                                        update_user_progress(machine_id, challenge.id, challenge.points)
+                                break
+                        if cmdi_detected:
+                            break
+
+                if not cmdi_detected:
+                    lambda_result = "AWS Lambda Function Execution\n"
+                    lambda_result += f"Processing event: {payload.get('event', 'unknown')}\n"
+                    lambda_result += "Function executed successfully\n"
+
+            except json.JSONDecodeError:
+                lambda_result = "Error: Invalid Lambda payload format"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Command Injection in Serverless Functions").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('cmdi/cmdi_level15.html', flag=flag, cmdi_detected=cmdi_detected,
+                          function_payload=function_payload, lambda_result=lambda_result, challenge=challenge)
+
+# Command Injection Level 16 - Command Injection with Process Substitution
+@app.route('/cmdi/level16', methods=['GET', 'POST'])
+def cmdi_level16():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    cmdi_detected = False
+    automation_script = request.form.get('automation_script', 'backup_database.sh')
+    script_params = request.form.get('script_params', '--target production --format tar.gz')
+    execution_result = ''
+
+    if request.method == 'POST':
+        # Simulate a Linux automation tool with advanced command injection
+        if automation_script and script_params:
+            # Check for process substitution and advanced injection techniques
+            advanced_patterns = ['<(', '>(', '$(', '`', '{', '}', '\\', '|', '&']
+
+            for pattern in advanced_patterns:
+                if pattern in automation_script or pattern in script_params:
+                    cmdi_detected = True
+                    execution_result = f"Executing automation script: {automation_script.split()[0]}\n"
+                    execution_result += f"Parameters: {script_params.split()[0]}\n"
+                    execution_result += "Script execution started...\n"
+                    execution_result += "Setting up environment...\n"
+                    execution_result += "Processing parameters...\n\n"
+
+                    # Add command injection output
+                    if 'whoami' in automation_script or 'whoami' in script_params:
+                        execution_result += "Process substitution executed:\n"
+                        execution_result += "Current user: automation-runner\n"
+                        execution_result += "Process ID: 12345\n"
+                        execution_result += "Flag: R00T{pr0c3ss_subst1tut10n_pwn3d}\n"
+
+                    # Mark challenge as completed
+                    challenge = Challenge.query.filter_by(name="Command Injection with Process Substitution").first()
+                    if challenge:
+                        completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                        if challenge.id not in completed_ids:
+                            update_user_progress(machine_id, challenge.id, challenge.points)
+                    break
+            else:
+                execution_result = f"Executing automation script: {automation_script}\n"
+                execution_result += f"Parameters: {script_params}\n"
+                execution_result += "Script completed successfully\n"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Command Injection with Process Substitution").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('cmdi/cmdi_level16.html', flag=flag, cmdi_detected=cmdi_detected,
+                          automation_script=automation_script, script_params=script_params,
+                          execution_result=execution_result, challenge=challenge)
+
+# Command Injection Level 17 - Command Injection in Container Environments
+@app.route('/cmdi/level17', methods=['GET', 'POST'])
+def cmdi_level17():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    cmdi_detected = False
+    container_image = request.form.get('container_image', 'nginx:latest')
+    container_cmd = request.form.get('container_cmd', '/bin/sh -c "nginx -g \'daemon off;\'"')
+    docker_result = ''
+
+    if request.method == 'POST':
+        # Simulate a Kubernetes/Docker container management platform
+        if container_image and container_cmd:
+            # Check for container escape and command injection
+            cmdi_patterns = ['&', '|', ';', '`', '$', '(', ')', '\\', '..', '/proc', '/sys']
+
+            for pattern in cmdi_patterns:
+                if pattern in container_image or pattern in container_cmd:
+                    cmdi_detected = True
+                    docker_result = f"Creating container from image: {container_image.split()[0]}\n"
+                    docker_result += f"Container command: {container_cmd.split()[0]}\n"
+                    docker_result += "Container ID: c4f3d2a1b5e6\n"
+                    docker_result += "Container started successfully\n"
+                    docker_result += "Monitoring container health...\n\n"
+
+                    # Add container escape output
+                    if 'proc' in container_cmd or 'sys' in container_cmd:
+                        docker_result += "Container escape detected:\n"
+                        docker_result += "Host filesystem access gained\n"
+                        docker_result += "Host kernel: Linux docker-host 5.15.0\n"
+                        docker_result += "Flag: R00T{c0nt41n3r_3sc4p3_pwn3d}\n"
+                    elif 'whoami' in container_cmd:
+                        docker_result += "Container execution output:\n"
+                        docker_result += "Container user: root\n"
+                        docker_result += "Container ID: c4f3d2a1b5e6\n"
+                        docker_result += "Flag: R00T{c0nt41n3r_3sc4p3_pwn3d}\n"
+
+                    # Mark challenge as completed
+                    challenge = Challenge.query.filter_by(name="Command Injection in Container Environments").first()
+                    if challenge:
+                        completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                        if challenge.id not in completed_ids:
+                            update_user_progress(machine_id, challenge.id, challenge.points)
+                    break
+            else:
+                docker_result = f"Creating container from image: {container_image}\n"
+                docker_result += f"Container command: {container_cmd}\n"
+                docker_result += "Container started successfully\n"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Command Injection in Container Environments").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('cmdi/cmdi_level17.html', flag=flag, cmdi_detected=cmdi_detected,
+                          container_image=container_image, container_cmd=container_cmd,
+                          docker_result=docker_result, challenge=challenge)
+
+# Command Injection Level 18 - Command Injection via Template Engines
+@app.route('/cmdi/level18', methods=['GET', 'POST'])
+def cmdi_level18():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    cmdi_detected = False
+    report_template = request.form.get('report_template', 'Report for {{customer_name}} generated on {{date}}')
+    template_data = request.form.get('template_data', '{"customer_name": "Acme Corp", "date": "2024-12-19"}')
+    report_result = ''
+
+    if request.method == 'POST':
+        # Simulate a report generation system with template injection
+        if report_template and template_data:
+            try:
+                data = json.loads(template_data)
+
+                # Check for template injection leading to command execution
+                ssti_patterns = ['{{', '}}', '{%', '%}', '__', 'import', 'os', 'subprocess']
+                cmdi_patterns = ['&', '|', ';', '`', '$', '(', ')']
+
+                template_vulnerable = any(pattern in report_template for pattern in ssti_patterns)
+                data_vulnerable = any(any(pattern in str(value) for pattern in cmdi_patterns)
+                                    for value in data.values() if isinstance(value, str))
+
+                if template_vulnerable or data_vulnerable:
+                    cmdi_detected = True
+                    report_result = "Generating report from template...\n"
+                    report_result += "Template engine: Jinja2\n"
+                    report_result += "Processing template variables...\n"
+                    report_result += "Rendering report...\n\n"
+
+                    # Add template injection output
+                    if '__import__' in report_template or 'os' in report_template:
+                        report_result += "Template injection executed:\n"
+                        report_result += "System access gained through template engine\n"
+                        report_result += "Current working directory: /app/reports\n"
+                        report_result += "Flag: R00T{t3mpl4t3_1nj3ct10n_pwn3d}\n"
+                    elif any('whoami' in str(value) for value in data.values()):
+                        report_result += "Command injection in template data:\n"
+                        report_result += "Template user: report-generator\n"
+                        report_result += "Flag: R00T{t3mpl4t3_1nj3ct10n_pwn3d}\n"
+
+                    # Mark challenge as completed
+                    challenge = Challenge.query.filter_by(name="Command Injection via Template Engines").first()
+                    if challenge:
+                        completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                        if challenge.id not in completed_ids:
+                            update_user_progress(machine_id, challenge.id, challenge.points)
+                else:
+                    # Safe template rendering
+                    safe_template = report_template.replace('{{customer_name}}', data.get('customer_name', 'Unknown'))
+                    safe_template = safe_template.replace('{{date}}', data.get('date', 'Unknown'))
+                    report_result = f"Report generated successfully:\n\n{safe_template}\n"
+
+            except json.JSONDecodeError:
+                report_result = "Error: Invalid JSON data format"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Command Injection via Template Engines").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('cmdi/cmdi_level18.html', flag=flag, cmdi_detected=cmdi_detected,
+                          report_template=report_template, template_data=template_data,
+                          report_result=report_result, challenge=challenge)
+
+# Command Injection Level 19 - Command Injection in Message Queues
+@app.route('/cmdi/level19', methods=['GET', 'POST'])
+def cmdi_level19():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    cmdi_detected = False
+    queue_message = request.form.get('queue_message', '{"task": "process_file", "filename": "data.csv", "options": "--format json"}')
+    processing_result = ''
+
+    if request.method == 'POST':
+        # Simulate a distributed system with message queue processing
+        if queue_message:
+            try:
+                message = json.loads(queue_message)
+
+                # Check for command injection in message queue processing
+                cmdi_patterns = ['&', '|', ';', '`', '$', '(', ')', '\\']
+
+                for key, value in message.items():
+                    if isinstance(value, str):
+                        for pattern in cmdi_patterns:
+                            if pattern in value:
+                                cmdi_detected = True
+                                processing_result = "Message Queue Processing\n"
+                                processing_result += "Queue: task-processor\n"
+                                processing_result += f"Task: {message.get('task', 'unknown')}\n"
+                                processing_result += "Worker node: worker-03\n"
+                                processing_result += "Processing message...\n\n"
+
+                                # Add command injection output
+                                if 'uname' in value or 'hostname' in value:
+                                    processing_result += "Worker system information:\n"
+                                    processing_result += "Worker hostname: task-worker-03\n"
+                                    processing_result += "Worker OS: Linux 5.15.0-72-generic\n"
+                                    processing_result += "Flag: R00T{m3ss4g3_qu3u3_pwn3d}\n"
+
+                                # Mark challenge as completed
+                                challenge = Challenge.query.filter_by(name="Command Injection in Message Queues").first()
+                                if challenge:
+                                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                                    if challenge.id not in completed_ids:
+                                        update_user_progress(machine_id, challenge.id, challenge.points)
+                                break
+                        if cmdi_detected:
+                            break
+
+                if not cmdi_detected:
+                    processing_result = "Message Queue Processing\n"
+                    processing_result += f"Task: {message.get('task', 'unknown')}\n"
+                    processing_result += "Message processed successfully\n"
+
+            except json.JSONDecodeError:
+                processing_result = "Error: Invalid message format"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Command Injection in Message Queues").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('cmdi/cmdi_level19.html', flag=flag, cmdi_detected=cmdi_detected,
+                          queue_message=queue_message, processing_result=processing_result, challenge=challenge)
+
+# Command Injection Level 20 - Command Injection with Out-of-Band
+@app.route('/cmdi/level20', methods=['GET', 'POST'])
+def cmdi_level20():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    cmdi_detected = False
+    system_config = request.form.get('system_config', 'network.interface=eth0')
+    webhook_url = request.form.get('webhook_url', 'https://webhook.site/unique-id')
+    config_result = ''
+
+    if request.method == 'POST':
+        # Simulate an air-gapped industrial control system
+        if system_config:
+            # Check for out-of-band command injection techniques
+            oob_patterns = ['curl', 'wget', 'nc', 'netcat', 'ping', 'nslookup', 'dig']
+            cmdi_patterns = ['&', '|', ';', '`', '$', '(', ')', '\\']
+
+            has_oob = any(pattern in system_config for pattern in oob_patterns)
+            has_cmdi = any(pattern in system_config for pattern in cmdi_patterns)
+
+            if has_oob and has_cmdi:
+                cmdi_detected = True
+                config_result = "Industrial Control System Configuration\n"
+                config_result += "System: SCADA-HMI-01\n"
+                config_result += "Network: Air-gapped environment\n"
+                config_result += "Processing configuration...\n"
+                config_result += "Applying network settings...\n\n"
+
+                # Add out-of-band output
+                if 'curl' in system_config or 'wget' in system_config:
+                    config_result += "Out-of-band communication detected:\n"
+                    config_result += "External connection established\n"
+                    config_result += "Data exfiltration in progress...\n"
+                    config_result += "Flag: R00T{0ut_0f_b4nd_cmd1_pwn3d}\n"
+
+                # Mark challenge as completed
+                challenge = Challenge.query.filter_by(name="Command Injection with Out-of-Band").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                config_result = "Industrial Control System Configuration\n"
+                config_result += "Configuration applied successfully\n"
+                config_result += "System status: Operational\n"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Command Injection with Out-of-Band").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('cmdi/cmdi_level20.html', flag=flag, cmdi_detected=cmdi_detected,
+                          system_config=system_config, webhook_url=webhook_url,
+                          config_result=config_result, challenge=challenge)
+
+# Command Injection Level 21 - Command Injection in Cloud Functions
+@app.route('/cmdi/level21', methods=['GET', 'POST'])
+def cmdi_level21():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    cmdi_detected = False
+    function_code = request.form.get('function_code', 'def handler(event, context):\n    return {"status": "success"}')
+    runtime_env = request.form.get('runtime_env', 'python3.9')
+    cloud_result = ''
+
+    if request.method == 'POST':
+        # Simulate Google Cloud Functions deployment
+        if function_code:
+            # Check for command injection in cloud function code
+            cmdi_patterns = ['os.system', 'subprocess', 'exec', 'eval', '__import__']
+
+            for pattern in cmdi_patterns:
+                if pattern in function_code:
+                    cmdi_detected = True
+                    cloud_result = "Google Cloud Functions Deployment\n"
+                    cloud_result += f"Runtime: {runtime_env}\n"
+                    cloud_result += "Function: data-processor-v3\n"
+                    cloud_result += "Region: us-central1\n"
+                    cloud_result += "Deploying function...\n"
+                    cloud_result += "Function deployed successfully\n"
+                    cloud_result += "Testing function execution...\n\n"
+
+                    # Add cloud function injection output
+                    if 'os.system' in function_code or 'subprocess' in function_code:
+                        cloud_result += "Function execution output:\n"
+                        cloud_result += "Cloud environment: Google Cloud Platform\n"
+                        cloud_result += "Service account: cloud-function-sa@project.iam\n"
+                        cloud_result += "Flag: R00T{cl0ud_funct10n_pwn3d}\n"
+
+                    # Mark challenge as completed
+                    challenge = Challenge.query.filter_by(name="Command Injection in Cloud Functions").first()
+                    if challenge:
+                        completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                        if challenge.id not in completed_ids:
+                            update_user_progress(machine_id, challenge.id, challenge.points)
+                    break
+            else:
+                cloud_result = "Google Cloud Functions Deployment\n"
+                cloud_result += f"Runtime: {runtime_env}\n"
+                cloud_result += "Function deployed successfully\n"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Command Injection in Cloud Functions").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('cmdi/cmdi_level21.html', flag=flag, cmdi_detected=cmdi_detected,
+                          function_code=function_code, runtime_env=runtime_env,
+                          cloud_result=cloud_result, challenge=challenge)
+
+# Command Injection Level 22 - Command Injection via SSH Commands
+@app.route('/cmdi/level22', methods=['GET', 'POST'])
+def cmdi_level22():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    cmdi_detected = False
+    ssh_host = request.form.get('ssh_host', 'production-server.company.com')
+    ssh_command = request.form.get('ssh_command', 'systemctl status nginx')
+    ssh_result = ''
+
+    if request.method == 'POST':
+        # Simulate a remote management tool with SSH command execution
+        if ssh_host and ssh_command:
+            # Check for command injection in SSH commands
+            cmdi_patterns = ['&', '|', ';', '`', '$', '(', ')', '\\', '&&', '||']
+
+            for pattern in cmdi_patterns:
+                if pattern in ssh_command:
+                    cmdi_detected = True
+                    ssh_result = f"SSH Connection to {ssh_host.split()[0]}\n"
+                    ssh_result += "Authentication: Key-based\n"
+                    ssh_result += f"Executing command: {ssh_command.split()[0]}\n"
+                    ssh_result += "Connection established...\n"
+                    ssh_result += "Command execution started...\n\n"
+
+                    # Add SSH command injection output
+                    if 'whoami' in ssh_command or 'id' in ssh_command:
+                        ssh_result += "Remote command output:\n"
+                        ssh_result += "Remote user: deploy-user\n"
+                        ssh_result += "Remote host: production-server-01\n"
+                        ssh_result += "SSH session: pts/2\n"
+                        ssh_result += "Flag: R00T{ssh_cmd_1nj3ct10n_pwn3d}\n"
+
+                    # Mark challenge as completed
+                    challenge = Challenge.query.filter_by(name="Command Injection via SSH Commands").first()
+                    if challenge:
+                        completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                        if challenge.id not in completed_ids:
+                            update_user_progress(machine_id, challenge.id, challenge.points)
+                    break
+            else:
+                ssh_result = f"SSH Connection to {ssh_host}\n"
+                ssh_result += f"Executing command: {ssh_command}\n"
+                ssh_result += "Command executed successfully\n"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Command Injection via SSH Commands").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('cmdi/cmdi_level22.html', flag=flag, cmdi_detected=cmdi_detected,
+                          ssh_host=ssh_host, ssh_command=ssh_command,
+                          ssh_result=ssh_result, challenge=challenge)
+
+# Command Injection Level 23 - Advanced Command Injection Chaining
+@app.route('/cmdi/level23', methods=['GET', 'POST'])
+def cmdi_level23():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    cmdi_detected = False
+    infrastructure_config = request.form.get('infrastructure_config', '{"terraform": {"provider": "aws", "region": "us-east-1"}, "ansible": {"playbook": "deploy.yml", "inventory": "production"}}')
+    deployment_result = ''
+
+    if request.method == 'POST':
+        # Simulate a complex enterprise infrastructure deployment system
+        if infrastructure_config:
+            try:
+                config = json.loads(infrastructure_config)
+
+                # Check for advanced command injection chaining
+                advanced_patterns = ['$(', '`', '&&', '||', '|', ';', '&']
+                terraform_cmdi = False
+                ansible_cmdi = False
+
+                # Check Terraform config
+                if 'terraform' in config:
+                    terraform_config = str(config['terraform'])
+                    terraform_cmdi = any(pattern in terraform_config for pattern in advanced_patterns)
+
+                # Check Ansible config
+                if 'ansible' in config:
+                    ansible_config = str(config['ansible'])
+                    ansible_cmdi = any(pattern in ansible_config for pattern in advanced_patterns)
+
+                if terraform_cmdi or ansible_cmdi:
+                    cmdi_detected = True
+                    deployment_result = "Enterprise Infrastructure Deployment\n"
+                    deployment_result += "Platform: Multi-cloud hybrid infrastructure\n"
+                    deployment_result += "Tools: Terraform + Ansible + Kubernetes\n"
+                    deployment_result += "Environment: Production\n"
+                    deployment_result += "Initializing deployment pipeline...\n\n"
+
+                    if terraform_cmdi:
+                        deployment_result += "Terraform execution:\n"
+                        deployment_result += "Provider: AWS\n"
+                        deployment_result += "Resources: EC2, RDS, S3\n"
+                        deployment_result += "Command injection in Terraform detected!\n\n"
+
+                    if ansible_cmdi:
+                        deployment_result += "Ansible execution:\n"
+                        deployment_result += "Inventory: Production servers\n"
+                        deployment_result += "Playbook: Application deployment\n"
+                        deployment_result += "Command injection in Ansible detected!\n\n"
+
+                    deployment_result += "Infrastructure compromise achieved:\n"
+                    deployment_result += "Access level: Enterprise administrator\n"
+                    deployment_result += "Scope: Multi-cloud infrastructure\n"
+                    deployment_result += "Flag: R00T{4dv4nc3d_ch41n1ng_m4st3r_pwn3d}\n"
+
+                    # Mark challenge as completed
+                    challenge = Challenge.query.filter_by(name="Advanced Command Injection Chaining").first()
+                    if challenge:
+                        completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                        if challenge.id not in completed_ids:
+                            update_user_progress(machine_id, challenge.id, challenge.points)
+                else:
+                    deployment_result = "Enterprise Infrastructure Deployment\n"
+                    deployment_result += "Deployment completed successfully\n"
+                    deployment_result += "All systems operational\n"
+
+            except json.JSONDecodeError:
+                deployment_result = "Error: Invalid infrastructure configuration format"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Advanced Command Injection Chaining").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('cmdi/cmdi_level23.html', flag=flag, cmdi_detected=cmdi_detected,
+                          infrastructure_config=infrastructure_config, deployment_result=deployment_result, challenge=challenge)
 
 def show_help():
     """Show help information"""

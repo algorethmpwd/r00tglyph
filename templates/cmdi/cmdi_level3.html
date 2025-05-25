@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 3: Command Injection in File Upload Metadata - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        {% if cmdi_detected %}
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>Success!</strong> You've successfully exploited the command injection vulnerability in the file metadata processor! The challenge has been marked as completed.
+            {% if flag %}
+            <div class="mt-2">
+                <strong>Flag:</strong> <code>{{ flag }}</code>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 3: Command Injection in File Upload Metadata</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>MetaExtract</strong>, a fictional file metadata extraction tool! This challenge simulates a real-world scenario where a file upload metadata processor is vulnerable to command injection.
+                    </p>
+                    <p>
+                        The developers of MetaExtract have created a tool that extracts metadata from uploaded files. However, they've made a critical mistake in how they process the filename.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Exploit the command injection vulnerability in the file metadata processor to read the contents of the flag.txt file on the server.
+                    </p>
+
+                    <div class="alert alert-warning">
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> The application uses the filename in a command to extract metadata. What happens if you include command injection characters in the filename?
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h5><i class="bi bi-info-circle-fill me-2"></i>Additional Hints</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>
+                                When exploiting command injection in file upload metadata processing, consider:
+                            </p>
+                            <ul>
+                                <li>How the filename might be used in a system command</li>
+                                <li>What command injection characters can be included in a filename</li>
+                                <li>How to craft a filename that will execute additional commands</li>
+                            </ul>
+                            <p>
+                                Try uploading a file with a specially crafted filename that includes command injection characters.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-file-earmark-binary me-2"></i>File Metadata Extractor</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('cmdi_level3') }}" method="post" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="file" class="form-label">Upload a file to extract its metadata</label>
+                                <input class="form-control" type="file" id="file" name="file">
+                                <div class="form-text">Supported file types: All file types</div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Extract Metadata</button>
+                        </form>
+                    </div>
+                </div>
+
+                {% if metadata_result %}
+                <div class="card mb-4">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Metadata Extraction Results</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded"><code>{{ metadata_result }}</code></pre>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            File upload functionality is a common feature in web applications, but it can introduce security vulnerabilities if not implemented correctly. One such vulnerability is command injection in file metadata processing.
+                        </p>
+                        <p>
+                            In 2023, security researchers found that:
+                        </p>
+                        <ul>
+                            <li>Over 30% of file upload vulnerabilities involve metadata processing</li>
+                            <li>Filenames are often passed directly to system commands without proper sanitization</li>
+                            <li>Metadata extraction tools like ExifTool and ImageMagick have been exploited in the wild</li>
+                        </ul>
+                    </div>
+                </div>
+
+
+
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level='cmdi3') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

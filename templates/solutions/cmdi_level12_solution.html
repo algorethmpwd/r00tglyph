@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: Command Injection in DevOps Tools - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Solution: Command Injection in DevOps Tools</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <strong>Challenge:</strong> Exploit command injection in a Terraform infrastructure deployment tool.
+                </div>
+
+                <h3 class="mt-4">Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates command injection in a Terraform infrastructure deployment platform. The system processes Terraform configurations and executes deployment commands, potentially allowing command injection through configuration parameters.
+                </p>
+
+                <h3 class="mt-4">Solution Steps</h3>
+                <ol>
+                    <li>
+                        <p><strong>Analyze Terraform configuration:</strong> The deployment tool accepts Terraform configuration with various parameters.</p>
+                    </li>
+                    <li>
+                        <p><strong>Inject commands in configuration values:</strong> Try injecting commands in Terraform variable values.</p>
+                        <pre class="bg-light p-3 rounded"><code>instance_name = "web-server; whoami"</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Test different configuration fields:</strong> Try injection in multiple configuration parameters.</p>
+                        <pre class="bg-light p-3 rounded"><code>region = "us-east-1 && id"</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Use Terraform-specific injection:</strong> Leverage Terraform's command execution features.</p>
+                        <pre class="bg-light p-3 rounded"><code>instance_name = "web-server" && terraform_data = "$(whoami)"</code></pre>
+                    </li>
+                </ol>
+
+                <h3 class="mt-4">Alternative Payloads</h3>
+                <ul>
+                    <li><code>instance_name = "web-server; whoami"</code></li>
+                    <li><code>region = "us-east-1 && id"</code></li>
+                    <li><code>instance_type = "t2.micro | whoami"</code></li>
+                    <li><code>tags = "Environment=$(whoami)"</code></li>
+                </ul>
+
+                <h3 class="mt-4">DevOps Tool Context</h3>
+                <p>This vulnerability is common in:</p>
+                <ul>
+                    <li>Terraform deployment platforms</li>
+                    <li>Ansible automation tools</li>
+                    <li>Kubernetes deployment systems</li>
+                    <li>Infrastructure as Code (IaC) platforms</li>
+                </ul>
+
+                <h3 class="mt-4">Real-World Impact</h3>
+                <p>Command injection in DevOps tools can lead to:</p>
+                <ul>
+                    <li>Compromise of infrastructure deployment systems</li>
+                    <li>Unauthorized access to cloud resources</li>
+                    <li>Manipulation of infrastructure configurations</li>
+                    <li>Data exfiltration from deployment environments</li>
+                </ul>
+
+                <h3 class="mt-4">Prevention</h3>
+                <ol>
+                    <li><strong>Configuration Validation:</strong> Validate all Terraform configuration parameters</li>
+                    <li><strong>Sandboxed Execution:</strong> Run Terraform in isolated environments</li>
+                    <li><strong>Parameter Sanitization:</strong> Sanitize all user-provided configuration values</li>
+                    <li><strong>Least Privilege:</strong> Run deployment tools with minimal required permissions</li>
+                </ol>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('cmdi_level12') }}" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end"><i class="bi bi-list me-2"></i>All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

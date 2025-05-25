@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Command Injection Level 11 - XML Processing{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3><i class="bi bi-terminal me-2"></i>Command Injection Level 11</h3>
+                    <div>
+                        <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#challengeModal">
+                            <i class="bi bi-info-circle me-1"></i>Challenge Info
+                        </button>
+                        <a href="{{ url_for('solutions', level='cmdi11') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-lightbulb me-1"></i>Solution
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="scenario-box mb-4">
+                        <h5><i class="bi bi-building-gear me-2"></i>Legacy Enterprise System</h5>
+                        <p>You're testing a legacy enterprise system that processes XML configuration files for service management. The system uses XML parsing to execute service management commands.</p>
+                        <p><strong>Context:</strong> Enterprise service management platform with XML-based configuration</p>
+                        <p><strong>Technology:</strong> Legacy XML processing with command execution</p>
+                    </div>
+
+                    {% if flag %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-flag-fill me-2"></i><strong>Challenge Completed!</strong>
+                        <br>Flag: <code>{{ flag }}</code>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" class="mb-4">
+                        <div class="mb-3">
+                            <label for="xml_config" class="form-label">XML Configuration:</label>
+                            <textarea class="form-control" id="xml_config" name="xml_config" rows="8" 
+                                      style="font-family: monospace;">{{ xml_config }}</textarea>
+                            <div class="form-text">Enter XML configuration for service management.</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-gear me-2"></i>Process Configuration
+                        </button>
+                    </form>
+
+                    {% if processing_result %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h6><i class="bi bi-terminal me-2"></i>Processing Output</h6>
+                        </div>
+                        <div class="card-body">
+                            <pre class="command-output">{{ processing_result }}</pre>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="mt-4">
+                        <h6>XML Injection Techniques:</h6>
+                        <ul>
+                            <li>Inject commands in XML element values</li>
+                            <li>Try: <code>&lt;service&gt;web; whoami&lt;/service&gt;</code></li>
+                            <li>Use XML attributes for injection</li>
+                            <li>Test different XML elements for command execution</li>
+                        </ul>
+                        
+                        <h6>Legacy System Context:</h6>
+                        <p>This challenge simulates vulnerabilities in legacy enterprise systems that process XML for system management, commonly found in older SOAP services, configuration management systems, and enterprise service buses.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Challenge Info Modal -->
+<div class="modal fade" id="challengeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Command Injection Level 11 - Challenge Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Objective:</h6>
+                <p>Exploit command injection through XML processing in a legacy enterprise system.</p>
+                
+                <h6>Scenario:</h6>
+                <p>You're testing a legacy enterprise service management platform that processes XML configuration files. The system parses XML and uses element values in system commands without proper validation, creating opportunities for command injection.</p>
+                
+                <h6>Learning Goals:</h6>
+                <ul>
+                    <li>Understand command injection in XML processing contexts</li>
+                    <li>Learn about legacy enterprise system vulnerabilities</li>
+                    <li>Practice XML-based payload construction</li>
+                    <li>Explore enterprise service management security</li>
+                </ul>
+                
+                <h6>Real-World Context:</h6>
+                <p>This challenge simulates vulnerabilities commonly found in:</p>
+                <ul>
+                    <li>Legacy SOAP web services</li>
+                    <li>Enterprise service buses (ESB)</li>
+                    <li>Configuration management systems</li>
+                    <li>Older enterprise applications with XML-based APIs</li>
+                </ul>
+                
+                <h6>Hints:</h6>
+                <ul>
+                    <li>Inject commands within XML element values</li>
+                    <li>Try system information commands like 'whoami' or 'id'</li>
+                    <li>Use command separators within XML content</li>
+                    <li>Test different XML elements for injection opportunities</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

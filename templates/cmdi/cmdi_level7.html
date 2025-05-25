@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 7: Time-Based Blind Command Injection - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        {% if cmdi_detected %}
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>Success!</strong> You've successfully exploited the time-based blind command injection vulnerability! The challenge has been marked as completed.
+            {% if flag %}
+            <div class="mt-2">
+                <strong>Flag:</strong> <code>{{ flag }}</code>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 7: Time-Based Blind Command Injection</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>ServerStatus</strong>, a fictional server monitoring tool! This challenge simulates a real-world scenario where a system that checks server status is vulnerable to time-based blind command injection.
+                    </p>
+                    <p>
+                        The developers of ServerStatus have created a tool that allows users to check if a server is online. However, they've made a critical mistake in how they handle user input.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Exploit the time-based blind command injection vulnerability to read the contents of the flag.txt file on the server.
+                    </p>
+
+                    <div class="alert alert-warning">
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> The application doesn't show the output of commands, but you can use time-based techniques to extract information. What happens if you include a command that causes a delay?
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h5><i class="bi bi-info-circle-fill me-2"></i>Additional Hints</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>
+                                When exploiting time-based blind command injection, consider:
+                            </p>
+                            <ul>
+                                <li>Using commands like <code>sleep</code> to introduce delays</li>
+                                <li>Conditional execution with <code>&&</code> or <code>||</code> operators</li>
+                                <li>Using <code>grep</code> with the <code>sleep</code> command to check for specific content</li>
+                            </ul>
+                            <p>
+                                Try using a payload like <code>example.com && sleep 5</code> to see if there's a delay in the response.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-server me-2"></i>Server Status Checker</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('cmdi_level7') }}" method="post">
+                            <div class="mb-3">
+                                <label for="hostname" class="form-label">Server Hostname or IP</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="hostname" name="hostname" placeholder="Enter hostname (e.g., example.com)" value="{{ hostname }}">
+                                    <button class="btn btn-primary" type="submit">Check Status</button>
+                                </div>
+                                <div class="form-text">Enter a hostname or IP address to check if the server is online.</div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {% if check_result %}
+                <div class="card mb-4">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Status Check Result</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded"><code>{{ check_result }}</code></pre>
+                        <div class="mt-2">
+                            <span class="badge {% if response_time > 5 %}bg-danger{% elif response_time > 2 %}bg-warning{% else %}bg-success{% endif %}">
+                                Response time: {{ response_time }} seconds
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            Time-based blind command injection is a web security vulnerability that allows an attacker to extract information from a system by observing time differences in responses.
+                        </p>
+                        <p>
+                            In 2023-2024, this type of vulnerability remains a significant threat, especially in:
+                        </p>
+                        <ul>
+                            <li>Network monitoring tools</li>
+                            <li>Server management interfaces</li>
+                            <li>Diagnostic utilities</li>
+                            <li>IoT device management systems</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level='cmdi7') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

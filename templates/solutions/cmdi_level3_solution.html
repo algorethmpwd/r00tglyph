@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Command Injection Level 3 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Command Injection Level 3 Solution: Command Injection in File Upload Metadata</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    This page explains how to solve the Command Injection in File Upload Metadata challenge.
+                </div>
+                
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This challenge features a command injection vulnerability in a file upload metadata processor. The application takes a file upload and extracts metadata from it, but it doesn't properly sanitize the filename before using it in a system command.
+                </p>
+                <p>
+                    The vulnerability occurs because the application likely constructs a command like this on the server:
+                </p>
+                <pre class="bg-light p-3 rounded"><code>exiftool [filename]</code></pre>
+                <p>
+                    When the filename is directly included in a system command without proper validation or sanitization, attackers can craft filenames that include command injection characters.
+                </p>
+                
+                <h3>Solution</h3>
+                <p>To solve this challenge, you need to upload a file with a specially crafted filename that includes command injection characters:</p>
+                
+                <h4>1. Create a file with a malicious filename:</h4>
+                <p>
+                    Create a simple text file or image file with a filename that includes command injection characters:
+                </p>
+                <div class="alert alert-secondary">
+                    <code>normal_image;cat flag.txt;.jpg</code>
+                </div>
+                
+                <h4>2. Upload the file:</h4>
+                <p>
+                    Upload the file through the file upload form. When the server processes the file, it will execute the injected command and display the contents of flag.txt in the metadata results.
+                </p>
+                
+                <h4>3. Alternative techniques:</h4>
+                <p>
+                    If semicolons are blocked, you can try other command injection techniques:
+                </p>
+                <ul>
+                    <li>Using pipes: <code>normal_image|cat flag.txt|.jpg</code></li>
+                    <li>Using command substitution: <code>normal_image$(cat flag.txt).jpg</code></li>
+                    <li>Using backticks: <code>normal_image`cat flag.txt`.jpg</code></li>
+                </ul>
+                
+                <h3>Prevention</h3>
+                <p>
+                    To prevent command injection vulnerabilities in file upload functionality:
+                </p>
+                <ol>
+                    <li><strong>Sanitize filenames</strong> before using them in system commands. Remove or escape special characters.</li>
+                    <li><strong>Use a secure library</strong> for metadata extraction instead of calling system commands.</li>
+                    <li><strong>Implement strict filename validation</strong> using a whitelist approach, only allowing specific characters.</li>
+                    <li><strong>Generate random filenames</strong> on the server side and don't use user-supplied filenames in commands.</li>
+                    <li><strong>Use parameterized APIs</strong> that separate commands from arguments.</li>
+                </ol>
+                
+                <h3>Real-World Impact</h3>
+                <p>
+                    File upload metadata processing vulnerabilities have been found in real-world applications. In 2023, notable examples included:
+                </p>
+                <ul>
+                    <li>A popular image processing application that was vulnerable to command injection through filenames</li>
+                    <li>A document management system where attackers could execute commands by crafting malicious filenames</li>
+                    <li>A cloud storage service that didn't properly sanitize filenames before processing metadata</li>
+                </ul>
+                
+                <h3>Related Vulnerabilities</h3>
+                <p>
+                    File upload functionality can introduce other security vulnerabilities:
+                </p>
+                <ul>
+                    <li><strong>Path Traversal</strong>: Using "../" in filenames to write files to unauthorized locations</li>
+                    <li><strong>File Type Validation Bypass</strong>: Uploading malicious files by bypassing file type checks</li>
+                    <li><strong>Metadata Exploitation</strong>: Exploiting vulnerabilities in metadata processing libraries like ExifTool or ImageMagick</li>
+                </ul>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('cmdi_level3') }}" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

