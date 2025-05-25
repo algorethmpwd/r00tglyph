@@ -7,13 +7,82 @@
     <div class="col-md-10 offset-md-1">
         <div class="card">
             <div class="card-header bg-dark text-white">
-                <h2 class="text-center">Level 22: Advanced SSRF Challenge</h2>
+                <h2 class="text-center">Level 22: SSRF via Protocol Smuggling</h2>
             </div>
             <div class="card-body">
-                <div class="alert alert-warning">
-                    <h4><i class="bi bi-tools me-2"></i>Under Construction</h4>
-                    <p>This challenge is currently being developed. It will demonstrate advanced SSRF exploitation techniques.</p>
-                    <p><strong>Coming Soon:</strong> Expert-level SSRF challenges with real-world scenarios.</p>
+                <div class="alert alert-dark challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>Protocol Gateway</strong>, a fictional service platform! This challenge demonstrates Advanced protocol smuggling techniques for bypassing SSRF protections and filters.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Use protocol smuggling to bypass SSRF filters and access restricted internal services.
+                    </p>
+                    <p>
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Combine multiple protocols and encoding techniques to evade detection.
+                    </p>
+                    <p>
+                        <i class="bi bi-tools me-2"></i><strong>Tools:</strong> Use protocol smuggling tools, encoding utilities, and advanced bypass techniques.
+                    </p>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-shuffle me-2"></i>Protocol Gateway - Interface</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="/ssrf/level22" method="post">
+                            <div class="mb-3">
+                                <label for="smuggled_request" class="form-label">Smuggled Request</label>
+                                <textarea class="form-control" name="smuggled_request" rows="4" placeholder="GET /admin HTTP/1.1\r\nHost: internal.admin.local\r\n\r\n">{{ smuggled_request }}</textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="wrapper_protocol" class="form-label">Wrapper Protocol</label>
+                                <input type="text" class="form-control" name="wrapper_protocol" placeholder="gopher://127.0.0.1:80/" value="{{ wrapper_protocol }}">
+                            </div>
+                            <button class="btn btn-primary" type="submit">Execute Request</button>
+                        </form>
+                    </div>
+                </div>
+
+                {% if smuggling_result %}
+                <div class="card mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Request Result</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded">{{ smuggling_result }}</pre>
+                        {% if ssrf_detected %}
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>Protocol Smuggling SSRF Successful! Advanced bypass achieved.</strong>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if flag %}
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
+                    <p>Congratulations! You've successfully completed this advanced SSRF challenge.</p>
+                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
+                </div>
+                {% endif %}
+
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Learning Objectives</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>Understand advanced SSRF attack vectors</li>
+                            <li>Learn modern exploitation techniques</li>
+                            <li>Practice real-world attack scenarios</li>
+                            <li>Master cutting-edge security testing methods</li>
+                        </ul>
+                    </div>
+                </div>
 
                 <div class="mt-4">
                     <a href="{{ url_for('solutions', level='ssrf22') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>

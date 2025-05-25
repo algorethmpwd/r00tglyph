@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 13 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">SSRF Level 13 Solution: SSRF in WebSocket Upgrade</h2>
+            </div>
+            <div class="card-body">
+                <h3>Solution</h3>
+                <p>This challenge demonstrates SSRF vulnerabilities during WebSocket connection upgrades, where custom headers can be manipulated to target internal services.</p>
+
+                <h4>Step-by-Step Solution:</h4>
+                <ol>
+                    <li><strong>Understand WebSocket handshake:</strong> WebSocket connections start with HTTP upgrade requests</li>
+                    <li><strong>Identify injection points:</strong> Both WebSocket URL and custom headers can be manipulated</li>
+                    <li><strong>Target internal services:</strong> Use internal addresses in WebSocket URL or Host headers</li>
+                    <li><strong>Craft malicious upgrade:</strong> Include internal service targets in upgrade headers</li>
+                </ol>
+
+                <h4>WebSocket SSRF Payloads:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># Basic WebSocket SSRF
+WebSocket URL: ws://localhost:8080/admin
+Custom Headers: Host: internal.service.local
+
+# Target specific internal services
+WebSocket URL: ws://127.0.0.1:3000/websocket
+Custom Headers: 
+Host: admin.internal.local
+Origin: http://trusted.domain.com
+
+# Advanced header manipulation
+WebSocket URL: ws://internal.management.local:9090/ws
+Custom Headers:
+Host: internal.service.local
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==
+Sec-WebSocket-Version: 13</code></pre>
+                    </div>
+                </div>
+
+                <h4>WebSocket SSRF Techniques:</h4>
+                <ul>
+                    <li><strong>Host header injection:</strong> Override target host in upgrade headers</li>
+                    <li><strong>Origin manipulation:</strong> Bypass origin-based restrictions</li>
+                    <li><strong>Protocol upgrade abuse:</strong> Exploit upgrade mechanism for SSRF</li>
+                    <li><strong>Internal service discovery:</strong> Enumerate WebSocket services</li>
+                </ul>
+
+                <h4>Tools Required:</h4>
+                <ul>
+                    <li><strong>Burp Suite:</strong> WebSocket support and header manipulation</li>
+                    <li><strong>wscat:</strong> Command-line WebSocket client</li>
+                    <li><strong>Custom scripts:</strong> WebSocket handshake manipulation</li>
+                    <li><strong>Browser DevTools:</strong> WebSocket connection analysis</li>
+                </ul>
+
+                <h4>Impact:</h4>
+                <ul>
+                    <li>Access to internal WebSocket services</li>
+                    <li>Real-time data exfiltration</li>
+                    <li>Bypass of traditional HTTP-based protections</li>
+                    <li>Persistent connection to internal services</li>
+                </ul>
+
+                <h4>Mitigation:</h4>
+                <ul>
+                    <li>Validate all WebSocket URLs and headers</li>
+                    <li>Implement strict origin checking</li>
+                    <li>Use allowlists for WebSocket targets</li>
+                    <li>Monitor WebSocket upgrade requests</li>
+                </ul>
+
+                <div class="alert alert-info">
+                    <h5><i class="bi bi-lightbulb-fill me-2"></i>Learning Points</h5>
+                    <ul class="mb-0">
+                        <li>WebSocket upgrades can introduce unique SSRF vectors</li>
+                        <li>Real-time protocols require specialized security measures</li>
+                        <li>Header manipulation during protocol upgrades is critical</li>
+                        <li>Modern web applications use diverse communication protocols</li>
+                    </ul>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/ssrf/level13" class="btn btn-primary me-2">Try Challenge Again</a>
+                    <a href="/ssrf/level14" class="btn btn-success">Next Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

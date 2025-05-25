@@ -7,13 +7,82 @@
     <div class="col-md-10 offset-md-1">
         <div class="card">
             <div class="card-header bg-dark text-white">
-                <h2 class="text-center">Level 17: Advanced SSRF Challenge</h2>
+                <h2 class="text-center">Level 17: SSRF in Container Metadata</h2>
             </div>
             <div class="card-body">
-                <div class="alert alert-warning">
-                    <h4><i class="bi bi-tools me-2"></i>Under Construction</h4>
-                    <p>This challenge is currently being developed. It will demonstrate advanced SSRF exploitation techniques.</p>
-                    <p><strong>Coming Soon:</strong> Expert-level SSRF challenges with real-world scenarios.</p>
+                <div class="alert alert-dark challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>Container Registry</strong>, a fictional service platform! This challenge demonstrates Container metadata service exploitation allowing access to Docker/Kubernetes internal APIs.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Exploit container metadata endpoints to access internal container orchestration APIs.
+                    </p>
+                    <p>
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Target container metadata services like Docker daemon or Kubernetes API server.
+                    </p>
+                    <p>
+                        <i class="bi bi-tools me-2"></i><strong>Tools:</strong> Use container CLI tools, Kubernetes kubectl, and Docker API clients.
+                    </p>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-box me-2"></i>Container Registry - Interface</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="/ssrf/level17" method="post">
+                            <div class="mb-3">
+                                <label for="container_id" class="form-label">Container ID</label>
+                                <input type="text" class="form-control" name="container_id" placeholder="sha256:abc123..." value="{{ container_id }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="metadata_endpoint" class="form-label">Metadata Endpoint</label>
+                                <input type="text" class="form-control" name="metadata_endpoint" placeholder="http://169.254.169.254/metadata/v1/" value="{{ metadata_endpoint }}">
+                            </div>
+                            <button class="btn btn-primary" type="submit">Execute Request</button>
+                        </form>
+                    </div>
+                </div>
+
+                {% if container_result %}
+                <div class="card mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Request Result</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded">{{ container_result }}</pre>
+                        {% if ssrf_detected %}
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>Container SSRF Successful! Internal container API accessed.</strong>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if flag %}
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
+                    <p>Congratulations! You've successfully completed this advanced SSRF challenge.</p>
+                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
+                </div>
+                {% endif %}
+
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Learning Objectives</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>Understand advanced SSRF attack vectors</li>
+                            <li>Learn modern exploitation techniques</li>
+                            <li>Practice real-world attack scenarios</li>
+                            <li>Master cutting-edge security testing methods</li>
+                        </ul>
+                    </div>
+                </div>
 
                 <div class="mt-4">
                     <a href="{{ url_for('solutions', level='ssrf17') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>

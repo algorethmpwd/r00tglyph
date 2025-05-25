@@ -10,10 +10,81 @@
                 <h2 class="text-center">Level 13: SSRF in WebSocket Upgrade</h2>
             </div>
             <div class="card-body">
-                <div class="alert alert-warning">
-                    <h4><i class="bi bi-tools me-2"></i>Under Construction</h4>
-                    <p>This challenge is currently being developed. It will demonstrate SSRF vulnerabilities during WebSocket connection upgrades.</p>
-                    <p><strong>Coming Soon:</strong> Advanced WebSocket SSRF exploitation techniques.</p>
+                <div class="alert alert-dark challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>WebSocket Gateway</strong>, a fictional real-time communication service! This challenge demonstrates SSRF vulnerabilities during WebSocket connection upgrades.
+                    </p>
+                    <p>
+                        The service allows WebSocket connections to be established with custom upgrade headers. However, it doesn't properly validate the target hosts in upgrade requests, allowing SSRF attacks through WebSocket handshakes.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Exploit the WebSocket upgrade process to perform SSRF attacks against internal services.
+                    </p>
+                    <p>
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Use WebSocket upgrade headers to target internal services during the handshake process.
+                    </p>
+                    <p>
+                        <i class="bi bi-tools me-2"></i><strong>Tools:</strong> Use WebSocket clients, Burp Suite WebSocket support, and custom upgrade headers.
+                    </p>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-broadcast me-2"></i>WebSocket Gateway - Connection Manager</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="/ssrf/level13" method="post">
+                            <div class="mb-3">
+                                <label for="websocket_url" class="form-label">WebSocket Target URL</label>
+                                <input type="text" class="form-control" name="websocket_url" placeholder="ws://example.com:8080/chat" value="{{ websocket_url }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="upgrade_headers" class="form-label">Custom Upgrade Headers</label>
+                                <textarea class="form-control" name="upgrade_headers" rows="4" placeholder="Host: internal.service.local&#10;Origin: http://trusted.domain.com">{{ upgrade_headers }}</textarea>
+                            </div>
+                            <button class="btn btn-primary" type="submit">Establish WebSocket Connection</button>
+                        </form>
+                    </div>
+                </div>
+
+                {% if websocket_result %}
+                <div class="card mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>WebSocket Handshake Result</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded">{{ websocket_result }}</pre>
+                        {% if ssrf_detected %}
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>WebSocket SSRF Successful!</strong> Internal service accessed via WebSocket upgrade.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if flag %}
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
+                    <p>Congratulations! You've successfully exploited SSRF through WebSocket upgrades.</p>
+                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
+                </div>
+                {% endif %}
+
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Learning Objectives</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>Understand SSRF vulnerabilities in WebSocket upgrades</li>
+                            <li>Learn how WebSocket handshakes can be exploited</li>
+                            <li>Practice manipulating upgrade headers for SSRF</li>
+                            <li>Master real-time protocol security testing</li>
+                        </ul>
+                    </div>
                 </div>
 
                 <div class="mt-4">

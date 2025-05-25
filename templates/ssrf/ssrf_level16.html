@@ -7,13 +7,82 @@
     <div class="col-md-10 offset-md-1">
         <div class="card">
             <div class="card-header bg-dark text-white">
-                <h2 class="text-center">Level 16: Advanced SSRF Challenge</h2>
+                <h2 class="text-center">Level 16: SSRF via LDAP Protocol</h2>
             </div>
             <div class="card-body">
-                <div class="alert alert-warning">
-                    <h4><i class="bi bi-tools me-2"></i>Under Construction</h4>
-                    <p>This challenge is currently being developed. It will demonstrate advanced SSRF exploitation techniques.</p>
-                    <p><strong>Coming Soon:</strong> Expert-level SSRF challenges with real-world scenarios.</p>
+                <div class="alert alert-dark challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>Directory Service</strong>, a fictional service platform! This challenge demonstrates LDAP injection through user directory lookups allowing SSRF attacks against internal LDAP servers.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Use LDAP injection to perform SSRF attacks against internal directory services.
+                    </p>
+                    <p>
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Inject LDAP queries that target internal directory servers and services.
+                    </p>
+                    <p>
+                        <i class="bi bi-tools me-2"></i><strong>Tools:</strong> Use LDAP query tools, directory enumeration utilities, and LDAP injection payloads.
+                    </p>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-people me-2"></i>Directory Service - Interface</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="/ssrf/level16" method="post">
+                            <div class="mb-3">
+                                <label for="ldap_query" class="form-label">LDAP Search Query</label>
+                                <input type="text" class="form-control" name="ldap_query" placeholder="(&(objectClass=user)(cn=admin))" value="{{ ldap_query }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="ldap_server" class="form-label">LDAP Server</label>
+                                <input type="text" class="form-control" name="ldap_server" placeholder="ldap://directory.internal.com:389" value="{{ ldap_server }}">
+                            </div>
+                            <button class="btn btn-primary" type="submit">Execute Request</button>
+                        </form>
+                    </div>
+                </div>
+
+                {% if ldap_result %}
+                <div class="card mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Request Result</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded">{{ ldap_result }}</pre>
+                        {% if ssrf_detected %}
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>LDAP SSRF Successful! Internal directory service accessed.</strong>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if flag %}
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
+                    <p>Congratulations! You've successfully completed this advanced SSRF challenge.</p>
+                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
+                </div>
+                {% endif %}
+
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Learning Objectives</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>Understand advanced SSRF attack vectors</li>
+                            <li>Learn modern exploitation techniques</li>
+                            <li>Practice real-world attack scenarios</li>
+                            <li>Master cutting-edge security testing methods</li>
+                        </ul>
+                    </div>
+                </div>
 
                 <div class="mt-4">
                     <a href="{{ url_for('solutions', level='ssrf16') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>

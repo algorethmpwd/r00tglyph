@@ -7,13 +7,82 @@
     <div class="col-md-10 offset-md-1">
         <div class="card">
             <div class="card-header bg-dark text-white">
-                <h2 class="text-center">Level 21: Advanced SSRF Challenge</h2>
+                <h2 class="text-center">Level 21: SSRF in Microservices</h2>
             </div>
             <div class="card-body">
-                <div class="alert alert-warning">
-                    <h4><i class="bi bi-tools me-2"></i>Under Construction</h4>
-                    <p>This challenge is currently being developed. It will demonstrate advanced SSRF exploitation techniques.</p>
-                    <p><strong>Coming Soon:</strong> Expert-level SSRF challenges with real-world scenarios.</p>
+                <div class="alert alert-dark challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>Service Mesh</strong>, a fictional service platform! This challenge demonstrates Microservices architecture exploitation allowing lateral movement through service mesh.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Exploit microservices communication to perform lateral SSRF attacks.
+                    </p>
+                    <p>
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Target service discovery mechanisms and inter-service communication.
+                    </p>
+                    <p>
+                        <i class="bi bi-tools me-2"></i><strong>Tools:</strong> Use service mesh tools, Istio/Envoy exploitation, and microservice scanners.
+                    </p>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-diagram-2 me-2"></i>Service Mesh - Interface</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="/ssrf/level21" method="post">
+                            <div class="mb-3">
+                                <label for="service_name" class="form-label">Service Name</label>
+                                <input type="text" class="form-control" name="service_name" placeholder="user-service" value="{{ service_name }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="mesh_endpoint" class="form-label">Service Mesh Endpoint</label>
+                                <input type="text" class="form-control" name="mesh_endpoint" placeholder="http://istio-proxy:15000/config_dump" value="{{ mesh_endpoint }}">
+                            </div>
+                            <button class="btn btn-primary" type="submit">Execute Request</button>
+                        </form>
+                    </div>
+                </div>
+
+                {% if microservice_result %}
+                <div class="card mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Request Result</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded">{{ microservice_result }}</pre>
+                        {% if ssrf_detected %}
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>Microservices SSRF Successful! Service mesh compromised.</strong>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if flag %}
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
+                    <p>Congratulations! You've successfully completed this advanced SSRF challenge.</p>
+                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
+                </div>
+                {% endif %}
+
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Learning Objectives</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>Understand advanced SSRF attack vectors</li>
+                            <li>Learn modern exploitation techniques</li>
+                            <li>Practice real-world attack scenarios</li>
+                            <li>Master cutting-edge security testing methods</li>
+                        </ul>
+                    </div>
+                </div>
 
                 <div class="mt-4">
                     <a href="{{ url_for('solutions', level='ssrf21') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>

