@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 10 - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 10: SSRF with DNS Rebinding</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>Website Health Monitor</strong>, a fictional website monitoring service! This challenge demonstrates the most advanced SSRF technique - DNS rebinding attacks to bypass SSRF protections.
+                    </p>
+                    <p>
+                        The service implements strict SSRF protections but is vulnerable to DNS rebinding attacks. This technique uses DNS resolution timing to bypass IP-based filters.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Use DNS rebinding techniques to bypass SSRF protections and access internal services.
+                    </p>
+                    <p>
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Use DNS rebinding services that resolve to external IPs first, then internal IPs on subsequent requests.
+                    </p>
+                    <p>
+                        <i class="bi bi-tools me-2"></i><strong>Tools:</strong> Use DNS rebinding services like rebind.network, rebind.it, or set up your own DNS rebinding infrastructure.
+                    </p>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-heart-pulse-fill me-2"></i>Website Health Monitor - Site Monitoring</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="/ssrf/level10" method="post">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">Target Domain</span>
+                                <input type="text" class="form-control" name="target_domain" placeholder="Enter domain to monitor (e.g., example.com)" value="{{ target_domain }}">
+                                <button class="btn btn-primary" type="submit">Check Health</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {% if rebinding_result %}
+                <div class="card mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Health Check Result</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded">{{ rebinding_result }}</pre>
+                        {% if ssrf_detected %}
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>DNS Rebinding Attack Successful!</strong> SSRF protections bypassed.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if flag %}
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
+                    <p>Congratulations! You've mastered the most advanced SSRF technique - DNS rebinding.</p>
+                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
+                </div>
+                {% endif %}
+
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Learning Objectives</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>Understand DNS rebinding attacks and their mechanisms</li>
+                            <li>Learn the most advanced SSRF bypass techniques</li>
+                            <li>Practice using DNS rebinding services and infrastructure</li>
+                            <li>Master expert-level SSRF exploitation methods</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

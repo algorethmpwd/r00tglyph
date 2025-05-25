@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 3 - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 3: Cloud Metadata SSRF</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>WebHook Notifier</strong>, a fictional webhook notification service! This challenge simulates a real-world cloud environment where SSRF can be used to access cloud metadata services.
+                    </p>
+                    <p>
+                        The service runs on a cloud instance and allows users to configure webhook URLs for notifications. However, it doesn't properly validate these URLs, allowing access to cloud metadata endpoints.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Exploit the SSRF vulnerability to access cloud metadata services and retrieve sensitive information like access keys or instance details.
+                    </p>
+                    <p>
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Try targeting cloud metadata endpoints like 169.254.169.254 (AWS), metadata.google.internal (GCP), or metadata.azure.com (Azure).
+                    </p>
+                    <p>
+                        <i class="bi bi-tools me-2"></i><strong>Tools:</strong> Use cloud CLI tools like aws-cli, gcloud, or az-cli to understand metadata structure, then exploit via SSRF.
+                    </p>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-bell-fill me-2"></i>WebHook Notifier - Notification Service</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="/ssrf/level3" method="post">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">Webhook URL</span>
+                                <input type="text" class="form-control" name="webhook_url" placeholder="Enter webhook URL for notifications (e.g., https://webhook.site/...)" value="{{ webhook_url }}">
+                                <button class="btn btn-primary" type="submit">Configure Webhook</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {% if metadata_result %}
+                <div class="card mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Webhook Configuration Result</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded">{{ metadata_result }}</pre>
+                        {% if ssrf_detected %}
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>Cloud Metadata Access Successful!</strong> You accessed sensitive cloud metadata.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if flag %}
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
+                    <p>Congratulations! You've successfully exploited SSRF to access cloud metadata services.</p>
+                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
+                </div>
+                {% endif %}
+
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Learning Objectives</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>Understand cloud metadata services and their security implications</li>
+                            <li>Learn how to exploit SSRF to access AWS, GCP, and Azure metadata</li>
+                            <li>Practice extracting sensitive information from cloud environments</li>
+                            <li>Understand the critical impact of SSRF in cloud infrastructure</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

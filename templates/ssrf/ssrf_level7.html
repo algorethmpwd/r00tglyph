@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 7 - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 7: SSRF in Webhooks</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>PaymentGateway Pro</strong>, a fictional payment processing service! This challenge demonstrates SSRF through webhook URL validation in payment systems.
+                    </p>
+                    <p>
+                        The service allows merchants to configure webhook URLs for payment notifications. However, it doesn't properly validate these URLs, allowing SSRF attacks against internal services.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Configure a webhook URL that targets internal services to exploit the SSRF vulnerability.
+                    </p>
+                    <p>
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Target internal payment processing APIs or admin interfaces.
+                    </p>
+                    <p>
+                        <i class="bi bi-tools me-2"></i><strong>Tools:</strong> Use Burp Suite to intercept webhook requests and analyze internal services.
+                    </p>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-credit-card-fill me-2"></i>PaymentGateway Pro - Webhook Configuration</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="/ssrf/level7" method="post">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">Notification URL</span>
+                                <input type="text" class="form-control" name="notification_url" placeholder="Enter webhook URL for payment notifications" value="{{ notification_url }}">
+                                <button class="btn btn-primary" type="submit">Configure Webhook</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {% if webhook_result %}
+                <div class="card mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Webhook Configuration Result</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded">{{ webhook_result }}</pre>
+                        {% if ssrf_detected %}
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>Webhook SSRF Successful!</strong> Internal service accessed.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if flag %}
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
+                    <p>Congratulations! You've successfully exploited SSRF in webhook functionality.</p>
+                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
+                </div>
+                {% endif %}
+
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Learning Objectives</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>Understand SSRF vulnerabilities in webhook implementations</li>
+                            <li>Learn how payment systems can be vulnerable to SSRF</li>
+                            <li>Practice exploiting webhook URL validation weaknesses</li>
+                            <li>Understand the business impact of SSRF in financial systems</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

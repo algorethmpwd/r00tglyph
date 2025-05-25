@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 8 - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 8: SSRF with WAF Bypass</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>SecureURL Fetcher</strong>, a fictional enterprise URL fetching service! This challenge demonstrates advanced SSRF filter bypass techniques against WAF protection.
+                    </p>
+                    <p>
+                        The service implements a Web Application Firewall (WAF) with advanced SSRF protection rules. You'll need to use sophisticated bypass techniques to circumvent these protections.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Bypass the advanced WAF protection to exploit SSRF and access internal services.
+                    </p>
+                    <p>
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Try advanced bypass techniques like DNS rebinding, alternative protocols, or encoding methods.
+                    </p>
+                    <p>
+                        <i class="bi bi-tools me-2"></i><strong>Tools:</strong> Use Burp Suite extensions, custom DNS servers, or research advanced SSRF bypass techniques.
+                    </p>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-shield-check-fill me-2"></i>SecureURL Fetcher - Protected Service</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="/ssrf/level8" method="post">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">Fetch URL</span>
+                                <input type="text" class="form-control" name="fetch_url" placeholder="Enter URL to fetch (WAF protected)" value="{{ fetch_url }}">
+                                <button class="btn btn-primary" type="submit">Fetch URL</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {% if waf_result %}
+                <div class="card mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Fetch Result</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded">{{ waf_result }}</pre>
+                        {% if ssrf_detected %}
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>WAF Bypass Successful!</strong> Advanced SSRF protection circumvented.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if flag %}
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
+                    <p>Congratulations! You've successfully bypassed advanced WAF protection.</p>
+                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
+                </div>
+                {% endif %}
+
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Learning Objectives</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>Understand advanced WAF protection mechanisms</li>
+                            <li>Learn sophisticated SSRF bypass techniques</li>
+                            <li>Practice circumventing enterprise-grade security controls</li>
+                            <li>Master advanced evasion methods and encoding techniques</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

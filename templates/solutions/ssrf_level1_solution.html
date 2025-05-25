@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 1 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">SSRF Level 1 Solution: Basic SSRF</h2>
+            </div>
+            <div class="card-body">
+                <h3>Solution</h3>
+                <p>This challenge demonstrates a basic Server-Side Request Forgery (SSRF) vulnerability where the application fetches content from user-supplied URLs without proper validation.</p>
+
+                <h4>Step-by-Step Solution:</h4>
+                <ol>
+                    <li><strong>Identify the vulnerability:</strong> The URL fetcher accepts any URL input without validation</li>
+                    <li><strong>Test internal addresses:</strong> Try URLs like:
+                        <ul>
+                            <li><code>http://localhost</code></li>
+                            <li><code>http://127.0.0.1</code></li>
+                            <li><code>http://192.168.1.1</code></li>
+                            <li><code>http://10.0.0.1</code></li>
+                        </ul>
+                    </li>
+                    <li><strong>Observe the response:</strong> Internal services return different responses than external ones</li>
+                    <li><strong>Extract the flag:</strong> The flag is revealed when accessing internal services</li>
+                </ol>
+
+                <h4>Payload Examples:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># Basic localhost access
+http://localhost
+
+# IP address access
+http://127.0.0.1
+
+# Private network scanning
+http://192.168.1.1
+http://10.0.0.1</code></pre>
+                    </div>
+                </div>
+
+                <h4>Technical Details:</h4>
+                <p>The vulnerability exists because the application:</p>
+                <ul>
+                    <li>Accepts user-controlled URLs</li>
+                    <li>Makes HTTP requests to these URLs from the server</li>
+                    <li>Returns the response content to the user</li>
+                    <li>Doesn't validate or filter internal/private IP addresses</li>
+                </ul>
+
+                <h4>Impact:</h4>
+                <ul>
+                    <li>Access to internal services and APIs</li>
+                    <li>Information disclosure from internal systems</li>
+                    <li>Potential for further exploitation of internal services</li>
+                    <li>Bypass of network-level access controls</li>
+                </ul>
+
+                <h4>Mitigation:</h4>
+                <ul>
+                    <li>Implement URL validation and filtering</li>
+                    <li>Use allowlists for permitted domains/IPs</li>
+                    <li>Block private IP ranges (RFC 1918)</li>
+                    <li>Implement network segmentation</li>
+                    <li>Use DNS resolution validation</li>
+                </ul>
+
+                <div class="alert alert-info">
+                    <h5><i class="bi bi-lightbulb-fill me-2"></i>Learning Points</h5>
+                    <ul class="mb-0">
+                        <li>SSRF allows attackers to make requests from the server's perspective</li>
+                        <li>Internal services are often less protected than external-facing ones</li>
+                        <li>Proper input validation is crucial for URL-based functionality</li>
+                        <li>Network segmentation provides defense in depth</li>
+                    </ul>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/ssrf/level1" class="btn btn-primary me-2">Try Challenge Again</a>
+                    <a href="/ssrf/level2" class="btn btn-success">Next Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

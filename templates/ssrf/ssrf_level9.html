@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 9 - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 9: SSRF via XXE</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>XML Data Processor</strong>, a fictional XML processing service! This challenge demonstrates chaining XXE (XML External Entity) vulnerabilities with SSRF for internal network access.
+                    </p>
+                    <p>
+                        The service processes XML data and resolves external entities. By crafting malicious XML with external entity references, you can achieve SSRF through XXE injection.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Create malicious XML with external entity references to exploit XXE and achieve SSRF against internal services.
+                    </p>
+                    <p>
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Use SYSTEM entities with file:// or http:// protocols to access internal resources.
+                    </p>
+                    <p>
+                        <i class="bi bi-tools me-2"></i><strong>Tools:</strong> Create XML payloads manually or use XXE exploitation tools and frameworks.
+                    </p>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-file-earmark-xml-fill me-2"></i>XML Data Processor - Document Processing</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="/ssrf/level9" method="post">
+                            <div class="mb-3">
+                                <label for="xml_data" class="form-label">XML Data</label>
+                                <textarea class="form-control" name="xml_data" rows="10" placeholder="Enter XML data here...">{{ xml_data }}</textarea>
+                            </div>
+                            <button class="btn btn-primary" type="submit">Process XML</button>
+                        </form>
+                    </div>
+                </div>
+
+                {% if xxe_result %}
+                <div class="card mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>XML Processing Result</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded">{{ xxe_result }}</pre>
+                        {% if ssrf_detected %}
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>XXE to SSRF Chain Successful!</strong> External entity resolved.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if flag %}
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
+                    <p>Congratulations! You've successfully chained XXE with SSRF.</p>
+                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
+                </div>
+                {% endif %}
+
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Learning Objectives</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>Understand XXE (XML External Entity) vulnerabilities</li>
+                            <li>Learn how to chain XXE with SSRF attacks</li>
+                            <li>Practice creating malicious XML with external entity references</li>
+                            <li>Master advanced exploitation techniques combining multiple vulnerabilities</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -449,8 +449,8 @@ function revealFlag() {
 }
 
 function setupChallengeDescriptionPopup() {
-    // Check if we're on a challenge page (XSS, SQLi, or Command Injection)
-    if (window.location.pathname.includes('/xss/level') || window.location.pathname.includes('/sqli/level') || window.location.pathname.includes('/cmdi/level')) {
+    // Check if we're on a challenge page (XSS, SQLi, Command Injection, or SSRF)
+    if (window.location.pathname.includes('/xss/level') || window.location.pathname.includes('/sqli/level') || window.location.pathname.includes('/cmdi/level') || window.location.pathname.includes('/ssrf/level')) {
         // Create modal for challenge description
         const challengeDescription = document.querySelector('.challenge-description');
         if (challengeDescription) {
@@ -471,6 +471,8 @@ function setupChallengeDescriptionPopup() {
                 challengeType = 'SQL Injection';
             } else if (path.includes('/cmdi/')) {
                 challengeType = 'Command Injection';
+            } else if (path.includes('/ssrf/')) {
+                challengeType = 'SSRF';
             }
 
             // Create modal content
@@ -546,8 +548,8 @@ function setupChallengeDescriptionPopup() {
 }
 
 function setupFlagSubmissionPopup() {
-    // Check if we're on a challenge page (XSS, SQLi, or Command Injection)
-    if (window.location.pathname.includes('/xss/level') || window.location.pathname.includes('/sqli/level') || window.location.pathname.includes('/cmdi/level')) {
+    // Check if we're on a challenge page (XSS, SQLi, Command Injection, or SSRF)
+    if (window.location.pathname.includes('/xss/level') || window.location.pathname.includes('/sqli/level') || window.location.pathname.includes('/cmdi/level') || window.location.pathname.includes('/ssrf/level')) {
         // Create flag submission icon
         const flagIcon = document.createElement('div');
         flagIcon.id = 'flag-submission-icon';
@@ -631,6 +633,9 @@ function setupFlagSubmissionPopup() {
             challengeId = match ? match[1] : '1';
         } else if (path.includes('/cmdi/level')) {
             const match = path.match(/\/cmdi\/level(\d+)/);
+            challengeId = match ? match[1] : '1';
+        } else if (path.includes('/ssrf/level')) {
+            const match = path.match(/\/ssrf\/level(\d+)/);
             challengeId = match ? match[1] : '1';
         }
 

@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 5 - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 5: SSRF with Basic Filters</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>Image Proxy Service</strong>, a fictional image proxy and caching service! This challenge simulates a real-world scenario where basic SSRF filters are implemented but can be bypassed.
+                    </p>
+                    <p>
+                        The developers have implemented basic blacklist filters to prevent SSRF attacks, blocking obvious internal addresses. However, these filters can be bypassed using various encoding and alternative representation techniques.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Bypass the basic SSRF filters to access internal services and retrieve the flag.
+                    </p>
+                    <p>
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Try alternative representations of localhost like 127.1, 0x7f000001, 2130706433, or use services like localtest.me.
+                    </p>
+                    <p>
+                        <i class="bi bi-tools me-2"></i><strong>Tools:</strong> Use Burp Suite to test different bypass techniques, or research SSRF filter bypass methods online.
+                    </p>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-image-fill me-2"></i>Image Proxy Service - Image Caching</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="/ssrf/level5" method="post">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">Image URL</span>
+                                <input type="text" class="form-control" name="image_url" placeholder="Enter image URL to proxy (e.g., https://example.com/image.jpg)" value="{{ image_url }}">
+                                <button class="btn btn-primary" type="submit">Proxy Image</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {% if filter_result %}
+                <div class="card mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Proxy Result</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded">{{ filter_result }}</pre>
+                        {% if ssrf_detected %}
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>Filter Bypass Successful!</strong> You bypassed the SSRF protection filters.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if flag %}
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
+                    <p>Congratulations! You've successfully bypassed SSRF filters.</p>
+                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
+                </div>
+                {% endif %}
+
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Learning Objectives</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>Understand common SSRF filter implementations and their weaknesses</li>
+                            <li>Learn various SSRF filter bypass techniques</li>
+                            <li>Practice using alternative IP representations and encodings</li>
+                            <li>Master bypass methods like DNS rebinding and URL parsing confusion</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

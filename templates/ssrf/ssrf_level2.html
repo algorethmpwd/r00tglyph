@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 2 - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 2: SSRF with Internal Network Scanning</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>ScreenShot Service</strong>, a fictional website screenshot service! This challenge simulates a real-world scenario where a screenshot service is vulnerable to SSRF and can be used for internal network scanning.
+                    </p>
+                    <p>
+                        The developers have created a service that takes screenshots of websites for preview purposes. However, they haven't properly validated the target URLs, allowing attackers to scan internal network services.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Use the SSRF vulnerability to scan internal network services and discover what's running on different ports.
+                    </p>
+                    <p>
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Try targeting internal IP addresses with specific ports (e.g., 192.168.1.1:22, 127.0.0.1:3306, 10.0.0.1:80).
+                    </p>
+                    <p>
+                        <i class="bi bi-tools me-2"></i><strong>Tools:</strong> Use Burp Suite to automate port scanning or manually test different internal IPs and ports.
+                    </p>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-camera-fill me-2"></i>ScreenShot Service - Website Preview</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="/ssrf/level2" method="post">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">Target URL</span>
+                                <input type="text" class="form-control" name="target_url" placeholder="Enter website URL to screenshot (e.g., https://example.com)" value="{{ target_url }}">
+                                <button class="btn btn-primary" type="submit">Take Screenshot</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {% if scan_result %}
+                <div class="card mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Screenshot Result</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded">{{ scan_result }}</pre>
+                        {% if ssrf_detected %}
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>Internal Network Scanning Successful!</strong> You discovered internal services.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if flag %}
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
+                    <p>Congratulations! You've successfully used SSRF for internal network scanning.</p>
+                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
+                </div>
+                {% endif %}
+
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Learning Objectives</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>Learn how SSRF can be used for internal network reconnaissance</li>
+                            <li>Understand port scanning through SSRF vulnerabilities</li>
+                            <li>Practice identifying internal services and their versions</li>
+                            <li>Understand the impact of SSRF on internal network security</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

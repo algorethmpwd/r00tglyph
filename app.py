@@ -233,6 +233,54 @@ def reset_database():
             Challenge(name="XSS in Federated Identity Systems", category="xss", difficulty="expert",
                      description="Exploit XSS vulnerabilities in federated identity systems.", points=2200),
 
+            # SQL Injection Challenges
+            Challenge(name="Basic SQL Injection", category="sqli", difficulty="beginner",
+                     description="Find and exploit a basic SQL injection vulnerability.", points=100),
+            Challenge(name="SQL Injection in Search", category="sqli", difficulty="beginner",
+                     description="Exploit SQL injection in search functionality.", points=200),
+            Challenge(name="SQL Injection with UNION", category="sqli", difficulty="intermediate",
+                     description="Use UNION-based SQL injection techniques.", points=300),
+            Challenge(name="Blind SQL Injection", category="sqli", difficulty="intermediate",
+                     description="Exploit blind SQL injection vulnerabilities.", points=400),
+            Challenge(name="Time-Based Blind SQL Injection", category="sqli", difficulty="intermediate",
+                     description="Use time-based techniques for blind SQL injection.", points=500),
+            Challenge(name="SQL Injection with WAF Bypass", category="sqli", difficulty="advanced",
+                     description="Bypass WAF protection to exploit SQL injection.", points=600),
+            Challenge(name="Error-Based SQL Injection", category="sqli", difficulty="advanced",
+                     description="Extract data using error-based SQL injection.", points=700),
+            Challenge(name="Second-Order SQL Injection", category="sqli", difficulty="advanced",
+                     description="Exploit second-order SQL injection vulnerabilities.", points=800),
+            Challenge(name="SQL Injection in REST API", category="sqli", difficulty="advanced",
+                     description="Find SQL injection in REST API endpoints.", points=900),
+            Challenge(name="NoSQL Injection", category="sqli", difficulty="expert",
+                     description="Exploit NoSQL injection vulnerabilities.", points=1000),
+            Challenge(name="GraphQL Injection", category="sqli", difficulty="expert",
+                     description="Exploit SQL injection in GraphQL queries.", points=1100),
+            Challenge(name="ORM-based SQL Injection", category="sqli", difficulty="expert",
+                     description="Exploit SQL injection in ORM frameworks.", points=1200),
+            Challenge(name="Out-of-band SQL Injection", category="sqli", difficulty="expert",
+                     description="Use out-of-band techniques for data exfiltration.", points=1300),
+            Challenge(name="SQL Injection with Advanced WAF Bypass", category="sqli", difficulty="expert",
+                     description="Advanced WAF bypass techniques for SQL injection.", points=1400),
+            Challenge(name="SQL Injection via XML", category="sqli", difficulty="expert",
+                     description="Exploit SQL injection through XML processing.", points=1500),
+            Challenge(name="SQL Injection in WebSockets", category="sqli", difficulty="expert",
+                     description="Find SQL injection in WebSocket connections.", points=1600),
+            Challenge(name="SQL Injection in Mobile App Backend", category="sqli", difficulty="expert",
+                     description="Exploit SQL injection in mobile app backends.", points=1700),
+            Challenge(name="SQL Injection in Cloud Functions", category="sqli", difficulty="expert",
+                     description="Find SQL injection in serverless cloud functions.", points=1800),
+            Challenge(name="SQL Injection via File Upload", category="sqli", difficulty="expert",
+                     description="Exploit SQL injection through file upload functionality.", points=1900),
+            Challenge(name="SQL Injection in Stored Procedures", category="sqli", difficulty="expert",
+                     description="Exploit SQL injection in stored procedures.", points=2000),
+            Challenge(name="SQL Injection in GraphQL API", category="sqli", difficulty="expert",
+                     description="Advanced GraphQL injection techniques.", points=2100),
+            Challenge(name="SQL Injection in NoSQL Database", category="sqli", difficulty="expert",
+                     description="Exploit injection vulnerabilities in NoSQL databases.", points=2200),
+            Challenge(name="SQL Injection in ORM Layer", category="sqli", difficulty="expert",
+                     description="Advanced ORM injection and bypass techniques.", points=2300),
+
             # Command Injection Challenges
             Challenge(name="Basic Command Injection", category="cmdi", difficulty="beginner",
                      description="Find and exploit a basic command injection vulnerability.", points=100),
@@ -280,6 +328,28 @@ def reset_database():
                      description="Exploit command injection in SSH command execution.", points=2200),
             Challenge(name="Advanced Command Injection Chaining", category="cmdi", difficulty="expert",
                      description="Chain multiple command injection techniques for maximum impact.", points=2300),
+
+            # Server-Side Request Forgery (SSRF) Challenges
+            Challenge(name="Basic SSRF", category="ssrf", difficulty="beginner",
+                     description="Find and exploit a basic SSRF vulnerability.", points=100),
+            Challenge(name="SSRF with Internal Network Scanning", category="ssrf", difficulty="beginner",
+                     description="Use SSRF to scan internal network services.", points=200),
+            Challenge(name="Cloud Metadata SSRF", category="ssrf", difficulty="intermediate",
+                     description="Exploit SSRF to access cloud metadata services.", points=300),
+            Challenge(name="Blind SSRF with DNS Exfiltration", category="ssrf", difficulty="intermediate",
+                     description="Exploit blind SSRF using DNS exfiltration techniques.", points=400),
+            Challenge(name="SSRF with Basic Filters", category="ssrf", difficulty="intermediate",
+                     description="Bypass basic SSRF protection filters.", points=500),
+            Challenge(name="SSRF via File Upload", category="ssrf", difficulty="advanced",
+                     description="Exploit SSRF through image processing vulnerabilities.", points=600),
+            Challenge(name="SSRF in Webhooks", category="ssrf", difficulty="advanced",
+                     description="Exploit SSRF in webhook URL validation.", points=700),
+            Challenge(name="SSRF with WAF Bypass", category="ssrf", difficulty="advanced",
+                     description="Bypass WAF protection to exploit SSRF.", points=800),
+            Challenge(name="SSRF via XXE", category="ssrf", difficulty="expert",
+                     description="Chain XXE with SSRF for internal network access.", points=900),
+            Challenge(name="SSRF with DNS Rebinding", category="ssrf", difficulty="expert",
+                     description="Use DNS rebinding attacks to bypass SSRF protections.", points=1000),
         ]
         db.session.add_all(challenges)
         db.session.commit()
@@ -4228,6 +4298,31 @@ def solutions(level):
             level_num = level  # Use the full level string
 
         return render_template(f'solutions/cmdi_level{level_num}_solution.html', challenge=challenge)
+    # Check if it's an SSRF solution
+    elif level.startswith('ssrf'):
+        # Get the challenge object to pass to the template
+        challenge_name_map = {
+            'ssrf1': 'Basic SSRF',
+            'ssrf2': 'SSRF with Internal Network Scanning',
+            'ssrf3': 'Cloud Metadata SSRF',
+            'ssrf4': 'Blind SSRF with DNS Exfiltration',
+            'ssrf5': 'SSRF with Basic Filters',
+            'ssrf6': 'SSRF via File Upload',
+            'ssrf7': 'SSRF in Webhooks',
+            'ssrf8': 'SSRF with WAF Bypass',
+            'ssrf9': 'SSRF via XXE',
+            'ssrf10': 'SSRF with DNS Rebinding'
+        }
+        challenge_name = challenge_name_map.get(level)
+        challenge = Challenge.query.filter_by(name=challenge_name).first() if challenge_name else None
+
+        # Extract level number, handling both single and double-digit levels
+        if level.startswith('ssrf'):
+            level_num = level[4:]  # Extract everything after 'ssrf'
+        else:
+            level_num = level  # Use the full level string
+
+        return render_template(f'solutions/ssrf_level{level_num}_solution.html', challenge=challenge)
     # Check if it's an SQLi solution
     elif level.startswith('sqli'):
         # Get the challenge object to pass to the template
@@ -5655,6 +5750,611 @@ def cmdi_level23():
 
     return render_template('cmdi/cmdi_level23.html', flag=flag, cmdi_detected=cmdi_detected,
                           infrastructure_config=infrastructure_config, deployment_result=deployment_result, challenge=challenge)
+
+# SSRF Level 1 - Basic SSRF
+@app.route('/ssrf/level1', methods=['GET', 'POST'])
+def ssrf_level1():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    ssrf_detected = False
+    url = request.form.get('url', '')
+    fetch_result = ''
+
+    if request.method == 'POST':
+        # Simulate a URL fetcher with SSRF vulnerability
+        if url:
+            # Check for SSRF patterns
+            ssrf_patterns = ['localhost', '127.0.0.1', '0.0.0.0', '::1', '10.', '192.168.', '172.16.', '172.17.', '172.18.', '172.19.', '172.20.', '172.21.', '172.22.', '172.23.', '172.24.', '172.25.', '172.26.', '172.27.', '172.28.', '172.29.', '172.30.', '172.31.']
+
+            for pattern in ssrf_patterns:
+                if pattern in url.lower():
+                    ssrf_detected = True
+                    fetch_result = f"Fetching URL: {url}\n"
+                    fetch_result += "Connection established...\n"
+                    fetch_result += "Response received:\n\n"
+
+                    # Simulate internal service response
+                    if 'localhost' in url.lower() or '127.0.0.1' in url:
+                        fetch_result += "HTTP/1.1 200 OK\n"
+                        fetch_result += "Server: Apache/2.4.41\n"
+                        fetch_result += "Content-Type: text/html\n\n"
+                        fetch_result += "<h1>Internal Admin Panel</h1>\n"
+                        fetch_result += "<p>Welcome to the internal administration interface</p>\n"
+                        fetch_result += "<p>Flag: R00T{b4s1c_ssrf_l0c4lh0st_pwn3d}</p>\n"
+                    elif '192.168.' in url or '10.' in url:
+                        fetch_result += "HTTP/1.1 200 OK\n"
+                        fetch_result += "Server: nginx/1.18.0\n"
+                        fetch_result += "Content-Type: application/json\n\n"
+                        fetch_result += '{"status": "success", "message": "Internal API accessed", "flag": "R00T{b4s1c_ssrf_1nt3rn4l_n3tw0rk}"}\n'
+
+                    # Mark challenge as completed
+                    challenge = Challenge.query.filter_by(name="Basic SSRF").first()
+                    if challenge:
+                        completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                        if challenge.id not in completed_ids:
+                            update_user_progress(machine_id, challenge.id, challenge.points)
+                    break
+            else:
+                # Normal external URL fetch simulation
+                fetch_result = f"Fetching URL: {url}\n"
+                fetch_result += "Connection established...\n"
+                fetch_result += "Response received:\n\n"
+                fetch_result += "HTTP/1.1 200 OK\n"
+                fetch_result += "Content-Type: text/html\n\n"
+                fetch_result += "<html><body><h1>External Website</h1><p>This is a normal external website.</p></body></html>\n"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Basic SSRF").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('ssrf/ssrf_level1.html', flag=flag, ssrf_detected=ssrf_detected,
+                          url=url, fetch_result=fetch_result, challenge=challenge)
+
+# SSRF Level 2 - SSRF with Internal Network Scanning
+@app.route('/ssrf/level2', methods=['GET', 'POST'])
+def ssrf_level2():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    ssrf_detected = False
+    target_url = request.form.get('target_url', '')
+    scan_result = ''
+
+    if request.method == 'POST':
+        # Simulate a website screenshot service with SSRF vulnerability
+        if target_url:
+            # Check for internal network scanning
+            internal_patterns = ['192.168.', '10.', '172.16.', '172.17.', '172.18.', '172.19.', '172.20.', '172.21.', '172.22.', '172.23.', '172.24.', '172.25.', '172.26.', '172.27.', '172.28.', '172.29.', '172.30.', '172.31.', 'localhost', '127.0.0.1']
+
+            for pattern in internal_patterns:
+                if pattern in target_url.lower():
+                    ssrf_detected = True
+                    scan_result = f"Taking screenshot of: {target_url}\n"
+                    scan_result += "Scanning internal network...\n\n"
+
+                    # Simulate port scanning results
+                    if ':22' in target_url:
+                        scan_result += "Port 22 (SSH): Open\n"
+                        scan_result += "Service: OpenSSH 8.2\n"
+                        scan_result += "Flag: R00T{ssrf_p0rt_sc4nn1ng_ssh_pwn3d}\n"
+                    elif ':80' in target_url or ':8080' in target_url:
+                        scan_result += "Port 80/8080 (HTTP): Open\n"
+                        scan_result += "Service: Internal Web Server\n"
+                        scan_result += "Response: Internal API Documentation\n"
+                        scan_result += "Flag: R00T{ssrf_1nt3rn4l_w3b_s3rv3r_pwn3d}\n"
+                    elif ':3306' in target_url:
+                        scan_result += "Port 3306 (MySQL): Open\n"
+                        scan_result += "Service: MySQL Database\n"
+                        scan_result += "Flag: R00T{ssrf_d4t4b4s3_d1sc0v3ry_pwn3d}\n"
+                    else:
+                        scan_result += "Internal service discovered!\n"
+                        scan_result += "Network scan successful\n"
+                        scan_result += "Flag: R00T{ssrf_n3tw0rk_sc4nn1ng_pwn3d}\n"
+
+                    # Mark challenge as completed
+                    challenge = Challenge.query.filter_by(name="SSRF with Internal Network Scanning").first()
+                    if challenge:
+                        completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                        if challenge.id not in completed_ids:
+                            update_user_progress(machine_id, challenge.id, challenge.points)
+                    break
+            else:
+                # Normal external URL
+                scan_result = f"Taking screenshot of: {target_url}\n"
+                scan_result += "Screenshot captured successfully\n"
+                scan_result += "External website processed\n"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="SSRF with Internal Network Scanning").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('ssrf/ssrf_level2.html', flag=flag, ssrf_detected=ssrf_detected,
+                          target_url=target_url, scan_result=scan_result, challenge=challenge)
+
+# SSRF Level 3 - Cloud Metadata SSRF
+@app.route('/ssrf/level3', methods=['GET', 'POST'])
+def ssrf_level3():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    ssrf_detected = False
+    webhook_url = request.form.get('webhook_url', '')
+    metadata_result = ''
+
+    if request.method == 'POST':
+        # Simulate a webhook notification service with SSRF vulnerability
+        if webhook_url:
+            # Check for cloud metadata endpoints
+            metadata_patterns = ['169.254.169.254', 'metadata.google.internal', 'metadata.azure.com', 'metadata.tencentyun.com']
+
+            for pattern in metadata_patterns:
+                if pattern in webhook_url.lower():
+                    ssrf_detected = True
+                    metadata_result = f"Sending webhook to: {webhook_url}\n"
+                    metadata_result += "Accessing cloud metadata service...\n\n"
+
+                    if '169.254.169.254' in webhook_url:
+                        metadata_result += "AWS EC2 Metadata Service Response:\n"
+                        metadata_result += "{\n"
+                        metadata_result += '  "instance-id": "i-1234567890abcdef0",\n'
+                        metadata_result += '  "instance-type": "t3.medium",\n'
+                        metadata_result += '  "security-credentials": {\n'
+                        metadata_result += '    "AccessKeyId": "AKIA...",\n'
+                        metadata_result += '    "SecretAccessKey": "...",\n'
+                        metadata_result += '    "Token": "..."\n'
+                        metadata_result += "  }\n"
+                        metadata_result += "}\n"
+                        metadata_result += "Flag: R00T{ssrf_4ws_m3t4d4t4_pwn3d}\n"
+                    elif 'metadata.google.internal' in webhook_url:
+                        metadata_result += "GCP Metadata Service Response:\n"
+                        metadata_result += "{\n"
+                        metadata_result += '  "project-id": "my-project-123",\n'
+                        metadata_result += '  "service-accounts": {\n'
+                        metadata_result += '    "default": {\n'
+                        metadata_result += '      "token": "ya29.c.Kp6B9n..."\n'
+                        metadata_result += "    }\n"
+                        metadata_result += "  }\n"
+                        metadata_result += "}\n"
+                        metadata_result += "Flag: R00T{ssrf_gcp_m3t4d4t4_pwn3d}\n"
+                    elif 'metadata.azure.com' in webhook_url:
+                        metadata_result += "Azure Metadata Service Response:\n"
+                        metadata_result += "{\n"
+                        metadata_result += '  "compute": {\n'
+                        metadata_result += '    "vmId": "02aab8a4-74ef-476e-8182-f6d2ba4166a6",\n'
+                        metadata_result += '    "subscriptionId": "8d10da13-8125-4ba9-a717-bf7490507b3d"\n'
+                        metadata_result += "  },\n"
+                        metadata_result += '  "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik..."\n'
+                        metadata_result += "}\n"
+                        metadata_result += "Flag: R00T{ssrf_4zur3_m3t4d4t4_pwn3d}\n"
+
+                    # Mark challenge as completed
+                    challenge = Challenge.query.filter_by(name="Cloud Metadata SSRF").first()
+                    if challenge:
+                        completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                        if challenge.id not in completed_ids:
+                            update_user_progress(machine_id, challenge.id, challenge.points)
+                    break
+            else:
+                # Normal webhook URL
+                metadata_result = f"Sending webhook to: {webhook_url}\n"
+                metadata_result += "Webhook sent successfully\n"
+                metadata_result += "External service notified\n"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Cloud Metadata SSRF").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('ssrf/ssrf_level3.html', flag=flag, ssrf_detected=ssrf_detected,
+                          webhook_url=webhook_url, metadata_result=metadata_result, challenge=challenge)
+
+# SSRF Level 4 - Blind SSRF with DNS Exfiltration
+@app.route('/ssrf/level4', methods=['GET', 'POST'])
+def ssrf_level4():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    ssrf_detected = False
+    callback_url = request.form.get('callback_url', '')
+    dns_result = ''
+
+    if request.method == 'POST':
+        # Simulate a PDF generation service with blind SSRF vulnerability
+        if callback_url:
+            # Check for DNS exfiltration patterns
+            dns_patterns = ['.burpcollaborator.net', '.oastify.com', '.dnslog.cn', '.requestbin.net', '.webhook.site']
+
+            for pattern in dns_patterns:
+                if pattern in callback_url.lower():
+                    ssrf_detected = True
+                    dns_result = f"Generating PDF with callback: {callback_url}\n"
+                    dns_result += "PDF generation initiated...\n"
+                    dns_result += "Making callback request...\n\n"
+                    dns_result += "DNS Query Detected:\n"
+                    dns_result += f"Query: {callback_url}\n"
+                    dns_result += "Type: A\n"
+                    dns_result += "Source: Internal PDF Service\n"
+                    dns_result += "Status: DNS exfiltration successful!\n"
+                    dns_result += "Flag: R00T{bl1nd_ssrf_dns_3xf1ltr4t10n_pwn3d}\n"
+
+                    # Mark challenge as completed
+                    challenge = Challenge.query.filter_by(name="Blind SSRF with DNS Exfiltration").first()
+                    if challenge:
+                        completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                        if challenge.id not in completed_ids:
+                            update_user_progress(machine_id, challenge.id, challenge.points)
+                    break
+            else:
+                # Normal callback URL
+                dns_result = f"Generating PDF with callback: {callback_url}\n"
+                dns_result += "PDF generation completed\n"
+                dns_result += "No callback made\n"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Blind SSRF with DNS Exfiltration").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('ssrf/ssrf_level4.html', flag=flag, ssrf_detected=ssrf_detected,
+                          callback_url=callback_url, dns_result=dns_result, challenge=challenge)
+
+# SSRF Level 5 - SSRF with Basic Filters
+@app.route('/ssrf/level5', methods=['GET', 'POST'])
+def ssrf_level5():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    ssrf_detected = False
+    image_url = request.form.get('image_url', '')
+    filter_result = ''
+
+    if request.method == 'POST':
+        # Simulate an image proxy service with basic SSRF filters
+        if image_url:
+            # Basic blacklist filters
+            blacklist = ['localhost', '127.0.0.1', '0.0.0.0', '::1']
+
+            # Check if URL bypasses basic filters
+            bypass_detected = False
+
+            # Check for various bypass techniques
+            if any(blocked in image_url.lower() for blocked in blacklist):
+                filter_result = f"Processing image: {image_url}\n"
+                filter_result += "ERROR: Blocked by security filter\n"
+                filter_result += "Reason: Internal address detected\n"
+            else:
+                # Check for bypass techniques
+                bypass_patterns = ['127.1', '127.0.1', '2130706433', '0x7f000001', '0177.0.0.1', 'localtest.me', '127.0.0.1.nip.io']
+
+                for pattern in bypass_patterns:
+                    if pattern in image_url.lower():
+                        bypass_detected = True
+                        ssrf_detected = True
+                        filter_result = f"Processing image: {image_url}\n"
+                        filter_result += "Filter bypass detected!\n"
+                        filter_result += "Accessing internal service...\n\n"
+                        filter_result += "Internal Service Response:\n"
+                        filter_result += "HTTP/1.1 200 OK\n"
+                        filter_result += "Content-Type: application/json\n\n"
+                        filter_result += '{"message": "Internal admin API", "flag": "R00T{ssrf_f1lt3r_byp4ss_pwn3d}"}\n'
+
+                        # Mark challenge as completed
+                        challenge = Challenge.query.filter_by(name="SSRF with Basic Filters").first()
+                        if challenge:
+                            completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                            if challenge.id not in completed_ids:
+                                update_user_progress(machine_id, challenge.id, challenge.points)
+                        break
+
+                if not bypass_detected:
+                    filter_result = f"Processing image: {image_url}\n"
+                    filter_result += "Image downloaded successfully\n"
+                    filter_result += "External image processed\n"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="SSRF with Basic Filters").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('ssrf/ssrf_level5.html', flag=flag, ssrf_detected=ssrf_detected,
+                          image_url=image_url, filter_result=filter_result, challenge=challenge)
+
+# SSRF Level 6 - SSRF via File Upload
+@app.route('/ssrf/level6', methods=['GET', 'POST'])
+def ssrf_level6():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    ssrf_detected = False
+    svg_content = request.form.get('svg_content', '')
+    upload_result = ''
+
+    if request.method == 'POST':
+        # Simulate an SVG file upload service with SSRF vulnerability
+        if svg_content:
+            # Check for SVG SSRF patterns
+            if '<image' in svg_content and 'href=' in svg_content:
+                # Extract href value
+                import re
+                href_match = re.search(r'href=["\']([^"\']+)["\']', svg_content)
+                if href_match:
+                    href_url = href_match.group(1)
+
+                    # Check for internal URLs
+                    internal_patterns = ['localhost', '127.0.0.1', '192.168.', '10.', '172.16.', '172.17.', '172.18.', '172.19.', '172.20.', '172.21.', '172.22.', '172.23.', '172.24.', '172.25.', '172.26.', '172.27.', '172.28.', '172.29.', '172.30.', '172.31.']
+
+                    for pattern in internal_patterns:
+                        if pattern in href_url.lower():
+                            ssrf_detected = True
+                            upload_result = f"Processing SVG file...\n"
+                            upload_result += f"Loading image from: {href_url}\n"
+                            upload_result += "SVG processing complete\n\n"
+                            upload_result += "Internal Service Response:\n"
+                            upload_result += "HTTP/1.1 200 OK\n"
+                            upload_result += "Content-Type: application/json\n\n"
+                            upload_result += '{"message": "Internal file server", "flag": "R00T{ssrf_svg_f1l3_upl04d_pwn3d}"}\n'
+
+                            # Mark challenge as completed
+                            challenge = Challenge.query.filter_by(name="SSRF via File Upload").first()
+                            if challenge:
+                                completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                                if challenge.id not in completed_ids:
+                                    update_user_progress(machine_id, challenge.id, challenge.points)
+                            break
+                    else:
+                        upload_result = f"Processing SVG file...\n"
+                        upload_result += f"Loading image from: {href_url}\n"
+                        upload_result += "External image loaded successfully\n"
+                else:
+                    upload_result = "Processing SVG file...\n"
+                    upload_result += "SVG processed successfully\n"
+            else:
+                upload_result = "Processing SVG file...\n"
+                upload_result += "SVG processed successfully\n"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="SSRF via File Upload").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('ssrf/ssrf_level6.html', flag=flag, ssrf_detected=ssrf_detected,
+                          svg_content=svg_content, upload_result=upload_result, challenge=challenge)
+
+# SSRF Level 7 - SSRF in Webhooks
+@app.route('/ssrf/level7', methods=['GET', 'POST'])
+def ssrf_level7():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    ssrf_detected = False
+    notification_url = request.form.get('notification_url', '')
+    webhook_result = ''
+
+    if request.method == 'POST':
+        # Simulate a payment webhook service with SSRF vulnerability
+        if notification_url:
+            # Check for internal webhook URLs
+            internal_patterns = ['localhost', '127.0.0.1', '192.168.', '10.', '172.16.', '172.17.', '172.18.', '172.19.', '172.20.', '172.21.', '172.22.', '172.23.', '172.24.', '172.25.', '172.26.', '172.27.', '172.28.', '172.29.', '172.30.', '172.31.']
+
+            for pattern in internal_patterns:
+                if pattern in notification_url.lower():
+                    ssrf_detected = True
+                    webhook_result = f"Sending payment notification to: {notification_url}\n"
+                    webhook_result += "Payment processed successfully\n"
+                    webhook_result += "Sending webhook notification...\n\n"
+                    webhook_result += "Webhook Response:\n"
+                    webhook_result += "HTTP/1.1 200 OK\n"
+                    webhook_result += "Content-Type: application/json\n\n"
+                    webhook_result += '{"status": "received", "internal_api": true, "flag": "R00T{ssrf_w3bh00k_1nt3rn4l_pwn3d}"}\n'
+
+                    # Mark challenge as completed
+                    challenge = Challenge.query.filter_by(name="SSRF in Webhooks").first()
+                    if challenge:
+                        completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                        if challenge.id not in completed_ids:
+                            update_user_progress(machine_id, challenge.id, challenge.points)
+                    break
+            else:
+                webhook_result = f"Sending payment notification to: {notification_url}\n"
+                webhook_result += "Payment processed successfully\n"
+                webhook_result += "Webhook sent to external service\n"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="SSRF in Webhooks").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('ssrf/ssrf_level7.html', flag=flag, ssrf_detected=ssrf_detected,
+                          notification_url=notification_url, webhook_result=webhook_result, challenge=challenge)
+
+# SSRF Level 8 - SSRF with WAF Bypass
+@app.route('/ssrf/level8', methods=['GET', 'POST'])
+def ssrf_level8():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    ssrf_detected = False
+    fetch_url = request.form.get('fetch_url', '')
+    waf_result = ''
+
+    if request.method == 'POST':
+        # Simulate a URL fetcher with WAF protection
+        if fetch_url:
+            # WAF blacklist
+            waf_blacklist = ['localhost', '127.0.0.1', '0.0.0.0', '::1', '192.168.', '10.', '172.16.', '172.17.', '172.18.', '172.19.', '172.20.', '172.21.', '172.22.', '172.23.', '172.24.', '172.25.', '172.26.', '172.27.', '172.28.', '172.29.', '172.30.', '172.31.']
+
+            # Check if blocked by WAF
+            if any(blocked in fetch_url.lower() for blocked in waf_blacklist):
+                waf_result = f"Fetching URL: {fetch_url}\n"
+                waf_result += "WAF BLOCKED: Internal address detected\n"
+                waf_result += "Request denied by security policy\n"
+            else:
+                # Check for advanced bypass techniques
+                bypass_patterns = ['127.1', '127.0.1', '2130706433', '0x7f000001', '0177.0.0.1', 'localtest.me', '127.0.0.1.nip.io', 'spoofed.burpcollaborator.net', 'localhost.localdomain']
+
+                for pattern in bypass_patterns:
+                    if pattern in fetch_url.lower():
+                        ssrf_detected = True
+                        waf_result = f"Fetching URL: {fetch_url}\n"
+                        waf_result += "WAF bypass successful!\n"
+                        waf_result += "Accessing internal service...\n\n"
+                        waf_result += "Internal Service Response:\n"
+                        waf_result += "HTTP/1.1 200 OK\n"
+                        waf_result += "Content-Type: application/json\n\n"
+                        waf_result += '{"message": "Internal admin panel", "flag": "R00T{ssrf_w4f_byp4ss_4dv4nc3d_pwn3d}"}\n'
+
+                        # Mark challenge as completed
+                        challenge = Challenge.query.filter_by(name="SSRF with WAF Bypass").first()
+                        if challenge:
+                            completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                            if challenge.id not in completed_ids:
+                                update_user_progress(machine_id, challenge.id, challenge.points)
+                        break
+                else:
+                    waf_result = f"Fetching URL: {fetch_url}\n"
+                    waf_result += "External URL fetched successfully\n"
+                    waf_result += "Content retrieved from external source\n"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="SSRF with WAF Bypass").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('ssrf/ssrf_level8.html', flag=flag, ssrf_detected=ssrf_detected,
+                          fetch_url=fetch_url, waf_result=waf_result, challenge=challenge)
+
+# SSRF Level 9 - SSRF via XXE
+@app.route('/ssrf/level9', methods=['GET', 'POST'])
+def ssrf_level9():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    ssrf_detected = False
+    xml_data = request.form.get('xml_data', '')
+    xxe_result = ''
+
+    if request.method == 'POST':
+        # Simulate an XML processing service with XXE to SSRF vulnerability
+        if xml_data:
+            # Check for XXE patterns that can lead to SSRF
+            if '<!ENTITY' in xml_data and 'SYSTEM' in xml_data:
+                import re
+                # Extract SYSTEM entity URLs
+                system_matches = re.findall(r'SYSTEM\s+["\']([^"\']+)["\']', xml_data)
+
+                for system_url in system_matches:
+                    # Check for internal URLs in XXE
+                    internal_patterns = ['localhost', '127.0.0.1', '192.168.', '10.', '172.16.', '172.17.', '172.18.', '172.19.', '172.20.', '172.21.', '172.22.', '172.23.', '172.24.', '172.25.', '172.26.', '172.27.', '172.28.', '172.29.', '172.30.', '172.31.', 'file://', 'gopher://']
+
+                    for pattern in internal_patterns:
+                        if pattern in system_url.lower():
+                            ssrf_detected = True
+                            xxe_result = f"Processing XML data...\n"
+                            xxe_result += f"Loading external entity: {system_url}\n"
+                            xxe_result += "XXE processing complete\n\n"
+
+                            if 'file://' in system_url:
+                                xxe_result += "File System Access:\n"
+                                xxe_result += "/etc/passwd:\n"
+                                xxe_result += "root:x:0:0:root:/root:/bin/bash\n"
+                                xxe_result += "Flag: R00T{xxe_t0_ssrf_f1l3_r34d_pwn3d}\n"
+                            elif 'gopher://' in system_url:
+                                xxe_result += "Gopher Protocol SSRF:\n"
+                                xxe_result += "Internal service accessed via Gopher\n"
+                                xxe_result += "Flag: R00T{xxe_t0_ssrf_g0ph3r_pwn3d}\n"
+                            else:
+                                xxe_result += "Internal Service Response:\n"
+                                xxe_result += "HTTP/1.1 200 OK\n"
+                                xxe_result += "Content-Type: application/json\n\n"
+                                xxe_result += '{"message": "Internal API via XXE", "flag": "R00T{xxe_t0_ssrf_1nt3rn4l_pwn3d}"}\n'
+
+                            # Mark challenge as completed
+                            challenge = Challenge.query.filter_by(name="SSRF via XXE").first()
+                            if challenge:
+                                completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                                if challenge.id not in completed_ids:
+                                    update_user_progress(machine_id, challenge.id, challenge.points)
+                            break
+                    if ssrf_detected:
+                        break
+
+                if not ssrf_detected:
+                    xxe_result = f"Processing XML data...\n"
+                    xxe_result += "External entities processed\n"
+                    xxe_result += "XML parsing complete\n"
+            else:
+                xxe_result = "Processing XML data...\n"
+                xxe_result += "XML parsed successfully\n"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="SSRF via XXE").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('ssrf/ssrf_level9.html', flag=flag, ssrf_detected=ssrf_detected,
+                          xml_data=xml_data, xxe_result=xxe_result, challenge=challenge)
+
+# SSRF Level 10 - SSRF with DNS Rebinding
+@app.route('/ssrf/level10', methods=['GET', 'POST'])
+def ssrf_level10():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    ssrf_detected = False
+    target_domain = request.form.get('target_domain', '')
+    rebinding_result = ''
+
+    if request.method == 'POST':
+        # Simulate a website health checker with DNS rebinding vulnerability
+        if target_domain:
+            # Check for DNS rebinding patterns
+            rebinding_patterns = ['rebind.network', 'rebind.it', '1u.ms', 'rebind.talos-sec.com', 'rbndr.us']
+
+            for pattern in rebinding_patterns:
+                if pattern in target_domain.lower():
+                    ssrf_detected = True
+                    rebinding_result = f"Checking website health: {target_domain}\n"
+                    rebinding_result += "DNS resolution in progress...\n"
+                    rebinding_result += "First resolution: 8.8.8.8 (external)\n"
+                    rebinding_result += "Second resolution: 127.0.0.1 (internal)\n"
+                    rebinding_result += "DNS rebinding attack detected!\n\n"
+                    rebinding_result += "Internal Service Response:\n"
+                    rebinding_result += "HTTP/1.1 200 OK\n"
+                    rebinding_result += "Content-Type: application/json\n\n"
+                    rebinding_result += '{"message": "Internal admin interface", "rebinding": true, "flag": "R00T{dns_r3b1nd1ng_ssrf_pwn3d}"}\n'
+
+                    # Mark challenge as completed
+                    challenge = Challenge.query.filter_by(name="SSRF with DNS Rebinding").first()
+                    if challenge:
+                        completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                        if challenge.id not in completed_ids:
+                            update_user_progress(machine_id, challenge.id, challenge.points)
+                    break
+            else:
+                rebinding_result = f"Checking website health: {target_domain}\n"
+                rebinding_result += "DNS resolution successful\n"
+                rebinding_result += "Website is healthy\n"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="SSRF with DNS Rebinding").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('ssrf/ssrf_level10.html', flag=flag, ssrf_detected=ssrf_detected,
+                          target_domain=target_domain, rebinding_result=rebinding_result, challenge=challenge)
 
 def show_help():
     """Show help information"""

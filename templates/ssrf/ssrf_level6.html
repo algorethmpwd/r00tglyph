@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 6 - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 6: SSRF via File Upload</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>SVG Processor</strong>, a fictional SVG file processing service! This challenge demonstrates SSRF through SVG file uploads that contain external references.
+                    </p>
+                    <p>
+                        The service processes SVG files and renders them. SVG files can contain external references that the server will fetch, creating an SSRF vulnerability through file upload functionality.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Create an SVG file with external references to internal services and upload it to exploit SSRF.
+                    </p>
+                    <p>
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Use SVG &lt;image&gt; tags with href attributes pointing to internal URLs.
+                    </p>
+                    <p>
+                        <i class="bi bi-tools me-2"></i><strong>Tools:</strong> Create SVG files manually or use tools to generate malicious SVG content.
+                    </p>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-file-earmark-code-fill me-2"></i>SVG Processor - File Processing</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="/ssrf/level6" method="post">
+                            <div class="mb-3">
+                                <label for="svg_content" class="form-label">SVG Content</label>
+                                <textarea class="form-control" name="svg_content" rows="8" placeholder="Enter SVG content here...">{{ svg_content }}</textarea>
+                            </div>
+                            <button class="btn btn-primary" type="submit">Process SVG</button>
+                        </form>
+                    </div>
+                </div>
+
+                {% if upload_result %}
+                <div class="card mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Processing Result</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded">{{ upload_result }}</pre>
+                        {% if ssrf_detected %}
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>SSRF via File Upload Successful!</strong> External reference processed.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if flag %}
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
+                    <p>Congratulations! You've successfully exploited SSRF through file upload.</p>
+                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
+                </div>
+                {% endif %}
+
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Learning Objectives</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>Understand SSRF through file upload vulnerabilities</li>
+                            <li>Learn how SVG files can contain external references</li>
+                            <li>Practice creating malicious SVG content for SSRF</li>
+                            <li>Understand the security implications of file processing services</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

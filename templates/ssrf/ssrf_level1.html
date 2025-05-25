@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 1 - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 1: Basic SSRF</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>WebFetch Pro</strong>, a fictional URL fetching service! This challenge simulates a real-world scenario where a URL fetcher is vulnerable to Server-Side Request Forgery (SSRF).
+                    </p>
+                    <p>
+                        The developers of WebFetch Pro have created a simple service that allows users to fetch content from any URL. However, they've made a critical mistake in how they handle user input, allowing attackers to make requests to internal services.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Exploit the SSRF vulnerability to access internal services and retrieve the flag.
+                    </p>
+                    <p>
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Think about what happens when you try to fetch content from internal addresses like localhost or private IP ranges.
+                    </p>
+                    <p>
+                        <i class="bi bi-tools me-2"></i><strong>Tools:</strong> You can use Burp Suite to intercept and modify requests, or simply test different URLs in the form below.
+                    </p>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-cloud-download-fill me-2"></i>WebFetch Pro - URL Content Fetcher</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="/ssrf/level1" method="post">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">URL</span>
+                                <input type="text" class="form-control" name="url" placeholder="Enter URL to fetch (e.g., https://example.com)" value="{{ url }}">
+                                <button class="btn btn-primary" type="submit">Fetch Content</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {% if fetch_result %}
+                <div class="card mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Fetch Result</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded">{{ fetch_result }}</pre>
+                        {% if ssrf_detected %}
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>SSRF Vulnerability Exploited!</strong> You successfully accessed an internal service.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if flag %}
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
+                    <p>Congratulations! You've successfully exploited the SSRF vulnerability.</p>
+                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
+                </div>
+                {% endif %}
+
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Learning Objectives</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>Understand what Server-Side Request Forgery (SSRF) is</li>
+                            <li>Learn how to identify SSRF vulnerabilities</li>
+                            <li>Practice exploiting SSRF to access internal services</li>
+                            <li>Understand the impact of SSRF vulnerabilities</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
