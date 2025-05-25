@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 2 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">SSRF Level 2 Solution: SSRF with Internal Network Scanning</h2>
+            </div>
+            <div class="card-body">
+                <h3>Solution</h3>
+                <p>This challenge demonstrates using SSRF for internal network reconnaissance and port scanning, a common technique used by attackers to map internal infrastructure.</p>
+
+                <h4>Step-by-Step Solution:</h4>
+                <ol>
+                    <li><strong>Identify the SSRF vulnerability:</strong> The screenshot service accepts any URL</li>
+                    <li><strong>Target internal networks:</strong> Try internal IP ranges with specific ports:
+                        <ul>
+                            <li><code>http://192.168.1.1:22</code> (SSH)</li>
+                            <li><code>http://127.0.0.1:3306</code> (MySQL)</li>
+                            <li><code>http://10.0.0.1:80</code> (HTTP)</li>
+                            <li><code>http://172.16.0.1:8080</code> (HTTP Alt)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Analyze responses:</strong> Different services return different responses</li>
+                    <li><strong>Extract service information:</strong> Identify running services and versions</li>
+                </ol>
+
+                <h4>Payload Examples:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># SSH Service Discovery
+http://192.168.1.1:22
+http://127.0.0.1:22
+
+# Database Service Discovery  
+http://127.0.0.1:3306
+http://192.168.1.100:3306
+
+# Web Service Discovery
+http://10.0.0.1:80
+http://172.16.0.1:8080
+
+# Common Internal Ports
+http://127.0.0.1:8080  # Tomcat/Jenkins
+http://127.0.0.1:9200  # Elasticsearch
+http://127.0.0.1:6379  # Redis</code></pre>
+                    </div>
+                </div>
+
+                <h4>Automation with Burp Suite:</h4>
+                <ol>
+                    <li>Intercept the screenshot request in Burp</li>
+                    <li>Send to Intruder</li>
+                    <li>Set payload positions for IP and port</li>
+                    <li>Use number lists for IP ranges and common ports</li>
+                    <li>Analyze response lengths and content for open services</li>
+                </ol>
+
+                <h4>Impact:</h4>
+                <ul>
+                    <li>Complete internal network mapping</li>
+                    <li>Service discovery and version identification</li>
+                    <li>Identification of vulnerable internal services</li>
+                    <li>Bypass of network firewalls and access controls</li>
+                </ul>
+
+                <h4>Mitigation:</h4>
+                <ul>
+                    <li>Implement strict URL validation</li>
+                    <li>Block private IP ranges (RFC 1918)</li>
+                    <li>Use network segmentation</li>
+                    <li>Implement egress filtering</li>
+                    <li>Monitor for unusual internal network traffic</li>
+                </ul>
+
+                <div class="alert alert-info">
+                    <h5><i class="bi bi-lightbulb-fill me-2"></i>Learning Points</h5>
+                    <ul class="mb-0">
+                        <li>SSRF can be used for comprehensive network reconnaissance</li>
+                        <li>Internal services often have weaker security than external ones</li>
+                        <li>Port scanning via SSRF can reveal critical infrastructure</li>
+                        <li>Automation tools like Burp Suite can scale SSRF attacks</li>
+                    </ul>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/ssrf/level2" class="btn btn-primary me-2">Try Challenge Again</a>
+                    <a href="/ssrf/level3" class="btn btn-success">Next Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

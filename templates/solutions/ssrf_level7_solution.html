@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 7 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">SSRF Level 7 Solution: SSRF in Webhooks</h2>
+            </div>
+            <div class="card-body">
+                <h3>Solution</h3>
+                <p>This challenge demonstrates SSRF through webhook URL validation in payment systems, a critical vulnerability in financial applications.</p>
+
+                <h4>Step-by-Step Solution:</h4>
+                <ol>
+                    <li><strong>Identify webhook functionality:</strong> Payment notifications use webhooks</li>
+                    <li><strong>Target internal services:</strong> Point webhook URL to internal addresses</li>
+                    <li><strong>Test payment processing APIs:</strong> Look for internal payment services</li>
+                    <li><strong>Extract sensitive data:</strong> Access internal financial data</li>
+                </ol>
+
+                <h4>Payload Examples:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># Internal payment APIs
+http://localhost:8080/admin/payments
+http://127.0.0.1:3000/internal/transactions
+
+# Database services
+http://192.168.1.100:5432
+http://10.0.0.50:3306
+
+# Internal admin panels
+http://172.16.0.10/admin
+http://localhost:9000/dashboard</code></pre>
+                    </div>
+                </div>
+
+                <h4>Webhook SSRF Impact:</h4>
+                <ul>
+                    <li>Access to internal payment processing systems</li>
+                    <li>Financial data exposure</li>
+                    <li>Transaction manipulation potential</li>
+                    <li>Compliance violations (PCI DSS)</li>
+                </ul>
+
+                <div class="text-center mt-4">
+                    <a href="/ssrf/level7" class="btn btn-primary me-2">Try Challenge Again</a>
+                    <a href="/ssrf/level8" class="btn btn-success">Next Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

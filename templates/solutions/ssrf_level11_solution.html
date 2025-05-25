@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 11 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">SSRF Level 11 Solution: SSRF in GraphQL</h2>
+            </div>
+            <div class="card-body">
+                <h3>Solution</h3>
+                <p>This challenge demonstrates SSRF vulnerabilities in GraphQL APIs where queries can include external data sources.</p>
+
+                <h4>Step-by-Step Solution:</h4>
+                <ol>
+                    <li><strong>Understand GraphQL structure:</strong> GraphQL queries can include external URLs</li>
+                    <li><strong>Craft malicious query:</strong> Include internal URLs in GraphQL query</li>
+                    <li><strong>Target internal services:</strong> Point URLs to internal addresses</li>
+                    <li><strong>Execute the query:</strong> Submit the malicious GraphQL query</li>
+                </ol>
+
+                <h4>GraphQL SSRF Payload:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># Basic GraphQL SSRF
+query { user(url: "http://localhost") { name } }
+
+# Target specific internal services
+query { data(source: "http://127.0.0.1:3306") { content } }
+
+# Multiple internal targets
+query { 
+  admin: user(url: "http://192.168.1.1:80") { name }
+  db: data(source: "http://127.0.0.1:5432") { content }
+}</code></pre>
+                    </div>
+                </div>
+
+                <h4>GraphQL SSRF Techniques:</h4>
+                <ul>
+                    <li><strong>Query variables:</strong> Use variables to inject URLs</li>
+                    <li><strong>Nested queries:</strong> Chain multiple SSRF requests</li>
+                    <li><strong>Introspection abuse:</strong> Use schema introspection for reconnaissance</li>
+                    <li><strong>Mutation exploitation:</strong> Use mutations to trigger SSRF</li>
+                </ul>
+
+                <h4>Impact:</h4>
+                <ul>
+                    <li>Internal API reconnaissance through GraphQL</li>
+                    <li>Data exfiltration via GraphQL responses</li>
+                    <li>Bypass of traditional SSRF protections</li>
+                    <li>Complex attack chaining through GraphQL</li>
+                </ul>
+
+                <h4>Mitigation:</h4>
+                <ul>
+                    <li>Validate all external URLs in GraphQL resolvers</li>
+                    <li>Implement URL allowlists for external data sources</li>
+                    <li>Disable dangerous GraphQL introspection in production</li>
+                    <li>Use GraphQL security tools and rate limiting</li>
+                </ul>
+
+                <div class="alert alert-info">
+                    <h5><i class="bi bi-lightbulb-fill me-2"></i>Learning Points</h5>
+                    <ul class="mb-0">
+                        <li>GraphQL can introduce unique SSRF attack vectors</li>
+                        <li>Complex queries can chain multiple SSRF requests</li>
+                        <li>GraphQL introspection can aid in reconnaissance</li>
+                        <li>Modern API technologies require specialized security measures</li>
+                    </ul>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/ssrf/level11" class="btn btn-primary me-2">Try Challenge Again</a>
+                    <a href="/ssrf/level12" class="btn btn-success">Next Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

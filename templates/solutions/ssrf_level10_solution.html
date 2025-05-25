@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 10 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">SSRF Level 10 Solution: SSRF with DNS Rebinding</h2>
+            </div>
+            <div class="card-body">
+                <h3>Solution</h3>
+                <p>This challenge demonstrates the most advanced SSRF technique - DNS rebinding attacks to bypass strict SSRF protections.</p>
+
+                <h4>DNS Rebinding Services:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># Public DNS rebinding services
+http://rebind.network
+http://rebind.it
+http://1u.ms
+http://rebind.talos-sec.com
+http://rbndr.us
+
+# Custom rebinding domains
+http://127.0.0.1.rebind.network
+http://localhost.rebind.it</code></pre>
+                    </div>
+                </div>
+
+                <h4>How DNS Rebinding Works:</h4>
+                <ol>
+                    <li>First DNS resolution returns external IP (passes validation)</li>
+                    <li>Second DNS resolution returns internal IP (127.0.0.1)</li>
+                    <li>Application makes request to internal service</li>
+                    <li>Bypasses IP-based SSRF protections</li>
+                </ol>
+
+                <h4>Advanced DNS Rebinding:</h4>
+                <ul>
+                    <li>Time-based DNS TTL manipulation</li>
+                    <li>Race condition exploitation</li>
+                    <li>Browser-based rebinding attacks</li>
+                    <li>Custom DNS server setup</li>
+                </ul>
+
+                <div class="alert alert-danger">
+                    <h5><i class="bi bi-exclamation-triangle-fill me-2"></i>Expert Level</h5>
+                    <p class="mb-0">DNS rebinding is the most sophisticated SSRF technique and can bypass even well-implemented protections. It requires deep understanding of DNS and timing attacks.</p>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/ssrf/level10" class="btn btn-primary me-2">Try Challenge Again</a>
+                    <a href="/challenges" class="btn btn-success">View All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 12 - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 12: SSRF via Redis Protocol</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>Protocol Gateway</strong>, a fictional protocol conversion service! This challenge demonstrates using the Gopher protocol to exploit Redis servers via SSRF.
+                    </p>
+                    <p>
+                        The service accepts Gopher protocol URLs for protocol conversion. The Gopher protocol can be used to send arbitrary data to TCP services, making it perfect for exploiting internal Redis servers.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Use Gopher protocol URLs to send Redis commands to internal Redis servers and retrieve the flag.
+                    </p>
+                    <p>
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Use gopher:// URLs targeting internal Redis servers (usually port 6379).
+                    </p>
+                    <p>
+                        <i class="bi bi-tools me-2"></i><strong>Tools:</strong> Learn Redis protocol commands and use Gopher URL encoding tools.
+                    </p>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-arrow-left-right me-2"></i>Protocol Gateway - Gopher Service</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="/ssrf/level12" method="post">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">Gopher URL</span>
+                                <input type="text" class="form-control" name="gopher_url" placeholder="Enter Gopher protocol URL (e.g., gopher://127.0.0.1:6379/...)" value="{{ gopher_url }}">
+                                <button class="btn btn-primary" type="submit">Process Protocol</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {% if redis_result %}
+                <div class="card mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Protocol Result</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded">{{ redis_result }}</pre>
+                        {% if ssrf_detected %}
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>Redis Protocol SSRF Successful!</strong> Internal Redis server accessed.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if flag %}
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
+                    <p>Congratulations! You've successfully exploited Redis via Gopher protocol SSRF.</p>
+                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
+                </div>
+                {% endif %}
+
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Learning Objectives</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>Understand Gopher protocol and its security implications</li>
+                            <li>Learn how to exploit Redis servers via SSRF</li>
+                            <li>Practice protocol smuggling techniques</li>
+                            <li>Master advanced SSRF exploitation methods</li>
+                        </ul>
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level='ssrf12') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

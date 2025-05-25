@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 13 - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 13: SSRF in WebSocket Upgrade</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <h4><i class="bi bi-tools me-2"></i>Under Construction</h4>
+                    <p>This challenge is currently being developed. It will demonstrate SSRF vulnerabilities during WebSocket connection upgrades.</p>
+                    <p><strong>Coming Soon:</strong> Advanced WebSocket SSRF exploitation techniques.</p>
+                </div>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level='ssrf13') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

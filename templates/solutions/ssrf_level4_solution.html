@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 4 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">SSRF Level 4 Solution: Blind SSRF with DNS Exfiltration</h2>
+            </div>
+            <div class="card-body">
+                <h3>Solution</h3>
+                <p>This challenge demonstrates blind SSRF detection using DNS exfiltration techniques, which is essential when you can't see the HTTP response directly.</p>
+
+                <h4>Step-by-Step Solution:</h4>
+                <ol>
+                    <li><strong>Set up DNS exfiltration service:</strong> Use one of these services:
+                        <ul>
+                            <li>Burp Collaborator (Burp Suite Professional)</li>
+                            <li>OAST.pro (free online service)</li>
+                            <li>dnslog.cn (Chinese service)</li>
+                            <li>webhook.site (HTTP callbacks)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Generate unique subdomain:</strong> Get a unique URL like <code>abc123.burpcollaborator.net</code></li>
+                    <li><strong>Submit the URL:</strong> Use it as the callback URL in the PDF generator</li>
+                    <li><strong>Check for DNS queries:</strong> Monitor the service for incoming DNS requests</li>
+                </ol>
+
+                <h4>Payload Examples:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># Burp Collaborator
+http://abc123.burpcollaborator.net
+
+# OAST.pro
+http://abc123.oast.pro
+
+# dnslog.cn
+http://abc123.dnslog.cn
+
+# webhook.site
+http://abc123.webhook.site
+
+# Custom subdomain for data exfiltration
+http://data-exfil.abc123.burpcollaborator.net</code></pre>
+                    </div>
+                </div>
+
+                <h4>Using Burp Collaborator:</h4>
+                <ol>
+                    <li>Open Burp Suite Professional</li>
+                    <li>Go to Burp → Burp Collaborator client</li>
+                    <li>Click "Copy to clipboard" to get a unique domain</li>
+                    <li>Use this domain in the callback URL field</li>
+                    <li>Click "Poll now" to check for interactions</li>
+                </ol>
+
+                <h4>Advanced Techniques:</h4>
+                <ul>
+                    <li><strong>Data exfiltration:</strong> Embed data in subdomain names</li>
+                    <li><strong>Time-based detection:</strong> Use delays to confirm requests</li>
+                    <li><strong>Protocol testing:</strong> Try different protocols (HTTP, HTTPS, FTP)</li>
+                    <li><strong>Port scanning:</strong> Test different ports with DNS callbacks</li>
+                </ul>
+
+                <h4>Impact:</h4>
+                <ul>
+                    <li>Confirmation of SSRF vulnerability existence</li>
+                    <li>Data exfiltration through DNS channels</li>
+                    <li>Bypass of HTTP-based monitoring</li>
+                    <li>Covert communication channel establishment</li>
+                </ul>
+
+                <h4>Mitigation:</h4>
+                <ul>
+                    <li>Monitor and log DNS queries</li>
+                    <li>Implement DNS filtering and blocking</li>
+                    <li>Use DNS sinkholes for known malicious domains</li>
+                    <li>Block outbound DNS from application servers</li>
+                    <li>Implement network monitoring for unusual DNS patterns</li>
+                </ul>
+
+                <div class="alert alert-warning">
+                    <h5><i class="bi bi-exclamation-triangle-fill me-2"></i>Detection Note</h5>
+                    <p class="mb-0">Blind SSRF is harder to detect but equally dangerous. DNS exfiltration can bypass many security controls and should be monitored carefully.</p>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/ssrf/level4" class="btn btn-primary me-2">Try Challenge Again</a>
+                    <a href="/ssrf/level5" class="btn btn-success">Next Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

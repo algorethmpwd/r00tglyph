@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 11 - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 11: SSRF in GraphQL</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>GraphQL API Explorer</strong>, a fictional GraphQL introspection service! This challenge demonstrates SSRF vulnerabilities in GraphQL queries that fetch external data.
+                    </p>
+                    <p>
+                        The service allows GraphQL queries that can include external data sources. However, it doesn't properly validate these external references, allowing SSRF attacks through GraphQL introspection.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Create a GraphQL query that includes external URLs pointing to internal services to exploit SSRF.
+                    </p>
+                    <p>
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Include HTTP URLs in your GraphQL query that point to internal services.
+                    </p>
+                    <p>
+                        <i class="bi bi-tools me-2"></i><strong>Tools:</strong> Use GraphQL introspection tools and Burp Suite to craft malicious queries.
+                    </p>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-diagram-3-fill me-2"></i>GraphQL API Explorer - Query Interface</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="/ssrf/level11" method="post">
+                            <div class="mb-3">
+                                <label for="graphql_query" class="form-label">GraphQL Query</label>
+                                <textarea class="form-control" name="graphql_query" rows="8" placeholder="Enter GraphQL query here...">{{ graphql_query }}</textarea>
+                            </div>
+                            <button class="btn btn-primary" type="submit">Execute Query</button>
+                        </form>
+                    </div>
+                </div>
+
+                {% if graphql_result %}
+                <div class="card mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Query Result</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded">{{ graphql_result }}</pre>
+                        {% if ssrf_detected %}
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>GraphQL SSRF Successful!</strong> Internal service accessed via GraphQL.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if flag %}
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
+                    <p>Congratulations! You've successfully exploited SSRF through GraphQL.</p>
+                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
+                </div>
+                {% endif %}
+
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Learning Objectives</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>Understand SSRF vulnerabilities in GraphQL APIs</li>
+                            <li>Learn how GraphQL introspection can lead to SSRF</li>
+                            <li>Practice crafting malicious GraphQL queries</li>
+                            <li>Master GraphQL-specific attack techniques</li>
+                        </ul>
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level='ssrf11') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

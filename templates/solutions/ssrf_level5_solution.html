@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 5 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">SSRF Level 5 Solution: SSRF with Basic Filters</h2>
+            </div>
+            <div class="card-body">
+                <h3>Solution</h3>
+                <p>This challenge demonstrates bypassing basic SSRF filters using various encoding and alternative representation techniques.</p>
+
+                <h4>Step-by-Step Solution:</h4>
+                <ol>
+                    <li><strong>Test blocked addresses:</strong> Confirm that localhost, 127.0.0.1 are blocked</li>
+                    <li><strong>Try alternative representations:</strong> Use different ways to represent localhost</li>
+                    <li><strong>Use bypass techniques:</strong> Try various encoding methods</li>
+                    <li><strong>Leverage DNS services:</strong> Use services that resolve to localhost</li>
+                </ol>
+
+                <h4>Bypass Techniques:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># Alternative IP representations
+http://127.1                    # Short form
+http://127.0.1                  # Another short form
+http://2130706433               # Decimal representation
+http://0x7f000001               # Hexadecimal
+http://0177.0.0.1               # Octal
+
+# DNS-based bypasses
+http://localtest.me             # Resolves to 127.0.0.1
+http://127.0.0.1.nip.io         # Wildcard DNS service
+http://127.0.0.1.xip.io         # Another wildcard service
+
+# URL encoding
+http://127.0.0.%31              # URL encode last digit
+http://127.0.0.1%2e             # URL encode dot
+
+# IPv6 representations
+http://[::1]                    # IPv6 localhost
+http://[0:0:0:0:0:0:0:1]        # Full IPv6</code></pre>
+                    </div>
+                </div>
+
+                <h4>Advanced Bypass Methods:</h4>
+                <ul>
+                    <li><strong>DNS Rebinding:</strong> Use services like rebind.network</li>
+                    <li><strong>Redirect chains:</strong> Use URL shorteners that redirect to localhost</li>
+                    <li><strong>Protocol confusion:</strong> Try different protocols (ftp://, gopher://)</li>
+                    <li><strong>Parser confusion:</strong> Use malformed URLs that parse differently</li>
+                </ul>
+
+                <h4>Testing with Burp Suite:</h4>
+                <ol>
+                    <li>Intercept the image proxy request</li>
+                    <li>Send to Repeater</li>
+                    <li>Try different bypass techniques systematically</li>
+                    <li>Look for different response patterns</li>
+                    <li>Use Burp's built-in encoding tools</li>
+                </ol>
+
+                <h4>Common Filter Weaknesses:</h4>
+                <ul>
+                    <li>String-based blacklists (case sensitivity)</li>
+                    <li>Incomplete IP range blocking</li>
+                    <li>URL parsing inconsistencies</li>
+                    <li>DNS resolution timing issues</li>
+                    <li>Protocol handling differences</li>
+                </ul>
+
+                <h4>Impact:</h4>
+                <ul>
+                    <li>Bypass of security controls</li>
+                    <li>Access to filtered internal resources</li>
+                    <li>Demonstration of filter inadequacy</li>
+                    <li>Potential for further exploitation</li>
+                </ul>
+
+                <h4>Proper Mitigation:</h4>
+                <ul>
+                    <li>Use allowlists instead of blacklists</li>
+                    <li>Resolve DNS before filtering</li>
+                    <li>Block all private IP ranges comprehensively</li>
+                    <li>Implement multiple layers of validation</li>
+                    <li>Use dedicated libraries for URL validation</li>
+                </ul>
+
+                <div class="alert alert-info">
+                    <h5><i class="bi bi-lightbulb-fill me-2"></i>Learning Points</h5>
+                    <ul class="mb-0">
+                        <li>Blacklist-based filters are often incomplete</li>
+                        <li>Multiple representations exist for the same IP address</li>
+                        <li>URL parsing can be inconsistent across systems</li>
+                        <li>Defense in depth is crucial for SSRF protection</li>
+                    </ul>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/ssrf/level5" class="btn btn-primary me-2">Try Challenge Again</a>
+                    <a href="/ssrf/level6" class="btn btn-success">Next Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

