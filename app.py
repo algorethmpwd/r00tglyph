@@ -127,6 +127,17 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///r00tglyph.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+# Add custom Jinja filter for JSON parsing
+@app.template_filter('from_json')
+def from_json_filter(value):
+    """Parse JSON string to Python object"""
+    if value:
+        try:
+            return json.loads(value)
+        except (json.JSONDecodeError, TypeError):
+            return []
+    return []
+
 # Models
 class LocalUser(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -376,6 +387,54 @@ def reset_database():
                      description="Use protocol smuggling for advanced SSRF.", points=2200),
             Challenge(name="SSRF in Serverless Functions", category="ssrf", difficulty="expert",
                      description="Exploit SSRF in serverless computing environments.", points=2300),
+
+            # Cross-Site Request Forgery (CSRF) Challenges
+            Challenge(name="Basic Form CSRF", category="csrf", difficulty="beginner",
+                     description="Exploit a basic CSRF vulnerability in form submissions.", points=100),
+            Challenge(name="GET-based CSRF", category="csrf", difficulty="beginner",
+                     description="Exploit CSRF in state-changing GET requests.", points=200),
+            Challenge(name="JSON CSRF", category="csrf", difficulty="intermediate",
+                     description="Perform CSRF attacks with JSON payloads.", points=300),
+            Challenge(name="File Upload CSRF", category="csrf", difficulty="intermediate",
+                     description="Exploit CSRF in file upload functionality.", points=400),
+            Challenge(name="CSRF with Weak Tokens", category="csrf", difficulty="intermediate",
+                     description="Bypass weak CSRF token implementations.", points=500),
+            Challenge(name="Referrer-based Protection Bypass", category="csrf", difficulty="intermediate",
+                     description="Bypass referrer header validation in CSRF protection.", points=600),
+            Challenge(name="CSRF in AJAX Requests", category="csrf", difficulty="intermediate",
+                     description="Exploit CSRF in XMLHttpRequest and fetch API calls.", points=700),
+            Challenge(name="SameSite Cookie Bypass", category="csrf", difficulty="advanced",
+                     description="Bypass SameSite cookie protection mechanisms.", points=800),
+            Challenge(name="CSRF with Custom Headers", category="csrf", difficulty="advanced",
+                     description="Bypass custom header-based CSRF protection.", points=900),
+            Challenge(name="Multi-step CSRF", category="csrf", difficulty="advanced",
+                     description="Execute complex multi-step CSRF attack chains.", points=1000),
+            Challenge(name="CSRF in Password Change", category="csrf", difficulty="advanced",
+                     description="Exploit CSRF in critical password change functionality.", points=1100),
+            Challenge(name="CSRF with CAPTCHA Bypass", category="csrf", difficulty="advanced",
+                     description="Bypass CAPTCHA protection in CSRF attacks.", points=1200),
+            Challenge(name="CSRF with CORS Exploitation", category="csrf", difficulty="expert",
+                     description="Combine CSRF with CORS misconfigurations.", points=1300),
+            Challenge(name="WebSocket CSRF", category="csrf", difficulty="expert",
+                     description="Exploit CSRF vulnerabilities in WebSocket connections.", points=1400),
+            Challenge(name="CSRF in OAuth Flows", category="csrf", difficulty="expert",
+                     description="Exploit CSRF in OAuth authorization flows.", points=1500),
+            Challenge(name="CSRF with CSP Bypass", category="csrf", difficulty="expert",
+                     description="Bypass Content Security Policy in CSRF attacks.", points=1600),
+            Challenge(name="CSRF via XSS Chain", category="csrf", difficulty="expert",
+                     description="Chain XSS and CSRF for advanced exploitation.", points=1700),
+            Challenge(name="GraphQL CSRF", category="csrf", difficulty="expert",
+                     description="Exploit CSRF vulnerabilities in GraphQL APIs.", points=1800),
+            Challenge(name="JWT-based CSRF", category="csrf", difficulty="expert",
+                     description="Exploit CSRF with JWT token manipulation.", points=1900),
+            Challenge(name="Mobile API CSRF", category="csrf", difficulty="expert",
+                     description="Exploit CSRF in mobile application APIs.", points=2000),
+            Challenge(name="Microservices CSRF", category="csrf", difficulty="expert",
+                     description="Exploit CSRF in microservices architectures.", points=2100),
+            Challenge(name="CSRF with Subdomain Takeover", category="csrf", difficulty="expert",
+                     description="Combine subdomain takeover with CSRF exploitation.", points=2200),
+            Challenge(name="Serverless Function CSRF", category="csrf", difficulty="expert",
+                     description="Exploit CSRF in serverless computing environments.", points=2300),
         ]
         db.session.add_all(challenges)
         db.session.commit()
@@ -456,17 +515,18 @@ def update_user_progress(machine_id, challenge_id, points):
     """Update user progress after completing a challenge"""
     user = LocalUser.query.filter_by(machine_id=machine_id).first()
     if user:
-        # Update score
-        user.score += points
-
         # Update completed challenges
         completed = json.loads(user.completed_challenges) if user.completed_challenges else []
         if challenge_id not in completed:
+            # Only award points if challenge wasn't already completed
+            user.score += points
             completed.append(challenge_id)
             user.completed_challenges = json.dumps(completed)
-
-        db.session.commit()
-        return True
+            db.session.commit()
+            return True
+        else:
+            # Challenge already completed, no points awarded
+            return False
     return False
 
 # WAF emulation functions
@@ -1608,7 +1668,18 @@ def xss_level16():
     flag = None
     xss_detected = False
     message = ""
-    # Check for intended payload
+
+    # Check if success parameter is present (XSS was successful)
+    if request.args.get('success') == 'true':
+        xss_detected = True
+        challenge = Challenge.query.filter_by(name="XSS in WebAssembly Applications").first()
+        if challenge:
+            completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+            if challenge.id not in completed_ids:
+                update_user_progress(machine_id, challenge.id, challenge.points)
+        message = "Challenge solved! Flag revealed."
+
+    # Check for intended payload in POST requests
     if request.method == 'POST':
         user_input = request.form.get('input', '')
         if 'alert("XSS Level 16 Completed!")' in user_input or "alert('XSS Level 16 Completed!')" in user_input:
@@ -1621,6 +1692,7 @@ def xss_level16():
             message = "Challenge solved! Flag revealed."
         else:
             message = "Try to trigger the alert as described."
+
     challenge = Challenge.query.filter_by(name="XSS in WebAssembly Applications").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
@@ -4400,6 +4472,44 @@ def solutions(level):
             level_num = level  # Use the full level string
 
         return render_template(f'solutions/sqli_level{level_num}_solution.html', challenge=challenge)
+    # Check if it's a CSRF solution
+    elif level.startswith('csrf'):
+        # Get the challenge object to pass to the template
+        challenge_name_map = {
+            'csrf1': 'Basic Form CSRF',
+            'csrf2': 'GET-based CSRF',
+            'csrf3': 'JSON CSRF',
+            'csrf4': 'File Upload CSRF',
+            'csrf5': 'CSRF with Weak Tokens',
+            'csrf6': 'Referrer-based Protection Bypass',
+            'csrf7': 'CSRF in AJAX Requests',
+            'csrf8': 'SameSite Cookie Bypass',
+            'csrf9': 'CSRF with Custom Headers',
+            'csrf10': 'Multi-step CSRF',
+            'csrf11': 'CSRF in Password Change',
+            'csrf12': 'CSRF with CAPTCHA Bypass',
+            'csrf13': 'CSRF with CORS Exploitation',
+            'csrf14': 'WebSocket CSRF',
+            'csrf15': 'CSRF in OAuth Flows',
+            'csrf16': 'CSRF with CSP Bypass',
+            'csrf17': 'CSRF via XSS Chain',
+            'csrf18': 'GraphQL CSRF',
+            'csrf19': 'JWT-based CSRF',
+            'csrf20': 'Mobile API CSRF',
+            'csrf21': 'Microservices CSRF',
+            'csrf22': 'CSRF with Subdomain Takeover',
+            'csrf23': 'Serverless Function CSRF'
+        }
+        challenge_name = challenge_name_map.get(level)
+        challenge = Challenge.query.filter_by(name=challenge_name).first() if challenge_name else None
+
+        # Extract level number, handling both single and double-digit levels
+        if level.startswith('csrf'):
+            level_num = level[4:]  # Extract everything after 'csrf'
+        else:
+            level_num = level  # Use the full level string
+
+        return render_template(f'solutions/csrf_level{level_num}_solution.html', challenge=challenge)
     else:
         # For XSS challenges, extract the level number and get the challenge
         try:
@@ -6668,7 +6778,7 @@ def ssrf_level15():
         if client_id and redirect_uri and scope:
             # Check for OAuth callback SSRF patterns
             ssrf_patterns = ['localhost', '127.0.0.1', '0.0.0.0', '::1', 'internal.', 'admin.', 'file://', 'gopher://']
-            
+
             if any(pattern in redirect_uri.lower() for pattern in ssrf_patterns):
                 ssrf_detected = True
                 oauth_result = f"""OAuth Authorization Request:
@@ -6692,7 +6802,7 @@ Internal OAuth Service Response:
     "flag": "R00T{{0auth_c4llb4ck_ssrf_pwn3d}}"
   }}
 }}"""
-                
+
                 challenge = Challenge.query.filter_by(name="SSRF in OAuth Callbacks").first()
                 if challenge:
                     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
@@ -6735,7 +6845,7 @@ def ssrf_level16():
         if ldap_query and ldap_server:
             # Check for LDAP SSRF patterns
             ssrf_patterns = ['localhost', '127.0.0.1', '0.0.0.0', '::1', 'internal.', 'ldap://', 'ldaps://']
-            
+
             if any(pattern in ldap_server.lower() for pattern in ssrf_patterns):
                 ssrf_detected = True
                 ldap_result = f"""LDAP Directory Search:
@@ -6769,7 +6879,7 @@ Internal LDAP Data:
   "internal_groups": ["Domain Admins", "Service Accounts"],
   "flag": "R00T{{ldap_1nj3ct10n_ssrf_pwn3d}}"
 }}"""
-                
+
                 challenge = Challenge.query.filter_by(name="SSRF via LDAP Protocol").first()
                 if challenge:
                     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
@@ -6811,7 +6921,7 @@ def ssrf_level17():
         if container_id and metadata_endpoint:
             # Check for container metadata SSRF patterns
             ssrf_patterns = ['169.254.169.254', 'localhost', '127.0.0.1', 'docker.sock', 'kubernetes', 'metadata']
-            
+
             if any(pattern in metadata_endpoint.lower() for pattern in ssrf_patterns):
                 ssrf_detected = True
                 container_result = f"""Container Metadata Request:
@@ -6855,7 +6965,7 @@ Docker Daemon API Response:
     ]
   }}
 }}"""
-                
+
                 challenge = Challenge.query.filter_by(name="SSRF in Container Metadata").first()
                 if challenge:
                     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
@@ -7410,6 +7520,1585 @@ Try targeting cloud metadata services."""
     return render_template('ssrf/ssrf_level23.html', flag=flag, ssrf_detected=ssrf_detected,
                           function_url=function_url, cloud_metadata=cloud_metadata,
                           serverless_result=serverless_result, challenge=challenge)
+
+
+# ===== CSRF CHALLENGE ROUTES =====
+
+# CSRF Level 1 - Basic Form CSRF
+@app.route('/csrf/level1', methods=['GET', 'POST'])
+def csrf_level1():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    csrf_detected = False
+    recipient = request.form.get('recipient', '')
+    amount = request.form.get('amount', '')
+    memo = request.form.get('memo', '')
+    transfer_result = ''
+
+    if request.method == 'POST':
+        if recipient and amount:
+            # Check for CSRF attack patterns
+            csrf_patterns = ['attacker', 'evil', 'malicious', '999999999', 'hacker']
+
+            if any(pattern in recipient.lower() or pattern in memo.lower() for pattern in csrf_patterns):
+                csrf_detected = True
+                transfer_result = f"""Transfer Request Processed:
+From: John Doe (Account: 1234567890)
+To: {recipient}
+Amount: ${amount}
+Memo: {memo}
+
+Transaction Details:
+- Transaction ID: TXN_{machine_id[:8]}
+- Status: COMPLETED
+- Timestamp: 2024-01-15 14:30:25
+- Method: Online Banking Transfer
+
+Security Notice:
+No CSRF protection detected on this form.
+This transfer was executed without any cross-site request forgery protection.
+
+Bank Response:
+{{
+  "status": "success",
+  "transaction_id": "TXN_{machine_id[:8]}",
+  "amount_transferred": "{amount}",
+  "recipient_account": "{recipient}",
+  "remaining_balance": "$4,{5000 - int(amount) if amount.isdigit() else 5000}",
+  "flag": "R00T{{b4s1c_f0rm_csrf_pwn3d}}"
+}}"""
+
+                challenge = Challenge.query.filter_by(name="Basic Form CSRF").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                transfer_result = f"""Transfer Request:
+From: John Doe (Account: 1234567890)
+To: {recipient}
+Amount: ${amount}
+Memo: {memo}
+
+Status: Processing...
+Please wait while we verify the transaction details."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Basic Form CSRF").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('csrf/csrf_level1.html', flag=flag, csrf_detected=csrf_detected,
+                          recipient=recipient, amount=amount, memo=memo,
+                          transfer_result=transfer_result, challenge=challenge)
+
+# CSRF Level 2 - GET-based CSRF
+@app.route('/csrf/level2', methods=['GET', 'POST'])
+def csrf_level2():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    csrf_detected = False
+    action = request.args.get('action', '')
+    user_id = request.args.get('user_id', '')
+    action_result = ''
+
+    if action and user_id:
+        # Check for CSRF attack patterns
+        csrf_actions = ['delete', 'promote', 'demote']
+
+        if action in csrf_actions and user_id:
+            csrf_detected = True
+            action_result = f"""Administrative Action Executed:
+Action: {action.upper()}
+Target User ID: {user_id}
+Executed By: System Administrator
+Timestamp: 2024-01-15 14:35:10
+
+Action Details:
+- HTTP Method: GET (Vulnerable to CSRF)
+- Referrer: {request.headers.get('Referer', 'Not provided')}
+- User Agent: {request.headers.get('User-Agent', 'Unknown')}
+
+Admin Panel Response:
+{{
+  "action": "{action}",
+  "target_user_id": "{user_id}",
+  "status": "completed",
+  "vulnerability": "GET-based state change",
+  "impact": "Administrative action performed via CSRF",
+  "flag": "R00T{{g3t_b4s3d_csrf_pwn3d}}"
+}}
+
+Security Warning:
+This action was performed using a GET request, making it vulnerable to CSRF attacks.
+State-changing operations should never use GET requests."""
+
+            challenge = Challenge.query.filter_by(name="GET-based CSRF").first()
+            if challenge:
+                completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                if challenge.id not in completed_ids:
+                    update_user_progress(machine_id, challenge.id, challenge.points)
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="GET-based CSRF").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('csrf/csrf_level2.html', flag=flag, csrf_detected=csrf_detected,
+                          action=action, user_id=user_id, action_result=action_result, challenge=challenge)
+
+# CSRF Level 3 - JSON CSRF
+@app.route('/csrf/level3', methods=['GET', 'POST'])
+def csrf_level3():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    csrf_detected = False
+    api_endpoint = request.form.get('api_endpoint', '')
+    json_payload = request.form.get('json_payload', '')
+    content_type = request.form.get('content_type', '')
+    result = ''
+
+    if request.method == 'POST':
+        if api_endpoint and json_payload:
+            # Check for JSON CSRF attack patterns
+            csrf_patterns = ['create', 'delete', 'admin', 'user', 'malicious']
+
+            if any(pattern in json_payload.lower() or pattern in api_endpoint.lower() for pattern in csrf_patterns):
+                csrf_detected = True
+                result = f"""JSON API Request Processed:
+Endpoint: {api_endpoint}
+Content-Type: {content_type}
+Payload: {json_payload}
+
+API Response:
+{{
+  "request_method": "POST",
+  "content_type": "{content_type}",
+  "endpoint": "{api_endpoint}",
+  "payload_received": {json_payload},
+  "csrf_protection": "none",
+  "vulnerability": "JSON CSRF without proper validation",
+  "execution_status": "success",
+  "flag": "R00T{{js0n_csrf_4p1_pwn3d}}"
+}}
+
+Security Analysis:
+- Content-Type manipulation successful
+- JSON payload executed without CSRF token validation
+- API endpoint vulnerable to cross-origin requests"""
+
+                challenge = Challenge.query.filter_by(name="JSON CSRF").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                result = f"""JSON API Request:
+Endpoint: {api_endpoint}
+Content-Type: {content_type}
+Payload: {json_payload}
+
+Status: Validating request...
+Please ensure your JSON payload contains valid API operations."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="JSON CSRF").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('csrf/csrf_level3.html', flag=flag, csrf_detected=csrf_detected,
+                          api_endpoint=api_endpoint, json_payload=json_payload, content_type=content_type,
+                          result=result, challenge=challenge)
+
+# CSRF Level 4 - File Upload CSRF
+@app.route('/csrf/level4', methods=['GET', 'POST'])
+def csrf_level4():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    csrf_detected = False
+    file_category = request.form.get('file_category', '')
+    file_description = request.form.get('file_description', '')
+    result = ''
+
+    if request.method == 'POST':
+        if 'upload_file' in request.files:
+            file = request.files['upload_file']
+            if file and file.filename:
+                # Check for CSRF attack patterns in file upload
+                csrf_patterns = ['malicious', 'shell', 'backdoor', 'exploit', 'payload']
+
+                if any(pattern in file.filename.lower() or pattern in file_description.lower() for pattern in csrf_patterns):
+                    csrf_detected = True
+                    result = f"""File Upload Processed:
+Filename: {file.filename}
+Category: {file_category}
+Description: {file_description}
+Size: {len(file.read()) if file else 0} bytes
+
+Upload Response:
+{{
+  "upload_status": "success",
+  "filename": "{file.filename}",
+  "category": "{file_category}",
+  "description": "{file_description}",
+  "upload_path": "/uploads/documents/{file.filename}",
+  "csrf_protection": "none",
+  "vulnerability": "File upload CSRF without validation",
+  "security_risk": "Malicious file uploaded via CSRF",
+  "flag": "R00T{{f1l3_upl04d_csrf_pwn3d}}"
+}}
+
+Security Warning:
+File upload completed without CSRF protection.
+This could allow attackers to upload malicious files via cross-site requests."""
+
+                    challenge = Challenge.query.filter_by(name="File Upload CSRF").first()
+                    if challenge:
+                        completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                        if challenge.id not in completed_ids:
+                            update_user_progress(machine_id, challenge.id, challenge.points)
+                else:
+                    result = f"""File Upload Request:
+Filename: {file.filename}
+Category: {file_category}
+Description: {file_description}
+
+Status: Processing upload...
+Please wait while we validate the file."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="File Upload CSRF").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('csrf/csrf_level4.html', flag=flag, csrf_detected=csrf_detected,
+                          file_category=file_category, file_description=file_description,
+                          result=result, challenge=challenge)
+
+# CSRF Level 5 - CSRF with Weak Tokens
+@app.route('/csrf/level5', methods=['GET', 'POST'])
+def csrf_level5():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    csrf_detected = False
+    csrf_token = request.form.get('csrf_token', '')
+    form_data = request.form.get('form_data', '')
+    submit_action = request.form.get('submit_action', '')
+    result = ''
+
+    if request.method == 'POST':
+        if csrf_token and form_data and submit_action:
+            # Check for weak CSRF token patterns
+            weak_tokens = ['123456', 'token', 'csrf', 'weak', 'predictable', '000000']
+
+            if any(weak in csrf_token.lower() for weak in weak_tokens) or len(csrf_token) < 10:
+                csrf_detected = True
+                result = f"""Form Submission Processed:
+CSRF Token: {csrf_token}
+Form Data: {form_data}
+Action: {submit_action}
+
+Token Validation Result:
+{{
+  "token_provided": "{csrf_token}",
+  "token_validation": "bypassed",
+  "token_weakness": "predictable/weak token detected",
+  "form_data": "{form_data}",
+  "action_executed": "{submit_action}",
+  "vulnerability": "Weak CSRF token implementation",
+  "bypass_method": "Token prediction/brute force",
+  "flag": "R00T{{w34k_csrf_t0k3n_pwn3d}}"
+}}
+
+Security Analysis:
+- CSRF token is weak and predictable
+- Token validation can be bypassed
+- Form submission executed despite weak protection"""
+
+                challenge = Challenge.query.filter_by(name="CSRF with Weak Tokens").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                result = f"""Form Submission:
+CSRF Token: {csrf_token}
+Form Data: {form_data}
+Action: {submit_action}
+
+Status: Validating CSRF token...
+Please ensure you have a valid token."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="CSRF with Weak Tokens").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('csrf/csrf_level5.html', flag=flag, csrf_detected=csrf_detected,
+                          csrf_token=csrf_token, form_data=form_data, submit_action=submit_action,
+                          result=result, challenge=challenge)
+
+# CSRF Level 6 - Referrer-based Protection Bypass
+@app.route('/csrf/level6', methods=['GET', 'POST'])
+def csrf_level6():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    csrf_detected = False
+    referrer_url = request.form.get('referrer_url', '')
+    target_action = request.form.get('target_action', '')
+    payload_data = request.form.get('payload_data', '')
+    result = ''
+
+    if request.method == 'POST':
+        if referrer_url and target_action:
+            # Check for referrer bypass patterns
+            bypass_patterns = ['trusted-domain', 'internal', 'admin', 'secure']
+            actual_referrer = request.headers.get('Referer', '')
+
+            if any(pattern in referrer_url.lower() for pattern in bypass_patterns) or not actual_referrer:
+                csrf_detected = True
+                result = f"""Referrer-based Protection Bypass:
+Provided Referrer: {referrer_url}
+Actual Referrer: {actual_referrer or 'None (bypassed)'}
+Target Action: {target_action}
+Payload Data: {payload_data}
+
+Security Analysis:
+{{
+  "referrer_validation": "bypassed",
+  "provided_referrer": "{referrer_url}",
+  "actual_referrer": "{actual_referrer or 'missing'}",
+  "target_action": "{target_action}",
+  "payload_data": "{payload_data}",
+  "bypass_method": "referrer_spoofing_or_removal",
+  "vulnerability": "Weak referrer-based CSRF protection",
+  "execution_status": "success",
+  "flag": "R00T{{r3f3rr3r_byp4ss_csrf_pwn3d}}"
+}}
+
+Protection Bypass Details:
+- Referrer header validation circumvented
+- Action executed despite referrer-based protection
+- Demonstrates weakness of referrer-only CSRF protection"""
+
+                challenge = Challenge.query.filter_by(name="Referrer-based Protection Bypass").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                result = f"""Referrer Validation:
+Provided Referrer: {referrer_url}
+Actual Referrer: {actual_referrer}
+Target Action: {target_action}
+
+Status: Referrer validation failed.
+Please provide a trusted referrer URL."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Referrer-based Protection Bypass").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('csrf/csrf_level6.html', flag=flag, csrf_detected=csrf_detected,
+                          referrer_url=referrer_url, target_action=target_action, payload_data=payload_data,
+                          result=result, challenge=challenge)
+
+# CSRF Level 7 - CSRF in AJAX Requests
+@app.route('/csrf/level7', methods=['GET', 'POST'])
+def csrf_level7():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    csrf_detected = False
+    ajax_endpoint = request.form.get('ajax_endpoint', '')
+    request_method = request.form.get('request_method', '')
+    ajax_data = request.form.get('ajax_data', '')
+    result = ''
+
+    if request.method == 'POST':
+        if ajax_endpoint and request_method and ajax_data:
+            # Check for AJAX CSRF attack patterns
+            csrf_patterns = ['api', 'admin', 'delete', 'update', 'create']
+            ajax_headers = request.headers.get('X-Requested-With', '')
+
+            if any(pattern in ajax_endpoint.lower() or pattern in ajax_data.lower() for pattern in csrf_patterns):
+                csrf_detected = True
+                result = f"""AJAX CSRF Attack Executed:
+Endpoint: {ajax_endpoint}
+Method: {request_method}
+Data: {ajax_data}
+X-Requested-With: {ajax_headers or 'Not provided'}
+
+AJAX Response:
+{{
+  "endpoint": "{ajax_endpoint}",
+  "method": "{request_method}",
+  "data_received": "{ajax_data}",
+  "x_requested_with": "{ajax_headers or 'missing'}",
+  "csrf_protection": "insufficient",
+  "vulnerability": "AJAX CSRF without proper validation",
+  "content_type": "{request.content_type}",
+  "origin": "{request.headers.get('Origin', 'not_provided')}",
+  "execution_status": "success",
+  "flag": "R00T{{4j4x_csrf_4p1_pwn3d}}"
+}}
+
+AJAX Security Analysis:
+- XMLHttpRequest/fetch API CSRF successful
+- Custom headers can be bypassed with simple requests
+- CORS preflight not triggered for simple content types
+- Modern SPA applications vulnerable to CSRF"""
+
+                challenge = Challenge.query.filter_by(name="CSRF in AJAX Requests").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                result = f"""AJAX Request:
+Endpoint: {ajax_endpoint}
+Method: {request_method}
+Data: {ajax_data}
+
+Status: Processing AJAX request...
+Please ensure valid API endpoint and data."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="CSRF in AJAX Requests").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('csrf/csrf_level7.html', flag=flag, csrf_detected=csrf_detected,
+                          ajax_endpoint=ajax_endpoint, request_method=request_method, ajax_data=ajax_data,
+                          result=result, challenge=challenge)
+
+# CSRF Level 8 - SameSite Cookie Bypass
+@app.route('/csrf/level8', methods=['GET', 'POST'])
+def csrf_level8():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    csrf_detected = False
+    samesite_mode = request.form.get('samesite_mode', '')
+    navigation_type = request.form.get('navigation_type', '')
+    csrf_payload = request.form.get('csrf_payload', '')
+    result = ''
+
+    if request.method == 'POST':
+        if samesite_mode and navigation_type and csrf_payload:
+            # Check for SameSite bypass patterns
+            bypass_conditions = [
+                (samesite_mode == 'Lax' and navigation_type == 'top_level'),
+                (samesite_mode == 'None'),
+                ('bypass' in csrf_payload.lower() or 'samesite' in csrf_payload.lower())
+            ]
+
+            if any(bypass_conditions):
+                csrf_detected = True
+                result = f"""SameSite Cookie Bypass:
+SameSite Mode: {samesite_mode}
+Navigation Type: {navigation_type}
+CSRF Payload: {csrf_payload}
+
+Cookie Analysis:
+{{
+  "samesite_attribute": "{samesite_mode}",
+  "navigation_context": "{navigation_type}",
+  "csrf_payload": "{csrf_payload}",
+  "bypass_successful": true,
+  "bypass_method": "samesite_lax_top_level_navigation",
+  "vulnerability": "SameSite=Lax bypass via top-level navigation",
+  "cookie_sent": true,
+  "authentication_bypassed": true,
+  "flag": "R00T{{s4m3s1t3_c00k13_byp4ss_pwn3d}}"
+}}
+
+SameSite Bypass Techniques:
+- SameSite=Lax allows cookies on top-level navigation
+- SameSite=None requires Secure attribute
+- Popup windows and iframe techniques
+- Navigation-based CSRF attacks still possible"""
+
+                challenge = Challenge.query.filter_by(name="SameSite Cookie Bypass").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                result = f"""SameSite Protection:
+SameSite Mode: {samesite_mode}
+Navigation Type: {navigation_type}
+CSRF Payload: {csrf_payload}
+
+Status: SameSite protection active.
+Cookies not sent due to SameSite restrictions."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="SameSite Cookie Bypass").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('csrf/csrf_level8.html', flag=flag, csrf_detected=csrf_detected,
+                          samesite_mode=samesite_mode, navigation_type=navigation_type, csrf_payload=csrf_payload,
+                          result=result, challenge=challenge)
+
+# CSRF Level 9 - CSRF with Custom Headers
+@app.route('/csrf/level9', methods=['GET', 'POST'])
+def csrf_level9():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    csrf_detected = False
+    custom_header = request.form.get('custom_header', '')
+    header_value = request.form.get('header_value', '')
+    api_action = request.form.get('api_action', '')
+    result = ''
+
+    if request.method == 'POST':
+        if custom_header and header_value and api_action:
+            # Check for custom header bypass patterns
+            bypass_patterns = ['XMLHttpRequest', 'application/json', 'bypass', 'custom']
+            actual_header = request.headers.get('X-Requested-With', '')
+
+            if any(pattern in header_value for pattern in bypass_patterns) or not actual_header:
+                csrf_detected = True
+                result = f"""Custom Header CSRF Bypass:
+Expected Header: {custom_header}
+Expected Value: {header_value}
+Actual X-Requested-With: {actual_header or 'Not provided'}
+API Action: {api_action}
+
+Header Bypass Analysis:
+{{
+  "expected_header": "{custom_header}",
+  "expected_value": "{header_value}",
+  "actual_header": "{actual_header or 'missing'}",
+  "api_action": "{api_action}",
+  "bypass_method": "custom_header_omission",
+  "vulnerability": "Custom header-based CSRF protection bypass",
+  "content_type": "{request.content_type}",
+  "simple_request": true,
+  "cors_preflight_avoided": true,
+  "execution_status": "success",
+  "flag": "R00T{{cust0m_h34d3r_byp4ss_pwn3d}}"
+}}
+
+Custom Header Protection Weaknesses:
+- Simple requests don't trigger CORS preflight
+- Custom headers can be omitted in CSRF attacks
+- Content-Type manipulation avoids preflight checks
+- Form-based requests bypass header requirements"""
+
+                challenge = Challenge.query.filter_by(name="CSRF with Custom Headers").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                result = f"""Custom Header Validation:
+Expected Header: {custom_header}
+Expected Value: {header_value}
+API Action: {api_action}
+
+Status: Custom header validation failed.
+Required headers not provided."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="CSRF with Custom Headers").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('csrf/csrf_level9.html', flag=flag, csrf_detected=csrf_detected,
+                          custom_header=custom_header, header_value=header_value, api_action=api_action,
+                          result=result, challenge=challenge)
+
+# CSRF Level 10 - Multi-step CSRF
+@app.route('/csrf/level10', methods=['GET', 'POST'])
+def csrf_level10():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    csrf_detected = False
+    step_number = request.form.get('step_number', '')
+    step_data = request.form.get('step_data', '')
+    workflow_id = request.form.get('workflow_id', '')
+    result = ''
+
+    if request.method == 'POST':
+        if step_number and step_data and workflow_id:
+            # Check for multi-step CSRF attack patterns
+            attack_patterns = ['workflow', 'admin', 'delete', 'transfer', 'approve']
+
+            if any(pattern in step_data.lower() or pattern in workflow_id.lower() for pattern in attack_patterns):
+                csrf_detected = True
+                result = f"""Multi-step CSRF Attack Chain:
+Workflow Step: {step_number}/4
+Step Data: {step_data}
+Workflow ID: {workflow_id}
+
+Workflow Execution:
+{{
+  "workflow_id": "{workflow_id}",
+  "current_step": {step_number},
+  "total_steps": 4,
+  "step_data": "{step_data}",
+  "step_status": "completed",
+  "csrf_protection": "none",
+  "vulnerability": "Multi-step workflow CSRF",
+  "business_logic_bypass": true,
+  "workflow_state": {{
+    "step_1": "user_verification_bypassed",
+    "step_2": "approval_process_skipped",
+    "step_3": "security_checks_bypassed",
+    "step_4": "final_execution_ready"
+  }},
+  "execution_status": "success",
+  "flag": "R00T{{mult1_st3p_w0rkfl0w_pwn3d}}"
+}}
+
+Multi-step Attack Analysis:
+- Complex business workflows vulnerable to CSRF
+- Each step can be individually exploited
+- State management weaknesses exploited
+- Approval processes bypassed via CSRF chain"""
+
+                challenge = Challenge.query.filter_by(name="Multi-step CSRF").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                result = f"""Workflow Processing:
+Workflow Step: {step_number}/4
+Step Data: {step_data}
+Workflow ID: {workflow_id}
+
+Status: Processing workflow step...
+Please ensure valid workflow data."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Multi-step CSRF").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('csrf/csrf_level10.html', flag=flag, csrf_detected=csrf_detected,
+                          step_number=step_number, step_data=step_data, workflow_id=workflow_id,
+                          result=result, challenge=challenge)
+
+# CSRF Level 11 - CSRF in Password Change
+@app.route('/csrf/level11', methods=['GET', 'POST'])
+def csrf_level11():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    csrf_detected = False
+    current_password = request.form.get('current_password', '')
+    new_password = request.form.get('new_password', '')
+    confirm_password = request.form.get('confirm_password', '')
+    result = ''
+
+    if request.method == 'POST':
+        if current_password and new_password and confirm_password:
+            # Check for password change CSRF attack patterns
+            csrf_patterns = ['admin', 'password123', 'hacker', 'pwned', 'bypass']
+
+            if any(pattern in new_password.lower() for pattern in csrf_patterns) or new_password == confirm_password:
+                csrf_detected = True
+                result = f"""Password Change CSRF Attack:
+Current Password: {current_password}
+New Password: {new_password}
+Confirm Password: {confirm_password}
+
+Security Breach Analysis:
+{{
+  "attack_type": "password_change_csrf",
+  "current_password": "{current_password}",
+  "new_password": "{new_password}",
+  "password_match": {str(new_password == confirm_password).lower()},
+  "csrf_protection": "none",
+  "vulnerability": "Critical password change without CSRF protection",
+  "account_compromised": true,
+  "session_hijacked": true,
+  "impact": "Complete account takeover possible",
+  "flag": "R00T{{p4ssw0rd_ch4ng3_csrf_pwn3d}}"
+}}
+
+Critical Security Impact:
+- User password changed without authorization
+- Account takeover achieved via CSRF
+- No validation of password change origin
+- Session management bypassed"""
+
+                challenge = Challenge.query.filter_by(name="CSRF in Password Change").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                result = f"""Password Change Request:
+Current Password: {current_password}
+New Password: {new_password}
+Confirm Password: {confirm_password}
+
+Status: Validating password change request...
+Please ensure passwords match and meet security requirements."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="CSRF in Password Change").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('csrf/csrf_level11.html', flag=flag, csrf_detected=csrf_detected,
+                          current_password=current_password, new_password=new_password, confirm_password=confirm_password,
+                          result=result, challenge=challenge)
+
+# CSRF Level 12 - CSRF with CAPTCHA Bypass
+@app.route('/csrf/level12', methods=['GET', 'POST'])
+def csrf_level12():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    csrf_detected = False
+    captcha_response = request.form.get('captcha_response', '')
+    captcha_token = request.form.get('captcha_token', '')
+    protected_action = request.form.get('protected_action', '')
+    result = ''
+
+    if request.method == 'POST':
+        if captcha_response and captcha_token and protected_action:
+            # Check for CAPTCHA bypass patterns
+            bypass_patterns = ['bypass', 'automated', 'bot', 'script', '12345']
+
+            if any(pattern in captcha_response.lower() or pattern in captcha_token.lower() for pattern in bypass_patterns):
+                csrf_detected = True
+                result = f"""CAPTCHA Bypass CSRF Attack:
+CAPTCHA Response: {captcha_response}
+CAPTCHA Token: {captcha_token}
+Protected Action: {protected_action}
+
+CAPTCHA Bypass Analysis:
+{{
+  "captcha_response": "{captcha_response}",
+  "captcha_token": "{captcha_token}",
+  "protected_action": "{protected_action}",
+  "captcha_bypassed": true,
+  "bypass_method": "automated_solving_or_reuse",
+  "vulnerability": "CAPTCHA protection insufficient for CSRF",
+  "csrf_protection": "weak",
+  "automation_successful": true,
+  "flag": "R00T{{c4ptch4_byp4ss_csrf_pwn3d}}"
+}}
+
+CAPTCHA Bypass Techniques:
+- Token reuse from previous sessions
+- Automated CAPTCHA solving services
+- CAPTCHA sharing across requests
+- Time-based token prediction"""
+
+                challenge = Challenge.query.filter_by(name="CSRF with CAPTCHA Bypass").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                result = f"""CAPTCHA Validation:
+CAPTCHA Response: {captcha_response}
+CAPTCHA Token: {captcha_token}
+Protected Action: {protected_action}
+
+Status: Validating CAPTCHA response...
+Please solve the CAPTCHA correctly."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="CSRF with CAPTCHA Bypass").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('csrf/csrf_level12.html', flag=flag, csrf_detected=csrf_detected,
+                          captcha_response=captcha_response, captcha_token=captcha_token, protected_action=protected_action,
+                          result=result, challenge=challenge)
+
+# CSRF Level 13 - CSRF with CORS Exploitation
+@app.route('/csrf/level13', methods=['GET', 'POST'])
+def csrf_level13():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    csrf_detected = False
+    origin_header = request.form.get('origin_header', '')
+    cors_endpoint = request.form.get('cors_endpoint', '')
+    credentials_mode = request.form.get('credentials_mode', '')
+    result = ''
+
+    if request.method == 'POST':
+        if origin_header and cors_endpoint and credentials_mode:
+            # Check for CORS exploitation patterns
+            cors_patterns = ['attacker.com', 'evil.com', 'malicious', 'cors', 'api']
+            actual_origin = request.headers.get('Origin', '')
+
+            if any(pattern in origin_header.lower() or pattern in cors_endpoint.lower() for pattern in cors_patterns):
+                csrf_detected = True
+                result = f"""CORS Exploitation CSRF Attack:
+Origin Header: {origin_header}
+CORS Endpoint: {cors_endpoint}
+Credentials Mode: {credentials_mode}
+Actual Origin: {actual_origin or 'Not provided'}
+
+CORS Misconfiguration Exploit:
+{{
+  "origin_header": "{origin_header}",
+  "cors_endpoint": "{cors_endpoint}",
+  "credentials_mode": "{credentials_mode}",
+  "actual_origin": "{actual_origin or 'missing'}",
+  "cors_misconfigured": true,
+  "wildcard_origin": true,
+  "credentials_allowed": true,
+  "vulnerability": "CORS misconfiguration enables CSRF",
+  "cross_origin_request": "successful",
+  "flag": "R00T{{c0rs_m1sc0nf1g_csrf_pwn3d}}"
+}}
+
+CORS Exploitation Details:
+- Wildcard origin (*) with credentials
+- Cross-origin requests allowed
+- CSRF protection bypassed via CORS
+- Sensitive data accessible cross-origin"""
+
+                challenge = Challenge.query.filter_by(name="CSRF with CORS Exploitation").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                result = f"""CORS Request:
+Origin Header: {origin_header}
+CORS Endpoint: {cors_endpoint}
+Credentials Mode: {credentials_mode}
+
+Status: Processing CORS request...
+Checking origin validation."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="CSRF with CORS Exploitation").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('csrf/csrf_level13.html', flag=flag, csrf_detected=csrf_detected,
+                          origin_header=origin_header, cors_endpoint=cors_endpoint, credentials_mode=credentials_mode,
+                          result=result, challenge=challenge)
+
+# CSRF Level 14 - WebSocket CSRF
+@app.route('/csrf/level14', methods=['GET', 'POST'])
+def csrf_level14():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    csrf_detected = False
+    websocket_url = request.form.get('websocket_url', '')
+    ws_protocol = request.form.get('ws_protocol', '')
+    ws_message = request.form.get('ws_message', '')
+    result = ''
+
+    if request.method == 'POST':
+        if websocket_url and ws_protocol and ws_message:
+            # Check for WebSocket CSRF attack patterns
+            ws_patterns = ['ws://', 'wss://', 'chat', 'admin', 'delete', 'malicious']
+
+            if any(pattern in websocket_url.lower() or pattern in ws_message.lower() for pattern in ws_patterns):
+                csrf_detected = True
+                result = f"""WebSocket CSRF Attack:
+WebSocket URL: {websocket_url}
+Protocol: {ws_protocol}
+Message: {ws_message}
+
+WebSocket Security Analysis:
+{{
+  "websocket_url": "{websocket_url}",
+  "protocol": "{ws_protocol}",
+  "message_payload": "{ws_message}",
+  "origin_validation": "bypassed",
+  "csrf_protection": "none",
+  "vulnerability": "WebSocket CSRF without origin validation",
+  "real_time_exploit": true,
+  "connection_hijacked": true,
+  "flag": "R00T{{w3bs0ck3t_csrf_pwn3d}}"
+}}
+
+WebSocket CSRF Techniques:
+- Origin header manipulation
+- Cross-origin WebSocket connections
+- Real-time message injection
+- Session hijacking via WebSocket"""
+
+                challenge = Challenge.query.filter_by(name="WebSocket CSRF").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                result = f"""WebSocket Connection:
+WebSocket URL: {websocket_url}
+Protocol: {ws_protocol}
+Message: {ws_message}
+
+Status: Establishing WebSocket connection...
+Validating protocol and message format."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="WebSocket CSRF").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('csrf/csrf_level14.html', flag=flag, csrf_detected=csrf_detected,
+                          websocket_url=websocket_url, ws_protocol=ws_protocol, ws_message=ws_message,
+                          result=result, challenge=challenge)
+
+# CSRF Level 15 - CSRF in OAuth Flows
+@app.route('/csrf/level15', methods=['GET', 'POST'])
+def csrf_level15():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    csrf_detected = False
+    client_id = request.form.get('client_id', '')
+    redirect_uri = request.form.get('redirect_uri', '')
+    state_parameter = request.form.get('state_parameter', '')
+    result = ''
+
+    if request.method == 'POST':
+        if client_id and redirect_uri and state_parameter:
+            # Check for OAuth CSRF attack patterns
+            oauth_patterns = ['attacker', 'malicious', 'bypass', 'oauth', 'redirect']
+
+            if any(pattern in redirect_uri.lower() or pattern in state_parameter.lower() for pattern in oauth_patterns):
+                csrf_detected = True
+                result = f"""OAuth Flow CSRF Attack:
+Client ID: {client_id}
+Redirect URI: {redirect_uri}
+State Parameter: {state_parameter}
+
+OAuth Security Breach:
+{{
+  "client_id": "{client_id}",
+  "redirect_uri": "{redirect_uri}",
+  "state_parameter": "{state_parameter}",
+  "state_validation": "bypassed",
+  "csrf_protection": "insufficient",
+  "vulnerability": "OAuth state parameter CSRF",
+  "authorization_hijacked": true,
+  "account_linking_attack": true,
+  "flag": "R00T{{04uth_st4t3_csrf_pwn3d}}"
+}}
+
+OAuth CSRF Attack Details:
+- State parameter manipulation
+- Authorization code interception
+- Account linking attacks
+- Cross-site authorization"""
+
+                challenge = Challenge.query.filter_by(name="CSRF in OAuth Flows").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                result = f"""OAuth Authorization:
+Client ID: {client_id}
+Redirect URI: {redirect_uri}
+State Parameter: {state_parameter}
+
+Status: Processing OAuth authorization...
+Validating client and redirect URI."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="CSRF in OAuth Flows").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('csrf/csrf_level15.html', flag=flag, csrf_detected=csrf_detected,
+                          client_id=client_id, redirect_uri=redirect_uri, state_parameter=state_parameter,
+                          result=result, challenge=challenge)
+
+# CSRF Level 16 - CSRF with CSP Bypass
+@app.route('/csrf/level16', methods=['GET', 'POST'])
+def csrf_level16():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    csrf_detected = False
+    csp_header = request.form.get('csp_header', '')
+    payload_method = request.form.get('payload_method', '')
+    bypass_technique = request.form.get('bypass_technique', '')
+    result = ''
+
+    if request.method == 'POST':
+        if csp_header and payload_method and bypass_technique:
+            # Check for CSP bypass patterns
+            bypass_patterns = ['jsonp', 'angular', 'meta', 'base', 'iframe', 'form-action']
+
+            if any(pattern in bypass_technique.lower() for pattern in bypass_patterns):
+                csrf_detected = True
+                result = f"""CSP Bypass CSRF Attack:
+CSP Header: {csp_header}
+Payload Method: {payload_method}
+Bypass Technique: {bypass_technique}
+
+CSP Analysis:
+{{
+  "csp_header": "{csp_header}",
+  "payload_method": "{payload_method}",
+  "bypass_technique": "{bypass_technique}",
+  "bypass_successful": true,
+  "vulnerability": "CSP misconfiguration allows CSRF",
+  "attack_vector": "CSP bypass via {bypass_technique}",
+  "impact": "CSRF protection circumvented",
+  "flag": "R00T{{csp_byp4ss_csrf_pwn3d}}"
+}}
+
+Security Analysis:
+- Content Security Policy bypassed
+- CSRF attack executed despite CSP protection
+- Demonstrates importance of proper CSP configuration"""
+
+                challenge = Challenge.query.filter_by(name="CSRF with CSP Bypass").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                result = f"""CSP Bypass Attempt:
+CSP Header: {csp_header}
+Payload Method: {payload_method}
+Bypass Technique: {bypass_technique}
+
+Status: CSP protection active.
+Try different bypass techniques."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="CSRF with CSP Bypass").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('csrf/csrf_level16.html', flag=flag, csrf_detected=csrf_detected,
+                          csp_header=csp_header, payload_method=payload_method, bypass_technique=bypass_technique,
+                          result=result, challenge=challenge)
+
+# CSRF Level 17 - CSRF via XSS Chain
+@app.route('/csrf/level17', methods=['GET', 'POST'])
+def csrf_level17():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    csrf_detected = False
+    xss_payload = request.form.get('xss_payload', '')
+    csrf_action = request.form.get('csrf_action', '')
+    target_endpoint = request.form.get('target_endpoint', '')
+    result = ''
+
+    if request.method == 'POST':
+        if xss_payload and csrf_action and target_endpoint:
+            # Check for XSS + CSRF chain patterns
+            xss_patterns = ['<script>', 'javascript:', 'onerror=', 'onload=', 'fetch(', 'XMLHttpRequest']
+            csrf_patterns = ['transfer', 'delete', 'admin', 'password', 'email']
+
+            has_xss = any(pattern in xss_payload.lower() for pattern in xss_patterns)
+            has_csrf = any(pattern in csrf_action.lower() for pattern in csrf_patterns)
+
+            if has_xss and has_csrf:
+                csrf_detected = True
+                result = f"""XSS + CSRF Chain Attack:
+XSS Payload: {xss_payload}
+CSRF Action: {csrf_action}
+Target Endpoint: {target_endpoint}
+
+Attack Chain Analysis:
+{{
+  "xss_payload": "{xss_payload}",
+  "csrf_action": "{csrf_action}",
+  "target_endpoint": "{target_endpoint}",
+  "attack_successful": true,
+  "vulnerability": "XSS enables CSRF bypass",
+  "attack_vector": "Stored/Reflected XSS + CSRF",
+  "impact": "Complete account takeover possible",
+  "flag": "R00T{{xss_csrf_ch41n_pwn3d}}"
+}}
+
+Security Analysis:
+- XSS vulnerability exploited to bypass CSRF protection
+- JavaScript executed in victim's browser context
+- CSRF tokens extracted and reused automatically
+- Demonstrates why XSS is critical for modern CSRF attacks"""
+
+                challenge = Challenge.query.filter_by(name="CSRF via XSS Chain").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                result = f"""XSS + CSRF Chain Attempt:
+XSS Payload: {xss_payload}
+CSRF Action: {csrf_action}
+Target Endpoint: {target_endpoint}
+
+Status: Attack chain incomplete.
+Ensure both XSS and CSRF components are present."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="CSRF via XSS Chain").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('csrf/csrf_level17.html', flag=flag, csrf_detected=csrf_detected,
+                          xss_payload=xss_payload, csrf_action=csrf_action, target_endpoint=target_endpoint,
+                          result=result, challenge=challenge)
+
+# CSRF Level 18 - GraphQL CSRF
+@app.route('/csrf/level18', methods=['GET', 'POST'])
+def csrf_level18():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    csrf_detected = False
+    graphql_query = request.form.get('graphql_query', '')
+    variables = request.form.get('variables', '')
+    operation_name = request.form.get('operation_name', '')
+    result = ''
+
+    if request.method == 'POST':
+        if graphql_query and operation_name:
+            # Check for GraphQL CSRF patterns
+            csrf_operations = ['deleteUser', 'updatePassword', 'transferFunds', 'promoteUser', 'createAdmin']
+            mutation_patterns = ['mutation', 'Mutation']
+
+            has_mutation = any(pattern in graphql_query for pattern in mutation_patterns)
+            has_csrf_op = any(op in operation_name for op in csrf_operations)
+
+            if has_mutation and has_csrf_op:
+                csrf_detected = True
+                result = f"""GraphQL CSRF Attack:
+Query: {graphql_query}
+Variables: {variables}
+Operation: {operation_name}
+
+GraphQL Response:
+{{
+  "data": {{
+    "{operation_name}": {{
+      "success": true,
+      "message": "Operation executed successfully",
+      "userId": "12345",
+      "timestamp": "2024-01-15T14:30:25Z"
+    }}
+  }},
+  "extensions": {{
+    "csrf_protection": "none",
+    "vulnerability": "GraphQL mutation CSRF",
+    "attack_vector": "POST request with application/json",
+    "impact": "Unauthorized GraphQL operations",
+    "flag": "R00T{{gr4phql_csrf_4p1_pwn3d}}"
+  }}
+}}
+
+Security Analysis:
+- GraphQL mutation executed without CSRF protection
+- JSON content-type bypasses simple CSRF defenses
+- Demonstrates need for proper GraphQL security measures"""
+
+                challenge = Challenge.query.filter_by(name="GraphQL CSRF").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                result = f"""GraphQL Request:
+Query: {graphql_query}
+Variables: {variables}
+Operation: {operation_name}
+
+Status: Invalid GraphQL operation.
+Ensure you're using a mutation with a sensitive operation."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="GraphQL CSRF").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('csrf/csrf_level18.html', flag=flag, csrf_detected=csrf_detected,
+                          graphql_query=graphql_query, variables=variables, operation_name=operation_name,
+                          result=result, challenge=challenge)
+
+# CSRF Level 19 - JWT-based CSRF
+@app.route('/csrf/level19', methods=['GET', 'POST'])
+def csrf_level19():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    csrf_detected = False
+    jwt_token = request.form.get('jwt_token', '')
+    api_action = request.form.get('api_action', '')
+    payload_data = request.form.get('payload_data', '')
+    result = ''
+
+    if request.method == 'POST':
+        if jwt_token and api_action and payload_data:
+            # Check for JWT CSRF patterns
+            jwt_patterns = ['eyJ', 'Bearer', 'JWT']
+            csrf_actions = ['delete', 'transfer', 'admin', 'password', 'promote']
+
+            has_jwt = any(pattern in jwt_token for pattern in jwt_patterns)
+            has_csrf = any(action in api_action.lower() for action in csrf_actions)
+
+            if has_jwt and has_csrf:
+                csrf_detected = True
+                result = f"""JWT-based CSRF Attack:
+JWT Token: {jwt_token[:50]}...
+API Action: {api_action}
+Payload: {payload_data}
+
+API Response:
+{{
+  "success": true,
+  "action": "{api_action}",
+  "payload": "{payload_data}",
+  "jwt_validation": "bypassed",
+  "vulnerability": "JWT CSRF without proper validation",
+  "attack_vector": "Automatic JWT inclusion in cross-site requests",
+  "impact": "Unauthorized API operations with valid JWT",
+  "flag": "R00T{{jwt_csrf_4p1_byp4ss_pwn3d}}"
+}}
+
+Security Analysis:
+- JWT token automatically included in cross-site requests
+- API lacks proper CSRF protection despite JWT authentication
+- Demonstrates that JWT alone is insufficient for CSRF protection"""
+
+                challenge = Challenge.query.filter_by(name="JWT-based CSRF").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                result = f"""JWT API Request:
+JWT Token: {jwt_token[:50] if jwt_token else 'None'}...
+API Action: {api_action}
+Payload: {payload_data}
+
+Status: Invalid JWT or action.
+Ensure valid JWT token and sensitive API action."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="JWT-based CSRF").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('csrf/csrf_level19.html', flag=flag, csrf_detected=csrf_detected,
+                          jwt_token=jwt_token, api_action=api_action, payload_data=payload_data,
+                          result=result, challenge=challenge)
+
+# CSRF Level 20 - Mobile API CSRF
+@app.route('/csrf/level20', methods=['GET', 'POST'])
+def csrf_level20():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    csrf_detected = False
+    mobile_api = request.form.get('mobile_api', '')
+    device_id = request.form.get('device_id', '')
+    api_key = request.form.get('api_key', '')
+    result = ''
+
+    if request.method == 'POST':
+        if mobile_api and device_id and api_key:
+            # Check for mobile API CSRF patterns
+            mobile_patterns = ['mobile', 'app', 'device', 'android', 'ios']
+            csrf_actions = ['transfer', 'delete', 'payment', 'purchase', 'admin']
+
+            has_mobile = any(pattern in mobile_api.lower() for pattern in mobile_patterns)
+            has_csrf = any(action in mobile_api.lower() for action in csrf_actions)
+
+            if has_mobile and has_csrf:
+                csrf_detected = True
+                result = f"""Mobile API CSRF Attack:
+API Endpoint: {mobile_api}
+Device ID: {device_id}
+API Key: {api_key[:20]}...
+
+Mobile API Response:
+{{
+  "status": "success",
+  "api_endpoint": "{mobile_api}",
+  "device_id": "{device_id}",
+  "api_key_valid": true,
+  "csrf_protection": "none",
+  "vulnerability": "Mobile API lacks CSRF protection",
+  "attack_vector": "Cross-site request to mobile API",
+  "impact": "Unauthorized mobile app operations",
+  "flag": "R00T{{m0b1l3_4p1_csrf_pwn3d}}"
+}}
+
+Security Analysis:
+- Mobile API vulnerable to CSRF attacks
+- Device ID and API key insufficient for CSRF protection
+- Demonstrates need for proper mobile API security"""
+
+                challenge = Challenge.query.filter_by(name="Mobile API CSRF").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                result = f"""Mobile API Request:
+API Endpoint: {mobile_api}
+Device ID: {device_id}
+API Key: {api_key[:20] if api_key else 'None'}...
+
+Status: Invalid mobile API request.
+Ensure mobile API endpoint with sensitive operation."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Mobile API CSRF").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('csrf/csrf_level20.html', flag=flag, csrf_detected=csrf_detected,
+                          mobile_api=mobile_api, device_id=device_id, api_key=api_key,
+                          result=result, challenge=challenge)
+
+# CSRF Level 21 - Microservices CSRF
+@app.route('/csrf/level21', methods=['GET', 'POST'])
+def csrf_level21():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    csrf_detected = False
+    service_name = request.form.get('service_name', '')
+    service_action = request.form.get('service_action', '')
+    auth_token = request.form.get('auth_token', '')
+    result = ''
+
+    if request.method == 'POST':
+        if service_name and service_action and auth_token:
+            # Check for microservices CSRF patterns
+            service_patterns = ['user-service', 'payment-service', 'admin-service', 'auth-service']
+            csrf_actions = ['delete', 'transfer', 'promote', 'disable', 'reset']
+
+            has_service = any(pattern in service_name.lower() for pattern in service_patterns)
+            has_csrf = any(action in service_action.lower() for action in csrf_actions)
+
+            if has_service and has_csrf:
+                csrf_detected = True
+                result = f"""Microservices CSRF Attack:
+Service: {service_name}
+Action: {service_action}
+Auth Token: {auth_token[:30]}...
+
+Microservice Response:
+{{
+  "service": "{service_name}",
+  "action": "{service_action}",
+  "status": "executed",
+  "auth_token_valid": true,
+  "csrf_protection": "none",
+  "vulnerability": "Microservice lacks CSRF protection",
+  "attack_vector": "Cross-service request forgery",
+  "impact": "Unauthorized microservice operations",
+  "flag": "R00T{{m1cr0s3rv1c3s_csrf_pwn3d}}"
+}}
+
+Security Analysis:
+- Microservice vulnerable to CSRF attacks
+- Service-to-service authentication insufficient for CSRF protection
+- Demonstrates need for proper microservices security architecture"""
+
+                challenge = Challenge.query.filter_by(name="Microservices CSRF").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                result = f"""Microservice Request:
+Service: {service_name}
+Action: {service_action}
+Auth Token: {auth_token[:30] if auth_token else 'None'}...
+
+Status: Invalid microservice request.
+Ensure valid service name and sensitive action."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Microservices CSRF").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('csrf/csrf_level21.html', flag=flag, csrf_detected=csrf_detected,
+                          service_name=service_name, service_action=service_action, auth_token=auth_token,
+                          result=result, challenge=challenge)
+
+# CSRF Level 22 - CSRF with Subdomain Takeover
+@app.route('/csrf/level22', methods=['GET', 'POST'])
+def csrf_level22():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    csrf_detected = False
+    subdomain = request.form.get('subdomain', '')
+    target_domain = request.form.get('target_domain', '')
+    attack_payload = request.form.get('attack_payload', '')
+    result = ''
+
+    if request.method == 'POST':
+        if subdomain and target_domain and attack_payload:
+            # Check for subdomain takeover CSRF patterns
+            takeover_patterns = ['github.io', 'herokuapp.com', 'netlify.app', 'vercel.app', 's3.amazonaws.com']
+            csrf_patterns = ['form', 'fetch', 'xhr', 'post']
+
+            has_takeover = any(pattern in subdomain.lower() for pattern in takeover_patterns)
+            has_csrf = any(pattern in attack_payload.lower() for pattern in csrf_patterns)
+
+            if has_takeover and has_csrf:
+                csrf_detected = True
+                result = f"""Subdomain Takeover CSRF Attack:
+Subdomain: {subdomain}
+Target Domain: {target_domain}
+Attack Payload: {attack_payload}
+
+Takeover Response:
+{{
+  "subdomain": "{subdomain}",
+  "target_domain": "{target_domain}",
+  "takeover_status": "successful",
+  "csrf_payload": "{attack_payload}",
+  "vulnerability": "Subdomain takeover enables CSRF",
+  "attack_vector": "Malicious subdomain hosting CSRF payload",
+  "impact": "Cross-domain CSRF via subdomain takeover",
+  "flag": "R00T{{subd0m41n_t4k30v3r_csrf_pwn3d}}"
+}}
+
+Security Analysis:
+- Subdomain takeover enables cross-domain CSRF attacks
+- Malicious content hosted on trusted subdomain
+- Demonstrates importance of subdomain security monitoring"""
+
+                challenge = Challenge.query.filter_by(name="CSRF with Subdomain Takeover").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                result = f"""Subdomain Takeover Attempt:
+Subdomain: {subdomain}
+Target Domain: {target_domain}
+Attack Payload: {attack_payload}
+
+Status: Takeover unsuccessful.
+Ensure vulnerable subdomain and valid CSRF payload."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="CSRF with Subdomain Takeover").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('csrf/csrf_level22.html', flag=flag, csrf_detected=csrf_detected,
+                          subdomain=subdomain, target_domain=target_domain, attack_payload=attack_payload,
+                          result=result, challenge=challenge)
+
+# CSRF Level 23 - Serverless Function CSRF
+@app.route('/csrf/level23', methods=['GET', 'POST'])
+def csrf_level23():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    csrf_detected = False
+    function_url = request.form.get('function_url', '')
+    function_payload = request.form.get('function_payload', '')
+    trigger_method = request.form.get('trigger_method', '')
+    result = ''
+
+    if request.method == 'POST':
+        if function_url and function_payload and trigger_method:
+            # Check for serverless CSRF patterns
+            serverless_patterns = ['lambda', 'azure-functions', 'cloud-functions', 'vercel', 'netlify']
+            csrf_patterns = ['delete', 'transfer', 'admin', 'payment', 'execute']
+
+            has_serverless = any(pattern in function_url.lower() for pattern in serverless_patterns)
+            has_csrf = any(pattern in function_payload.lower() for pattern in csrf_patterns)
+
+            if has_serverless and has_csrf:
+                csrf_detected = True
+                result = f"""Serverless Function CSRF Attack:
+Function URL: {function_url}
+Payload: {function_payload}
+Trigger Method: {trigger_method}
+
+Serverless Response:
+{{
+  "function_url": "{function_url}",
+  "payload": "{function_payload}",
+  "trigger_method": "{trigger_method}",
+  "execution_status": "success",
+  "csrf_protection": "none",
+  "vulnerability": "Serverless function lacks CSRF protection",
+  "attack_vector": "Cross-site serverless function invocation",
+  "impact": "Unauthorized serverless function execution",
+  "flag": "R00T{{s3rv3rl3ss_csrf_pwn3d}}"
+}}
+
+Security Analysis:
+- Serverless function vulnerable to CSRF attacks
+- Function URL accessible without proper CSRF protection
+- Demonstrates need for serverless security best practices"""
+
+                challenge = Challenge.query.filter_by(name="Serverless Function CSRF").first()
+                if challenge:
+                    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+                    if challenge.id not in completed_ids:
+                        update_user_progress(machine_id, challenge.id, challenge.points)
+            else:
+                result = f"""Serverless Function Request:
+Function URL: {function_url}
+Payload: {function_payload}
+Trigger Method: {trigger_method}
+
+Status: Invalid serverless function request.
+Ensure valid function URL and sensitive payload."""
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Serverless Function CSRF").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('csrf/csrf_level23.html', flag=flag, csrf_detected=csrf_detected,
+                          function_url=function_url, function_payload=function_payload, trigger_method=trigger_method,
+                          result=result, challenge=challenge)
 
 def show_help():
     """Show help information"""

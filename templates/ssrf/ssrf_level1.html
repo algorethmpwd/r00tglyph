@@ -6,11 +6,11 @@
 <div class="row">
     <div class="col-md-10 offset-md-1">
         <div class="card">
-            <div class="card-header bg-dark text-white">
+            <div class="card-header">
                 <h2 class="text-center">Level 1: Basic SSRF</h2>
             </div>
             <div class="card-body">
-                <div class="alert alert-dark challenge-description" style="display: none;">
+                <div class="alert alert-info challenge-description" style="display: none;">
                     <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
                     <p>
                         Welcome to <strong>WebFetch Pro</strong>, a fictional URL fetching service! This challenge simulates a real-world scenario where a URL fetcher is vulnerable to Server-Side Request Forgery (SSRF).
@@ -30,7 +30,7 @@
                 </div>
 
                 <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
+                    <div class="card-header">
                         <h4 class="mb-0"><i class="bi bi-cloud-download-fill me-2"></i>WebFetch Pro - URL Content Fetcher</h4>
                     </div>
                     <div class="card-body">
@@ -46,11 +46,11 @@
 
                 {% if fetch_result %}
                 <div class="card mb-4">
-                    <div class="card-header bg-secondary text-white">
+                    <div class="card-header">
                         <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Fetch Result</h5>
                     </div>
                     <div class="card-body">
-                        <pre class="bg-dark text-light p-3 rounded">{{ fetch_result }}</pre>
+                        <pre class="p-3 rounded" style="background-color: var(--bs-body-bg); border: 1px solid var(--bs-border-color); color: var(--bs-body-color);">{{ fetch_result }}</pre>
                         {% if ssrf_detected %}
                         <div class="alert alert-success mt-3">
                             <i class="bi bi-check-circle-fill me-2"></i>
@@ -70,8 +70,8 @@
                 {% endif %}
 
                 <div class="card">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Learning Objectives</h5>
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-info-circle-fill text-info me-2"></i>Learning Objectives</h5>
                     </div>
                     <div class="card-body">
                         <ul>

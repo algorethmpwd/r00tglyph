@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}CSRF Level 4 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h2 class="text-center">
+                    <i class="bi bi-lightbulb-fill me-2"></i>
+                    Level 4 Solution: CSRF with Hidden Form Fields
+                </h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
+                    <p>This challenge demonstrates bypassing hidden form field protection in healthcare portals.</p>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-tools me-2"></i>Tools Required</h4>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Primary Tools:</strong> Browser Developer Tools, HTML manipulation</p>
+                        <p><strong>Skills:</strong> CSRF exploitation, HTTP request manipulation, Web security testing</p>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h4 class="mb-0"><i class="bi bi-list-ol me-2"></i>Step-by-Step Solution</h4>
+                    </div>
+                    <div class="card-body">
+                        
+                        <ol>
+                            <li><strong>Analyze the Form:</strong> Inspect the form to identify hidden fields</li>
+                            <li><strong>Identify Protection:</strong> Look for hidden CSRF protection fields</li>
+                            <li><strong>Craft Malicious Form:</strong> Create a form that includes the hidden fields</li>
+                            <li><strong>Social Engineering:</strong> Trick the victim into submitting the form</li>
+                            <li><strong>Bypass Validation:</strong> Use predictable or static hidden field values</li>
+                            <li><strong>Execute Attack:</strong> Submit the crafted form to perform unauthorized actions</li>
+                        </ol>
+                        <div class="alert alert-warning mt-3">
+                            <strong>Key Insight:</strong> Hidden fields are not sufficient CSRF protection if they're predictable or static.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-danger text-white">
+                        <h4 class="mb-0"><i class="bi bi-shield-exclamation me-2"></i>Security Impact</h4>
+                    </div>
+                    <div class="card-body">
+                        <p>This CSRF vulnerability demonstrates how attackers can:</p>
+                        <ul>
+                            <li>Execute unauthorized actions on behalf of authenticated users</li>
+                            <li>Bypass authentication mechanisms through cross-site requests</li>
+                            <li>Potentially compromise user accounts and sensitive data</li>
+                            <li>Perform state-changing operations without user consent</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0"><i class="bi bi-shield-check me-2"></i>Mitigation Strategies</h4>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li><strong>CSRF Tokens:</strong> Implement anti-CSRF tokens in all state-changing forms</li>
+                            <li><strong>SameSite Cookies:</strong> Use SameSite cookie attributes to prevent cross-site requests</li>
+                            <li><strong>Origin Validation:</strong> Verify the Origin and Referer headers</li>
+                            <li><strong>Custom Headers:</strong> Require custom headers for AJAX requests</li>
+                            <li><strong>Double Submit Cookies:</strong> Implement double submit cookie pattern</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/solutions/csrf3" class="btn btn-secondary me-2">
+                        <i class="bi bi-arrow-left me-1"></i>Previous Solution
+                    </a>
+                    <a href="/csrf/level4" class="btn btn-primary me-2">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Challenge
+                    </a>
+                    <a href="/solutions/csrf5" class="btn btn-success">
+                        <i class="bi bi-arrow-right me-1"></i>Next Solution
+                    </a>
+                    <a href="/challenges" class="btn btn-info ms-2">
+                        <i class="bi bi-list me-1"></i>All Challenges
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

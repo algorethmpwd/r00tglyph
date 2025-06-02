@@ -18,6 +18,7 @@
                                 <th scope="col">#</th>
                                 <th scope="col">Username</th>
                                 <th scope="col">Score</th>
+                                <th scope="col">Completed</th>
                                 <th scope="col">Last Active</th>
                             </tr>
                         </thead>
@@ -25,9 +26,28 @@
                             {% for user in users %}
                             <tr {% if session.get('machine_id') == user.machine_id %}class="table-success"{% endif %}>
                                 <th scope="row">{{ loop.index }}</th>
-                                <td>{{ user.display_name }}</td>
-                                <td>{{ user.score }} pts</td>
-                                <td>{{ user.last_active.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-person-circle me-2"></i>
+                                        {{ user.display_name }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary">{{ user.score }} pts</span>
+                                </td>
+                                <td>
+                                    {% set completed_count = user.completed_challenges|length if user.completed_challenges else 0 %}
+                                    {% if user.completed_challenges %}
+                                        {% set completed_list = user.completed_challenges|from_json %}
+                                        {% set completed_count = completed_list|length %}
+                                    {% else %}
+                                        {% set completed_count = 0 %}
+                                    {% endif %}
+                                    <span class="badge bg-success">{{ completed_count }}/115</span>
+                                </td>
+                                <td>
+                                    <small class="text-muted">{{ user.last_active.strftime('%Y-%m-%d %H:%M') }}</small>
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>

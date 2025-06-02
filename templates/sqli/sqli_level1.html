@@ -34,7 +34,7 @@
         {% endif %}
 
         <!-- Hidden challenge description that will be used by JavaScript -->
-        <div class="alert alert-dark challenge-description">
+        <div class="alert alert-info challenge-description">
             <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
             <p>
                 Welcome to <strong>SecureBank</strong>, a fictional banking application! This challenge simulates a real-world scenario where a login form is vulnerable to SQL injection.
@@ -46,8 +46,8 @@
                 <strong>Your Task:</strong> Bypass the login form without knowing a valid username or password. Successfully logging in will reveal the flag.
             </p>
 
-            <div class="card mb-3 border-secondary">
-                <div class="card-header bg-secondary text-white">
+            <div class="card mb-3">
+                <div class="card-header">
                     <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
                 </div>
                 <div class="card-body">
@@ -87,7 +87,7 @@
                     <p>
                         SQL injection occurs when user input is directly concatenated into SQL queries. Think about how a login query might be structured:
                     </p>
-                    <pre class="bg-light p-3 rounded"><code>SELECT * FROM users WHERE username = 'input_username' AND password = 'input_password'</code></pre>
+                    <pre class="p-3 rounded" style="background-color: rgba(var(--bs-secondary-rgb), 0.1); border: 1px solid var(--bs-border-color);"><code>SELECT * FROM users WHERE username = 'input_username' AND password = 'input_password'</code></pre>
                     <p>
                         What happens if you can manipulate this query to always return true? Consider:
                     </p>
@@ -125,7 +125,7 @@
         </div>
 
         <div class="card">
-            <div class="card-header bg-dark text-white">
+            <div class="card-header">
                 <h2 class="text-center">Level 1: Basic SQL Injection</h2>
             </div>
             <div class="card-body">

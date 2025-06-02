@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block title %}CSRF Level 23 - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="text-center">Level 23: Serverless Function CSRF</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>CloudFunc Platform</strong>, a serverless computing environment! This challenge demonstrates CSRF attacks against serverless functions that lack proper protection mechanisms.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Exploit serverless function endpoints that are vulnerable to CSRF attacks despite cloud-based authentication.
+                    </p>
+                    <p>
+                        <strong>Learning Objective:</strong> Understand how serverless functions can be vulnerable to CSRF attacks and the importance of proper serverless security practices.
+                    </p>
+                    <p>
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Serverless functions with HTTP triggers can be vulnerable to CSRF attacks from browsers.
+                    </p>
+                    <p>
+                        <i class="bi bi-tools me-2"></i><strong>Tools:</strong> Use Burp Suite to analyze serverless function requests and test for CSRF vulnerabilities.
+                    </p>
+                </div>
+
+                <div class="text-center mb-3">
+                    <button class="btn btn-info btn-sm" onclick="toggleDescription()">
+                        <i class="bi bi-info-circle me-1"></i>Show Challenge Description
+                    </button>
+                    <a href="/solutions/csrf23" class="btn btn-success btn-sm ms-2">
+                        <i class="bi bi-lightbulb me-1"></i>View Solution
+                    </a>
+                </div>
+
+                {% if flag %}
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
+                    <p>Congratulations! You've successfully exploited serverless function CSRF vulnerabilities.</p>
+                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
+                </div>
+                {% endif %}
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="bi bi-cloud-arrow-up me-2"></i>CloudFunc Platform - Serverless Computing</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5>Serverless Function Testing</h5>
+                                <form action="/csrf/level23" method="post">
+                                    <div class="mb-3">
+                                        <label for="function_url" class="form-label">Function URL</label>
+                                        <select class="form-control" id="function_url" name="function_url">
+                                            <option value="">Select Function URL</option>
+                                            <option value="https://lambda.aws.com/delete-user">AWS Lambda - Delete User</option>
+                                            <option value="https://azure-functions.net/transfer-funds">Azure Functions - Transfer</option>
+                                            <option value="https://cloud-functions.google.com/admin">Google Cloud Functions - Admin</option>
+                                            <option value="https://vercel.app/payment-process">Vercel - Payment</option>
+                                            <option value="https://netlify.app/execute-command">Netlify - Execute</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="function_payload" class="form-label">Function Payload</label>
+                                        <textarea class="form-control" id="function_payload" name="function_payload" rows="3"
+                                                  placeholder="Enter function payload (e.g., delete user, transfer funds, admin action)">{{ function_payload }}</textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="trigger_method" class="form-label">Trigger Method</label>
+                                        <select class="form-control" id="trigger_method" name="trigger_method">
+                                            <option value="">Select Trigger Method</option>
+                                            <option value="HTTP_POST">HTTP POST</option>
+                                            <option value="HTTP_GET">HTTP GET</option>
+                                            <option value="WEBHOOK">Webhook</option>
+                                            <option value="API_GATEWAY">API Gateway</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-lightning me-1"></i>Execute Serverless Function
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="col-md-4">
+                                <h5>Function Info</h5>
+                                <div class="card" style="background-color: rgba(var(--bs-secondary-rgb), 0.1);">
+                                    <div class="card-body">
+                                        <p><strong>Platform:</strong> Multi-Cloud</p>
+                                        <p><strong>Runtime:</strong> Node.js/Python</p>
+                                        <p><strong>Trigger:</strong> HTTP/Webhook</p>
+                                        <p><strong>CSRF Protection:</strong> Testing Required</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if result %}
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Serverless Function Response</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="p-3 rounded" style="background-color: var(--bs-body-bg); border: 1px solid var(--bs-border-color); color: var(--bs-body-color);">{{ result }}</pre>
+
+                        {% if csrf_detected %}
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>Serverless Function CSRF Successful! Function executed without proper CSRF protection.</strong>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-lightbulb-fill text-warning me-2"></i>Hint</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Serverless functions with HTTP triggers can be vulnerable to CSRF attacks when accessed from browsers without proper protection.</p>
+                        <p><strong>Key concepts:</strong> Serverless security, HTTP triggers, cloud function vulnerabilities, CSRF protection</p>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/csrf/level22" class="btn btn-secondary me-2">
+                        <i class="bi bi-arrow-left me-1"></i>Previous Challenge
+                    </a>
+                    <a href="/challenges" class="btn btn-success">
+                        <i class="bi bi-list me-1"></i>All Challenges
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleDescription() {
+    const desc = document.querySelector('.challenge-description');
+    const btn = event.target.closest('button');
+
+    if (desc.style.display === 'none') {
+        desc.style.display = 'block';
+        btn.innerHTML = '<i class="bi bi-info-circle me-1"></i>Hide Challenge Description';
+    } else {
+        desc.style.display = 'none';
+        btn.innerHTML = '<i class="bi bi-info-circle me-1"></i>Show Challenge Description';
+    }
+}
+</script>
+{% endblock %}

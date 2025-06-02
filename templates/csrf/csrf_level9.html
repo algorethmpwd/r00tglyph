@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}CSRF Level 9 - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 9: CSRF with Custom Headers</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>HeaderGuard API</strong>, a API security platform! This challenge demonstrates bypassing custom header-based CSRF protection.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Bypass custom header validation to perform CSRF attacks.
+                    </p>
+                    <p>
+                        <strong>Learning Objective:</strong> Understand how custom headers are used for CSRF protection and bypass techniques.
+                    </p>
+                </div>
+
+                <div class="text-center mb-3">
+                    <button class="btn btn-info btn-sm" onclick="toggleDescription()">
+                        <i class="bi bi-info-circle me-1"></i>Show Challenge Description
+                    </button>
+                    <a href="/solutions/csrf9" class="btn btn-success btn-sm ms-2">
+                        <i class="bi bi-lightbulb me-1"></i>View Solution
+                    </a>
+                </div>
+
+                {% if flag %}
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
+                    <p>Congratulations! You've successfully completed this CSRF challenge.</p>
+                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
+                </div>
+                {% endif %}
+
+                <div class="card mb-4">
+                    <div class="card-header bg-danger text-white">
+                        <h4 class="mb-0"><i class="bi-list-ul me-2"></i>HeaderGuard API - Interface</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="/csrf/level9" method="post">
+                            <div class="mb-3">
+                                <label for="custom_header" class="form-label">Custom Header</label>
+                                <input type="text" class="form-control" id="custom_header" name="custom_header" 
+                                       placeholder="X-Requested-With: XMLHttpRequest" value="{{ custom_header or '' }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="header_value" class="form-label">Header Value</label>
+                                <input type="text" class="form-control" id="header_value" name="header_value" 
+                                       placeholder="Expected header value" value="{{ header_value or '' }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="api_action" class="form-label">API Action</label>
+                                <input type="text" class="form-control" id="api_action" name="api_action" 
+                                       placeholder="API endpoint action" value="{{ api_action or '' }}">
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-arrow-right-circle me-1"></i>Submit Request
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                {% if result %}
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bi bi-check-circle-fill me-2"></i>Request Result</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded">{{ result }}</pre>
+                        
+                        {% if csrf_detected %}
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>CSRF Attack Successful! CSRF with Custom Headers vulnerability exploited.</strong>
+                        </div>
+                        {% endif %}
+                        
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="card mt-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-lightbulb-fill me-2"></i>Hint</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Focus on the csrf with custom headers vulnerability. Consider how this type of CSRF attack differs from basic form submissions.</p>
+                        <p><strong>Key concepts:</strong> CSRF with Custom Headers, cross-origin requests, protection bypass</p>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/csrf/level8" class="btn btn-secondary me-2">
+                        <i class="bi bi-arrow-left me-1"></i>Previous Challenge
+                    </a>
+                    <a href="/csrf/level10" class="btn btn-primary">
+                        <i class="bi bi-arrow-right me-1"></i>Next Challenge
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleDescription() {
+    const desc = document.querySelector('.challenge-description');
+    const btn = event.target.closest('button');
+    
+    if (desc.style.display === 'none') {
+        desc.style.display = 'block';
+        btn.innerHTML = '<i class="bi bi-info-circle me-1"></i>Hide Challenge Description';
+    } else {
+        desc.style.display = 'none';
+        btn.innerHTML = '<i class="bi bi-info-circle me-1"></i>Show Challenge Description';
+    }
+}
+</script>
+{% endblock %}

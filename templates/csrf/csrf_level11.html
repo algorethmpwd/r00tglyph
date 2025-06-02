@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}CSRF Level 11 - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 11: CSRF in Password Change</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>SecureAccount Manager</strong>, a Critical account security system! This challenge demonstrates CSRF in password change functionality.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Exploit CSRF to change user passwords without authorization.
+                    </p>
+                    <p>
+                        <strong>Learning Objective:</strong> Understand the critical impact of CSRF in sensitive operations like password changes.
+                    </p>
+                </div>
+
+                <div class="text-center mb-3">
+                    <button class="btn btn-info btn-sm" onclick="toggleDescription()">
+                        <i class="bi bi-info-circle me-1"></i>Show Challenge Description
+                    </button>
+                    <a href="/solutions/csrf11" class="btn btn-success btn-sm ms-2">
+                        <i class="bi bi-lightbulb me-1"></i>View Solution
+                    </a>
+                </div>
+
+                {% if flag %}
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
+                    <p>Congratulations! You've successfully completed this CSRF challenge.</p>
+                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
+                </div>
+                {% endif %}
+
+                <div class="card mb-4">
+                    <div class="card-header bg-danger text-white">
+                        <h4 class="mb-0"><i class="bi-key me-2"></i>SecureAccount Manager - Interface</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="/csrf/level11" method="post">
+                            <div class="mb-3">
+                                <label for="current_password" class="form-label">Current Password</label>
+                                <input type="password" class="form-control" id="current_password" name="current_password" 
+                                       placeholder="Enter current password" value="{{ current_password or '' }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="new_password" class="form-label">New Password</label>
+                                <input type="password" class="form-control" id="new_password" name="new_password" 
+                                       placeholder="Enter new password" value="{{ new_password or '' }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="confirm_password" class="form-label">Confirm Password</label>
+                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" 
+                                       placeholder="Confirm new password" value="{{ confirm_password or '' }}">
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-arrow-right-circle me-1"></i>Submit Request
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                {% if result %}
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bi bi-check-circle-fill me-2"></i>Request Result</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded">{{ result }}</pre>
+                        
+                        {% if csrf_detected %}
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>CSRF Attack Successful! CSRF in Password Change vulnerability exploited.</strong>
+                        </div>
+                        {% endif %}
+                        
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="card mt-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-lightbulb-fill me-2"></i>Hint</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Focus on the csrf in password change vulnerability. Consider how this type of CSRF attack differs from basic form submissions.</p>
+                        <p><strong>Key concepts:</strong> CSRF in Password Change, cross-origin requests, protection bypass</p>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/csrf/level10" class="btn btn-secondary me-2">
+                        <i class="bi bi-arrow-left me-1"></i>Previous Challenge
+                    </a>
+                    <a href="/csrf/level12" class="btn btn-primary">
+                        <i class="bi bi-arrow-right me-1"></i>Next Challenge
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleDescription() {
+    const desc = document.querySelector('.challenge-description');
+    const btn = event.target.closest('button');
+    
+    if (desc.style.display === 'none') {
+        desc.style.display = 'block';
+        btn.innerHTML = '<i class="bi bi-info-circle me-1"></i>Hide Challenge Description';
+    } else {
+        desc.style.display = 'none';
+        btn.innerHTML = '<i class="bi bi-info-circle me-1"></i>Show Challenge Description';
+    }
+}
+</script>
+{% endblock %}

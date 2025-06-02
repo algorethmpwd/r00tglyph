@@ -18,18 +18,18 @@
         {% endif %}
         
         <div class="card">
-            <div class="card-header bg-dark text-white">
+            <div class="card-header">
                 <h2 class="text-center">Level 1: Basic Reflected XSS</h2>
             </div>
             <div class="card-body">
-                <div class="alert alert-dark challenge-description">
+                <div class="alert alert-info challenge-description">
                     <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
                     <p>
                         Welcome to <strong>TechConnect</strong>, a fictional tech support forum! You've been hired to perform a security assessment of their search functionality.
                     </p>
 
-                    <div class="card mb-3 border-secondary">
-                        <div class="card-header bg-secondary text-white">
+                    <div class="card mb-3">
+                        <div class="card-header">
                             <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
                         </div>
                         <div class="card-body">
@@ -67,7 +67,7 @@
                 </div>
 
                 <div class="card mb-4">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0"><i class="bi bi-headset me-2"></i>TechConnect Support Forum</h5>
                         <div>
                             <span class="badge bg-success">Online</span>
@@ -75,7 +75,7 @@
                         </div>
                     </div>
                     <div class="card-body p-0">
-                        <nav class="navbar navbar-expand navbar-light bg-light px-3">
+                        <nav class="navbar navbar-expand px-3" style="background-color: rgba(var(--bs-light-rgb), 0.1);">
                             <div class="container-fluid">
                                 <ul class="navbar-nav">
                                     <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-house-door me-1"></i>Home</a></li>
@@ -120,7 +120,7 @@
                                 <div class="col-md-9">
                                     {% if user_input %}
                                     <div class="card">
-                                        <div class="card-header bg-light">
+                                        <div class="card-header">
                                             <h5 class="mb-0"><i class="bi bi-search me-2"></i>Search Results</h5>
                                         </div>
                                         <div class="card-body">

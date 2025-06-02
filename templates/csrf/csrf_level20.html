@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}CSRF Level 20 - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="text-center">Level 20: Mobile API CSRF</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>MobileApp API</strong>, a backend service for mobile applications! This challenge demonstrates CSRF attacks against mobile APIs that rely solely on device authentication.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Exploit mobile API endpoints that lack proper CSRF protection despite device-based authentication.
+                    </p>
+                    <p>
+                        <strong>Learning Objective:</strong> Understand how mobile APIs can be vulnerable to CSRF attacks and why device authentication alone is insufficient.
+                    </p>
+                    <p>
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Mobile APIs accessed via web browsers are still vulnerable to CSRF attacks.
+                    </p>
+                    <p>
+                        <i class="bi bi-tools me-2"></i><strong>Tools:</strong> Use Burp Suite to analyze mobile API requests and test for CSRF vulnerabilities.
+                    </p>
+                </div>
+
+                <div class="text-center mb-3">
+                    <button class="btn btn-info btn-sm" onclick="toggleDescription()">
+                        <i class="bi bi-info-circle me-1"></i>Show Challenge Description
+                    </button>
+                    <a href="/solutions/csrf20" class="btn btn-success btn-sm ms-2">
+                        <i class="bi bi-lightbulb me-1"></i>View Solution
+                    </a>
+                </div>
+
+                {% if flag %}
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
+                    <p>Congratulations! You've successfully exploited mobile API CSRF vulnerabilities.</p>
+                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
+                </div>
+                {% endif %}
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="bi bi-phone me-2"></i>MobileApp API - Device Authentication Backend</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5>Mobile API Testing</h5>
+                                <form action="/csrf/level20" method="post">
+                                    <div class="mb-3">
+                                        <label for="mobile_api" class="form-label">Mobile API Endpoint</label>
+                                        <select class="form-control" id="mobile_api" name="mobile_api">
+                                            <option value="">Select API Endpoint</option>
+                                            <option value="/mobile/app/transfer">/mobile/app/transfer</option>
+                                            <option value="/mobile/device/delete">/mobile/device/delete</option>
+                                            <option value="/mobile/app/payment">/mobile/app/payment</option>
+                                            <option value="/mobile/android/purchase">/mobile/android/purchase</option>
+                                            <option value="/mobile/ios/admin">/mobile/ios/admin</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="device_id" class="form-label">Device ID</label>
+                                        <input type="text" class="form-control" id="device_id" name="device_id"
+                                               placeholder="Enter device ID (e.g., DEVICE-12345-ABCDE)" value="{{ device_id }}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="api_key" class="form-label">API Key</label>
+                                        <input type="text" class="form-control" id="api_key" name="api_key"
+                                               placeholder="Enter API key (e.g., mobile_api_key_123456789)" value="{{ api_key }}">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-phone-vibrate me-1"></i>Execute Mobile API Request
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="col-md-4">
+                                <h5>Mobile API Info</h5>
+                                <div class="card" style="background-color: rgba(var(--bs-secondary-rgb), 0.1);">
+                                    <div class="card-body">
+                                        <p><strong>Platform:</strong> iOS/Android</p>
+                                        <p><strong>Auth Method:</strong> Device ID + API Key</p>
+                                        <p><strong>API Version:</strong> v3.1</p>
+                                        <p><strong>CSRF Protection:</strong> Testing Required</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if result %}
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Mobile API Response</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="p-3 rounded" style="background-color: var(--bs-body-bg); border: 1px solid var(--bs-border-color); color: var(--bs-body-color);">{{ result }}</pre>
+
+                        {% if csrf_detected %}
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>Mobile API CSRF Successful! API operation executed without proper CSRF protection.</strong>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-lightbulb-fill text-warning me-2"></i>Hint</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Mobile APIs accessed via web browsers can be vulnerable to CSRF attacks even with device authentication.</p>
+                        <p><strong>Key concepts:</strong> Mobile API security, device authentication, cross-platform vulnerabilities</p>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/csrf/level19" class="btn btn-secondary me-2">
+                        <i class="bi bi-arrow-left me-1"></i>Previous Challenge
+                    </a>
+                    <a href="/csrf/level21" class="btn btn-primary">
+                        <i class="bi bi-arrow-right me-1"></i>Next Challenge
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleDescription() {
+    const desc = document.querySelector('.challenge-description');
+    const btn = event.target.closest('button');
+
+    if (desc.style.display === 'none') {
+        desc.style.display = 'block';
+        btn.innerHTML = '<i class="bi bi-info-circle me-1"></i>Hide Challenge Description';
+    } else {
+        desc.style.display = 'none';
+        btn.innerHTML = '<i class="bi bi-info-circle me-1"></i>Show Challenge Description';
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block title %}CSRF Level 13 - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 13: CSRF with CORS Exploitation</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>CrossOrigin API Gateway</strong>, a Modern API platform! This challenge demonstrates combining CSRF with CORS misconfigurations.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Exploit CORS misconfigurations to enhance CSRF attacks.
+                    </p>
+                    <p>
+                        <strong>Learning Objective:</strong> Understand how CORS misconfigurations can amplify CSRF vulnerabilities.
+                    </p>
+                </div>
+
+                <div class="text-center mb-3">
+                    <button class="btn btn-info btn-sm" onclick="toggleDescription()">
+                        <i class="bi bi-info-circle me-1"></i>Show Challenge Description
+                    </button>
+                    <a href="/solutions/csrf13" class="btn btn-success btn-sm ms-2">
+                        <i class="bi bi-lightbulb me-1"></i>View Solution
+                    </a>
+                </div>
+
+                {% if flag %}
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
+                    <p>Congratulations! You've successfully completed this CSRF challenge.</p>
+                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
+                </div>
+                {% endif %}
+
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h4 class="mb-0"><i class="bi-globe me-2"></i>CrossOrigin API Gateway - Interface</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="/csrf/level13" method="post">
+                            <div class="mb-3">
+                                <label for="origin_header" class="form-label">Origin Header</label>
+                                <input type="text" class="form-control" id="origin_header" name="origin_header" 
+                                       placeholder="https://attacker.com" value="{{ origin_header or '' }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="cors_endpoint" class="form-label">CORS Endpoint</label>
+                                <input type="text" class="form-control" id="cors_endpoint" name="cors_endpoint" 
+                                       placeholder="/api/cors/action" value="{{ cors_endpoint or '' }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="credentials_mode" class="form-label">Credentials Mode</label>
+                                <select class="form-control" id="credentials_mode" name="credentials_mode">
+                                    <option value="include">include</option>
+                                    <option value="same-origin">same-origin</option>
+                                    <option value="omit">omit</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-arrow-right-circle me-1"></i>Submit Request
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                {% if result %}
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bi bi-check-circle-fill me-2"></i>Request Result</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded">{{ result }}</pre>
+                        
+                        {% if csrf_detected %}
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>CSRF Attack Successful! CSRF with CORS Exploitation vulnerability exploited.</strong>
+                        </div>
+                        {% endif %}
+                        
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="card mt-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-lightbulb-fill me-2"></i>Hint</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Focus on the csrf with cors exploitation vulnerability. Consider how this type of CSRF attack differs from basic form submissions.</p>
+                        <p><strong>Key concepts:</strong> CSRF with CORS Exploitation, cross-origin requests, protection bypass</p>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/csrf/level12" class="btn btn-secondary me-2">
+                        <i class="bi bi-arrow-left me-1"></i>Previous Challenge
+                    </a>
+                    <a href="/csrf/level14" class="btn btn-primary">
+                        <i class="bi bi-arrow-right me-1"></i>Next Challenge
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleDescription() {
+    const desc = document.querySelector('.challenge-description');
+    const btn = event.target.closest('button');
+    
+    if (desc.style.display === 'none') {
+        desc.style.display = 'block';
+        btn.innerHTML = '<i class="bi bi-info-circle me-1"></i>Hide Challenge Description';
+    } else {
+        desc.style.display = 'none';
+        btn.innerHTML = '<i class="bi bi-info-circle me-1"></i>Show Challenge Description';
+    }
+}
+</script>
+{% endblock %}

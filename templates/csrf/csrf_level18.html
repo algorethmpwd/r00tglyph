@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}CSRF Level 18 - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="text-center">Level 18: GraphQL CSRF</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>GraphQL API Hub</strong>, a modern API platform using GraphQL! This challenge demonstrates CSRF attacks against GraphQL endpoints that lack proper protection.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Exploit GraphQL mutations to perform unauthorized operations via CSRF attacks.
+                    </p>
+                    <p>
+                        <strong>Learning Objective:</strong> Understand how GraphQL APIs can be vulnerable to CSRF and why JSON content-type alone is insufficient protection.
+                    </p>
+                    <p>
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> GraphQL mutations can be executed via POST requests with application/json content-type.
+                    </p>
+                    <p>
+                        <i class="bi bi-tools me-2"></i><strong>Tools:</strong> Use Burp Suite to analyze GraphQL requests and test mutation-based CSRF attacks.
+                    </p>
+                </div>
+
+                <div class="text-center mb-3">
+                    <button class="btn btn-info btn-sm" onclick="toggleDescription()">
+                        <i class="bi bi-info-circle me-1"></i>Show Challenge Description
+                    </button>
+                    <a href="/solutions/csrf18" class="btn btn-success btn-sm ms-2">
+                        <i class="bi bi-lightbulb me-1"></i>View Solution
+                    </a>
+                </div>
+
+                {% if flag %}
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
+                    <p>Congratulations! You've successfully exploited GraphQL CSRF vulnerabilities.</p>
+                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
+                </div>
+                {% endif %}
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="bi bi-diagram-3 me-2"></i>GraphQL API Hub - Modern API Platform</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5>GraphQL Mutation Testing</h5>
+                                <form action="/csrf/level18" method="post">
+                                    <div class="mb-3">
+                                        <label for="graphql_query" class="form-label">GraphQL Query/Mutation</label>
+                                        <textarea class="form-control" id="graphql_query" name="graphql_query" rows="4"
+                                                  placeholder="Enter GraphQL mutation (e.g., mutation { deleteUser(id: 123) { success } })">{{ graphql_query }}</textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="variables" class="form-label">Variables (JSON)</label>
+                                        <textarea class="form-control" id="variables" name="variables" rows="2"
+                                                  placeholder='{"userId": 123, "amount": 1000}'>{{ variables }}</textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="operation_name" class="form-label">Operation Name</label>
+                                        <select class="form-control" id="operation_name" name="operation_name">
+                                            <option value="">Select Operation</option>
+                                            <option value="deleteUser">deleteUser</option>
+                                            <option value="updatePassword">updatePassword</option>
+                                            <option value="transferFunds">transferFunds</option>
+                                            <option value="promoteUser">promoteUser</option>
+                                            <option value="createAdmin">createAdmin</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-play-circle me-1"></i>Execute GraphQL Mutation
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="col-md-4">
+                                <h5>API Information</h5>
+                                <div class="card" style="background-color: rgba(var(--bs-secondary-rgb), 0.1);">
+                                    <div class="card-body">
+                                        <p><strong>API Type:</strong> GraphQL</p>
+                                        <p><strong>Version:</strong> v2.0</p>
+                                        <p><strong>Content-Type:</strong> application/json</p>
+                                        <p><strong>CSRF Protection:</strong> Testing Required</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if result %}
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>GraphQL Response</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="p-3 rounded" style="background-color: var(--bs-body-bg); border: 1px solid var(--bs-border-color); color: var(--bs-body-color);">{{ result }}</pre>
+
+                        {% if csrf_detected %}
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>GraphQL CSRF Successful! Mutation executed without proper CSRF protection.</strong>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-lightbulb-fill text-warning me-2"></i>Hint</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>GraphQL mutations can be vulnerable to CSRF attacks when proper protection is not implemented. JSON content-type alone is not sufficient.</p>
+                        <p><strong>Key concepts:</strong> GraphQL mutations, JSON CSRF, application/json content-type bypass</p>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/csrf/level17" class="btn btn-secondary me-2">
+                        <i class="bi bi-arrow-left me-1"></i>Previous Challenge
+                    </a>
+                    <a href="/csrf/level19" class="btn btn-primary">
+                        <i class="bi bi-arrow-right me-1"></i>Next Challenge
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleDescription() {
+    const desc = document.querySelector('.challenge-description');
+    const btn = event.target.closest('button');
+
+    if (desc.style.display === 'none') {
+        desc.style.display = 'block';
+        btn.innerHTML = '<i class="bi bi-info-circle me-1"></i>Hide Challenge Description';
+    } else {
+        desc.style.display = 'none';
+        btn.innerHTML = '<i class="bi bi-info-circle me-1"></i>Show Challenge Description';
+    }
+}
+</script>
+{% endblock %}

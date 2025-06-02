@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}CSRF Level 8 - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 8: SameSite Cookie Bypass</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>ModernAuth Platform</strong>, a Next-generation authentication system! This challenge demonstrates bypassing SameSite cookie protection.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Bypass SameSite=Lax cookie protection to perform CSRF attacks.
+                    </p>
+                    <p>
+                        <strong>Learning Objective:</strong> Learn about SameSite cookie attribute and techniques to bypass this protection.
+                    </p>
+                </div>
+
+                <div class="text-center mb-3">
+                    <button class="btn btn-info btn-sm" onclick="toggleDescription()">
+                        <i class="bi bi-info-circle me-1"></i>Show Challenge Description
+                    </button>
+                    <a href="/solutions/csrf8" class="btn btn-success btn-sm ms-2">
+                        <i class="bi bi-lightbulb me-1"></i>View Solution
+                    </a>
+                </div>
+
+                {% if flag %}
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
+                    <p>Congratulations! You've successfully completed this CSRF challenge.</p>
+                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
+                </div>
+                {% endif %}
+
+                <div class="card mb-4">
+                    <div class="card-header bg-warning text-white">
+                        <h4 class="mb-0"><i class="bi-cookie me-2"></i>ModernAuth Platform - Interface</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="/csrf/level8" method="post">
+                            <div class="mb-3">
+                                <label for="samesite_mode" class="form-label">SameSite Mode</label>
+                                <select class="form-control" id="samesite_mode" name="samesite_mode">
+                                    <option value="Lax">Lax</option>
+                                    <option value="Strict">Strict</option>
+                                    <option value="None">None</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="navigation_type" class="form-label">Navigation Type</label>
+                                <select class="form-control" id="navigation_type" name="navigation_type">
+                                    <option value="top_level">top_level</option>
+                                    <option value="iframe">iframe</option>
+                                    <option value="popup">popup</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="csrf_payload" class="form-label">CSRF Payload</label>
+                                <textarea class="form-control" id="csrf_payload" name="csrf_payload" 
+                                         placeholder="Attack payload" rows="4">{{ csrf_payload or '' }}</textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-arrow-right-circle me-1"></i>Submit Request
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                {% if result %}
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bi bi-check-circle-fill me-2"></i>Request Result</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded">{{ result }}</pre>
+                        
+                        {% if csrf_detected %}
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>CSRF Attack Successful! SameSite Cookie Bypass vulnerability exploited.</strong>
+                        </div>
+                        {% endif %}
+                        
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="card mt-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-lightbulb-fill me-2"></i>Hint</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Focus on the samesite cookie bypass vulnerability. Consider how this type of CSRF attack differs from basic form submissions.</p>
+                        <p><strong>Key concepts:</strong> SameSite Cookie Bypass, cross-origin requests, protection bypass</p>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/csrf/level7" class="btn btn-secondary me-2">
+                        <i class="bi bi-arrow-left me-1"></i>Previous Challenge
+                    </a>
+                    <a href="/csrf/level9" class="btn btn-primary">
+                        <i class="bi bi-arrow-right me-1"></i>Next Challenge
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleDescription() {
+    const desc = document.querySelector('.challenge-description');
+    const btn = event.target.closest('button');
+    
+    if (desc.style.display === 'none') {
+        desc.style.display = 'block';
+        btn.innerHTML = '<i class="bi bi-info-circle me-1"></i>Hide Challenge Description';
+    } else {
+        desc.style.display = 'none';
+        btn.innerHTML = '<i class="bi bi-info-circle me-1"></i>Show Challenge Description';
+    }
+}
+</script>
+{% endblock %}

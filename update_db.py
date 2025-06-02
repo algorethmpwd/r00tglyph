@@ -568,8 +568,384 @@ def initialize_challenges():
         }
     ]
 
+    # CSRF Challenges (23 levels) - Modern CSRF attack contexts
+    csrf_challenges = [
+        {
+            "name": "Basic CSRF Attack",
+            "category": "csrf",
+            "difficulty": "beginner",
+            "description": "Exploit basic CSRF vulnerability in a modern banking transfer system.",
+            "points": 100,
+            "active": True
+        },
+        {
+            "name": "CSRF with GET Request",
+            "category": "csrf",
+            "difficulty": "beginner",
+            "description": "Exploit CSRF via GET request in a social media platform.",
+            "points": 200,
+            "active": True
+        },
+        {
+            "name": "CSRF with POST Request",
+            "category": "csrf",
+            "difficulty": "intermediate",
+            "description": "Exploit CSRF via POST request in an e-commerce checkout system.",
+            "points": 300,
+            "active": True
+        },
+        {
+            "name": "CSRF with Hidden Form Fields",
+            "category": "csrf",
+            "difficulty": "intermediate",
+            "description": "Bypass hidden form field protection in a healthcare portal.",
+            "points": 400,
+            "active": True
+        },
+        {
+            "name": "CSRF with Referer Header Bypass",
+            "category": "csrf",
+            "difficulty": "advanced",
+            "description": "Bypass referer header validation in a fintech application.",
+            "points": 500,
+            "active": True
+        },
+        {
+            "name": "CSRF with Custom Headers",
+            "category": "csrf",
+            "difficulty": "advanced",
+            "description": "Exploit CSRF with custom headers in a microservices API.",
+            "points": 600,
+            "active": True
+        },
+        {
+            "name": "CSRF with AJAX Requests",
+            "category": "csrf",
+            "difficulty": "advanced",
+            "description": "Exploit CSRF in AJAX-based single page applications.",
+            "points": 700,
+            "active": True
+        },
+        {
+            "name": "CSRF with JSON Payload",
+            "category": "csrf",
+            "difficulty": "advanced",
+            "description": "Exploit CSRF with JSON payloads in a REST API.",
+            "points": 750,
+            "active": True
+        },
+        {
+            "name": "CSRF with File Upload",
+            "category": "csrf",
+            "difficulty": "expert",
+            "description": "Chain CSRF with file upload in a document management system.",
+            "points": 800,
+            "active": True
+        },
+        {
+            "name": "CSRF with Multi-Step Process",
+            "category": "csrf",
+            "difficulty": "expert",
+            "description": "Exploit CSRF in multi-step workflow processes.",
+            "points": 900,
+            "active": True
+        },
+        {
+            "name": "CSRF in Password Change",
+            "category": "csrf",
+            "difficulty": "expert",
+            "description": "Exploit CSRF to change user passwords without authorization.",
+            "points": 1000,
+            "active": True
+        },
+        {
+            "name": "CSRF with CAPTCHA Bypass",
+            "category": "csrf",
+            "difficulty": "expert",
+            "description": "Bypass CAPTCHA protection in CSRF attacks.",
+            "points": 1100,
+            "active": True
+        },
+        {
+            "name": "CSRF with CORS Exploitation",
+            "category": "csrf",
+            "difficulty": "expert",
+            "description": "Exploit CORS misconfigurations to enable CSRF attacks.",
+            "points": 1200,
+            "active": True
+        },
+        {
+            "name": "WebSocket CSRF",
+            "category": "csrf",
+            "difficulty": "expert",
+            "description": "Exploit CSRF vulnerabilities in WebSocket connections.",
+            "points": 1300,
+            "active": True
+        },
+        {
+            "name": "CSRF in OAuth Flows",
+            "category": "csrf",
+            "difficulty": "expert",
+            "description": "Exploit CSRF in OAuth authorization flows.",
+            "points": 1400,
+            "active": True
+        },
+        {
+            "name": "CSRF with CSP Bypass",
+            "category": "csrf",
+            "difficulty": "expert",
+            "description": "Bypass Content Security Policy in CSRF attacks.",
+            "points": 1500,
+            "active": True
+        },
+        {
+            "name": "CSRF via XSS Chain",
+            "category": "csrf",
+            "difficulty": "expert",
+            "description": "Chain XSS with CSRF for advanced exploitation.",
+            "points": 1600,
+            "active": True
+        },
+        {
+            "name": "GraphQL CSRF",
+            "category": "csrf",
+            "difficulty": "expert",
+            "description": "Exploit CSRF vulnerabilities in GraphQL APIs.",
+            "points": 1700,
+            "active": True
+        },
+        {
+            "name": "JWT-based CSRF",
+            "category": "csrf",
+            "difficulty": "expert",
+            "description": "Exploit CSRF in JWT-based authentication systems.",
+            "points": 1800,
+            "active": True
+        },
+        {
+            "name": "Mobile API CSRF",
+            "category": "csrf",
+            "difficulty": "expert",
+            "description": "Exploit CSRF vulnerabilities in mobile API endpoints.",
+            "points": 1900,
+            "active": True
+        },
+        {
+            "name": "Microservices CSRF",
+            "category": "csrf",
+            "difficulty": "expert",
+            "description": "Exploit CSRF in microservices architectures.",
+            "points": 2000,
+            "active": True
+        },
+        {
+            "name": "CSRF with Subdomain Takeover",
+            "category": "csrf",
+            "difficulty": "expert",
+            "description": "Chain subdomain takeover with CSRF attacks.",
+            "points": 2100,
+            "active": True
+        },
+        {
+            "name": "Serverless Function CSRF",
+            "category": "csrf",
+            "difficulty": "expert",
+            "description": "Exploit CSRF in serverless function architectures.",
+            "points": 2200,
+            "active": True
+        }
+    ]
+
+    # SSRF Challenges (23 levels) - Modern SSRF attack contexts
+    ssrf_challenges = [
+        {
+            "name": "Basic SSRF Attack",
+            "category": "ssrf",
+            "difficulty": "beginner",
+            "description": "Exploit basic SSRF vulnerability in a URL fetching service.",
+            "points": 100,
+            "active": True
+        },
+        {
+            "name": "SSRF with Internal Network Access",
+            "category": "ssrf",
+            "difficulty": "beginner",
+            "description": "Access internal network resources via SSRF in a cloud application.",
+            "points": 200,
+            "active": True
+        },
+        {
+            "name": "SSRF with Port Scanning",
+            "category": "ssrf",
+            "difficulty": "intermediate",
+            "description": "Use SSRF for internal port scanning in a microservices environment.",
+            "points": 300,
+            "active": True
+        },
+        {
+            "name": "SSRF with Protocol Smuggling",
+            "category": "ssrf",
+            "difficulty": "intermediate",
+            "description": "Exploit SSRF with protocol smuggling techniques.",
+            "points": 400,
+            "active": True
+        },
+        {
+            "name": "SSRF with Filter Bypass",
+            "category": "ssrf",
+            "difficulty": "advanced",
+            "description": "Bypass SSRF filters in a document processing service.",
+            "points": 500,
+            "active": True
+        },
+        {
+            "name": "SSRF with DNS Rebinding",
+            "category": "ssrf",
+            "difficulty": "advanced",
+            "description": "Exploit SSRF using DNS rebinding attacks.",
+            "points": 600,
+            "active": True
+        },
+        {
+            "name": "SSRF with Cloud Metadata",
+            "category": "ssrf",
+            "difficulty": "advanced",
+            "description": "Access cloud metadata services via SSRF.",
+            "points": 700,
+            "active": True
+        },
+        {
+            "name": "SSRF with Blind Exploitation",
+            "category": "ssrf",
+            "difficulty": "advanced",
+            "description": "Exploit blind SSRF vulnerabilities with out-of-band techniques.",
+            "points": 750,
+            "active": True
+        },
+        {
+            "name": "SSRF with File Protocol",
+            "category": "ssrf",
+            "difficulty": "expert",
+            "description": "Exploit SSRF using file:// protocol for local file access.",
+            "points": 800,
+            "active": True
+        },
+        {
+            "name": "SSRF with Gopher Protocol",
+            "category": "ssrf",
+            "difficulty": "expert",
+            "description": "Use gopher:// protocol for advanced SSRF exploitation.",
+            "points": 900,
+            "active": True
+        },
+        {
+            "name": "SSRF with Redis Exploitation",
+            "category": "ssrf",
+            "difficulty": "expert",
+            "description": "Exploit Redis instances via SSRF in a caching layer.",
+            "points": 1000,
+            "active": True
+        },
+        {
+            "name": "SSRF with Docker API",
+            "category": "ssrf",
+            "difficulty": "expert",
+            "description": "Access Docker API via SSRF in containerized environments.",
+            "points": 1100,
+            "active": True
+        },
+        {
+            "name": "SSRF with Kubernetes API",
+            "category": "ssrf",
+            "difficulty": "expert",
+            "description": "Exploit Kubernetes API via SSRF in orchestrated environments.",
+            "points": 1200,
+            "active": True
+        },
+        {
+            "name": "SSRF with Time-Based Detection",
+            "category": "ssrf",
+            "difficulty": "expert",
+            "description": "Use time-based techniques for blind SSRF detection.",
+            "points": 1300,
+            "active": True
+        },
+        {
+            "name": "SSRF with HTTP Smuggling",
+            "category": "ssrf",
+            "difficulty": "expert",
+            "description": "Chain SSRF with HTTP request smuggling attacks.",
+            "points": 1400,
+            "active": True
+        },
+        {
+            "name": "SSRF with WebSocket Upgrade",
+            "category": "ssrf",
+            "difficulty": "expert",
+            "description": "Exploit SSRF via WebSocket protocol upgrades.",
+            "points": 1500,
+            "active": True
+        },
+        {
+            "name": "SSRF with GraphQL Introspection",
+            "category": "ssrf",
+            "difficulty": "expert",
+            "description": "Use SSRF to access GraphQL introspection endpoints.",
+            "points": 1600,
+            "active": True
+        },
+        {
+            "name": "SSRF with LDAP Injection",
+            "category": "ssrf",
+            "difficulty": "expert",
+            "description": "Chain SSRF with LDAP injection in enterprise systems.",
+            "points": 1700,
+            "active": True
+        },
+        {
+            "name": "SSRF with XXE Chaining",
+            "category": "ssrf",
+            "difficulty": "expert",
+            "description": "Chain SSRF with XXE attacks for enhanced exploitation.",
+            "points": 1800,
+            "active": True
+        },
+        {
+            "name": "SSRF with Cloud Function Exploitation",
+            "category": "ssrf",
+            "difficulty": "expert",
+            "description": "Exploit cloud functions via SSRF in serverless architectures.",
+            "points": 1900,
+            "active": True
+        },
+        {
+            "name": "SSRF with Database Access",
+            "category": "ssrf",
+            "difficulty": "expert",
+            "description": "Access internal databases via SSRF in data processing services.",
+            "points": 2000,
+            "active": True
+        },
+        {
+            "name": "SSRF with Message Queue Exploitation",
+            "category": "ssrf",
+            "difficulty": "expert",
+            "description": "Exploit message queues via SSRF in distributed systems.",
+            "points": 2100,
+            "active": True
+        },
+        {
+            "name": "Advanced SSRF Chaining",
+            "category": "ssrf",
+            "difficulty": "expert",
+            "description": "Chain multiple SSRF techniques for complex exploitation.",
+            "points": 2200,
+            "active": True
+        }
+    ]
+
     # Combine all challenges
-    all_challenges = xss_challenges + sqli_challenges + cmdi_challenges
+    all_challenges = xss_challenges + sqli_challenges + cmdi_challenges + csrf_challenges + ssrf_challenges
 
     with app.app_context():
         # Clear existing challenges
@@ -591,14 +967,18 @@ def initialize_challenges():
         xss_count = len([c for c in all_challenges if c['category'] == 'xss'])
         sqli_count = len([c for c in all_challenges if c['category'] == 'sqli'])
         cmdi_count = len([c for c in all_challenges if c['category'] == 'cmdi'])
+        csrf_count = len([c for c in all_challenges if c['category'] == 'csrf'])
+        ssrf_count = len([c for c in all_challenges if c['category'] == 'ssrf'])
 
         print(f"XSS challenges: {xss_count}")
         print(f"SQL Injection challenges: {sqli_count}")
         print(f"Command Injection challenges: {cmdi_count}")
+        print(f"CSRF challenges: {csrf_count}")
+        print(f"SSRF challenges: {ssrf_count}")
 
         # Verify database contents
         print("\nDatabase verification:")
-        for category in ['xss', 'sqli', 'cmdi']:
+        for category in ['xss', 'sqli', 'cmdi', 'csrf', 'ssrf']:
             challenges = Challenge.query.filter_by(category=category).all()
             print(f"{category.upper()}: {len(challenges)} challenges")
 

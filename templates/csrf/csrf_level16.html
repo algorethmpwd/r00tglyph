@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block title %}CSRF Level 16 - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="text-center">Level 16: CSRF with CSP Bypass</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>SecureApp Pro</strong>, a modern web application with Content Security Policy (CSP) protection! This challenge demonstrates advanced CSRF attacks that bypass CSP restrictions.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Exploit CSRF vulnerabilities by bypassing Content Security Policy protections using various techniques.
+                    </p>
+                    <p>
+                        <strong>Learning Objective:</strong> Understand how CSP can be bypassed and why proper CSP configuration is crucial for CSRF protection.
+                    </p>
+                    <p>
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Look for CSP misconfigurations like unsafe-inline, unsafe-eval, or overly permissive directives.
+                    </p>
+                    <p>
+                        <i class="bi bi-tools me-2"></i><strong>Tools:</strong> Use Burp Suite to analyze CSP headers and test bypass techniques.
+                    </p>
+                </div>
+
+                <div class="text-center mb-3">
+                    <button class="btn btn-info btn-sm" onclick="toggleDescription()">
+                        <i class="bi bi-info-circle me-1"></i>Show Challenge Description
+                    </button>
+                    <a href="/solutions/csrf16" class="btn btn-success btn-sm ms-2">
+                        <i class="bi bi-lightbulb me-1"></i>View Solution
+                    </a>
+                </div>
+
+                {% if flag %}
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
+                    <p>Congratulations! You've successfully bypassed CSP protection and completed this CSRF challenge.</p>
+                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
+                </div>
+                {% endif %}
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="bi bi-shield-check me-2"></i>SecureApp Pro - CSP Protected Application</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5>CSP Bypass Testing</h5>
+                                <form action="/csrf/level16" method="post">
+                                    <div class="mb-3">
+                                        <label for="csp_header" class="form-label">CSP Header</label>
+                                        <select class="form-control" id="csp_header" name="csp_header">
+                                            <option value="">Select CSP Configuration</option>
+                                            <option value="default-src 'self'; script-src 'unsafe-inline'">Unsafe Inline Scripts</option>
+                                            <option value="default-src 'self'; script-src 'unsafe-eval'">Unsafe Eval</option>
+                                            <option value="default-src 'self'; form-action *">Permissive Form Action</option>
+                                            <option value="default-src 'self'; base-uri 'unsafe-inline'">Unsafe Base URI</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="payload_method" class="form-label">Payload Method</label>
+                                        <select class="form-control" id="payload_method" name="payload_method">
+                                            <option value="">Select Payload Method</option>
+                                            <option value="form_submission">Form Submission</option>
+                                            <option value="javascript_fetch">JavaScript Fetch</option>
+                                            <option value="iframe_injection">Iframe Injection</option>
+                                            <option value="meta_refresh">Meta Refresh</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="bypass_technique" class="form-label">Bypass Technique</label>
+                                        <input type="text" class="form-control" id="bypass_technique" name="bypass_technique"
+                                               placeholder="Enter bypass technique (e.g., jsonp, angular, meta, base, iframe)" value="{{ bypass_technique }}">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-shield-slash me-1"></i>Test CSP Bypass
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="col-md-4">
+                                <h5>CSP Information</h5>
+                                <div class="card" style="background-color: rgba(var(--bs-secondary-rgb), 0.1);">
+                                    <div class="card-body">
+                                        <p><strong>Application:</strong> SecureApp Pro</p>
+                                        <p><strong>CSP Version:</strong> Level 3</p>
+                                        <p><strong>Protection:</strong> Active</p>
+                                        <p><strong>Bypass Status:</strong> Testing Required</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if result %}
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>CSP Bypass Result</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="p-3 rounded" style="background-color: var(--bs-body-bg); border: 1px solid var(--bs-border-color); color: var(--bs-body-color);">{{ result }}</pre>
+
+                        {% if csrf_detected %}
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>CSP Bypass Successful! CSRF attack executed despite CSP protection.</strong>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-lightbulb-fill text-warning me-2"></i>Hint</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>CSP can be bypassed through various techniques including JSONP endpoints, AngularJS template injection, meta tag manipulation, and base URI hijacking.</p>
+                        <p><strong>Key concepts:</strong> CSP bypass techniques, unsafe-inline, unsafe-eval, form-action directive</p>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/csrf/level15" class="btn btn-secondary me-2">
+                        <i class="bi bi-arrow-left me-1"></i>Previous Challenge
+                    </a>
+                    <a href="/csrf/level17" class="btn btn-primary">
+                        <i class="bi bi-arrow-right me-1"></i>Next Challenge
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleDescription() {
+    const desc = document.querySelector('.challenge-description');
+    const btn = event.target.closest('button');
+
+    if (desc.style.display === 'none') {
+        desc.style.display = 'block';
+        btn.innerHTML = '<i class="bi bi-info-circle me-1"></i>Hide Challenge Description';
+    } else {
+        desc.style.display = 'none';
+        btn.innerHTML = '<i class="bi bi-info-circle me-1"></i>Show Challenge Description';
+    }
+}
+</script>
+{% endblock %}

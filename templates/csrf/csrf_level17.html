@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}CSRF Level 17 - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="text-center">Level 17: CSRF via XSS Chain</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>VulnApp</strong>, a web application with both XSS and CSRF vulnerabilities! This challenge demonstrates how XSS can be chained with CSRF to bypass modern protection mechanisms.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Exploit XSS vulnerabilities to extract CSRF tokens and execute unauthorized actions.
+                    </p>
+                    <p>
+                        <strong>Learning Objective:</strong> Understand how XSS enables sophisticated CSRF attacks and why XSS prevention is crucial for CSRF protection.
+                    </p>
+                    <p>
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Use JavaScript to extract CSRF tokens from the DOM and automatically submit forms.
+                    </p>
+                    <p>
+                        <i class="bi bi-tools me-2"></i><strong>Tools:</strong> Use Burp Suite to analyze requests and test XSS payloads that perform CSRF actions.
+                    </p>
+                </div>
+
+                <div class="text-center mb-3">
+                    <button class="btn btn-info btn-sm" onclick="toggleDescription()">
+                        <i class="bi bi-info-circle me-1"></i>Show Challenge Description
+                    </button>
+                    <a href="/solutions/csrf17" class="btn btn-success btn-sm ms-2">
+                        <i class="bi bi-lightbulb me-1"></i>View Solution
+                    </a>
+                </div>
+
+                {% if flag %}
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
+                    <p>Congratulations! You've successfully chained XSS and CSRF attacks.</p>
+                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
+                </div>
+                {% endif %}
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="bi bi-link-45deg me-2"></i>VulnApp - XSS + CSRF Testing Platform</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5>XSS + CSRF Chain Attack</h5>
+                                <form action="/csrf/level17" method="post">
+                                    <div class="mb-3">
+                                        <label for="xss_payload" class="form-label">XSS Payload</label>
+                                        <textarea class="form-control" id="xss_payload" name="xss_payload" rows="3"
+                                                  placeholder="Enter XSS payload (e.g., <script>fetch('/admin/delete', {method: 'POST', credentials: 'include'})</script>)">{{ xss_payload }}</textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="csrf_action" class="form-label">CSRF Action</label>
+                                        <select class="form-control" id="csrf_action" name="csrf_action">
+                                            <option value="">Select CSRF Action</option>
+                                            <option value="transfer_funds">Transfer Funds</option>
+                                            <option value="delete_account">Delete Account</option>
+                                            <option value="change_password">Change Password</option>
+                                            <option value="admin_promote">Admin Promotion</option>
+                                            <option value="change_email">Change Email</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="target_endpoint" class="form-label">Target Endpoint</label>
+                                        <input type="text" class="form-control" id="target_endpoint" name="target_endpoint"
+                                               placeholder="Enter target endpoint (e.g., /admin/users/delete)" value="{{ target_endpoint }}">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-link me-1"></i>Execute XSS + CSRF Chain
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="col-md-4">
+                                <h5>Attack Information</h5>
+                                <div class="card" style="background-color: rgba(var(--bs-secondary-rgb), 0.1);">
+                                    <div class="card-body">
+                                        <p><strong>Application:</strong> VulnApp</p>
+                                        <p><strong>XSS Type:</strong> Stored/Reflected</p>
+                                        <p><strong>CSRF Protection:</strong> Token-based</p>
+                                        <p><strong>Chain Status:</strong> Testing Required</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if result %}
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Attack Chain Result</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="p-3 rounded" style="background-color: var(--bs-body-bg); border: 1px solid var(--bs-border-color); color: var(--bs-body-color);">{{ result }}</pre>
+
+                        {% if csrf_detected %}
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>XSS + CSRF Chain Successful! CSRF protection bypassed via XSS.</strong>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-lightbulb-fill text-warning me-2"></i>Hint</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>XSS can be used to extract CSRF tokens from the DOM and automatically submit forms. This bypasses token-based CSRF protection.</p>
+                        <p><strong>Key concepts:</strong> DOM manipulation, token extraction, automatic form submission, attack chaining</p>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/csrf/level16" class="btn btn-secondary me-2">
+                        <i class="bi bi-arrow-left me-1"></i>Previous Challenge
+                    </a>
+                    <a href="/csrf/level18" class="btn btn-primary">
+                        <i class="bi bi-arrow-right me-1"></i>Next Challenge
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleDescription() {
+    const desc = document.querySelector('.challenge-description');
+    const btn = event.target.closest('button');
+
+    if (desc.style.display === 'none') {
+        desc.style.display = 'block';
+        btn.innerHTML = '<i class="bi bi-info-circle me-1"></i>Hide Challenge Description';
+    } else {
+        desc.style.display = 'none';
+        btn.innerHTML = '<i class="bi bi-info-circle me-1"></i>Show Challenge Description';
+    }
+}
+</script>
+{% endblock %}

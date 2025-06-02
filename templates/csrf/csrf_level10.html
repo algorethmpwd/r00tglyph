@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block title %}CSRF Level 10 - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 10: Multi-step CSRF</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>WorkflowPro System</strong>, a Enterprise workflow management! This challenge demonstrates complex multi-step CSRF attacks.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Execute a multi-step CSRF attack chain to complete a complex workflow.
+                    </p>
+                    <p>
+                        <strong>Learning Objective:</strong> Learn how to chain multiple CSRF attacks for complex business logic exploitation.
+                    </p>
+                </div>
+
+                <div class="text-center mb-3">
+                    <button class="btn btn-info btn-sm" onclick="toggleDescription()">
+                        <i class="bi bi-info-circle me-1"></i>Show Challenge Description
+                    </button>
+                    <a href="/solutions/csrf10" class="btn btn-success btn-sm ms-2">
+                        <i class="bi bi-lightbulb me-1"></i>View Solution
+                    </a>
+                </div>
+
+                {% if flag %}
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
+                    <p>Congratulations! You've successfully completed this CSRF challenge.</p>
+                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
+                </div>
+                {% endif %}
+
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0"><i class="bi-diagram-3 me-2"></i>WorkflowPro System - Interface</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="/csrf/level10" method="post">
+                            <div class="mb-3">
+                                <label for="step_number" class="form-label">Workflow Step</label>
+                                <select class="form-control" id="step_number" name="step_number">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="step_data" class="form-label">Step Data</label>
+                                <textarea class="form-control" id="step_data" name="step_data" 
+                                         placeholder="Step-specific data" rows="4">{{ step_data or '' }}</textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="workflow_id" class="form-label">Workflow ID</label>
+                                <input type="text" class="form-control" id="workflow_id" name="workflow_id" 
+                                       placeholder="workflow_12345" value="{{ workflow_id or '' }}">
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-arrow-right-circle me-1"></i>Submit Request
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                {% if result %}
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bi bi-check-circle-fill me-2"></i>Request Result</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded">{{ result }}</pre>
+                        
+                        {% if csrf_detected %}
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>CSRF Attack Successful! Multi-step CSRF vulnerability exploited.</strong>
+                        </div>
+                        {% endif %}
+                        
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="card mt-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-lightbulb-fill me-2"></i>Hint</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Focus on the multi-step csrf vulnerability. Consider how this type of CSRF attack differs from basic form submissions.</p>
+                        <p><strong>Key concepts:</strong> Multi-step CSRF, cross-origin requests, protection bypass</p>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/csrf/level9" class="btn btn-secondary me-2">
+                        <i class="bi bi-arrow-left me-1"></i>Previous Challenge
+                    </a>
+                    <a href="/csrf/level11" class="btn btn-primary">
+                        <i class="bi bi-arrow-right me-1"></i>Next Challenge
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleDescription() {
+    const desc = document.querySelector('.challenge-description');
+    const btn = event.target.closest('button');
+    
+    if (desc.style.display === 'none') {
+        desc.style.display = 'block';
+        btn.innerHTML = '<i class="bi bi-info-circle me-1"></i>Hide Challenge Description';
+    } else {
+        desc.style.display = 'none';
+        btn.innerHTML = '<i class="bi bi-info-circle me-1"></i>Show Challenge Description';
+    }
+}
+</script>
+{% endblock %}

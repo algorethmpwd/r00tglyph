@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block title %}CSRF Level 6 - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 6: Referrer-based Protection Bypass</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-dark challenge-description" style="display: none;">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>RefererGuard System</strong>, a Security-focused web application! This challenge demonstrates bypassing referrer-based CSRF protection.
+                    </p>
+                    <p>
+                        <strong>Your Task:</strong> Bypass the referrer header validation to perform CSRF attacks.
+                    </p>
+                    <p>
+                        <strong>Learning Objective:</strong> Learn how referrer-based protection can be bypassed and its limitations.
+                    </p>
+                </div>
+
+                <div class="text-center mb-3">
+                    <button class="btn btn-info btn-sm" onclick="toggleDescription()">
+                        <i class="bi bi-info-circle me-1"></i>Show Challenge Description
+                    </button>
+                    <a href="/solutions/csrf6" class="btn btn-success btn-sm ms-2">
+                        <i class="bi bi-lightbulb me-1"></i>View Solution
+                    </a>
+                </div>
+
+                {% if flag %}
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
+                    <p>Congratulations! You've successfully completed this CSRF challenge.</p>
+                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
+                </div>
+                {% endif %}
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="bi-shield-slash me-2"></i>RefererGuard System - Interface</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="/csrf/level6" method="post">
+                            <div class="mb-3">
+                                <label for="referrer_url" class="form-label">Referrer URL</label>
+                                <input type="text" class="form-control" id="referrer_url" name="referrer_url"
+                                       placeholder="https://trusted-domain.com" value="{{ referrer_url or '' }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="target_action" class="form-label">Target Action</label>
+                                <select class="form-control" id="target_action" name="target_action">
+                                    <option value="change_password">change_password</option>
+                                    <option value="update_profile">update_profile</option>
+                                    <option value="delete_account">delete_account</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="payload_data" class="form-label">Payload Data</label>
+                                <input type="text" class="form-control" id="payload_data" name="payload_data"
+                                       placeholder="Action-specific data" value="{{ payload_data or '' }}">
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-arrow-right-circle me-1"></i>Submit Request
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                {% if result %}
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bi bi-check-circle-fill me-2"></i>Request Result</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded">{{ result }}</pre>
+
+                        {% if csrf_detected %}
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>CSRF Attack Successful! Referrer-based Protection Bypass vulnerability exploited.</strong>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="card mt-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-lightbulb-fill me-2"></i>Hint</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Focus on the referrer-based protection bypass vulnerability. Consider how this type of CSRF attack differs from basic form submissions.</p>
+                        <p><strong>Key concepts:</strong> Referrer-based Protection Bypass, cross-origin requests, protection bypass</p>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/csrf/level5" class="btn btn-secondary me-2">
+                        <i class="bi bi-arrow-left me-1"></i>Previous Challenge
+                    </a>
+                    <a href="/csrf/level7" class="btn btn-primary">
+                        <i class="bi bi-arrow-right me-1"></i>Next Challenge
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleDescription() {
+    const desc = document.querySelector('.challenge-description');
+    const btn = event.target.closest('button');
+
+    if (desc.style.display === 'none') {
+        desc.style.display = 'block';
+        btn.innerHTML = '<i class="bi bi-info-circle me-1"></i>Hide Challenge Description';
+    } else {
+        desc.style.display = 'none';
+        btn.innerHTML = '<i class="bi bi-info-circle me-1"></i>Show Challenge Description';
+    }
+}
+</script>
+{% endblock %}

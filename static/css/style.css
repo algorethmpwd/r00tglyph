@@ -192,16 +192,70 @@ footer {
     border: none;
     border-radius: 8px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
 }
 
 .modal-header {
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    border-bottom: 1px solid var(--bs-border-color);
 }
 
 .modal-footer {
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
+    background-color: var(--bs-body-bg);
+    border-top: 1px solid var(--bs-border-color);
+}
+
+.modal-body {
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+}
+
+/* Theme-specific modal styling */
+[data-bs-theme="dark"] .modal-content {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+}
+
+[data-bs-theme="dark"] .modal-header,
+[data-bs-theme="dark"] .modal-body,
+[data-bs-theme="dark"] .modal-footer {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    border-color: #333;
+}
+
+[data-bs-theme="cyberpunk"] .modal-content {
+    background-color: #1a1a3e;
+    border: 1px solid #00ff9d;
+    box-shadow: 0 0 20px rgba(0, 255, 157, 0.3);
+}
+
+[data-bs-theme="cyberpunk"] .modal-header,
+[data-bs-theme="cyberpunk"] .modal-body,
+[data-bs-theme="cyberpunk"] .modal-footer {
+    background-color: #1a1a3e;
+    color: #00ff9d;
+    border-color: #00ff9d;
+}
+
+[data-bs-theme="hacker"] .modal-content {
+    background-color: #0c0c0c;
+    border: 1px solid #00ff00;
+    font-family: 'Courier New', monospace;
+}
+
+[data-bs-theme="hacker"] .modal-header,
+[data-bs-theme="hacker"] .modal-body,
+[data-bs-theme="hacker"] .modal-footer {
+    background-color: #0c0c0c;
+    color: #00ff00;
+    border-color: #00ff00;
 }
 
 /* Dark theme adjustments for flag container */
@@ -261,11 +315,18 @@ footer {
     --bs-danger-rgb: 220, 53, 69;
     --bs-light-rgb: 248, 249, 250;
     --bs-dark-rgb: 33, 37, 41;
+    --bs-border-color: #333;
 }
 
 [data-bs-theme="dark"] .card {
     background-color: #1e1e1e;
     border-color: #333;
+}
+
+[data-bs-theme="dark"] .card-header {
+    background-color: rgba(13, 110, 253, 0.1);
+    border-bottom-color: #333;
+    color: #e0e0e0;
 }
 
 [data-bs-theme="dark"] .alert-dark {
@@ -340,6 +401,7 @@ footer {
     --bs-danger-rgb: 255, 0, 60;
     --bs-light-rgb: 42, 42, 78;
     --bs-dark-rgb: 10, 10, 30;
+    --bs-border-color: #00ff9d;
 }
 
 [data-bs-theme="cyberpunk"] .navbar {
@@ -355,6 +417,7 @@ footer {
 
 [data-bs-theme="cyberpunk"] .card-header {
     background-color: #2a2a4e !important;
+    border-bottom-color: #00ff9d;
     color: #00ff9d !important;
     border-bottom: 1px solid #00ff9d;
 }
@@ -485,6 +548,7 @@ footer {
     --bs-danger-rgb: 255, 0, 0;
     --bs-light-rgb: 34, 34, 34;
     --bs-dark-rgb: 0, 0, 0;
+    --bs-border-color: #00ff00;
     font-family: 'Courier New', monospace;
 }
 
@@ -815,6 +879,110 @@ footer {
     padding: 0 5px;
     font-size: 0.8rem;
     color: #28a745;
+}
+
+/* Solution page styling */
+.solution-content pre {
+    background-color: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    color: var(--bs-body-color);
+    padding: 15px;
+    border-radius: 5px;
+    overflow-x: auto;
+}
+
+.solution-content code {
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+    color: var(--bs-body-color);
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+}
+
+/* Theme-specific solution styling */
+[data-bs-theme="dark"] .solution-content pre {
+    background-color: #1e1e1e;
+    border-color: #333;
+}
+
+[data-bs-theme="dark"] .solution-content code {
+    background-color: rgba(13, 110, 253, 0.2);
+}
+
+[data-bs-theme="cyberpunk"] .solution-content pre {
+    background-color: #1a1a3e;
+    border-color: #00ff9d;
+    box-shadow: 0 0 5px rgba(0, 255, 157, 0.2);
+}
+
+[data-bs-theme="cyberpunk"] .solution-content code {
+    background-color: rgba(255, 0, 170, 0.2);
+    color: #00ff9d;
+}
+
+[data-bs-theme="hacker"] .solution-content pre {
+    background-color: #0c0c0c;
+    border-color: #00ff00;
+    font-family: 'Courier New', monospace;
+}
+
+[data-bs-theme="hacker"] .solution-content code {
+    background-color: rgba(0, 255, 0, 0.2);
+    color: #00ff00;
+    font-family: 'Courier New', monospace;
+}
+
+/* Button theme consistency */
+.btn {
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+/* Light theme button adjustments */
+[data-bs-theme="light"] .btn-outline-primary {
+    border-color: #0d6efd;
+    color: #0d6efd;
+}
+
+[data-bs-theme="light"] .btn-outline-primary:hover {
+    background-color: #0d6efd;
+    color: white;
+}
+
+[data-bs-theme="light"] .btn-outline-secondary {
+    border-color: #6c757d;
+    color: #6c757d;
+}
+
+[data-bs-theme="light"] .btn-outline-secondary:hover {
+    background-color: #6c757d;
+    color: white;
+}
+
+/* Input group theme consistency */
+.input-group-text {
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+    border-color: var(--bs-border-color);
+    color: var(--bs-body-color);
+}
+
+[data-bs-theme="dark"] .input-group-text {
+    background-color: rgba(13, 110, 253, 0.2);
+    border-color: #333;
+    color: #e0e0e0;
+}
+
+[data-bs-theme="cyberpunk"] .input-group-text {
+    background-color: rgba(255, 0, 170, 0.2);
+    border-color: #00ff9d;
+    color: #00ff9d;
+}
+
+[data-bs-theme="hacker"] .input-group-text {
+    background-color: rgba(0, 255, 0, 0.2);
+    border-color: #00ff00;
+    color: #00ff00;
+    font-family: 'Courier New', monospace;
 }
 
 /* Responsive adjustments */

