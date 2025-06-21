@@ -449,8 +449,8 @@ function revealFlag() {
 }
 
 function setupChallengeDescriptionPopup() {
-    // Check if we're on a challenge page (XSS, SQLi, Command Injection, or SSRF)
-    if (window.location.pathname.includes('/xss/level') || window.location.pathname.includes('/sqli/level') || window.location.pathname.includes('/cmdi/level') || window.location.pathname.includes('/ssrf/level')) {
+    // Check if we're on a challenge page (XSS, SQLi, Command Injection, SSRF, or CSRF)
+    if (window.location.pathname.includes('/xss/level') || window.location.pathname.includes('/sqli/level') || window.location.pathname.includes('/cmdi/level') || window.location.pathname.includes('/ssrf/level') || window.location.pathname.includes('/csrf/level')) {
         // Create modal for challenge description
         const challengeDescription = document.querySelector('.challenge-description');
         if (challengeDescription) {
@@ -511,8 +511,8 @@ function setupChallengeDescriptionPopup() {
             descriptionButton.setAttribute('data-bs-target', '#challengeDescriptionModal');
 
             // Insert the button at the appropriate location
-            // For SQLi challenges, we want it at the top of the content
-            if (window.location.pathname.includes('/sqli/level')) {
+            // For SQLi and CSRF challenges, we want it at the top of the content
+            if (window.location.pathname.includes('/sqli/level') || window.location.pathname.includes('/csrf/level')) {
                 const contentDiv = document.querySelector('.row > .col-md-10, .row > .col-md-8');
                 if (contentDiv) {
                     // Insert at the beginning of the content div, after any success alerts
@@ -548,8 +548,8 @@ function setupChallengeDescriptionPopup() {
 }
 
 function setupFlagSubmissionPopup() {
-    // Check if we're on a challenge page (XSS, SQLi, Command Injection, or SSRF)
-    if (window.location.pathname.includes('/xss/level') || window.location.pathname.includes('/sqli/level') || window.location.pathname.includes('/cmdi/level') || window.location.pathname.includes('/ssrf/level')) {
+    // Check if we're on a challenge page (XSS, SQLi, Command Injection, SSRF, or CSRF)
+    if (window.location.pathname.includes('/xss/level') || window.location.pathname.includes('/sqli/level') || window.location.pathname.includes('/cmdi/level') || window.location.pathname.includes('/ssrf/level') || window.location.pathname.includes('/csrf/level')) {
         // Create flag submission icon
         const flagIcon = document.createElement('div');
         flagIcon.id = 'flag-submission-icon';
@@ -636,6 +636,9 @@ function setupFlagSubmissionPopup() {
             challengeId = match ? match[1] : '1';
         } else if (path.includes('/ssrf/level')) {
             const match = path.match(/\/ssrf\/level(\d+)/);
+            challengeId = match ? match[1] : '1';
+        } else if (path.includes('/csrf/level')) {
+            const match = path.match(/\/csrf\/level(\d+)/);
             challengeId = match ? match[1] : '1';
         }
 

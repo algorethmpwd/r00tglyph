@@ -12,9 +12,9 @@
             <div class="card-body">
                 <div class="alert alert-dark">
                     <i class="bi bi-info-circle-fill me-2"></i>
-                    Select a challenge category below to begin. Each challenge has a unique flag that you must capture to earn points.
+                    <strong>Real-World Security Training:</strong> Practice against vulnerabilities actively exploited in 2024. Each challenge simulates current attack techniques used by threat actors.
                     <br>
-                    <small class="text-muted">Note: You need to be logged in to submit flags and track your progress.</small>
+                    <small class="text-muted">📊 <strong>Current Threat Context:</strong> 22,254 CVEs reported in 2024 | 1,636 attacks per week per organization | 72% of vulnerabilities in web applications</small>
                 </div>
 
                 <!-- Overall Progress Bar -->
@@ -42,7 +42,7 @@
                                 <div class="d-flex justify-content-between align-items-center w-100">
                                     <div>
                                         <i class="bi bi-bug-fill me-2"></i>
-                                        {{ category.upper() }} Challenges
+                                        {{ category_display_names[category] }} Challenges
                                     </div>
                                     <div>
                                         <span class="badge bg-success me-2">
@@ -56,7 +56,7 @@
                             <div class="accordion-body p-0">
                                 <div class="list-group list-group-flush">
                                     {% for challenge in challenges_by_category[category] %}
-                                    <a href="{% if category == 'xss' %}{{ url_for('xss_level' + (loop.index | string)) }}{% elif category == 'sqli' %}{{ url_for('sqli_level' + (loop.index | string)) }}{% elif category == 'cmdi' %}{{ url_for('cmdi_level' + (loop.index | string)) }}{% elif category == 'ssrf' %}{{ url_for('ssrf_level' + (loop.index | string)) }}{% elif category == 'csrf' %}{{ url_for('csrf_level' + (loop.index | string)) }}{% else %}#{% endif %}"
+                                    <a href="{% if category == 'xss' %}{{ url_for('xss_level' + (loop.index | string)) }}{% elif category == 'sqli' %}{{ url_for('sqli_level' + (loop.index | string)) }}{% elif category == 'cmdi' %}{{ url_for('cmdi_level' + (loop.index | string)) }}{% elif category == 'ssrf' %}{{ url_for('ssrf_level' + (loop.index | string)) }}{% elif category == 'csrf' %}{{ url_for('csrf_level' + (loop.index | string)) }}{% elif category == 'xxe' %}{{ url_for('xxe_level' + (loop.index | string)) }}{% else %}#{% endif %}"
                                        class="list-group-item list-group-item-action {% if challenge.completed %}list-group-item-success{% endif %}">
                                         <div class="d-flex w-100 justify-content-between align-items-center">
                                             <div>
@@ -88,8 +88,9 @@
                     {% endfor %}
                 </div>
 
-                <div class="alert alert-info mt-4">
-                    <strong><i class="bi bi-clock-history"></i> Coming Soon:</strong> File Upload, XXE, and more vulnerability types!
+                <div class="alert alert-success mt-4">
+                    <strong><i class="bi bi-check-circle-fill"></i> Complete Training Arsenal:</strong> 138 challenges covering the most critical vulnerabilities from OWASP Top 10 2021 and emerging threats. 
+                    Master the skills needed to defend against real-world attacks happening today.
                 </div>
             </div>
         </div>

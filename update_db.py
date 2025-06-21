@@ -944,8 +944,196 @@ def initialize_challenges():
         }
     ]
 
+    # XXE (XML External Entity) Challenges (23 levels) - Modern XML attack contexts
+    xxe_challenges = [
+        {
+            "name": "Basic XXE File Disclosure",
+            "category": "xxe",
+            "difficulty": "beginner",
+            "description": "Exploit basic XXE vulnerability to read local files in a document processing system.",
+            "points": 100,
+            "active": True
+        },
+        {
+            "name": "XXE with Parameter Entities",
+            "category": "xxe",
+            "difficulty": "beginner",
+            "description": "Use XML parameter entities for file disclosure in a modern CMS.",
+            "points": 200,
+            "active": True
+        },
+        {
+            "name": "XXE via SOAP Services",
+            "category": "xxe",
+            "difficulty": "beginner",
+            "description": "Exploit XXE in legacy SOAP web services used by enterprise applications.",
+            "points": 300,
+            "active": True
+        },
+        {
+            "name": "XXE in XML File Upload",
+            "category": "xxe",
+            "difficulty": "beginner",
+            "description": "Exploit XXE through XML file upload in a cloud storage platform.",
+            "points": 400,
+            "active": True
+        },
+        {
+            "name": "XXE with DTD External Subset",
+            "category": "xxe",
+            "difficulty": "intermediate",
+            "description": "Use external DTD subsets for XXE exploitation in a financial reporting system.",
+            "points": 500,
+            "active": True
+        },
+        {
+            "name": "XXE via RSS/XML Feed",
+            "category": "xxe",
+            "difficulty": "intermediate",
+            "description": "Exploit XXE in RSS feed processing for a news aggregation platform.",
+            "points": 600,
+            "active": True
+        },
+        {
+            "name": "XXE in Configuration Files",
+            "category": "xxe",
+            "difficulty": "intermediate",
+            "description": "Exploit XXE in XML configuration file processing for DevOps tools.",
+            "points": 700,
+            "active": True
+        },
+        {
+            "name": "XXE with URL Schemes",
+            "category": "xxe",
+            "difficulty": "intermediate",
+            "description": "Use various URL schemes (file://, http://) for XXE exploitation.",
+            "points": 800,
+            "active": True
+        },
+        {
+            "name": "Blind XXE with Out-of-Band",
+            "category": "xxe",
+            "difficulty": "intermediate",
+            "description": "Exploit blind XXE using out-of-band techniques in a microservices API.",
+            "points": 900,
+            "active": True
+        },
+        {
+            "name": "XXE via SVG Upload",
+            "category": "xxe",
+            "difficulty": "intermediate",
+            "description": "Exploit XXE through SVG file upload in a modern design platform.",
+            "points": 1000,
+            "active": True
+        },
+        {
+            "name": "XXE with Error-Based Disclosure",
+            "category": "xxe",
+            "difficulty": "intermediate",
+            "description": "Use error-based techniques for XXE information disclosure.",
+            "points": 1100,
+            "active": True
+        },
+        {
+            "name": "XXE via XML-RPC Services",
+            "category": "xxe",
+            "difficulty": "intermediate",
+            "description": "Exploit XXE in XML-RPC services used by content management systems.",
+            "points": 1200,
+            "active": True
+        },
+        {
+            "name": "XXE with Base64 Bypass",
+            "category": "xxe",
+            "difficulty": "expert",
+            "description": "Bypass filters using Base64 encoding in XXE attacks.",
+            "points": 1300,
+            "active": True
+        },
+        {
+            "name": "XXE via Office Documents",
+            "category": "xxe",
+            "difficulty": "expert",
+            "description": "Exploit XXE through DOCX/Office document processing in enterprise systems.",
+            "points": 1400,
+            "active": True
+        },
+        {
+            "name": "XXE with Parameter Pollution",
+            "category": "xxe",
+            "difficulty": "expert",
+            "description": "Use HTTP parameter pollution techniques with XXE exploitation.",
+            "points": 1500,
+            "active": True
+        },
+        {
+            "name": "XXE via XML Signatures",
+            "category": "xxe",
+            "difficulty": "expert",
+            "description": "Exploit XXE in XML signature verification systems.",
+            "points": 1600,
+            "active": True
+        },
+        {
+            "name": "XXE with WAF Bypass",
+            "category": "xxe",
+            "difficulty": "expert",
+            "description": "Bypass Web Application Firewalls using advanced XXE techniques.",
+            "points": 1700,
+            "active": True
+        },
+        {
+            "name": "XXE via SAML Authentication",
+            "category": "xxe",
+            "difficulty": "expert",
+            "description": "Exploit XXE in SAML-based Single Sign-On authentication systems.",
+            "points": 1800,
+            "active": True
+        },
+        {
+            "name": "XXE with SSRF Chaining",
+            "category": "xxe",
+            "difficulty": "expert",
+            "description": "Chain XXE with SSRF attacks for complex exploitation scenarios.",
+            "points": 1900,
+            "active": True
+        },
+        {
+            "name": "Blind XXE with DNS Exfiltration",
+            "category": "xxe",
+            "difficulty": "expert",
+            "description": "Use DNS exfiltration techniques for blind XXE exploitation with Burp Collaborator.",
+            "points": 2000,
+            "active": True
+        },
+        {
+            "name": "XXE via GraphQL Variables",
+            "category": "xxe",
+            "difficulty": "expert",
+            "description": "Exploit XXE through GraphQL XML variable processing in modern APIs.",
+            "points": 2100,
+            "active": True
+        },
+        {
+            "name": "Billion Laughs DoS Attack",
+            "category": "xxe",
+            "difficulty": "expert",
+            "description": "Perform Billion Laughs DoS attack using XML entity expansion.",
+            "points": 2200,
+            "active": True
+        },
+        {
+            "name": "Advanced XXE with Custom DTD",
+            "category": "xxe",
+            "difficulty": "expert",
+            "description": "Advanced XXE exploitation using custom DTD hosting and complex payloads.",
+            "points": 2300,
+            "active": True
+        }
+    ]
+
     # Combine all challenges
-    all_challenges = xss_challenges + sqli_challenges + cmdi_challenges + csrf_challenges + ssrf_challenges
+    all_challenges = xss_challenges + sqli_challenges + cmdi_challenges + csrf_challenges + ssrf_challenges + xxe_challenges
 
     with app.app_context():
         # Clear existing challenges
@@ -969,16 +1157,18 @@ def initialize_challenges():
         cmdi_count = len([c for c in all_challenges if c['category'] == 'cmdi'])
         csrf_count = len([c for c in all_challenges if c['category'] == 'csrf'])
         ssrf_count = len([c for c in all_challenges if c['category'] == 'ssrf'])
+        xxe_count = len([c for c in all_challenges if c['category'] == 'xxe'])
 
         print(f"XSS challenges: {xss_count}")
         print(f"SQL Injection challenges: {sqli_count}")
         print(f"Command Injection challenges: {cmdi_count}")
         print(f"CSRF challenges: {csrf_count}")
         print(f"SSRF challenges: {ssrf_count}")
+        print(f"XXE challenges: {xxe_count}")
 
         # Verify database contents
         print("\nDatabase verification:")
-        for category in ['xss', 'sqli', 'cmdi', 'csrf', 'ssrf']:
+        for category in ['xss', 'sqli', 'cmdi', 'csrf', 'ssrf', 'xxe']:
             challenges = Challenge.query.filter_by(category=category).all()
             print(f"{category.upper()}: {len(challenges)} challenges")
 

@@ -1,0 +1,319 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 8: XXE with URL Schemes - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        {% if xxe_detected %}
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>Success!</strong> You've successfully exploited the XXE vulnerability using various URL schemes! The challenge has been marked as completed.
+            {% if flag %}
+            <div class="mt-2">
+                <strong>Flag:</strong> <code>{{ flag }}</code>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 8: XXE with URL Schemes</h2>
+            </div>
+            <div class="card-body">
+                <!-- Challenge Description Button -->
+                <div class="text-center mb-3">
+                    <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#challengeModal">
+                        <i class="bi bi-info-circle me-2"></i>Show Challenge Description
+                    </button>
+                    {% if flag %}
+                    <button type="button" class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#flagModal">
+                        <i class="bi bi-flag-fill me-2"></i>Submit Flag
+                    </button>
+                    {% endif %}
+                </div>
+
+                <!-- Challenge Description Modal -->
+                <div class="modal fade" id="challengeModal" tabindex="-1" aria-labelledby="challengeModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header bg-dark text-white">
+                                <h5 class="modal-title" id="challengeModalLabel">
+                                    <i class="bi bi-info-circle-fill me-2"></i>Challenge Description
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="card mb-3">
+                                    <div class="card-header">
+                                        <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="mb-0">
+                                            <strong>Client:</strong> CloudProcessor Data Integration Platform<br>
+                                            <strong>Target:</strong> XML Data Processing Engine<br>
+                                            <strong>Vulnerability:</strong> XXE with Various URL Schemes<br>
+                                            <strong>Objective:</strong> Exploit XXE using different URL schemes for enhanced data access
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <p>
+                                    <strong>Technical Background:</strong> CloudProcessor's data integration platform processes 
+                                    XML documents from various sources and supports multiple URL schemes for data fetching. 
+                                    The XML parser processes external entities using different protocols, creating opportunities 
+                                    for sophisticated XXE exploitation.
+                                </p>
+
+                                <p>
+                                    <strong>URL Schemes in XXE:</strong> XML parsers often support various URL schemes beyond 
+                                    the basic file:// protocol. These include http://, https://, ftp://, and others. Each 
+                                    scheme can be used for different attack vectors in XXE exploitation.
+                                </p>
+
+                                <p>
+                                    <strong>Real-world Impact:</strong> XXE with various URL schemes can lead to:
+                                </p>
+                                <ul>
+                                    <li>Local file access via file:// scheme</li>
+                                    <li>Network reconnaissance via http:// and https://</li>
+                                    <li>FTP server interaction for data exfiltration</li>
+                                    <li>Protocol-specific attacks and SSRF exploitation</li>
+                                </ul>
+
+                                <p>
+                                    <strong>Your Task:</strong> Explore different URL schemes in XXE entities to read the contents of 
+                                    <code>/etc/passwd</code> and demonstrate various protocol interactions.
+                                </p>
+
+                                <div class="alert alert-warning">
+                                    <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Try different URL schemes like 
+                                    file://, http://, https://, and ftp:// in your entity definitions. Some schemes may provide 
+                                    different levels of access or information disclosure.
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simulated Data Integration Interface -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4><i class="bi bi-hdd-network me-2"></i>CloudProcessor Data Integration</h4>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">Process XML data from various sources using multiple URL schemes and protocols.</p>
+                        
+                        <form method="POST" class="mb-4">
+                            <div class="mb-3">
+                                <label for="data_xml" class="form-label">Data Processing XML:</label>
+                                <textarea class="form-control" id="data_xml" name="data_xml" rows="15" placeholder="Enter your data processing XML here...">{{ data_xml or '<?xml version="1.0" encoding="UTF-8"?>
+<data_processor>
+    <sources>
+        <source type="file">
+            <location>file:///path/to/local/data.xml</location>
+            <format>xml</format>
+        </source>
+        <source type="http">
+            <location>http://api.example.com/data.xml</location>
+            <format>xml</format>
+        </source>
+    </sources>
+    <processing>
+        <transformation>normalize</transformation>
+        <validation>schema_check</validation>
+        <output_format>json</output_format>
+    </processing>
+    <destination>
+        <type>database</type>
+        <connection>postgresql://db.internal.com:5432/datastore</connection>
+    </destination>
+</data_processor>' }}</textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-play-fill me-2"></i>Process Data
+                            </button>
+                        </form>
+
+                        {% if data_xml %}
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="bi bi-terminal me-2"></i>Data Processing Results</h5>
+                            </div>
+                            <div class="card-body">
+                                {% if xxe_detected %}
+                                <div class="alert alert-danger">
+                                    <strong>XXE Vulnerability Detected!</strong> URL scheme processing successful.
+                                </div>
+                                {% endif %}
+                                
+                                <h6>Processing Summary:</h6>
+                                <ul>
+                                    <li><strong>Sources Processed:</strong> {{ sources_count or 0 }}</li>
+                                    <li><strong>URL Schemes Used:</strong> {{ url_schemes or 'None detected' }}</li>
+                                    <li><strong>Status:</strong> {% if processing_successful %}Completed{% else %}Failed{% endif %}</li>
+                                </ul>
+                                
+                                <h6>Processed Data Output:</h6>
+                                <pre class="bg-dark text-light p-3 rounded"><code>{{ processed_data or 'No data processed' }}</code></pre>
+                                
+                                {% if file_content %}
+                                <h6 class="mt-3">External Resource Content Retrieved:</h6>
+                                <pre class="bg-danger text-white p-3 rounded"><code>{{ file_content }}</code></pre>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- URL Schemes Reference -->
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5><i class="bi bi-link-45deg me-2"></i>Supported URL Schemes</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>File System Access:</h6>
+                                <ul>
+                                    <li><code>file://</code> - Local file system access</li>
+                                    <li><code>file:///etc/passwd</code> - Unix system files</li>
+                                    <li><code>file:///C:/Windows/system32/drivers/etc/hosts</code> - Windows files</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Network Protocols:</h6>
+                                <ul>
+                                    <li><code>http://</code> - HTTP requests</li>
+                                    <li><code>https://</code> - HTTPS requests</li>
+                                    <li><code>ftp://</code> - FTP file transfer</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Solution Link -->
+                <div class="text-center">
+                    <a href="/solutions/xxe8" class="btn btn-outline-info">
+                        <i class="bi bi-lightbulb me-2"></i>View Solution
+                    </a>
+                </div>
+
+                {% if flag %}
+                <div id="flag-display" class="mb-3">
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <strong>Congratulations!</strong> You've solved the challenge.
+                    </div>
+                    <div class="flag-container mb-2">
+                        <span class="flag-label">Your Flag</span>
+                        <code id="flag-value">{{ flag }}</code>
+                    </div>
+                    <!-- Visible flag submission form -->
+                    <form id="flag-submission-form" class="mt-3">
+                        <input type="hidden" name="challenge_id" value="{{ challenge.id }}">
+                        <div class="input-group">
+                            <input type="text" name="flag" class="form-control" value="{{ flag }}" readonly>
+                            <button type="submit" class="btn btn-success">Submit Flag</button>
+                        </div>
+                    </form>
+                    <div id="flag-result" class="alert" style="display: none;"></div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Flag Submission Modal -->
+{% if flag %}
+<div class="modal fade" id="flagModal" tabindex="-1" aria-labelledby="flagModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="flagModalLabel">
+                    <i class="bi bi-flag-fill me-2"></i>Submit Flag
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="modal-flag-submission-form">
+                    <input type="hidden" name="challenge_id" value="{{ challenge.id }}">
+                    <div class="mb-3">
+                        <label for="modal-flag-input" class="form-label">Flag:</label>
+                        <input type="text" name="flag" id="modal-flag-input" class="form-control" value="{{ flag }}" readonly>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Submit Flag</button>
+                </form>
+                <div id="modal-flag-result" class="alert mt-3" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Show challenge description modal on page load (only once)
+    if (!sessionStorage.getItem('xxe8_description_shown')) {
+        var challengeModal = new bootstrap.Modal(document.getElementById('challengeModal'));
+        challengeModal.show();
+        sessionStorage.setItem('xxe8_description_shown', 'true');
+    }
+
+    // Handle flag submission
+    function handleFlagSubmission(formId, resultId) {
+        const form = document.getElementById(formId);
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(form);
+                
+                fetch('/submit_flag', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const resultDiv = document.getElementById(resultId);
+                    resultDiv.style.display = 'block';
+                    
+                    if (data.success) {
+                        resultDiv.className = 'alert alert-success';
+                        resultDiv.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>' + data.message;
+                        
+                        // Redirect after a short delay
+                        setTimeout(() => {
+                            window.location.href = '/challenges';
+                        }, 2000);
+                    } else {
+                        resultDiv.className = 'alert alert-danger';
+                        resultDiv.innerHTML = '<i class="bi bi-x-circle-fill me-2"></i>' + data.message;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    const resultDiv = document.getElementById(resultId);
+                    resultDiv.style.display = 'block';
+                    resultDiv.className = 'alert alert-danger';
+                    resultDiv.innerHTML = '<i class="bi bi-x-circle-fill me-2"></i>An error occurred while submitting the flag.';
+                });
+            });
+        }
+    }
+
+    // Set up flag submission handlers
+    handleFlagSubmission('flag-submission-form', 'flag-result');
+    handleFlagSubmission('modal-flag-submission-form', 'modal-flag-result');
+});
+</script>
+{% endblock %}

@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 2: XXE with Parameter Entities - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        {% if xxe_detected %}
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>Success!</strong> You've successfully exploited the XXE vulnerability using parameter entities! The challenge has been marked as completed.
+            {% if flag %}
+            <div class="mt-2">
+                <strong>Flag:</strong> <code>{{ flag }}</code>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2 class="text-center">Level 2: XXE with Parameter Entities</h2>
+            </div>
+            <div class="card-body">
+                <!-- Challenge Description Button -->
+                <div class="text-center mb-3">
+                    <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#challengeModal">
+                        <i class="bi bi-info-circle me-2"></i>Show Challenge Description
+                    </button>
+                    {% if flag %}
+                    <button type="button" class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#flagModal">
+                        <i class="bi bi-flag-fill me-2"></i>Submit Flag
+                    </button>
+                    {% endif %}
+                </div>
+
+                <!-- Challenge Description Modal -->
+                <div class="modal fade" id="challengeModal" tabindex="-1" aria-labelledby="challengeModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header bg-dark text-white">
+                                <h5 class="modal-title" id="challengeModalLabel">
+                                    <i class="bi bi-info-circle-fill me-2"></i>Challenge Description
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="card mb-3">
+                                    <div class="card-header">
+                                        <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="mb-0">
+                                            <strong>Client:</strong> ContentFlow CMS Platform<br>
+                                            <strong>Target:</strong> XML Template Processing Engine<br>
+                                            <strong>Vulnerability:</strong> XXE with Parameter Entity Support<br>
+                                            <strong>Objective:</strong> Exploit parameter entities to read sensitive configuration files
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <p>
+                                    <strong>Technical Background:</strong> ContentFlow's CMS uses an XML template engine that supports 
+                                    parameter entities for dynamic content generation. The system processes XML templates with DTD 
+                                    declarations, making it vulnerable to XXE attacks using parameter entities.
+                                </p>
+
+                                <p>
+                                    <strong>Parameter Entities:</strong> Parameter entities are XML entities that can only be used within 
+                                    DTD declarations. They are defined with <code>%</code> and can be used to construct more complex 
+                                    XXE payloads, especially when direct entity references are filtered.
+                                </p>
+
+                                <p>
+                                    <strong>Real-world Impact:</strong> Parameter entity XXE attacks can:
+                                </p>
+                                <ul>
+                                    <li>Bypass basic XXE filters that only check for direct entity references</li>
+                                    <li>Read sensitive configuration files and credentials</li>
+                                    <li>Perform more sophisticated out-of-band data exfiltration</li>
+                                    <li>Chain with other vulnerabilities for complex attacks</li>
+                                </ul>
+
+                                <p>
+                                    <strong>Your Task:</strong> Use parameter entities to read the contents of <code>/etc/hostname</code> 
+                                    and display it in the template output.
+                                </p>
+
+                                <div class="alert alert-warning">
+                                    <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Parameter entities are defined with 
+                                    <code>%</code> and can reference external files. Try using <code>%param;</code> syntax within the DTD.
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simulated CMS Template Interface -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4><i class="bi bi-file-code me-2"></i>ContentFlow XML Template Engine</h4>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">Create and process XML templates for dynamic content generation.</p>
+                        
+                        <form method="POST" class="mb-4">
+                            <div class="mb-3">
+                                <label for="template_content" class="form-label">XML Template Content:</label>
+                                <textarea class="form-control" id="template_content" name="template_content" rows="12" placeholder="Enter your XML template here...">{{ template_content or '<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE template [
+    <!ENTITY title "Welcome to ContentFlow">
+    <!ENTITY content "This is a sample template for content management.">
+]>
+<template>
+    <header>&title;</header>
+    <body>&content;</body>
+    <footer>Generated by ContentFlow CMS</footer>
+</template>' }}</textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-play-fill me-2"></i>Process Template
+                            </button>
+                        </form>
+
+                        {% if template_content %}
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="bi bi-terminal me-2"></i>Template Processing Results</h5>
+                            </div>
+                            <div class="card-body">
+                                {% if xxe_detected %}
+                                <div class="alert alert-danger">
+                                    <strong>XXE Vulnerability Detected!</strong> Parameter entity processing successful.
+                                </div>
+                                {% endif %}
+                                
+                                <h6>Processed Template Output:</h6>
+                                <pre class="bg-dark text-light p-3 rounded"><code>{{ processed_output or 'No output generated' }}</code></pre>
+                                
+                                {% if file_content %}
+                                <h6 class="mt-3">External Content Retrieved:</h6>
+                                <pre class="bg-danger text-white p-3 rounded"><code>{{ file_content }}</code></pre>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Solution Link -->
+                <div class="text-center">
+                    <a href="/solutions/xxe2" class="btn btn-outline-info">
+                        <i class="bi bi-lightbulb me-2"></i>View Solution
+                    </a>
+                </div>
+
+                {% if flag %}
+                <div id="flag-display" class="mb-3">
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <strong>Congratulations!</strong> You've solved the challenge.
+                    </div>
+                    <div class="flag-container mb-2">
+                        <span class="flag-label">Your Flag</span>
+                        <code id="flag-value">{{ flag }}</code>
+                    </div>
+                    <!-- Visible flag submission form -->
+                    <form id="flag-submission-form" class="mt-3">
+                        <input type="hidden" name="challenge_id" value="{{ challenge.id }}">
+                        <div class="input-group">
+                            <input type="text" name="flag" class="form-control" value="{{ flag }}" readonly>
+                            <button type="submit" class="btn btn-success">Submit Flag</button>
+                        </div>
+                    </form>
+                    <div id="flag-result" class="alert" style="display: none;"></div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Flag Submission Modal -->
+{% if flag %}
+<div class="modal fade" id="flagModal" tabindex="-1" aria-labelledby="flagModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="flagModalLabel">
+                    <i class="bi bi-flag-fill me-2"></i>Submit Flag
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="modal-flag-submission-form">
+                    <input type="hidden" name="challenge_id" value="{{ challenge.id }}">
+                    <div class="mb-3">
+                        <label for="modal-flag-input" class="form-label">Flag:</label>
+                        <input type="text" name="flag" id="modal-flag-input" class="form-control" value="{{ flag }}" readonly>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Submit Flag</button>
+                </form>
+                <div id="modal-flag-result" class="alert mt-3" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Show challenge description modal on page load (only once)
+    if (!sessionStorage.getItem('xxe2_description_shown')) {
+        var challengeModal = new bootstrap.Modal(document.getElementById('challengeModal'));
+        challengeModal.show();
+        sessionStorage.setItem('xxe2_description_shown', 'true');
+    }
+
+    // Handle flag submission
+    function handleFlagSubmission(formId, resultId) {
+        const form = document.getElementById(formId);
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(form);
+                
+                fetch('/submit_flag', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const resultDiv = document.getElementById(resultId);
+                    resultDiv.style.display = 'block';
+                    
+                    if (data.success) {
+                        resultDiv.className = 'alert alert-success';
+                        resultDiv.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>' + data.message;
+                        
+                        // Redirect after a short delay
+                        setTimeout(() => {
+                            window.location.href = '/challenges';
+                        }, 2000);
+                    } else {
+                        resultDiv.className = 'alert alert-danger';
+                        resultDiv.innerHTML = '<i class="bi bi-x-circle-fill me-2"></i>' + data.message;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    const resultDiv = document.getElementById(resultId);
+                    resultDiv.style.display = 'block';
+                    resultDiv.className = 'alert alert-danger';
+                    resultDiv.innerHTML = '<i class="bi bi-x-circle-fill me-2"></i>An error occurred while submitting the flag.';
+                });
+            });
+        }
+    }
+
+    // Set up flag submission handlers
+    handleFlagSubmission('flag-submission-form', 'flag-result');
+    handleFlagSubmission('modal-flag-submission-form', 'modal-flag-result');
+});
+</script>
+{% endblock %}

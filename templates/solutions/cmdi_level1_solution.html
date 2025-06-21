@@ -28,29 +28,41 @@
                 </p>
                 
                 <h3>Solution</h3>
-                <p>To solve this challenge, you can use command injection to read the flag.txt file:</p>
+                <p>To solve this challenge, you can use command injection to execute system commands and retrieve user information:</p>
                 
                 <h4>1. Using semicolon (;) to execute multiple commands:</h4>
                 <div class="alert alert-secondary">
-                    <code>127.0.0.1; cat flag.txt</code>
+                    <code>127.0.0.1; whoami</code>
                 </div>
                 <p>
                     This input will cause the server to execute two commands:
                 </p>
                 <pre class="bg-light p-3 rounded"><code>ping 127.0.0.1
-cat flag.txt</code></pre>
+whoami</code></pre>
                 <p>
-                    The first command pings the localhost, and the second command reads the contents of flag.txt.
+                    The first command pings the localhost, and the second command reveals the current user, triggering the vulnerability detection and revealing the flag.
                 </p>
                 
-                <h4>2. Using pipe (|) to chain commands:</h4>
+                <h4>2. Alternative command using 'id':</h4>
                 <div class="alert alert-secondary">
-                    <code>127.0.0.1 | cat flag.txt</code>
+                    <code>127.0.0.1; id</code>
+                </div>
+                <p>
+                    The 'id' command displays user and group information, also triggering the vulnerability detection.
+                </p>
+                
+                <h4>3. Using pipe (|) to chain commands:</h4>
+                <div class="alert alert-secondary">
+                    <code>127.0.0.1 | whoami</code>
                 </div>
                 
-                <h4>3. Using AND operator (&&) to execute commands sequentially:</h4>
+                <h4>4. Using AND operator (&&) to execute commands sequentially:</h4>
                 <div class="alert alert-secondary">
-                    <code>127.0.0.1 && cat flag.txt</code>
+                    <code>127.0.0.1 && id</code>
+                </div>
+
+                <div class="alert alert-warning mt-3">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i><strong>Note:</strong> This challenge specifically detects the execution of system identification commands like 'whoami' and 'id' to demonstrate command injection. In real-world scenarios, attackers might use these commands to gather system information before executing more damaging payloads.
                 </div>
                 
                 <h3>Prevention</h3>

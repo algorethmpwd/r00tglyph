@@ -1,32 +1,68 @@
 {% extends 'base.html' %}
 
-{% block title %}SSRF Level 1 - R00tGlyph{% endblock %}
+{% block title %}Level 1: Basic SSRF - R00tGlyph{% endblock %}
 
 {% block content %}
 <div class="row">
-    <div class="col-md-10 offset-md-1">
+    <div class="col-md-8 offset-md-2">
+        {% if ssrf_detected %}
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>Success!</strong> You've successfully exploited the SSRF vulnerability! The challenge has been marked as completed.
+            {% if flag %}
+            <div class="mt-2">
+                <strong>Flag:</strong> <code>{{ flag }}</code>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        
         <div class="card">
             <div class="card-header">
                 <h2 class="text-center">Level 1: Basic SSRF</h2>
             </div>
             <div class="card-body">
-                <div class="alert alert-info challenge-description" style="display: none;">
+                <div class="alert alert-info challenge-description">
                     <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
                     <p>
-                        Welcome to <strong>WebFetch Pro</strong>, a fictional URL fetching service! This challenge simulates a real-world scenario where a URL fetcher is vulnerable to Server-Side Request Forgery (SSRF).
+                        Welcome to <strong>WebFetch Pro</strong>, a fictional URL fetching service! You've been hired to perform a security assessment of their content retrieval functionality.
                     </p>
+
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-0">
+                                <strong>Client:</strong> WebFetch Pro Content Service<br>
+                                <strong>Target:</strong> URL Content Fetcher<br>
+                                <strong>Vulnerability:</strong> Server-Side Request Forgery (SSRF)<br>
+                                <strong>Objective:</strong> Access internal services and retrieve sensitive information
+                            </p>
+                        </div>
+                    </div>
+
                     <p>
-                        The developers of WebFetch Pro have created a simple service that allows users to fetch content from any URL. However, they've made a critical mistake in how they handle user input, allowing attackers to make requests to internal services.
+                        <strong>Technical Background:</strong> WebFetch Pro's content retrieval system allows users to fetch content from any URL without proper validation. This enables attackers to make requests to internal services that are not accessible from the internet, bypassing firewalls and network security controls.
                     </p>
+
                     <p>
-                        <strong>Your Task:</strong> Exploit the SSRF vulnerability to access internal services and retrieve the flag.
+                        <strong>Real-world Impact:</strong> In a real scenario, this vulnerability could allow attackers to:
                     </p>
+                    <ul>
+                        <li>Access internal services and APIs that should not be publicly accessible</li>
+                        <li>Read local files through file:// protocol (in some configurations)</li>
+                        <li>Perform port scanning of internal networks</li>
+                        <li>Bypass authentication mechanisms by accessing localhost services</li>
+                    </ul>
+
                     <p>
-                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Think about what happens when you try to fetch content from internal addresses like localhost or private IP ranges.
+                        <strong>Your Task:</strong> Exploit the SSRF vulnerability to access internal services and retrieve the flag from a local service.
                     </p>
-                    <p>
-                        <i class="bi bi-tools me-2"></i><strong>Tools:</strong> You can use Burp Suite to intercept and modify requests, or simply test different URLs in the form below.
-                    </p>
+
+                    <div class="alert alert-warning">
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Try fetching content from internal addresses like localhost, 127.0.0.1, or private IP ranges. Internal services often run on common ports.
+                    </div>
                 </div>
 
                 <div class="card mb-4">

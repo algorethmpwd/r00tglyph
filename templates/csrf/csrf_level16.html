@@ -1,6 +1,21 @@
 {% extends 'base.html' %}
 
-{% block title %}CSRF Level 16 - R00tGlyph{% endblock %}
+{% block title %}CSRF Level 16 - R00tGlyph
+<script>
+function toggleDescription() {
+    const desc = document.querySelector('.challenge-description');
+    const btn = event.target.closest('button');
+    
+    if (desc.style.display === 'none') {
+        desc.style.display = 'block';
+        btn.innerHTML = '<i class="bi bi-info-circle me-1"></i>Hide Challenge Description';
+    } else {
+        desc.style.display = 'none';
+        btn.innerHTML = '<i class="bi bi-info-circle me-1"></i>Show Challenge Description';
+    }
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="row">
@@ -30,10 +45,7 @@
                 </div>
 
                 <div class="text-center mb-3">
-                    <button class="btn btn-info btn-sm" onclick="toggleDescription()">
-                        <i class="bi bi-info-circle me-1"></i>Show Challenge Description
-                    </button>
-                    <a href="/solutions/csrf16" class="btn btn-success btn-sm ms-2">
+                    <a href="/solutions/csrf16" class="btn btn-success btn-sm">
                         <i class="bi bi-lightbulb me-1"></i>View Solution
                     </a>
                 </div>
@@ -142,11 +154,12 @@
     </div>
 </div>
 
+
 <script>
 function toggleDescription() {
     const desc = document.querySelector('.challenge-description');
     const btn = event.target.closest('button');
-
+    
     if (desc.style.display === 'none') {
         desc.style.display = 'block';
         btn.innerHTML = '<i class="bi bi-info-circle me-1"></i>Hide Challenge Description';

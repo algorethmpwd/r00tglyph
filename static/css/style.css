@@ -303,19 +303,19 @@ footer {
     border: 1px solid #00ff00;
 }
 
-/* Theme: Dark (default) */
+/* Theme: Dark (default) - Enhanced for Security UI */
 [data-bs-theme="dark"] {
-    --bs-body-bg: #121212;
+    --bs-body-bg: #1e1e1e;
     --bs-body-color: #e0e0e0;
-    --bs-primary-rgb: 13, 110, 253;
-    --bs-secondary-rgb: 108, 117, 125;
-    --bs-success-rgb: 25, 135, 84;
-    --bs-info-rgb: 13, 202, 240;
-    --bs-warning-rgb: 255, 193, 7;
-    --bs-danger-rgb: 220, 53, 69;
+    --bs-primary-rgb: 79, 172, 254;
+    --bs-secondary-rgb: 138, 147, 155;
+    --bs-success-rgb: 40, 167, 69;
+    --bs-info-rgb: 91, 192, 222;
+    --bs-warning-rgb: 255, 205, 57;
+    --bs-danger-rgb: 242, 63, 67;
     --bs-light-rgb: 248, 249, 250;
     --bs-dark-rgb: 33, 37, 41;
-    --bs-border-color: #333;
+    --bs-border-color: #444;
 }
 
 [data-bs-theme="dark"] .card {
@@ -389,19 +389,19 @@ footer {
     color: #888;
 }
 
-/* Theme: Cyberpunk */
+/* Theme: Cyberpunk - Enhanced Readability */
 [data-bs-theme="cyberpunk"] {
-    --bs-body-bg: #0a0a1e;
-    --bs-body-color: #00ff9d;
+    --bs-body-bg: #0f0f23;
+    --bs-body-color: #b3ffcc;
     --bs-primary-rgb: 255, 0, 170;
     --bs-secondary-rgb: 0, 255, 255;
     --bs-success-rgb: 0, 255, 157;
     --bs-info-rgb: 0, 195, 255;
     --bs-warning-rgb: 255, 217, 0;
-    --bs-danger-rgb: 255, 0, 60;
+    --bs-danger-rgb: 255, 64, 129;
     --bs-light-rgb: 42, 42, 78;
-    --bs-dark-rgb: 10, 10, 30;
-    --bs-border-color: #00ff9d;
+    --bs-dark-rgb: 15, 15, 35;
+    --bs-border-color: #4dff8a;
 }
 
 [data-bs-theme="cyberpunk"] .navbar {
@@ -983,6 +983,54 @@ footer {
     border-color: #00ff00;
     color: #00ff00;
     font-family: 'Courier New', monospace;
+}
+
+/* Theme: Light - Modern Security Platform */
+[data-bs-theme="light"] {
+    --bs-body-bg: #ffffff;
+    --bs-body-color: #212529;
+    --bs-primary-rgb: 13, 110, 253;
+    --bs-secondary-rgb: 108, 117, 125;
+    --bs-success-rgb: 25, 135, 84;
+    --bs-info-rgb: 13, 202, 240;
+    --bs-warning-rgb: 255, 193, 7;
+    --bs-danger-rgb: 220, 53, 69;
+    --bs-light-rgb: 248, 249, 250;
+    --bs-dark-rgb: 33, 37, 41;
+    --bs-border-color: #dee2e6;
+}
+
+[data-bs-theme="light"] .card {
+    background-color: #ffffff;
+    border-color: #dee2e6;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+[data-bs-theme="light"] .card-header {
+    background-color: rgba(13, 110, 253, 0.05);
+    border-bottom-color: #dee2e6;
+    color: #212529;
+}
+
+[data-bs-theme="light"] .navbar {
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #dee2e6;
+}
+
+[data-bs-theme="light"] .flag-container {
+    background-color: #f8f9fa;
+    border-color: #28a745;
+}
+
+[data-bs-theme="light"] .flag-container code {
+    background-color: #e9ecef;
+    color: #d63384;
+}
+
+[data-bs-theme="light"] pre {
+    background-color: #f8f9fa;
+    color: #212529;
+    border: 1px solid #dee2e6;
 }
 
 /* Responsive adjustments */

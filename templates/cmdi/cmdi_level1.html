@@ -18,72 +18,190 @@
         {% endif %}
 
         <div class="card">
-            <div class="card-header bg-dark text-white">
+            <div class="card-header">
                 <h2 class="text-center">Level 1: Basic Command Injection</h2>
             </div>
             <div class="card-body">
-                <div class="alert alert-dark challenge-description" style="display: none;">
+                <div class="alert alert-info challenge-description">
                     <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
                     <p>
-                        Welcome to <strong>NetTools</strong>, a fictional network administration tool! This challenge simulates a real-world scenario where a ping utility is vulnerable to command injection.
+                        Welcome to <strong>NetTools Pro</strong>, a fictional network administration tool! You've been hired to perform a security assessment of their remote ping utility.
                     </p>
+
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-0">
+                                <strong>Client:</strong> NetTools Pro Network Administration Platform<br>
+                                <strong>Target:</strong> Remote Ping Utility Service<br>
+                                <strong>Vulnerability:</strong> Suspected Command Injection<br>
+                                <strong>Objective:</strong> Exploit the vulnerability to read the flag.txt file on the server
+                            </p>
+                        </div>
+                    </div>
+
                     <p>
-                        The developers of NetTools have created a simple ping utility that allows users to check if a server is online. However, they've made a critical mistake in how they handle user input.
+                        <strong>Technical Background:</strong> The ping utility appears to directly execute user input through system commands without proper validation.
+                        This is a classic example of a <em>Command Injection</em> vulnerability, where user-supplied data is passed directly to shell commands.
                     </p>
+
                     <p>
-                        <strong>Your Task:</strong> Exploit the command injection vulnerability to read the contents of the flag.txt file on the server.
+                        <strong>Real-world Impact:</strong> In a real scenario, this vulnerability could allow attackers to:
+                    </p>
+                    <ul>
+                        <li>Execute arbitrary system commands with web server privileges</li>
+                        <li>Read sensitive files and configuration data</li>
+                        <li>Install backdoors and maintain persistent access</li>
+                        <li>Pivot to internal network resources</li>
+                        <li>Escalate privileges and compromise the entire system</li>
+                    </ul>
+
+                    <p>
+                        <strong>Your Task:</strong> Exploit the command injection vulnerability to read the contents of the flag.txt file and prove system compromise.
                     </p>
 
                     <div class="alert alert-warning">
-                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Think about how the ping command might be executed on the server. What happens if you add additional commands?
-                    </div>
-
-                    <div class="card mt-3">
-                        <div class="card-header">
-                            <h5><i class="bi bi-info-circle-fill me-2"></i>Additional Hints</h5>
-                        </div>
-                        <div class="card-body">
-                            <p>
-                                Command injection occurs when user input is directly passed to system commands. Think about how a ping command might be structured:
-                            </p>
-                            <pre class="bg-light p-3 rounded"><code>ping [user_input]</code></pre>
-                            <p>
-                                What happens if you can add additional commands? Consider:
-                            </p>
-                            <ul>
-                                <li>How can you use command separators like semicolons (;) or pipes (|)?</li>
-                                <li>What commands might help you read files on the system?</li>
-                                <li>How can you chain multiple commands together?</li>
-                            </ul>
-                        </div>
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Think about how command separators like semicolons (;) or pipes (|) can chain additional commands to the ping operation.
                     </div>
                 </div>
 
 
 
                 <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0"><i class="bi bi-hdd-network-fill me-2"></i>Network Ping Tool</h4>
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-hdd-network-fill me-2"></i>NetTools Pro - Network Diagnostics</h5>
+                        <div>
+                            <span class="badge bg-success">System Online</span>
+                            <span class="ms-2">Server: prod-nettools-01</span>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <form action="{{ url_for('cmdi_level1') }}" method="post">
-                            <div class="input-group mb-3">
-                                <span class="input-group-text">IP Address</span>
-                                <input type="text" class="form-control" name="ip" placeholder="Enter IP address (e.g., 8.8.8.8)" value="{{ ip_address }}">
-                                <button class="btn btn-primary" type="submit">Ping</button>
+                    <div class="card-body p-0">
+                        <nav class="navbar navbar-expand px-3" style="background-color: rgba(var(--bs-light-rgb), 0.1);">
+                            <div class="container-fluid">
+                                <ul class="navbar-nav">
+                                    <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-activity me-1"></i>Ping Tool</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-graph-up me-1"></i>Traceroute</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-speedometer2 me-1"></i>Bandwidth Test</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-shield-check me-1"></i>Port Scanner</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-gear me-1"></i>Settings</a></li>
+                                </ul>
                             </div>
-                        </form>
+                        </nav>
+
+                        <div class="p-4">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0"><i class="bi bi-router me-2"></i>Remote Ping Utility</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="text-muted mb-3">Test connectivity to remote hosts and servers</p>
+                                            <form action="{{ url_for('cmdi_level1') }}" method="post">
+                                                <div class="row g-3">
+                                                    <div class="col-md-8">
+                                                        <div class="input-group">
+                                                            <span class="input-group-text"><i class="bi bi-globe"></i></span>
+                                                            <input type="text" class="form-control" name="ip" placeholder="Enter IP address or hostname (e.g., 8.8.8.8)" value="{{ ip_address }}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <button class="btn btn-primary w-100" type="submit">
+                                                            <i class="bi bi-play-fill me-2"></i>Execute Ping
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="row mt-3">
+                                                    <div class="col-md-6">
+                                                        <select class="form-select" id="ping-count">
+                                                            <option selected>Ping Count: 4</option>
+                                                            <option>Ping Count: 1</option>
+                                                            <option>Ping Count: 10</option>
+                                                            <option>Continuous</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <select class="form-select" id="packet-size">
+                                                            <option selected>Packet Size: 32 bytes</option>
+                                                            <option>Packet Size: 64 bytes</option>
+                                                            <option>Packet Size: 128 bytes</option>
+                                                            <option>Packet Size: 1024 bytes</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0"><i class="bi bi-clock-history me-2"></i>Recent Tests</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="list-group list-group-flush">
+                                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                                    <div>
+                                                        <strong>8.8.8.8</strong><br>
+                                                        <small class="text-muted">Google DNS</small>
+                                                    </div>
+                                                    <span class="badge bg-success rounded-pill">12ms</span>
+                                                </div>
+                                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                                    <div>
+                                                        <strong>1.1.1.1</strong><br>
+                                                        <small class="text-muted">Cloudflare DNS</small>
+                                                    </div>
+                                                    <span class="badge bg-success rounded-pill">8ms</span>
+                                                </div>
+                                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                                    <div>
+                                                        <strong>192.168.1.1</strong><br>
+                                                        <small class="text-muted">Gateway</small>
+                                                    </div>
+                                                    <span class="badge bg-warning rounded-pill">45ms</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 {% if ping_result %}
                 <div class="card mb-4">
-                    <div class="card-header bg-dark text-white">
-                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Ping Results</h5>
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Command Execution Results</h5>
                     </div>
                     <div class="card-body">
                         <pre class="bg-dark text-light p-3 rounded"><code>{{ ping_result }}</code></pre>
                     </div>
+                </div>
+                {% endif %}
+
+                {% if flag %}
+                <div id="flag-display" class="mb-3">
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <strong>Congratulations!</strong> You've solved the challenge.
+                    </div>
+                    <div class="flag-container mb-2">
+                        <span class="flag-label">Your Flag</span>
+                        <code id="flag-value">{{ flag }}</code>
+                    </div>
+                    <!-- Visible flag submission form -->
+                    <form id="flag-submission-form" class="mt-3">
+                        <input type="hidden" name="challenge_id" value="{{ challenge.id }}">
+                        <div class="input-group">
+                            <input type="text" name="flag" class="form-control" value="{{ flag }}" readonly>
+                            <button type="submit" class="btn btn-success">Submit Flag</button>
+                        </div>
+                    </form>
+                    <div id="flag-result" class="alert" style="display: none;"></div>
                 </div>
                 {% endif %}
 

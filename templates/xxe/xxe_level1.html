@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+
+{% block title %}Level 1: Basic XXE File Disclosure - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        {% if xxe_detected %}
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>Success!</strong> You've successfully exploited the XXE vulnerability! The challenge has been marked as completed.
+            {% if flag %}
+            <div class="mt-2">
+                <strong>Flag:</strong> <code>{{ flag }}</code>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <div class="card">
+            <div class="card-header">
+                <h2 class="text-center">Level 1: Basic XXE File Disclosure</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info challenge-description">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
+                    <p>
+                        Welcome to <strong>SecureDoc Enterprise</strong>, a document processing platform! You've been hired to perform a security assessment of their XML document parser.
+                    </p>
+
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-0">
+                                <strong>Client:</strong> SecureDoc Enterprise Document Processing<br>
+                                <strong>Target:</strong> XML Document Parser<br>
+                                <strong>Vulnerability:</strong> XML External Entity (XXE) Injection<br>
+                                <strong>Objective:</strong> Read local system files using XXE exploitation
+                            </p>
+                        </div>
+                    </div>
+
+                    <p>
+                        <strong>Technical Background:</strong> XXE vulnerabilities occur when XML parsers process external entities without proper security controls. This can lead to file disclosure, SSRF attacks, and denial of service.
+                    </p>
+
+                    <p>
+                        <strong>Real-world Impact:</strong> In a real scenario, this vulnerability could allow attackers to:
+                    </p>
+                    <ul>
+                        <li>Read sensitive configuration files and source code</li>
+                        <li>Access password files and SSH keys</li>
+                        <li>Perform Server-Side Request Forgery (SSRF) attacks</li>
+                        <li>Cause Denial of Service through entity expansion</li>
+                        <li>Access internal network resources and services</li>
+                    </ul>
+
+                    <p>
+                        <strong>Your Task:</strong> Craft an XML payload that exploits the XXE vulnerability to read the contents of <code>/etc/passwd</code> file and display it in the response.
+                    </p>
+
+                    <div class="alert alert-warning">
+                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Look for XML input fields and try defining external entities that reference local files using the <code>file://</code> protocol.
+                    </div>
+                </div>
+
+                {% if flag %}
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
+                    <p>Congratulations! You've successfully completed this XXE challenge.</p>
+                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
+                </div>
+                {% endif %}
+
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-file-earmark-text me-2"></i>SecureDoc XML Document Processor</h5>
+                        <div>
+                            <span class="badge bg-success">Online</span>
+                            <span class="ms-2">Processing Ready</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">Enterprise XML document processing and parsing service.</p>
+                        
+                        <form method="POST" class="mb-4">
+                            <div class="mb-3">
+                                <label for="xml_content" class="form-label">XML Document Content:</label>
+                                <textarea class="form-control" id="xml_content" name="xml_content" rows="10" placeholder="Enter your XML document here...">{{ xml_content or '<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <title>Sample Document</title>
+    <content>This is a sample XML document for processing.</content>
+</document>' }}</textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-play-fill me-2"></i>Process Document
+                            </button>
+                        </form>
+
+                        {% if xml_content %}
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="bi bi-terminal me-2"></i>Processing Results</h5>
+                            </div>
+                            <div class="card-body">
+                                {% if xxe_detected %}
+                                <div class="alert alert-danger">
+                                    <strong>XXE Vulnerability Detected!</strong> External entity processing successful.
+                                </div>
+                                {% endif %}
+                                
+                                <h6>Parsed XML Content:</h6>
+                                <pre class="bg-dark text-light p-3 rounded"><code>{{ parsed_content or 'No content parsed' }}</code></pre>
+                                
+                                {% if file_content %}
+                                <h6 class="mt-3">File Content Retrieved:</h6>
+                                <pre class="bg-danger text-white p-3 rounded"><code>{{ file_content }}</code></pre>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if flag %}
+                <div id="flag-display" class="mb-3">
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <strong>Congratulations!</strong> You've solved the challenge.
+                    </div>
+                    <div class="flag-container mb-2">
+                        <span class="flag-label">Your Flag</span>
+                        <code id="flag-value">{{ flag }}</code>
+                    </div>
+                    <!-- Visible flag submission form -->
+                    <form id="flag-submission-form" class="mt-3">
+                        <input type="hidden" name="challenge_id" value="{{ challenge.id }}">
+                        <div class="input-group">
+                            <input type="text" name="flag" class="form-control" value="{{ flag }}" readonly>
+                            <button type="submit" class="btn btn-success">Submit Flag</button>
+                        </div>
+                    </form>
+                    <div id="flag-result" class="alert" style="display: none;"></div>
+                </div>
+                {% endif %}
+
+                <div class="mt-4">
+                    <a href="{{ url_for('solutions', level='xxe1') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

