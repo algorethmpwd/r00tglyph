@@ -1,0 +1,33 @@
+{#
+  Reusable flag submission form component
+
+  Usage:
+  {% include 'components/flag_submission_form.html' with context %}
+
+  Optional variables:
+  - show_form: Show the form (default: true)
+  - form_title: Title for the form (default: "Submit Your Flag")
+#}
+{% if show_form is not defined or show_form %}
+<div class="card mt-4">
+    <div class="card-header">
+        <h5><i class="bi bi-flag-fill me-2"></i>{{ form_title|default("Submit Your Flag") }}</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('submit_flag') }}" class="flag-form">
+            <input type="hidden" name="challenge_id" value="{{ challenge_id }}">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-flag"></i></span>
+                <input type="text" class="form-control" name="flag" placeholder="R00T{...}" required>
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-check-circle me-1"></i>Submit Flag
+                </button>
+            </div>
+            <small class="text-muted d-block mt-2">
+                <i class="bi bi-lightbulb me-1"></i>
+                Flags follow the format: R00T{...}
+            </small>
+        </form>
+    </div>
+</div>
+{% endif %}

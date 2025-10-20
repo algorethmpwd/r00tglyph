@@ -1,0 +1,47 @@
+{%- set level_number = 2 -%}
+{%- set category = "DESERIAL" -%}
+{%- set category_lower = "deserial" -%}
+{%- set title = "PHP Unserialize Vulnerability" -%}
+{%- set difficulty = "beginner" -%}
+{%- set description = "PHP unserialize() function processes user-controlled data. Achieve remote code execution." -%}
+{%- set challenge_id = deserial_level2_id -%}
+
+{%extends 'components/base_challenge.html' %}
+
+{%block challenge_content %}
+<div class="card">
+    <div class="card-header">
+        <h5><i class="bi bi-info-circle me-2"></i>Scenario</h5>
+    </div>
+    <div class="card-body">
+        <p><strong>Context:</strong> A content management system with object caching.</p>
+        <p><strong>Framework/Language:</strong> PHP</p>
+        <p><strong>Your Mission:</strong> Exploit the vulnerability to capture the flag.</p>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h5><i class="bi bi-laptop me-2"></i>Vulnerable Application</h5>
+    </div>
+    <div class="card-body">
+        <!-- Challenge-specific interactive content will go here -->
+        <form method="POST">
+            <div class="mb-3">
+                <label for="payload" class="form-label">Enter your payload:</label>
+                <textarea class="form-control" id="payload" name="payload" rows="5" placeholder="Your exploit payload here..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-play-fill me-1"></i>Execute
+            </button>
+        </form>
+
+        {%if result %}
+        <div class="alert alert-secondary mt-3">
+            <strong>Output:</strong>
+            <pre>{{ result }}</pre>
+        </div>
+        {%endif %}
+    </div>
+</div>
+{%endblock %}

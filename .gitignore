@@ -13,3 +13,5 @@ instance/
 backup/
 scripts/
 scripts/
+.claude
+.vscode/

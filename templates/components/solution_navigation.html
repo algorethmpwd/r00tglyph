@@ -1,0 +1,35 @@
+{#
+  Reusable solution page navigation component
+
+  Usage:
+  {% include 'components/solution_navigation.html' with context %}
+
+  Required variables:
+  - category: Challenge category (e.g., 'xss', 'sqli', 'ssti')
+  - level_number: Current level number
+  - total_levels: Total levels in category (default: 23)
+
+  Optional variables:
+  - show_back_to_challenges: Show back button (default: true)
+#}
+<div class="text-center mt-4">
+    <div class="btn-group" role="group">
+        {% if show_back_to_challenges is not defined or show_back_to_challenges %}
+        <a href="{{ url_for('vulnerabilities') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back to Challenges
+        </a>
+        {% endif %}
+
+        <a href="{{ url_for(category ~ '_level' ~ level_number) }}" class="btn btn-primary">
+            <i class="bi bi-play-fill me-1"></i>Try Challenge
+        </a>
+
+        {% set next_level = level_number + 1 %}
+        {% set max_levels = total_levels|default(23) %}
+        {% if next_level <= max_levels %}
+        <a href="{{ url_for(category ~ '_level' ~ next_level) }}" class="btn btn-success">
+            <i class="bi bi-arrow-right me-1"></i>Next Challenge
+        </a>
+        {% endif %}
+    </div>
+</div>

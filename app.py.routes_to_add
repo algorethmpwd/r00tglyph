@@ -1,0 +1,119 @@
+
+# ===== SSTI CHALLENGE ROUTES =====
+
+# SSTI Level 1 - Basic Jinja2 Template Injection
+@app.route('/ssti/level1', methods=['GET', 'POST'])
+def ssti_level1():
+    user = get_current_user()
+    challenge = Challenge.query.filter_by(category='ssti', name='SSTI Level 1').first()
+    if not challenge:
+        return "Challenge not found. Please run add_challenges_to_db.py first.", 404
+
+    vulnerability_detected = False
+    flag = None
+    result = None
+
+    if request.method == 'POST':
+        payload = request.form.get('payload', '')
+        # Check for SSTI patterns
+        if any(p in payload for p in ['{{', '}}', '{%', '%}', 'config', 'self', '__class__']):
+            vulnerability_detected = True
+            flag = generate_flag(challenge.id, user.machine_id)
+            mark_challenge_completed(user, challenge.id)
+        result = "Template processed: " + payload[:100] if payload else None
+
+    return render_template('ssti/ssti_level1.html', user=user,
+                         vulnerability_detected=vulnerability_detected,
+                         flag=flag, result=result)
+
+# SSTI Levels 2-23 (Similar pattern)
+@app.route('/ssti/level<int:level>', methods=['GET', 'POST'])
+def ssti_level_dynamic(level):
+    if level < 2 or level > 23:
+        return "Invalid level", 404
+
+    user = get_current_user()
+    challenge = Challenge.query.filter_by(category='ssti', name=f'SSTI Level {level}').first()
+    if not challenge:
+        return f"Challenge not found. Please run add_challenges_to_db.py first.", 404
+
+    vulnerability_detected = False
+    flag = None
+    result = None
+
+    if request.method == 'POST':
+        payload = request.form.get('payload', '')
+        # SSTI detection patterns
+        ssti_patterns = ['{{', '}}', '{%', '%}', 'config', 'self', '__class__', '__mro__', '__globals__']
+        if any(p in payload for p in ssti_patterns):
+            vulnerability_detected = True
+            flag = generate_flag(challenge.id, user.machine_id)
+            mark_challenge_completed(user, challenge.id)
+        result = f"Template processed: {payload[:100]}" if payload else None
+
+    return render_template(f'ssti/ssti_level{level}.html', user=user,
+                         vulnerability_detected=vulnerability_detected,
+                         flag=flag, result=result)
+
+
+# ===== DESERIALIZATION CHALLENGE ROUTES =====
+
+@app.route('/deserial/level<int:level>', methods=['GET', 'POST'])
+def deserial_level(level):
+    if level < 1 or level > 5:
+        return "Invalid level", 404
+
+    user = get_current_user()
+    challenge = Challenge.query.filter_by(category='deserial', name=f'Deserialization Level {level}').first()
+    if not challenge:
+        return "Challenge not found. Please run add_challenges_to_db.py first.", 404
+
+    vulnerability_detected = False
+    flag = None
+    result = None
+
+    if request.method == 'POST':
+        payload = request.form.get('payload', '')
+        # Deserialization patterns
+        deserial_patterns = ['pickle', '__reduce__', 'os.system', 'O:', 'a:', 's:', 'rO0', 'AAEAA']
+        if any(p in payload for p in deserial_patterns):
+            vulnerability_detected = True
+            flag = generate_flag(challenge.id, user.machine_id)
+            mark_challenge_completed(user, challenge.id)
+        result = f"Deserialization attempted: {payload[:100]}" if payload else None
+
+    return render_template(f'deserial/deserial_level{level}.html', user=user,
+                         vulnerability_detected=vulnerability_detected,
+                         flag=flag, result=result)
+
+
+# ===== AUTH BYPASS CHALLENGE ROUTES =====
+
+@app.route('/auth/level<int:level>', methods=['GET', 'POST'])
+def auth_level(level):
+    if level < 1 or level > 5:
+        return "Invalid level", 404
+
+    user = get_current_user()
+    challenge = Challenge.query.filter_by(category='auth', name=f'Auth Bypass Level {level}').first()
+    if not challenge:
+        return "Challenge not found. Please run add_challenges_to_db.py first.", 404
+
+    vulnerability_detected = False
+    flag = None
+    result = None
+
+    if request.method == 'POST':
+        payload = request.form.get('payload', '')
+        # Auth bypass patterns
+        auth_patterns = ["' OR '1'='1", "' OR 1=1--", "admin' --", '"alg": "none"', 'sessionid=']
+        if any(p.lower() in payload.lower() for p in auth_patterns):
+            vulnerability_detected = True
+            flag = generate_flag(challenge.id, user.machine_id)
+            mark_challenge_completed(user, challenge.id)
+        result = f"Authentication check: {payload[:100]}" if payload else None
+
+    return render_template(f'auth/auth_level{level}.html', user=user,
+                         vulnerability_detected=vulnerability_detected,
+                         flag=flag, result=result)
+

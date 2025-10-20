@@ -6,7 +6,7 @@
 <div class="row">
     <div class="col-md-8 offset-md-2">
         <div class="card">
-            <div class="card-header bg-dark text-white">
+            <div class="card-header">
                 <h2 class="text-center">Level 11: XSS via SVG and CDATA</h2>
             </div>
             <div class="card-body">
@@ -17,7 +17,7 @@
                     </p>
                     
                     <div class="card mb-3 border-secondary">
-                        <div class="card-header bg-secondary text-white">
+                        <div class="card-header">
                             <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
                         </div>
                         <div class="card-body">
@@ -144,7 +144,7 @@
                                             <div id="svg-container">{{ filtered_svg | safe }}</div>
                                             {% else %}
                                             <div class="svg-placeholder">
-                                                <i class="bi bi-image text-muted" style="font-size: 5rem;"></i>
+                                                <i class="bi bi-image text-muted" class="icon-xxl"></i>
                                                 <p class="mt-3 text-muted">Your SVG will appear here</p>
                                             </div>
                                             {% endif %}

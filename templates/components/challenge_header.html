@@ -1,0 +1,30 @@
+{#
+  Reusable challenge header component
+
+  Usage:
+  {% include 'components/challenge_header.html' with context %}
+
+  Required variables:
+  - level_number: Challenge level number (e.g., 1, 2, 3)
+  - category: Challenge category (e.g., 'XSS', 'SQLi', 'SSTI')
+  - title: Challenge title
+  - difficulty: 'beginner', 'intermediate', 'advanced', or 'expert'
+#}
+<div class="card-header">
+    <h2 class="text-center">
+        <i class="bi bi-shield-exclamation me-2"></i>
+        Level {{ level_number }}: {{ title }}
+    </h2>
+    <div class="text-center mt-2">
+        <span class="badge bg-primary">{{ category }}</span>
+        {% if difficulty == 'beginner' %}
+        <span class="badge bg-success">Beginner</span>
+        {% elif difficulty == 'intermediate' %}
+        <span class="badge bg-warning text-dark">Intermediate</span>
+        {% elif difficulty == 'advanced' %}
+        <span class="badge bg-danger">Advanced</span>
+        {% elif difficulty == 'expert' %}
+        <span class="badge bg-dark">Expert</span>
+        {% endif %}
+    </div>
+</div>

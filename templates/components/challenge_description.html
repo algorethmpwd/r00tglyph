@@ -1,0 +1,18 @@
+{#
+  Reusable challenge description component
+
+  Usage:
+  {% include 'components/challenge_description.html' with context %}
+
+  Required variables:
+  - description: Challenge description text
+
+  Optional variables:
+  - show_icon: Show info icon (default: true)
+#}
+<div class="alert alert-info challenge-description">
+    {% if show_icon is not defined or show_icon %}
+    <i class="bi bi-info-circle-fill me-2"></i>
+    {% endif %}
+    <strong>Challenge:</strong> {{ description }}
+</div>

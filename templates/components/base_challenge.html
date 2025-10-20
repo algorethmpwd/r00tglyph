@@ -1,0 +1,64 @@
+{#
+  Base challenge template - extend this for all challenges
+
+  Usage:
+  {% extends 'components/base_challenge.html' %}
+
+  {% block challenge_content %}
+    <!-- Your challenge-specific HTML here -->
+  {% endblock %}
+
+  Required variables to set before extending:
+  - level_number: Challenge level
+  - category: Challenge category uppercase (e.g., 'SSTI')
+  - category_lower: Category lowercase (e.g., 'ssti')
+  - title: Challenge title
+  - difficulty: 'beginner', 'intermediate', 'advanced', 'expert'
+  - description: Challenge description
+  - challenge_id: Database challenge ID
+#}
+{% extends 'base.html' %}
+
+{% block title %}Level {{ level_number }}: {{ title }} - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        {# Success banner if vulnerability detected #}
+        {% if vulnerability_detected %}
+        {% include 'components/success_banner.html' with context %}
+        {% endif %}
+
+        {# Main challenge card #}
+        <div class="card">
+            {# Challenge header #}
+            {% include 'components/challenge_header.html' with context %}
+
+            <div class="card-body">
+                {# Challenge description #}
+                {% include 'components/challenge_description.html' with context %}
+
+                {# Challenge-specific content #}
+                {% block challenge_content %}
+                <!-- Override this block with challenge-specific HTML -->
+                {% endblock %}
+
+                {# Hints (if provided) #}
+                {% if hints is defined %}
+                {% include 'components/hint_box.html' with context %}
+                {% endif %}
+            </div>
+        </div>
+
+        {# Flag submission form #}
+        {% include 'components/flag_submission_form.html' with context %}
+
+        {# Back to challenges button #}
+        <div class="text-center mt-3">
+            <a href="{{ url_for('vulnerabilities') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Back to Challenges
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

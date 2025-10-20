@@ -12,7 +12,7 @@ import sys
 import argparse
 import shutil
 import subprocess
-from datetime import datetime
+from datetime import datetime, timezone
 import xml.etree.ElementTree as ET
 import xml.parsers.expat
 
@@ -125,7 +125,17 @@ if len(sys.argv) > 1:
 
 app = Flask(__name__, template_folder='templates')
 app.secret_key = os.environ.get('SECRET_KEY', 'r00tglyph_secret_key_change_in_production')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///r00tglyph.db'
+
+# Support both SQLite (local) and PostgreSQL (production)
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL:
+    # Fix for Render/Heroku postgres:// to postgresql://
+    if DATABASE_URL.startswith('postgres://'):
+        DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///r00tglyph.db'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -148,8 +158,8 @@ class LocalUser(db.Model):
     machine_id = db.Column(db.String(64), unique=True, nullable=False)
     score = db.Column(db.Integer, default=0)
     completed_challenges = db.Column(db.Text, default='[]')  # JSON string of completed challenge IDs
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    last_active = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    last_active = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
 class Challenge(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -166,7 +176,7 @@ class Flag(db.Model):
     machine_id = db.Column(db.String(64), nullable=False)
     flag_value = db.Column(db.String(100), nullable=False)
     used = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
 class Submission(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -174,7 +184,7 @@ class Submission(db.Model):
     challenge_id = db.Column(db.Integer, db.ForeignKey('challenge.id'), nullable=False)
     flag = db.Column(db.String(100), nullable=False)
     correct = db.Column(db.Boolean, default=False)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -182,7 +192,7 @@ class Comment(db.Model):
     content = db.Column(db.Text)
     level = db.Column(db.Integer)
     machine_id = db.Column(db.String(64), nullable=True)  # Optional, to track who posted the comment
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
 # Create database tables
 with app.app_context():
@@ -529,7 +539,7 @@ def get_local_user():
         db.session.commit()
 
     # Update last active time
-    user.last_active = datetime.utcnow()
+    user.last_active = datetime.now(timezone.utc)
     db.session.commit()
 
     return user
@@ -851,8 +861,8 @@ def vulnerabilities():
         all_categories.remove('SQL Injection')
 
     # Define the correct order for security training progression
-    category_order = ['xss', 'sqli', 'cmdi', 'csrf', 'ssrf', 'xxe']
-    
+    category_order = ['xss', 'sqli', 'cmdi', 'csrf', 'ssrf', 'xxe', 'ssti', 'deserial', 'auth']
+
     # Sort categories in the specified order
     categories = []
     for category in category_order:
@@ -866,7 +876,10 @@ def vulnerabilities():
         'cmdi': 'Command Injection (CMDi)',
         'csrf': 'Cross-Site Request Forgery (CSRF)',
         'ssrf': 'Server-Side Request Forgery (SSRF)',
-        'xxe': 'XML External Entity (XXE)'
+        'xxe': 'XML External Entity (XXE)',
+        'ssti': 'Server-Side Template Injection (SSTI)',
+        'deserial': 'Insecure Deserialization',
+        'auth': 'Authentication Bypass'
     }
 
     # Get the current user and their completed challenges
@@ -9139,6 +9152,121 @@ Time to Complete: 47 minutes"""
                           chaining_result=chaining_result, challenge=challenge)
 
 
+# ===== SSTI CHALLENGE ROUTES =====
+
+# SSTI Level 1 - Basic Jinja2 Template Injection
+@app.route('/ssti/level1', methods=['GET', 'POST'])
+def ssti_level1():
+    user = get_local_user()
+    challenge = Challenge.query.filter_by(category='ssti', name='SSTI Level 1').first()
+    if not challenge:
+        return "Challenge not found. Please run add_challenges_to_db.py first.", 404
+
+    vulnerability_detected = False
+    flag = None
+    result = None
+
+    if request.method == 'POST':
+        payload = request.form.get('payload', '')
+        if any(p in payload for p in ['{{', '}}', '{%', '%}', 'config', 'self', '__class__']):
+            vulnerability_detected = True
+            flag = generate_flag(challenge.id, user.machine_id)
+            mark_challenge_completed(user, challenge.id)
+        result = "Template processed: " + payload[:100] if payload else None
+
+    return render_template('ssti/ssti_level1.html', user=user,
+                         vulnerability_detected=vulnerability_detected,
+                         flag=flag, result=result)
+
+# SSTI Levels 2-23 (Dynamic route)
+@app.route('/ssti/level<int:level>', methods=['GET', 'POST'])
+def ssti_level_dynamic(level):
+    if level < 2 or level > 23:
+        return "Invalid level", 404
+
+    user = get_local_user()
+    challenge = Challenge.query.filter_by(category='ssti', name=f'SSTI Level {level}').first()
+    if not challenge:
+        return f"Challenge not found. Please run add_challenges_to_db.py first.", 404
+
+    vulnerability_detected = False
+    flag = None
+    result = None
+
+    if request.method == 'POST':
+        payload = request.form.get('payload', '')
+        ssti_patterns = ['{{', '}}', '{%', '%}', 'config', 'self', '__class__', '__mro__', '__globals__']
+        if any(p in payload for p in ssti_patterns):
+            vulnerability_detected = True
+            flag = generate_flag(challenge.id, user.machine_id)
+            mark_challenge_completed(user, challenge.id)
+        result = f"Template processed: {payload[:100]}" if payload else None
+
+    return render_template(f'ssti/ssti_level{level}.html', user=user,
+                         vulnerability_detected=vulnerability_detected,
+                         flag=flag, result=result)
+
+
+# ===== DESERIALIZATION CHALLENGE ROUTES =====
+
+@app.route('/deserial/level<int:level>', methods=['GET', 'POST'])
+def deserial_level(level):
+    if level < 1 or level > 5:
+        return "Invalid level", 404
+
+    user = get_local_user()
+    challenge = Challenge.query.filter_by(category='deserial', name=f'Deserialization Level {level}').first()
+    if not challenge:
+        return "Challenge not found. Please run add_challenges_to_db.py first.", 404
+
+    vulnerability_detected = False
+    flag = None
+    result = None
+
+    if request.method == 'POST':
+        payload = request.form.get('payload', '')
+        deserial_patterns = ['pickle', '__reduce__', 'os.system', 'O:', 'a:', 's:', 'rO0', 'AAEAA']
+        if any(p in payload for p in deserial_patterns):
+            vulnerability_detected = True
+            flag = generate_flag(challenge.id, user.machine_id)
+            mark_challenge_completed(user, challenge.id)
+        result = f"Deserialization attempted: {payload[:100]}" if payload else None
+
+    return render_template(f'deserial/deserial_level{level}.html', user=user,
+                         vulnerability_detected=vulnerability_detected,
+                         flag=flag, result=result)
+
+
+# ===== AUTH BYPASS CHALLENGE ROUTES =====
+
+@app.route('/auth/level<int:level>', methods=['GET', 'POST'])
+def auth_level(level):
+    if level < 1 or level > 5:
+        return "Invalid level", 404
+
+    user = get_local_user()
+    challenge = Challenge.query.filter_by(category='auth', name=f'Auth Bypass Level {level}').first()
+    if not challenge:
+        return "Challenge not found. Please run add_challenges_to_db.py first.", 404
+
+    vulnerability_detected = False
+    flag = None
+    result = None
+
+    if request.method == 'POST':
+        payload = request.form.get('payload', '')
+        auth_patterns = ["' OR '1'='1", "' OR 1=1--", "admin' --", '"alg": "none"', 'sessionid=']
+        if any(p.lower() in payload.lower() for p in auth_patterns):
+            vulnerability_detected = True
+            flag = generate_flag(challenge.id, user.machine_id)
+            mark_challenge_completed(user, challenge.id)
+        result = f"Authentication check: {payload[:100]}" if payload else None
+
+    return render_template(f'auth/auth_level{level}.html', user=user,
+                         vulnerability_detected=vulnerability_detected,
+                         flag=flag, result=result)
+
+
 # ===== CSRF CHALLENGE ROUTES =====
 
 # CSRF Level 1 - Basic Form CSRF
@@ -10724,4 +10852,8 @@ if __name__ == '__main__':
     # Start the application
     # Note: The argparse block at the top handles --update, --backup, --restore
     # Those commands exit the script, so they won't reach here.
-    app.run(debug=True, host='0.0.0.0', port=5000)
+
+    # Support both local development and production (Render/Heroku)
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('FLASK_ENV') != 'production'
+    app.run(debug=debug, host='0.0.0.0', port=port)

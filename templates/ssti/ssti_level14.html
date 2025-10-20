@@ -1,0 +1,47 @@
+{%- set level_number = 14 -%}
+{%- set category = "SSTI" -%}
+{%- set category_lower = "ssti" -%}
+{%- set title = "Polyglot SSTI Payload" -%}
+{%- set difficulty = "advanced" -%}
+{%- set description = "Application uses multiple template engines. Craft payload that works across engines." -%}
+{#- challenge_id passed from route -#}
+
+{%extends 'components/base_challenge.html' %}
+
+{%block challenge_content %}
+<div class="card">
+    <div class="card-header">
+        <h5><i class="bi bi-info-circle me-2"></i>Scenario</h5>
+    </div>
+    <div class="card-body">
+        <p><strong>Context:</strong> A multi-tenant platform supporting various template formats.</p>
+        <p><strong>Framework/Language:</strong> Mixed</p>
+        <p><strong>Your Mission:</strong> Exploit the vulnerability to capture the flag.</p>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-header">
+        <h5><i class="bi bi-laptop me-2"></i>Vulnerable Application</h5>
+    </div>
+    <div class="card-body">
+        <!-- Challenge-specific interactive content will go here -->
+        <form method="POST">
+            <div class="mb-3">
+                <label for="payload" class="form-label">Enter your payload:</label>
+                <textarea class="form-control" id="payload" name="payload" rows="5" placeholder="Your exploit payload here..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-play-fill me-1"></i>Execute
+            </button>
+        </form>
+
+        {%if result %}
+        <div class="alert alert-secondary mt-3">
+            <strong>Output:</strong>
+            <pre>{{ result }}</pre>
+        </div>
+        {%endif %}
+    </div>
+</div>
+{%endblock %}

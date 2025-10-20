@@ -3,52 +3,6 @@
 {% block title %}Level 10: NoSQL Injection - R00tGlyph{% endblock %}
 
 {% block content %}
-<style>
-    .mongodb-header {
-        background: linear-gradient(135deg, #13aa52 0%, #00684a 100%);
-        color: white;
-        padding: 20px;
-        border-radius: 5px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    .document-card {
-        transition: all 0.3s ease;
-        margin-bottom: 15px;
-        border-left: 4px solid #13aa52;
-    }
-    .document-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-    }
-    .query-box {
-        background-color: #2e3440;
-        color: #d8dee9;
-        font-family: monospace;
-        padding: 15px;
-        border-radius: 5px;
-        margin-bottom: 20px;
-    }
-    .query-keyword {
-        color: #81a1c1;
-    }
-    .query-string {
-        color: #a3be8c;
-    }
-    .query-operator {
-        color: #b48ead;
-    }
-    .query-number {
-        color: #d08770;
-    }
-    .admin-note {
-        background-color: rgba(255, 193, 7, 0.1);
-        border-left: 4px solid var(--bs-warning);
-        padding: 15px;
-        margin-top: 20px;
-        border-radius: 5px;
-    }
-</style>
 
 <div class="row">
     <div class="col-md-10 offset-md-1">
@@ -78,7 +32,7 @@
             </p>
 
             <div class="card mb-3 border-secondary">
-                <div class="card-header bg-secondary text-white">
+                <div class="card-header">
                     <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
                 </div>
                 <div class="card-body">
@@ -167,13 +121,13 @@
         </div>
 
         <div class="card">
-            <div class="card-header bg-dark text-white">
+            <div class="card-header">
                 <h2 class="text-center">Level 10: NoSQL Injection</h2>
             </div>
             <div class="card-body">
                 <div class="mongodb-header">
                     <div class="d-flex align-items-center justify-content-center">
-                        <i class="bi bi-file-earmark-text me-2" style="font-size: 2.5rem;"></i>
+                        <i class="bi bi-file-earmark-text me-2" class="icon-lg"></i>
                         <h1 class="mb-0">DocuStore</h1>
                     </div>
                     <p class="text-center mb-0 mt-2">Secure Document Management System</p>
@@ -223,7 +177,7 @@
 
                 <div class="login-container">
                     <div class="card mb-4">
-                        <div class="card-header bg-primary text-white">
+                        <div class="card-header">
                             <h4 class="mb-0"><i class="bi bi-person-fill me-2"></i>User Login</h4>
                         </div>
                         <div class="card-body">

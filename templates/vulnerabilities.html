@@ -6,7 +6,7 @@
 <div class="row">
     <div class="col-md-10 offset-md-1">
         <div class="card">
-            <div class="card-header bg-dark text-white">
+            <div class="card-header">
                 <h2 class="text-center">R00tGlyph Challenges</h2>
             </div>
             <div class="card-body">
@@ -56,7 +56,7 @@
                             <div class="accordion-body p-0">
                                 <div class="list-group list-group-flush">
                                     {% for challenge in challenges_by_category[category] %}
-                                    <a href="{% if category == 'xss' %}{{ url_for('xss_level' + (loop.index | string)) }}{% elif category == 'sqli' %}{{ url_for('sqli_level' + (loop.index | string)) }}{% elif category == 'cmdi' %}{{ url_for('cmdi_level' + (loop.index | string)) }}{% elif category == 'ssrf' %}{{ url_for('ssrf_level' + (loop.index | string)) }}{% elif category == 'csrf' %}{{ url_for('csrf_level' + (loop.index | string)) }}{% elif category == 'xxe' %}{{ url_for('xxe_level' + (loop.index | string)) }}{% else %}#{% endif %}"
+                                    <a href="{% if category == 'xss' %}{{ url_for('xss_level' + (loop.index | string)) }}{% elif category == 'sqli' %}{{ url_for('sqli_level' + (loop.index | string)) }}{% elif category == 'cmdi' %}{{ url_for('cmdi_level' + (loop.index | string)) }}{% elif category == 'ssrf' %}{{ url_for('ssrf_level' + (loop.index | string)) }}{% elif category == 'csrf' %}{{ url_for('csrf_level' + (loop.index | string)) }}{% elif category == 'xxe' %}{{ url_for('xxe_level' + (loop.index | string)) }}{% elif category == 'ssti' and loop.index == 1 %}{{ url_for('ssti_level1') }}{% elif category == 'ssti' %}{{ url_for('ssti_level_dynamic', level=loop.index) }}{% elif category == 'deserial' %}{{ url_for('deserial_level', level=loop.index) }}{% elif category == 'auth' %}{{ url_for('auth_level', level=loop.index) }}{% else %}#{% endif %}"
                                        class="list-group-item list-group-item-action {% if challenge.completed %}list-group-item-success{% endif %}">
                                         <div class="d-flex w-100 justify-content-between align-items-center">
                                             <div>
@@ -89,7 +89,7 @@
                 </div>
 
                 <div class="alert alert-success mt-4">
-                    <strong><i class="bi bi-check-circle-fill"></i> Complete Training Arsenal:</strong> 138 challenges covering the most critical vulnerabilities from OWASP Top 10 2021 and emerging threats. 
+                    <strong><i class="bi bi-check-circle-fill"></i> Complete Training Arsenal:</strong> 171 challenges covering the most critical vulnerabilities from OWASP Top 10 2021 and emerging threats.
                     Master the skills needed to defend against real-world attacks happening today.
                 </div>
             </div>

@@ -1,0 +1,36 @@
+{#
+  Reusable success banner component for when vulnerability is detected
+
+  Usage:
+  {% if vulnerability_detected %}
+  {% set flag = "R00T{...}" %}
+  {% include 'components/success_banner.html' with context %}
+  {% endif %}
+
+  Required variables:
+  - flag: The flag value to display
+
+  Optional variables:
+  - success_message: Custom success message
+  - vulnerability_type: Type of vulnerability (e.g., "XSS", "SQL Injection")
+#}
+<div class="alert alert-success">
+    <i class="bi bi-check-circle-fill me-2"></i>
+    <strong>Success!</strong>
+    {% if success_message %}
+    {{ success_message }}
+    {% else %}
+    You've successfully exploited the {{ vulnerability_type|default("vulnerability") }}!
+    The challenge has been marked as completed.
+    {% endif %}
+
+    {% if flag %}
+    <div class="mt-2">
+        <strong>Your Flag:</strong>
+        <code class="ms-2">{{ flag }}</code>
+        <button class="btn btn-sm btn-outline-success ms-2" onclick="navigator.clipboard.writeText('{{ flag }}')">
+            <i class="bi bi-clipboard"></i> Copy
+        </button>
+    </div>
+    {% endif %}
+</div>

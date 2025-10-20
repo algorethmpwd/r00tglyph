@@ -13,6 +13,30 @@ body {
 
 .card-header {
     font-weight: bold;
+    background-color: var(--bs-primary-bg-subtle);
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+/* Standardized challenge card header */
+.challenge-card-header {
+    background-color: var(--bs-primary-bg-subtle);
+    color: var(--bs-emphasis-color);
+    font-weight: bold;
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+/* Standardized layout widths */
+.challenge-container {
+    /* Standard container for all challenges */
+}
+
+.challenge-content {
+    /* 8-column centered layout */
+}
+
+/* Standardized alert styling */
+.alert-challenge-description {
+    /* Consistent styling for challenge descriptions */
 }
 
 pre {
@@ -1033,6 +1057,121 @@ footer {
     border: 1px solid #dee2e6;
 }
 
+/* ============================================
+   UTILITY CLASSES FOR CONSISTENCY
+   ============================================ */
+
+/* Icon sizes */
+.icon-lg {
+    font-size: 2.5rem;
+}
+
+.icon-xl {
+    font-size: 3rem;
+}
+
+.icon-xxl {
+    font-size: 5rem;
+}
+
+/* Progress bar standard height */
+.progress-standard {
+    height: 30px;
+}
+
+/* MongoDB/Database specific styling (theme-aware) */
+.db-header,
+.mongodb-header {
+    background: linear-gradient(135deg, #13aa52 0%, #00684a 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.document-card {
+    transition: all 0.3s ease;
+    margin-bottom: 15px;
+    border-left: 4px solid #13aa52;
+}
+
+.document-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.query-keyword {
+    color: #81a1c1;
+}
+
+.query-string {
+    color: #a3be8c;
+}
+
+.query-operator {
+    color: #b48ead;
+}
+
+.query-number {
+    color: #d08770;
+}
+
+.admin-note {
+    background-color: rgba(255, 193, 7, 0.1);
+    border-left: 4px solid var(--bs-warning);
+    padding: 15px;
+    margin-top: 20px;
+    border-radius: 5px;
+}
+
+.query-box {
+    background-color: var(--bs-secondary-bg);
+    color: var(--bs-body-color);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    font-family: 'Courier New', monospace;
+}
+
+[data-bs-theme="dark"] .query-box {
+    background-color: #2e3440;
+    color: #d8dee9;
+}
+
+[data-bs-theme="cyberpunk"] .query-box {
+    background-color: #1a1a3e;
+    color: #00ff9d;
+    border: 1px solid #00ffff;
+}
+
+[data-bs-theme="hacker"] .query-box {
+    background-color: #0a0a0a;
+    color: #00ff00;
+    border: 1px solid #00ff00;
+}
+
+/* Result container styling */
+.result-container {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: var(--bs-light-bg-subtle);
+    border-radius: 0.5rem;
+}
+
+[data-bs-theme="dark"] .result-container {
+    background-color: #1e1e1e;
+}
+
+[data-bs-theme="cyberpunk"] .result-container {
+    background-color: #1a1a3e;
+    border: 1px solid #00ff9d;
+}
+
+[data-bs-theme="hacker"] .result-container {
+    background-color: #0c0c0c;
+    border: 1px solid #00ff00;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .card-title {
@@ -1045,5 +1184,17 @@ footer {
 
     h3 {
         font-size: 1.3rem;
+    }
+
+    .icon-lg {
+        font-size: 2rem;
+    }
+
+    .icon-xl {
+        font-size: 2.5rem;
+    }
+
+    .icon-xxl {
+        font-size: 3.5rem;
     }
 }

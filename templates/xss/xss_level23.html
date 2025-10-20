@@ -6,7 +6,7 @@
 <div class="row">
     <div class="col-md-8 offset-md-2">
         <div class="card">
-            <div class="card-header bg-dark text-white">
+            <div class="card-header">
                 <h2 class="text-center">Level 23: XSS in Federated Identity Systems</h2>
             </div>
             <div class="card-body">
@@ -17,7 +17,7 @@
                     </p>
                     
                     <div class="card mb-3 border-secondary">
-                        <div class="card-header bg-secondary text-white">
+                        <div class="card-header">
                             <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
                         </div>
                         <div class="card-body">
@@ -203,7 +203,7 @@
                                         <strong>Congratulations!</strong> Your XSS payload successfully executed in the federated identity system.
                                     </div>
                                     <div class="card mt-2">
-                                        <div class="card-header bg-success text-white">
+                                        <div class="card-header">
                                             <h5 class="mb-0"><i class="bi bi-trophy me-2"></i>Challenge Completed!</h5>
                                         </div>
                                         <div class="card-body">
@@ -371,7 +371,7 @@
                 case 'start':
                     authFlowContent.innerHTML = `
                         <div class="card">
-                            <div class="card-header bg-primary text-white">
+                            <div class="card-header">
                                 <h5 class="mb-0">Authentication Request</h5>
                             </div>
                             <div class="card-body">
@@ -390,7 +390,7 @@
                 case 'login':
                     authFlowContent.innerHTML = `
                         <div class="card">
-                            <div class="card-header bg-primary text-white">
+                            <div class="card-header">
                                 <h5 class="mb-0">User Login</h5>
                             </div>
                             <div class="card-body">
@@ -409,7 +409,7 @@
                 case 'consent':
                     authFlowContent.innerHTML = `
                         <div class="card">
-                            <div class="card-header bg-primary text-white">
+                            <div class="card-header">
                                 <h5 class="mb-0">User Consent</h5>
                             </div>
                             <div class="card-body">
@@ -430,7 +430,7 @@
                 case 'token':
                     authFlowContent.innerHTML = `
                         <div class="card">
-                            <div class="card-header bg-primary text-white">
+                            <div class="card-header">
                                 <h5 class="mb-0">Token Generation</h5>
                             </div>
                             <div class="card-body">
@@ -449,7 +449,7 @@
                     // without sanitizing them, allowing XSS
                     authFlowContent.innerHTML = `
                         <div class="card">
-                            <div class="card-header bg-primary text-white">
+                            <div class="card-header">
                                 <h5 class="mb-0">Redirect to Client</h5>
                             </div>
                             <div class="card-body">
@@ -467,7 +467,7 @@
                 case 'complete':
                     authFlowContent.innerHTML = `
                         <div class="card">
-                            <div class="card-header bg-success text-white">
+                            <div class="card-header">
                                 <h5 class="mb-0">Authentication Complete</h5>
                             </div>
                             <div class="card-body">
@@ -487,7 +487,7 @@
                 case 'error':
                     authFlowContent.innerHTML = `
                         <div class="card">
-                            <div class="card-header bg-danger text-white">
+                            <div class="card-header">
                                 <h5 class="mb-0">Authentication Error</h5>
                             </div>
                             <div class="card-body">
