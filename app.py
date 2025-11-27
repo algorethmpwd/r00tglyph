@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify, make_response
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, make_response, flash, get_flashed_messages
 from flask_sqlalchemy import SQLAlchemy
 import os
 import json
@@ -15,6 +15,8 @@ import subprocess
 from datetime import datetime, timezone
 import xml.etree.ElementTree as ET
 import xml.parsers.expat
+from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
 
 
 
@@ -153,9 +155,10 @@ def from_json_filter(value):
 # Models
 class LocalUser(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(50), nullable=False, default='Hacker')
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    password_hash = db.Column(db.String(256), nullable=False)
     display_name = db.Column(db.String(50), nullable=False, default='Anonymous Hacker')
-    machine_id = db.Column(db.String(64), unique=True, nullable=False)
+    profile_picture = db.Column(db.String(256), nullable=True)  # Path to profile picture
     score = db.Column(db.Integer, default=0)
     completed_challenges = db.Column(db.Text, default='[]')  # JSON string of completed challenge IDs
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
@@ -173,14 +176,14 @@ class Challenge(db.Model):
 class Flag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     challenge_id = db.Column(db.Integer, db.ForeignKey('challenge.id'), nullable=False)
-    machine_id = db.Column(db.String(64), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('local_user.id'), nullable=False)
     flag_value = db.Column(db.String(100), nullable=False)
     used = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
 class Submission(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    machine_id = db.Column(db.String(64), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('local_user.id'), nullable=False)
     challenge_id = db.Column(db.Integer, db.ForeignKey('challenge.id'), nullable=False)
     flag = db.Column(db.String(100), nullable=False)
     correct = db.Column(db.Boolean, default=False)
@@ -191,7 +194,7 @@ class Comment(db.Model):
     username = db.Column(db.String(50))
     content = db.Column(db.Text)
     level = db.Column(db.Integer)
-    machine_id = db.Column(db.String(64), nullable=True)  # Optional, to track who posted the comment
+    user_id = db.Column(db.Integer, db.ForeignKey('local_user.id'), nullable=True)
     timestamp = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
 # Create database tables
@@ -503,60 +506,88 @@ def reset_database():
 
 
 # Helper functions
-def get_machine_id():
-    """Generate or retrieve a unique machine identifier"""
-    if 'machine_id' not in session:
-        # Generate a new machine ID if not in session
-        session['machine_id'] = hashlib.sha256(str(uuid.uuid4()).encode()).hexdigest()
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return redirect(url_for('login', next=request.url))
+        return f(*args, **kwargs)
+    return decorated_function
 
-        # Check if this machine ID exists in the database
-        existing_user = LocalUser.query.filter_by(machine_id=session['machine_id']).first()
-        if not existing_user:
-            # Create a new local user
-            new_user = LocalUser(
-                username='Hacker',
-                display_name='Anonymous Hacker',
-                machine_id=session['machine_id']
-            )
-            db.session.add(new_user)
-            db.session.commit()
+def get_current_user():
+    """Get the current logged-in user"""
+    if 'user_id' in session:
+        return LocalUser.query.get(session['user_id'])
+    return None
 
-    return session['machine_id']
+@app.context_processor
+def inject_user():
+    return dict(current_user=get_current_user())
 
-def get_local_user():
-    """Get the current local user or create one if it doesn't exist"""
-    machine_id = get_machine_id()
-    user = LocalUser.query.filter_by(machine_id=machine_id).first()
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        confirm_password = request.form['confirm_password']
 
-    if not user:
-        # Create a new local user if not found
-        user = LocalUser(
-            username='Hacker',
-            display_name='Anonymous Hacker',
-            machine_id=machine_id
-        )
-        db.session.add(user)
+        if password != confirm_password:
+            flash('Passwords do not match!', 'danger')
+            return redirect(url_for('register'))
+
+        existing_user = LocalUser.query.filter_by(username=username).first()
+        if existing_user:
+            flash('Username already exists!', 'danger')
+            return redirect(url_for('register'))
+
+        hashed_password = generate_password_hash(password)
+        new_user = LocalUser(username=username, display_name=username, password_hash=hashed_password)
+        db.session.add(new_user)
         db.session.commit()
 
-    # Update last active time
-    user.last_active = datetime.now(timezone.utc)
-    db.session.commit()
+        flash('Registration successful! Please login.', 'success')
+        return redirect(url_for('login'))
 
-    return user
+    return render_template('register.html')
 
-def generate_flag(challenge_id, machine_id):
-    """Generate a unique flag for a specific challenge and machine"""
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        user = LocalUser.query.filter_by(username=username).first()
+        if user and check_password_hash(user.password_hash, password):
+            session['user_id'] = user.id
+            user.last_active = datetime.now(timezone.utc)
+            db.session.commit()
+            flash('Login successful!', 'success')
+            next_page = request.args.get('next')
+            return redirect(next_page or url_for('index'))
+        else:
+            flash('Invalid username or password', 'danger')
+
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('user_id', None)
+    flash('You have been logged out.', 'info')
+    return redirect(url_for('login'))
+
+def generate_flag(challenge_id, user_id):
+    """Generate a unique flag for a specific challenge and user"""
     random_part = ''.join(random.choices(string.ascii_uppercase + string.digits, k=16))
-    unique_id = f"{challenge_id}_{machine_id}_{random_part}"
+    unique_id = f"{challenge_id}_{user_id}_{random_part}"
     flag = f"R00T{{{hashlib.md5(unique_id.encode()).hexdigest()}}}"
     return flag
 
-def get_or_create_flag(challenge_id, machine_id):
+def get_or_create_flag(challenge_id, user_id):
     """Get an existing unused flag or create a new one"""
     # Check for existing unused flag
     existing_flag = Flag.query.filter_by(
         challenge_id=challenge_id,
-        machine_id=machine_id,
+        user_id=user_id,
         used=False
     ).first()
 
@@ -564,16 +595,16 @@ def get_or_create_flag(challenge_id, machine_id):
         return existing_flag.flag_value
 
     # Create new flag
-    new_flag_value = generate_flag(challenge_id, machine_id)
-    new_flag = Flag(challenge_id=challenge_id, machine_id=machine_id, flag_value=new_flag_value)
+    new_flag_value = generate_flag(challenge_id, user_id)
+    new_flag = Flag(challenge_id=challenge_id, user_id=user_id, flag_value=new_flag_value)
     db.session.add(new_flag)
     db.session.commit()
 
     return new_flag_value
 
-def update_user_progress(machine_id, challenge_id, points):
+def update_user_progress(user_id, challenge_id, points):
     """Update user progress after completing a challenge"""
-    user = LocalUser.query.filter_by(machine_id=machine_id).first()
+    user = LocalUser.query.get(user_id)
     if user:
         # Update completed challenges
         completed = json.loads(user.completed_challenges) if user.completed_challenges else []
@@ -812,17 +843,42 @@ def change_theme(theme):
 
 # Profile management
 @app.route('/profile', methods=['GET', 'POST'])
+@login_required
 def profile():
-    user = get_local_user()
+    user = get_current_user()
 
     if request.method == 'POST':
+        # Handle display name update
         display_name = request.form.get('display_name')
         if display_name and len(display_name) <= 50:
-            # Update both display_name and username for consistency
             user.display_name = display_name
-            user.username = display_name
-            db.session.commit()
-            return redirect(url_for('profile'))
+        
+        # Handle profile picture upload
+        if 'profile_picture' in request.files:
+            file = request.files['profile_picture']
+            if file and file.filename:
+                # Validate file extension
+                allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+                filename = file.filename.lower()
+                if '.' in filename and filename.rsplit('.', 1)[1] in allowed_extensions:
+                    # Create uploads directory if it doesn't exist
+                    upload_folder = os.path.join('static', 'uploads', 'profiles')
+                    os.makedirs(upload_folder, exist_ok=True)
+                    
+                    # Generate unique filename
+                    import uuid
+                    ext = filename.rsplit('.', 1)[1]
+                    unique_filename = f"{user.id}_{uuid.uuid4().hex[:8]}.{ext}"
+                    filepath = os.path.join(upload_folder, unique_filename)
+                    
+                    # Save file
+                    file.save(filepath)
+                    
+                    # Update user profile picture path (relative to static folder)
+                    user.profile_picture = f"uploads/profiles/{unique_filename}"
+        
+        db.session.commit()
+        return redirect(url_for('profile'))
 
     # Get completed challenges
     completed_challenges = []
@@ -846,7 +902,7 @@ def profile():
 @app.route('/')
 def index():
     # Ensure user is initialized
-    get_local_user()
+    # get_local_user() # No longer needed with explicit auth
     return render_template('index.html')
 
 # Vulnerabilities selection page with categories
@@ -883,7 +939,10 @@ def vulnerabilities():
     }
 
     # Get the current user and their completed challenges
-    user = get_local_user()
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('login', next=request.url))
+        
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
 
     # Get challenges grouped by category
@@ -901,7 +960,7 @@ def vulnerabilities():
         for challenge in challenges:
             challenge.completed = challenge.id in completed_ids
             if challenge.completed:
-                challenge.flag = get_or_create_flag(challenge.id, user.machine_id)
+                challenge.flag = get_or_create_flag(challenge.id, user.id)
                 category_completed += 1
                 completed_count += 1
             else:
@@ -932,10 +991,11 @@ def scoreboard():
 
 # Flag submission
 @app.route('/submit-flag', methods=['POST'])
+@login_required
 def submit_flag():
     challenge_id = request.form.get('challenge_id')
     flag = request.form.get('flag')
-    machine_id = get_machine_id()
+    user_id = session.get('user_id')
 
     if not challenge_id or not flag:
         return jsonify({'success': False, 'message': 'Missing required parameters'})
@@ -954,7 +1014,7 @@ def submit_flag():
     # Check if flag is valid
     valid_flag = Flag.query.filter_by(
         challenge_id=challenge_id,
-        machine_id=machine_id,
+        user_id=user_id,
         flag_value=flag,
         used=False
     ).first()
@@ -964,18 +1024,18 @@ def submit_flag():
         valid_flag.used = True
 
         # Record submission
-        submission = Submission(machine_id=machine_id, challenge_id=challenge_id, flag=flag, correct=True)
+        submission = Submission(user_id=user_id, challenge_id=challenge_id, flag=flag, correct=True)
         db.session.add(submission)
 
         # Update user score
-        update_user_progress(machine_id, challenge_id, challenge.points)
+        update_user_progress(user_id, challenge_id, challenge.points)
 
         db.session.commit()
 
         return jsonify({'success': True, 'message': f'Congratulations! You earned {challenge.points} points!'})
     else:
         # Record incorrect submission
-        submission = Submission(machine_id=machine_id, challenge_id=challenge_id, flag=flag, correct=False)
+        submission = Submission(user_id=user_id, challenge_id=challenge_id, flag=flag, correct=False)
         db.session.add(submission)
         db.session.commit()
 
@@ -983,14 +1043,15 @@ def submit_flag():
 
 # XSS Level 1 - Basic Reflected XSS
 @app.route('/xss/level1', methods=['GET', 'POST'])
+@login_required
 def xss_level1():
     user_input = request.args.get('name', '')
-    machine_id = get_machine_id()
+    # machine_id = get_machine_id() # Deprecated
     flag = None
     xss_detected = False
 
     # Get this user's completed challenges
-    user = get_local_user()
+    user = get_current_user()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
 
     # Check for XSS payload
@@ -999,24 +1060,25 @@ def xss_level1():
         # Mark challenge as completed if not already
         challenge = Challenge.query.filter_by(name="Basic Reflected XSS").first()
         if challenge and challenge.id not in completed_ids:
-            update_user_progress(machine_id, challenge.id, challenge.points)
+            update_user_progress(user.id, challenge.id, challenge.points)
             completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
 
     # Generate a flag for this challenge only if completed
     challenge = Challenge.query.filter_by(name="Basic Reflected XSS").first()
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('xss/xss_level1.html', user_input=user_input, flag=flag, xss_detected=xss_detected, challenge=challenge)
 
 # XSS Level 2 - DOM-based XSS
 @app.route('/xss/level2')
+@login_required
 def xss_level2():
-    machine_id = get_machine_id()
+    # machine_id = get_machine_id() # Deprecated
     flag = None
     xss_detected = False
 
-    user = get_local_user()
+    user = get_current_user()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
 
     # Mark challenge as completed if ?success=true is present (triggered by frontend after alert)
@@ -1024,12 +1086,12 @@ def xss_level2():
         xss_detected = True
         challenge = Challenge.query.filter_by(name="DOM-based XSS").first()
         if challenge and challenge.id not in completed_ids:
-            update_user_progress(machine_id, challenge.id, challenge.points)
+            update_user_progress(user.id, challenge.id, challenge.points)
             completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
 
     challenge = Challenge.query.filter_by(name="DOM-based XSS").first()
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     # Handle AJAX requests differently
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -1045,9 +1107,10 @@ def xss_level2():
 
 # XSS Level 3 - Stored XSS
 @app.route('/xss/level3', methods=['GET', 'POST'])
+@login_required
 def xss_level3():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     xss_detected = False
 
@@ -1068,7 +1131,7 @@ def xss_level3():
                     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
 
         # Store the comment in the database
-        new_comment = Comment(username=username, content=content, level=3, machine_id=machine_id)
+        new_comment = Comment(username=username, content=content, level=3, user_id=user.id)
         db.session.add(new_comment)
         db.session.commit()
 
@@ -1081,15 +1144,16 @@ def xss_level3():
     challenge = Challenge.query.filter_by(name="Stored XSS").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('xss/xss_level3.html', comments=comments, flag=flag, user=user, xss_detected=xss_detected, challenge=challenge)
 
 # XSS Level 4 - XSS with Basic Filters
 @app.route('/xss/level4', methods=['GET', 'POST'])
+@login_required
 def xss_level4():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     message = ""
     filtered_input = ""
     waf_blocked = False
@@ -1118,16 +1182,17 @@ def xss_level4():
     challenge = Challenge.query.filter_by(name="XSS with Basic Filters").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('xss/xss_level4.html', message=message, filtered_input=filtered_input,
                            waf_blocked=waf_blocked, flag=flag, user=user, xss_detected=xss_detected, challenge=challenge)
 
 # XSS Level 5 - XSS with Advanced Filters
 @app.route('/xss/level5', methods=['GET', 'POST'])
+@login_required
 def xss_level5():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     message = ""
     filtered_input = ""
     waf_blocked = False
@@ -1156,16 +1221,17 @@ def xss_level5():
     challenge = Challenge.query.filter_by(name="XSS with Advanced Filters").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('xss/xss_level5.html', message=message, filtered_input=filtered_input,
                            waf_blocked=waf_blocked, flag=flag, user=user, xss_detected=xss_detected, challenge=challenge)
 
 # XSS Level 6 - XSS with ModSecurity WAF
 @app.route('/xss/level6', methods=['GET', 'POST'])
+@login_required
 def xss_level6():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     message = ""
     filtered_input = ""
     waf_blocked = False
@@ -1191,23 +1257,24 @@ def xss_level6():
                 if challenge:
                     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                     if challenge.id not in completed_ids:
-                        update_user_progress(machine_id, challenge.id, challenge.points)
+                        update_user_progress(user.id, challenge.id, challenge.points)
                         completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
 
     # Generate a flag for this challenge only if completed
     challenge = Challenge.query.filter_by(name="XSS with ModSecurity WAF").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('xss/xss_level6.html', message=message, filtered_input=filtered_input,
                            waf_blocked=waf_blocked, flag=flag, user=user, xss_detected=xss_detected, challenge=challenge)
 
 # XSS Level 7 - XSS via HTTP Headers
 @app.route('/xss/level7', methods=['GET'])
+@login_required
 def xss_level7():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     xss_detected = False
 
@@ -1226,22 +1293,23 @@ def xss_level7():
         if challenge:
             completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
             if challenge.id not in completed_ids:
-                update_user_progress(machine_id, challenge.id, challenge.points)
+                update_user_progress(user.id, challenge.id, challenge.points)
 
     # Generate a flag for this challenge only if completed
     challenge = Challenge.query.filter_by(name="XSS via HTTP Headers").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('xss/xss_level7.html', client_ip=client_ip, user_agent=user_agent,
                            random_id=random_id, flag=flag, user=user, xss_detected=xss_detected, challenge=challenge)
 
 # XSS Level 8 - XSS in JSON API
 @app.route('/xss/level8', methods=['GET'])
+@login_required
 def xss_level8():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     xss_detected = False
 
@@ -1253,21 +1321,23 @@ def xss_level8():
         if challenge:
             completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
             if challenge.id not in completed_ids:
-                update_user_progress(machine_id, challenge.id, challenge.points)
+                update_user_progress(user.id, challenge.id, challenge.points)
 
     # Generate a flag for this challenge only if completed
     challenge = Challenge.query.filter_by(name="XSS in JSON API").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('xss/xss_level8.html', flag=flag, user=user, xss_detected=xss_detected, challenge=challenge)
 
 # API endpoint for XSS Level 8
 @app.route('/api/notes', methods=['GET', 'POST'])
 def api_notes():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
+    if not user:
+        return jsonify({'error': 'Unauthorized'}), 401
 
     if request.method == 'POST':
         # Handle note creation
@@ -1333,9 +1403,10 @@ def api_notes():
 
 # XSS Level 9 - XSS with CSP Bypass
 @app.route('/xss/level9', methods=['GET', 'POST'])
+@login_required
 def xss_level9():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     user_comment = ""
     flag = None
     xss_detected = False
@@ -1359,7 +1430,7 @@ def xss_level9():
     challenge = Challenge.query.filter_by(name="XSS with CSP Bypass").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     response = make_response(render_template('xss/xss_level9.html', user_comment=user_comment, flag=flag, user=user, xss_detected=xss_detected, challenge=challenge, message=message))
     # Intentionally misconfigured CSP to allow the challenge to be solved
@@ -1373,9 +1444,10 @@ def xss_level9():
 
 # XSS Level 10 - XSS with Mutation Observer Bypass
 @app.route('/xss/level10', methods=['GET', 'POST'])
+@login_required
 def xss_level10():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     user_message = ""
     flag = None
     xss_detected = False
@@ -1394,7 +1466,7 @@ def xss_level10():
         if challenge:
             completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
             if challenge.id not in completed_ids:
-                update_user_progress(machine_id, challenge.id, challenge.points)
+                update_user_progress(user.id, challenge.id, challenge.points)
         message = "Challenge solved! Flag revealed."
 
     if request.method == 'POST':
@@ -1407,7 +1479,7 @@ def xss_level10():
             if challenge:
                 completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                 if challenge.id not in completed_ids:
-                    update_user_progress(machine_id, challenge.id, challenge.points)
+                    update_user_progress(user.id, challenge.id, challenge.points)
             message = "Challenge solved! Flag revealed."
 
             # Add the user's message to the chat
@@ -1429,7 +1501,7 @@ def xss_level10():
     challenge = Challenge.query.filter_by(name="XSS with Mutation Observer Bypass").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('xss/xss_level10.html',
                           user_message=user_message,
@@ -1442,9 +1514,10 @@ def xss_level10():
 
 # XSS Level 11 - XSS via SVG and CDATA
 @app.route('/xss/level11', methods=['GET', 'POST'])
+@login_required
 def xss_level11():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     svg_code = '<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg"></svg>'
     filtered_svg = ""
     flag = None
@@ -1465,7 +1538,7 @@ def xss_level11():
         if challenge:
             completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
             if challenge.id not in completed_ids:
-                update_user_progress(machine_id, challenge.id, challenge.points)
+                update_user_progress(user.id, challenge.id, challenge.points)
         message = "Challenge solved! Flag revealed."
 
     if request.method == 'POST':
@@ -1485,14 +1558,14 @@ def xss_level11():
             if challenge:
                 completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                 if challenge.id not in completed_ids:
-                    update_user_progress(machine_id, challenge.id, challenge.points)
+                    update_user_progress(user.id, challenge.id, challenge.points)
             message = "Challenge solved! Flag revealed."
 
     # Generate a flag for this challenge only if completed
     challenge = Challenge.query.filter_by(name="XSS via SVG and CDATA").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('xss/xss_level11.html',
                           svg_code=svg_code,
@@ -1506,9 +1579,10 @@ def xss_level11():
 
 # XSS Level 12 - Blind XSS with Webhook Exfiltration
 @app.route('/xss/level12', methods=['GET', 'POST'])
+@login_required
 def xss_level12():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     ticket_submitted = False
     ticket_id = None
     ticket_subject = None
@@ -1525,7 +1599,7 @@ def xss_level12():
         if challenge:
             completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
             if challenge.id not in completed_ids:
-                update_user_progress(machine_id, challenge.id, challenge.points)
+                update_user_progress(user.id, challenge.id, challenge.points)
         message = "Challenge solved! Flag revealed."
 
     if request.method == 'POST':
@@ -1551,14 +1625,14 @@ def xss_level12():
             if challenge:
                 completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                 if challenge.id not in completed_ids:
-                    update_user_progress(machine_id, challenge.id, challenge.points)
+                    update_user_progress(user.id, challenge.id, challenge.points)
             message = "Challenge solved! Your XSS payload was executed in the admin panel and the data was exfiltrated to your webhook."
 
     # Generate a flag for this challenge only if completed
     challenge = Challenge.query.filter_by(name="Blind XSS with Webhook Exfiltration").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('xss/xss_level12.html',
                           ticket_submitted=ticket_submitted,
@@ -1574,9 +1648,10 @@ def xss_level12():
 
 # XSS Level 13 - XSS in PDF Generation
 @app.route('/xss/level13', methods=['GET', 'POST'])
+@login_required
 def xss_level13():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     pdf_generated = False
     resume_name = None
     resume_email = None
@@ -1605,13 +1680,13 @@ def xss_level13():
             if challenge:
                 completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                 if challenge.id not in completed_ids:
-                    update_user_progress(machine_id, challenge.id, challenge.points)
+                    update_user_progress(user.id, challenge.id, challenge.points)
 
     # Generate a flag for this challenge only if completed
     challenge = Challenge.query.filter_by(name="XSS in PDF Generation").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('xss/xss_level13.html', pdf_generated=pdf_generated,
                            resume_name=resume_name, resume_email=resume_email,
@@ -1621,9 +1696,10 @@ def xss_level13():
 
 # XSS Level 14 - XSS via Prototype Pollution
 @app.route('/xss/level14', methods=['GET', 'POST'])
+@login_required
 def xss_level14():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     config_saved = False
     config_name = None
     config_json = None
@@ -1638,7 +1714,7 @@ def xss_level14():
         if challenge:
             completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
             if challenge.id not in completed_ids:
-                update_user_progress(machine_id, challenge.id, challenge.points)
+                update_user_progress(user.id, challenge.id, challenge.points)
         message = "Challenge solved! Flag revealed."
 
     if request.method == 'POST':
@@ -1655,7 +1731,7 @@ def xss_level14():
             if challenge:
                 completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                 if challenge.id not in completed_ids:
-                    update_user_progress(machine_id, challenge.id, challenge.points)
+                    update_user_progress(user.id, challenge.id, challenge.points)
             message = "Challenge solved! Flag revealed."
         else:
             message = "Try to use prototype pollution to trigger the alert as described."
@@ -1664,7 +1740,7 @@ def xss_level14():
     challenge = Challenge.query.filter_by(name="XSS via Prototype Pollution").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('xss/xss_level14.html',
                           config_saved=config_saved,
@@ -1678,9 +1754,10 @@ def xss_level14():
 
 # XSS Level 15 - XSS via Template Injection
 @app.route('/xss/level15', methods=['GET', 'POST'])
+@login_required
 def xss_level15():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     template_saved = False
     template_name = None
     template_subject = None
@@ -1697,7 +1774,7 @@ def xss_level15():
         if challenge:
             completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
             if challenge.id not in completed_ids:
-                update_user_progress(machine_id, challenge.id, challenge.points)
+                update_user_progress(user.id, challenge.id, challenge.points)
         message = "Challenge solved! Flag revealed."
     current_date = datetime.now().strftime('%B %d, %Y')
 
@@ -1719,7 +1796,7 @@ def xss_level15():
             if challenge:
                 completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                 if challenge.id not in completed_ids:
-                    update_user_progress(machine_id, challenge.id, challenge.points)
+                    update_user_progress(user.id, challenge.id, challenge.points)
             message = "Challenge solved! Flag revealed."
         else:
             message = "Template saved, but no XSS detected. Try using template injection to trigger the alert."
@@ -1728,7 +1805,7 @@ def xss_level15():
     challenge = Challenge.query.filter_by(name="XSS via Template Injection").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('xss/xss_level15.html',
                           template_saved=template_saved,
@@ -1745,9 +1822,10 @@ def xss_level15():
 
 # XSS Level 16 - XSS in WebAssembly Applications
 @app.route('/xss/level16', methods=['GET', 'POST'])
+@login_required
 def xss_level16():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     xss_detected = False
     message = ""
@@ -1759,7 +1837,7 @@ def xss_level16():
         if challenge:
             completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
             if challenge.id not in completed_ids:
-                update_user_progress(machine_id, challenge.id, challenge.points)
+                update_user_progress(user.id, challenge.id, challenge.points)
         message = "Challenge solved! Flag revealed."
 
     # Check for intended payload in POST requests
@@ -1771,7 +1849,7 @@ def xss_level16():
             if challenge:
                 completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                 if challenge.id not in completed_ids:
-                    update_user_progress(machine_id, challenge.id, challenge.points)
+                    update_user_progress(user.id, challenge.id, challenge.points)
             message = "Challenge solved! Flag revealed."
         else:
             message = "Try to trigger the alert as described."
@@ -1779,14 +1857,15 @@ def xss_level16():
     challenge = Challenge.query.filter_by(name="XSS in WebAssembly Applications").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
     return render_template('xss/xss_level16.html', flag=flag, user=user, xss_detected=xss_detected, challenge=challenge, message=message)
 
 # XSS Level 17 - XSS in Progressive Web Apps
 @app.route('/xss/level17', methods=['GET', 'POST'])
+@login_required
 def xss_level17():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     xss_detected = False
     message = ""
@@ -1797,7 +1876,7 @@ def xss_level17():
         if challenge:
             completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
             if challenge.id not in completed_ids:
-                update_user_progress(machine_id, challenge.id, challenge.points)
+                update_user_progress(user.id, challenge.id, challenge.points)
         message = "Challenge solved! Flag revealed."
 
     if request.method == 'POST':
@@ -1817,21 +1896,22 @@ def xss_level17():
             if challenge:
                 completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                 if challenge.id not in completed_ids:
-                    update_user_progress(machine_id, challenge.id, challenge.points)
+                    update_user_progress(user.id, challenge.id, challenge.points)
             message = "Challenge solved! Flag revealed."
         else:
             message = "Try to trigger the alert as described. Look for vulnerabilities in the PWA components."
     challenge = Challenge.query.filter_by(name="XSS in Progressive Web Apps").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
     return render_template('xss/xss_level17.html', flag=flag, user=user, xss_detected=xss_detected, challenge=challenge, message=message)
 
 # XSS Level 18 - XSS via Web Components
 @app.route('/xss/level18', methods=['GET', 'POST'])
+@login_required
 def xss_level18():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     xss_detected = False
     message = ""
@@ -1843,21 +1923,22 @@ def xss_level18():
             if challenge:
                 completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                 if challenge.id not in completed_ids:
-                    update_user_progress(machine_id, challenge.id, challenge.points)
+                    update_user_progress(user.id, challenge.id, challenge.points)
             message = "Challenge solved! Flag revealed."
         else:
             message = "Try to trigger the alert as described."
     challenge = Challenge.query.filter_by(name="XSS via Web Components").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
     return render_template('xss/xss_level18.html', flag=flag, user=user, xss_detected=xss_detected, challenge=challenge, message=message)
 
 # XSS Level 19 - XSS in GraphQL APIs
 @app.route('/xss/level19', methods=['GET', 'POST'])
+@login_required
 def xss_level19():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     xss_detected = False
     message = ""
@@ -1869,21 +1950,22 @@ def xss_level19():
             if challenge:
                 completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                 if challenge.id not in completed_ids:
-                    update_user_progress(machine_id, challenge.id, challenge.points)
+                    update_user_progress(user.id, challenge.id, challenge.points)
             message = "Challenge solved! Flag revealed."
         else:
             message = "Try to trigger the alert as described."
     challenge = Challenge.query.filter_by(name="XSS in GraphQL APIs").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
     return render_template('xss/xss_level19.html', flag=flag, user=user, xss_detected=xss_detected, challenge=challenge, message=message)
 
 # XSS Level 20 - XSS in WebRTC Applications
 @app.route('/xss/level20', methods=['GET', 'POST'])
+@login_required
 def xss_level20():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     xss_detected = False
     message = ""
@@ -1895,21 +1977,22 @@ def xss_level20():
             if challenge:
                 completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                 if challenge.id not in completed_ids:
-                    update_user_progress(machine_id, challenge.id, challenge.points)
+                    update_user_progress(user.id, challenge.id, challenge.points)
             message = "Challenge solved! Flag revealed."
         else:
             message = "Try to trigger the alert as described."
     challenge = Challenge.query.filter_by(name="XSS in WebRTC Applications").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
     return render_template('xss/xss_level20.html', flag=flag, user=user, xss_detected=xss_detected, challenge=challenge, message=message)
 
 # XSS Level 21 - XSS via Web Bluetooth/USB
 @app.route('/xss/level21', methods=['GET', 'POST'])
+@login_required
 def xss_level21():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     xss_detected = False
     message = ""
@@ -1921,21 +2004,22 @@ def xss_level21():
             if challenge:
                 completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                 if challenge.id not in completed_ids:
-                    update_user_progress(machine_id, challenge.id, challenge.points)
+                    update_user_progress(user.id, challenge.id, challenge.points)
             message = "Challenge solved! Flag revealed."
         else:
             message = "Try to trigger the alert as described."
     challenge = Challenge.query.filter_by(name="XSS via Web Bluetooth/USB").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
     return render_template('xss/xss_level21.html', flag=flag, user=user, xss_detected=xss_detected, challenge=challenge, message=message)
 
 # XSS Level 22 - XSS in WebGPU Applications
 @app.route('/xss/level22', methods=['GET', 'POST'])
+@login_required
 def xss_level22():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     xss_detected = False
     message = ""
@@ -1947,21 +2031,22 @@ def xss_level22():
             if challenge:
                 completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                 if challenge.id not in completed_ids:
-                    update_user_progress(machine_id, challenge.id, challenge.points)
+                    update_user_progress(user.id, challenge.id, challenge.points)
             message = "Challenge solved! Flag revealed."
         else:
             message = "Try to trigger the alert as described."
     challenge = Challenge.query.filter_by(name="XSS in WebGPU Applications").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
     return render_template('xss/xss_level22.html', flag=flag, user=user, xss_detected=xss_detected, challenge=challenge, message=message)
 
 # XSS Level 23 - XSS in Federated Identity Systems
 @app.route('/xss/level23', methods=['GET', 'POST'])
+@login_required
 def xss_level23():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     xss_detected = False
     message = ""
@@ -1973,21 +2058,22 @@ def xss_level23():
             if challenge:
                 completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                 if challenge.id not in completed_ids:
-                    update_user_progress(machine_id, challenge.id, challenge.points)
+                    update_user_progress(user.id, challenge.id, challenge.points)
             message = "Challenge solved! Flag revealed."
         else:
             message = "Try to trigger the alert as described."
     challenge = Challenge.query.filter_by(name="XSS in Federated Identity Systems").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
     return render_template('xss/xss_level23.html', flag=flag, user=user, xss_detected=xss_detected, challenge=challenge, message=message)
 
 # SQL Injection Level 1 - Basic SQL Injection
 @app.route('/sqli/level1', methods=['GET', 'POST'])
+@login_required
 def sqli_level1():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     sqli_detected = False
     error = None
@@ -2018,7 +2104,7 @@ def sqli_level1():
             if challenge:
                 completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                 if challenge.id not in completed_ids:
-                    update_user_progress(machine_id, challenge.id, challenge.points)
+                    update_user_progress(user.id, challenge.id, challenge.points)
 
             success = "SQL Injection detected! You've successfully bypassed the login."
         else:
@@ -2029,15 +2115,16 @@ def sqli_level1():
     challenge = Challenge.query.filter_by(name="Basic SQL Injection").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('sqli/sqli_level1.html', flag=flag, sqli_detected=sqli_detected, error=error, success=success)
 
 # SQL Injection Level 2 - SQL Injection in Search
 @app.route('/sqli/level2', methods=['GET'])
+@login_required
 def sqli_level2():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     sqli_detected = False
     search_term = request.args.get('search', '')
@@ -2082,7 +2169,7 @@ def sqli_level2():
             if challenge:
                 completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                 if challenge.id not in completed_ids:
-                    update_user_progress(machine_id, challenge.id, challenge.points)
+                    update_user_progress(user.id, challenge.id, challenge.points)
         # If SQL injection is detected with a generic attack that would return all products
         elif sqli_detected and ("1=1" in search_term.lower() or "or" in search_term.lower()):
             products = default_products.copy()
@@ -2093,22 +2180,23 @@ def sqli_level2():
             if challenge:
                 completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                 if challenge.id not in completed_ids:
-                    update_user_progress(machine_id, challenge.id, challenge.points)
+                    update_user_progress(user.id, challenge.id, challenge.points)
 
     # Generate a flag for this challenge only if completed
     challenge = Challenge.query.filter_by(name="SQL Injection in Search").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('sqli/sqli_level2.html', flag=flag, sqli_detected=sqli_detected,
                           search_term=search_term, search_performed=search_performed, products=products)
 
 # SQL Injection Level 3 - SQL Injection with UNION
 @app.route('/sqli/level3', methods=['GET'])
+@login_required
 def sqli_level3():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     sqli_detected = False
     search_term = request.args.get('search', '')
@@ -2165,22 +2253,23 @@ def sqli_level3():
                 if challenge:
                     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                     if challenge.id not in completed_ids:
-                        update_user_progress(machine_id, challenge.id, challenge.points)
+                        update_user_progress(user.id, challenge.id, challenge.points)
 
     # Generate a flag for this challenge only if completed
     challenge = Challenge.query.filter_by(name="SQL Injection with UNION").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('sqli/sqli_level3.html', flag=flag, sqli_detected=sqli_detected,
                           search_term=search_term, search_performed=search_performed, books=books)
 
 # SQL Injection Level 4 - Blind SQL Injection
 @app.route('/sqli/level4', methods=['GET'])
+@login_required
 def sqli_level4():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     sqli_detected = False
     user_id = request.args.get('id', '')
@@ -2219,7 +2308,7 @@ def sqli_level4():
                 if challenge:
                     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                     if challenge.id not in completed_ids:
-                        update_user_progress(machine_id, challenge.id, challenge.points)
+                        update_user_progress(user.id, challenge.id, challenge.points)
             # If the query is using blind SQL injection techniques to extract data
             elif "SUBSTRING" in user_id_upper or "ASCII" in user_id_upper or "MID" in user_id_upper or "CHAR" in user_id_upper:
                 user_exists = True
@@ -2229,7 +2318,7 @@ def sqli_level4():
                 if challenge:
                     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                     if challenge.id not in completed_ids:
-                        update_user_progress(machine_id, challenge.id, challenge.points)
+                        update_user_progress(user.id, challenge.id, challenge.points)
             else:
                 # For other SQL injection attempts, return random results to simulate blind injection
                 import random
@@ -2242,16 +2331,17 @@ def sqli_level4():
     challenge = Challenge.query.filter_by(name="Blind SQL Injection").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('sqli/sqli_level4.html', flag=flag, sqli_detected=sqli_detected,
                           user_id=user_id, user_exists=user_exists)
 
 # SQL Injection Level 5 - Time-Based Blind SQL Injection
 @app.route('/sqli/level5', methods=['GET', 'POST'])
+@login_required
 def sqli_level5():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     sqli_detected = False
     message = None
@@ -2289,7 +2379,7 @@ def sqli_level5():
                 if challenge:
                     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                     if challenge.id not in completed_ids:
-                        update_user_progress(machine_id, challenge.id, challenge.points)
+                        update_user_progress(user.id, challenge.id, challenge.points)
 
                 message = "Thank you for subscribing to our newsletter!"
                 message_type = "success"
@@ -2307,16 +2397,17 @@ def sqli_level5():
     challenge = Challenge.query.filter_by(name="Time-Based Blind SQL Injection").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('sqli/sqli_level5.html', flag=flag, sqli_detected=sqli_detected,
                           message=message, message_type=message_type, response_time=response_time)
 
 # SQL Injection Level 6 - SQL Injection with WAF Bypass
 @app.route('/sqli/level6', methods=['GET'])
+@login_required
 def sqli_level6():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     sqli_detected = False
     waf_blocked = False
@@ -2371,13 +2462,13 @@ def sqli_level6():
                 if challenge:
                     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                     if challenge.id not in completed_ids:
-                        update_user_progress(machine_id, challenge.id, challenge.points)
+                        update_user_progress(user.id, challenge.id, challenge.points)
 
     # Generate a flag for this challenge only if completed
     challenge = Challenge.query.filter_by(name="SQL Injection with WAF Bypass").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('sqli/sqli_level6.html', flag=flag, sqli_detected=sqli_detected,
                           search_term=search_term, search_performed=search_performed,
@@ -2385,9 +2476,10 @@ def sqli_level6():
 
 # SQL Injection Level 7 - Error-Based SQL Injection
 @app.route('/sqli/level7', methods=['GET'])
+@login_required
 def sqli_level7():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     sqli_detected = False
     category_id = request.args.get('id', '')
@@ -2428,7 +2520,7 @@ def sqli_level7():
                 if challenge:
                     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                     if challenge.id not in completed_ids:
-                        update_user_progress(machine_id, challenge.id, challenge.points)
+                        update_user_progress(user.id, challenge.id, challenge.points)
             else:
                 # For other SQL injection attempts, return a generic error
                 error_message = "Error: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '" + category_id + "' at line 1"
@@ -2443,16 +2535,17 @@ def sqli_level7():
     challenge = Challenge.query.filter_by(name="Error-Based SQL Injection").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('sqli/sqli_level7.html', flag=flag, sqli_detected=sqli_detected,
                           category_id=category_id, category=category, error_message=error_message)
 
 # SQL Injection Level 8 - Second-Order SQL Injection
 @app.route('/sqli/level8', methods=['GET', 'POST'])
+@login_required
 def sqli_level8():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     sqli_detected = False
 
@@ -2531,7 +2624,7 @@ def sqli_level8():
             if challenge:
                 completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                 if challenge.id not in completed_ids:
-                    update_user_progress(machine_id, challenge.id, challenge.points)
+                    update_user_progress(user.id, challenge.id, challenge.points)
         else:
             # Normal user lookup
             profile = users_db.get(view_user)
@@ -2540,7 +2633,7 @@ def sqli_level8():
     challenge = Challenge.query.filter_by(name="Second-Order SQL Injection").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('sqli/sqli_level8.html', flag=flag, sqli_detected=sqli_detected,
                           username=username, bio=bio, location=location, website=website,
@@ -2548,9 +2641,10 @@ def sqli_level8():
 
 # SQL Injection Level 9 - SQL Injection in REST API
 @app.route('/sqli/level9', methods=['GET', 'POST'])
+@login_required
 def sqli_level9():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     sqli_detected = False
     request_body = None
@@ -2613,7 +2707,7 @@ def sqli_level9():
                 if challenge:
                     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                     if challenge.id not in completed_ids:
-                        update_user_progress(machine_id, challenge.id, challenge.points)
+                        update_user_progress(user.id, challenge.id, challenge.points)
 
             # Generate JSON response
             response = json.dumps({"products": filtered_products})
@@ -2627,16 +2721,17 @@ def sqli_level9():
     challenge = Challenge.query.filter_by(name="SQL Injection in REST API").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('sqli/sqli_level9.html', flag=flag, sqli_detected=sqli_detected,
                           request_body=request_body, response=response)
 
 # SQL Injection Level 10 - NoSQL Injection
 @app.route('/sqli/level10', methods=['GET', 'POST'])
+@login_required
 def sqli_level10():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     sqli_detected = False
     error = None
@@ -2701,7 +2796,7 @@ def sqli_level10():
             if challenge:
                 completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                 if challenge.id not in completed_ids:
-                    update_user_progress(machine_id, challenge.id, challenge.points)
+                    update_user_progress(user.id, challenge.id, challenge.points)
         elif username == "admin" and password == "admin":
             # Simulating a successful login with correct credentials (for testing)
             success = "Welcome, admin! You have successfully logged in."
@@ -2736,7 +2831,7 @@ def sqli_level10():
             if challenge:
                 completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                 if challenge.id not in completed_ids:
-                    update_user_progress(machine_id, challenge.id, challenge.points)
+                    update_user_progress(user.id, challenge.id, challenge.points)
         elif username == "user" and password == "password":
             # Simulating a successful login with regular user credentials
             success = "Welcome, user! You have successfully logged in."
@@ -2766,16 +2861,17 @@ def sqli_level10():
     challenge = Challenge.query.filter_by(name="NoSQL Injection").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('sqli/sqli_level10.html', flag=flag, sqli_detected=sqli_detected,
                           error=error, success=success, documents=documents)
 
 # SQL Injection Level 11 - GraphQL Injection
 @app.route('/sqli/level11', methods=['GET', 'POST'])
+@login_required
 def sqli_level11():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     sqli_detected = False
     query = None
@@ -2985,9 +3081,10 @@ def sqli_level11():
 
 # SQL Injection Level 12 - ORM-based SQL Injection
 @app.route('/sqli/level12', methods=['GET', 'POST'])
+@login_required
 def sqli_level12():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     sqli_detected = False
     department = request.form.get('department', 'IT')
@@ -3138,7 +3235,7 @@ def sqli_level12():
                 if challenge:
                     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                     if challenge.id not in completed_ids:
-                        update_user_progress(machine_id, challenge.id, challenge.points)
+                        update_user_progress(user.id, challenge.id, challenge.points)
             elif search_term:
                 # Normal search - filter employees by department and search term
                 for employee in default_employees[department]:
@@ -3160,16 +3257,17 @@ def sqli_level12():
     challenge = Challenge.query.filter_by(name="ORM-based SQL Injection").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('sqli/sqli_level12.html', flag=flag, sqli_detected=sqli_detected,
                           department=department, search_term=search_term, employees=employees, error=error)
 
 # SQL Injection Level 13 - Out-of-band SQL Injection
 @app.route('/sqli/level13', methods=['GET', 'POST'])
+@login_required
 def sqli_level13():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     sqli_detected = False
     search_term = request.form.get('search_term', '')
@@ -3251,7 +3349,7 @@ def sqli_level13():
                 if challenge:
                     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                     if challenge.id not in completed_ids:
-                        update_user_progress(machine_id, challenge.id, challenge.points)
+                        update_user_progress(user.id, challenge.id, challenge.points)
 
                 # Return all stocks for the search results
                 stocks = default_stocks
@@ -3274,16 +3372,17 @@ def sqli_level13():
     challenge = Challenge.query.filter_by(name="Out-of-band SQL Injection").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('sqli/sqli_level13.html', flag=flag, sqli_detected=sqli_detected,
                           search_term=search_term, stocks=stocks, error=error, dns_logs=dns_logs)
 
 # SQL Injection Level 14 - SQL Injection with Advanced WAF Bypass
 @app.route('/sqli/level14', methods=['GET', 'POST'])
+@login_required
 def sqli_level14():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     sqli_detected = False
     category = request.form.get('category', 'Electronics')
@@ -3365,14 +3464,14 @@ def sqli_level14():
                     if challenge:
                         completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                         if challenge.id not in completed_ids:
-                            update_user_progress(machine_id, challenge.id, challenge.points)
+                            update_user_progress(user.id, challenge.id, challenge.points)
                     break
 
     # Generate a flag for this challenge only if completed
     challenge = Challenge.query.filter_by(name="SQL Injection with Advanced WAF Bypass").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('sqli/sqli_level14.html', flag=flag, sqli_detected=sqli_detected,
                           category=category, search_term=search_term, products=products,
@@ -3380,9 +3479,10 @@ def sqli_level14():
 
 # SQL Injection Level 15 - SQL Injection via XML
 @app.route('/sqli/level15', methods=['GET', 'POST'])
+@login_required
 def sqli_level15():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     sqli_detected = False
     xml_data = None
@@ -3425,7 +3525,7 @@ def sqli_level15():
                     if challenge:
                         completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                         if challenge.id not in completed_ids:
-                            update_user_progress(machine_id, challenge.id, challenge.points)
+                            update_user_progress(user.id, challenge.id, challenge.points)
                     break
 
             # If no SQL injection detected, return normal reports
@@ -3452,16 +3552,17 @@ def sqli_level15():
     challenge = Challenge.query.filter_by(name="SQL Injection via XML").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('sqli/sqli_level15.html', flag=flag, sqli_detected=sqli_detected,
                           xml_data=xml_data, reports=reports, error=error)
 
 # SQL Injection Level 16 - SQL Injection in WebSockets
 @app.route('/sqli/level16', methods=['GET', 'POST'])
+@login_required
 def sqli_level16():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     sqli_detected = False
     ws_message = None
@@ -3480,7 +3581,7 @@ def sqli_level16():
                     # Add challenge to completed challenges
                     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                     if challenge.id not in completed_ids:
-                        update_user_progress(machine_id, challenge.id, challenge.points)
+                        update_user_progress(user.id, challenge.id, challenge.points)
 
                     return jsonify({"success": True})
                 return jsonify({"success": False, "error": "Challenge not found"})
@@ -3489,17 +3590,18 @@ def sqli_level16():
     challenge = Challenge.query.filter_by(name="SQL Injection in WebSockets").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('sqli/sqli_level16.html', flag=flag, sqli_detected=sqli_detected,
                           ws_message=ws_message)
 
 # SQL Injection Level 17 - SQL Injection in Mobile App Backend
 @app.route('/sqli/level17', methods=['GET', 'POST'])
+@login_required
 def sqli_level17():
     import json
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     sqli_detected = False
     api_request = None
@@ -3547,7 +3649,7 @@ def sqli_level17():
                     if challenge:
                         completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                         if challenge.id not in completed_ids:
-                            update_user_progress(machine_id, challenge.id, challenge.points)
+                            update_user_progress(user.id, challenge.id, challenge.points)
                     break
 
             # If no SQL injection detected, return normal products
@@ -3599,19 +3701,20 @@ def sqli_level17():
     challenge = Challenge.query.filter_by(name="SQL Injection in Mobile App Backend").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('sqli/sqli_level17.html', flag=flag, sqli_detected=sqli_detected,
                           api_request=api_request, api_response=api_response)
 
 # SQL Injection Level 18 - SQL Injection in Cloud Functions
 @app.route('/sqli/level18', methods=['GET', 'POST'])
+@login_required
 def sqli_level18():
     import json
     import random
     import datetime
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     sqli_detected = False
     event_data = None
@@ -3693,7 +3796,7 @@ def sqli_level18():
                         if challenge:
                             completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                             if challenge.id not in completed_ids:
-                                update_user_progress(machine_id, challenge.id, challenge.points)
+                                update_user_progress(user.id, challenge.id, challenge.points)
                     else:
                         function_response = json.dumps({
                             "status": "success",
@@ -3768,7 +3871,7 @@ def sqli_level18():
     challenge = Challenge.query.filter_by(name="SQL Injection in Cloud Functions").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('sqli/sqli_level18.html', flag=flag, sqli_detected=sqli_detected,
                           event_data=event_data, function_response=function_response,
@@ -3777,9 +3880,10 @@ def sqli_level18():
 
 # SQL Injection Level 19 - SQL Injection via File Upload
 @app.route('/sqli/level19', methods=['GET', 'POST'])
+@login_required
 def sqli_level19():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     sqli_detected = False
     csv_content = None
@@ -3858,7 +3962,7 @@ def sqli_level19():
                                         if challenge:
                                             completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                                             if challenge.id not in completed_ids:
-                                                update_user_progress(machine_id, challenge.id, challenge.points)
+                                                update_user_progress(user.id, challenge.id, challenge.points)
                                         break
 
                                 if not sqli_detected:
@@ -3890,7 +3994,7 @@ def sqli_level19():
     challenge = Challenge.query.filter_by(name="SQL Injection via File Upload").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('sqli/sqli_level19.html', flag=flag, sqli_detected=sqli_detected,
                           csv_content=csv_content, csv_preview=csv_preview, upload_success=upload_success,
@@ -3900,9 +4004,10 @@ def sqli_level19():
 
 # SQL Injection Level 20 - SQL Injection in Stored Procedures
 @app.route('/sqli/level20', methods=['GET', 'POST'])
+@login_required
 def sqli_level20():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     sqli_detected = False
     category = request.form.get('category', 'Electronics')
@@ -3945,7 +4050,7 @@ def sqli_level20():
                         if challenge:
                             completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                             if challenge.id not in completed_ids:
-                                update_user_progress(machine_id, challenge.id, challenge.points)
+                                update_user_progress(user.id, challenge.id, challenge.points)
                     else:
                         result_rows = [
                             [999, "Suspicious query detected", "2023-01-01 00:00:00", "true"]
@@ -3987,7 +4092,7 @@ def sqli_level20():
     challenge = Challenge.query.filter_by(name="SQL Injection in Stored Procedures").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('sqli/sqli_level20.html', flag=flag, sqli_detected=sqli_detected,
                           category=category, search_term=search_term, procedure_result=procedure_result,
@@ -3996,9 +4101,10 @@ def sqli_level20():
 
 # SQL Injection Level 21 - SQL Injection in GraphQL API
 @app.route('/sqli/level21', methods=['GET', 'POST'])
+@login_required
 def sqli_level21():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     sqli_detected = False
     graphql_query = None
@@ -4039,7 +4145,7 @@ def sqli_level21():
                     if challenge:
                         completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                         if challenge.id not in completed_ids:
-                            update_user_progress(machine_id, challenge.id, challenge.points)
+                            update_user_progress(user.id, challenge.id, challenge.points)
                     break
 
             # If no SQL injection detected, return normal response
@@ -4133,16 +4239,17 @@ def sqli_level21():
     challenge = Challenge.query.filter_by(name="SQL Injection in GraphQL API").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('sqli/sqli_level21.html', flag=flag, sqli_detected=sqli_detected,
                           graphql_query=graphql_query, graphql_result=graphql_result)
 
 # SQL Injection Level 22 - SQL Injection in NoSQL Database
 @app.route('/sqli/level22', methods=['GET', 'POST'])
+@login_required
 def sqli_level22():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     sqli_detected = False
     collection = request.form.get('collection', 'articles')
@@ -4183,7 +4290,7 @@ def sqli_level22():
                 if challenge:
                     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                     if challenge.id not in completed_ids:
-                        update_user_progress(machine_id, challenge.id, challenge.points)
+                        update_user_progress(user.id, challenge.id, challenge.points)
 
             # If no NoSQL injection detected, return normal results
             elif not sqli_detected:
@@ -4281,16 +4388,17 @@ def sqli_level22():
     challenge = Challenge.query.filter_by(name="SQL Injection in NoSQL Database").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('sqli/sqli_level22.html', flag=flag, sqli_detected=sqli_detected,
                           collection=collection, query=query, results=results, error=error)
 
 # SQL Injection Level 23 - SQL Injection in ORM Layer
 @app.route('/sqli/level23', methods=['GET', 'POST'])
+@login_required
 def sqli_level23():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     sqli_detected = False
     search_term = request.form.get('search_term', '')
@@ -4339,7 +4447,7 @@ def sqli_level23():
                         if challenge:
                             completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                             if challenge.id not in completed_ids:
-                                update_user_progress(machine_id, challenge.id, challenge.points)
+                                update_user_progress(user.id, challenge.id, challenge.points)
                     else:
                         results = [
                             {
@@ -4432,7 +4540,7 @@ def sqli_level23():
     challenge = Challenge.query.filter_by(name="SQL Injection in ORM Layer").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('sqli/sqli_level23.html', flag=flag, sqli_detected=sqli_detected,
                           search_term=search_term, filter_by=filter_by, sort_by=sort_by,
@@ -4673,9 +4781,10 @@ def solutions(level):
 
 # Command Injection Level 1 - Basic Command Injection
 @app.route('/cmdi/level1', methods=['GET', 'POST'])
+@login_required
 def cmdi_level1():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     cmdi_detected = False
     hostname = request.form.get('hostname', '')
@@ -4708,7 +4817,7 @@ def cmdi_level1():
                     if challenge:
                         completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                         if challenge.id not in completed_ids:
-                            update_user_progress(machine_id, challenge.id, challenge.points)
+                            update_user_progress(user.id, challenge.id, challenge.points)
                     break
             else:
                 # Normal ping output
@@ -4721,16 +4830,17 @@ def cmdi_level1():
     challenge = Challenge.query.filter_by(name="Basic Command Injection").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('cmdi/cmdi_level1.html', flag=flag, cmdi_detected=cmdi_detected,
                           hostname=hostname, ping_result=ping_result, challenge=challenge)
 
 # Command Injection Level 2 - Command Injection with Filters
 @app.route('/cmdi/level2', methods=['GET', 'POST'])
+@login_required
 def cmdi_level2():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     cmdi_detected = False
     command = request.form.get('command', '')
@@ -4768,7 +4878,7 @@ def cmdi_level2():
                     if challenge:
                         completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                         if challenge.id not in completed_ids:
-                            update_user_progress(machine_id, challenge.id, challenge.points)
+                            update_user_progress(user.id, challenge.id, challenge.points)
                     break
             else:
                 # Normal deployment output
@@ -4779,16 +4889,17 @@ def cmdi_level2():
     challenge = Challenge.query.filter_by(name="Command Injection with Filters").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('cmdi/cmdi_level2.html', flag=flag, cmdi_detected=cmdi_detected,
                           command=command, output=output, filtered=filtered, challenge=challenge)
 
 # Command Injection Level 3 - Blind Command Injection
 @app.route('/cmdi/level3', methods=['GET', 'POST'])
+@login_required
 def cmdi_level3():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     cmdi_detected = False
     email = request.form.get('email', '')
@@ -4810,7 +4921,7 @@ def cmdi_level3():
                     if challenge:
                         completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                         if challenge.id not in completed_ids:
-                            update_user_progress(machine_id, challenge.id, challenge.points)
+                            update_user_progress(user.id, challenge.id, challenge.points)
                     break
             else:
                 status = "Email notification sent successfully"
@@ -4819,16 +4930,17 @@ def cmdi_level3():
     challenge = Challenge.query.filter_by(name="Blind Command Injection").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('cmdi/cmdi_level3.html', flag=flag, cmdi_detected=cmdi_detected,
                           email=email, status=status, challenge=challenge)
 
 # Command Injection Level 4 - Command Injection via File Upload
 @app.route('/cmdi/level4', methods=['GET', 'POST'])
+@login_required
 def cmdi_level4():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     cmdi_detected = False
     filename = request.form.get('filename', '')
@@ -4857,7 +4969,7 @@ def cmdi_level4():
                     if challenge:
                         completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                         if challenge.id not in completed_ids:
-                            update_user_progress(machine_id, challenge.id, challenge.points)
+                            update_user_progress(user.id, challenge.id, challenge.points)
                     break
             else:
                 upload_result = f"Processing file: {filename}\n"
@@ -4867,16 +4979,17 @@ def cmdi_level4():
     challenge = Challenge.query.filter_by(name="Command Injection via File Upload").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('cmdi/cmdi_level4.html', flag=flag, cmdi_detected=cmdi_detected,
                           filename=filename, upload_result=upload_result, challenge=challenge)
 
 # Command Injection Level 5 - Command Injection in API Parameters
 @app.route('/cmdi/level5', methods=['GET', 'POST'])
+@login_required
 def cmdi_level5():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     cmdi_detected = False
     service_name = request.form.get('service_name', '')
@@ -4905,7 +5018,7 @@ def cmdi_level5():
                     if challenge:
                         completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                         if challenge.id not in completed_ids:
-                            update_user_progress(machine_id, challenge.id, challenge.points)
+                            update_user_progress(user.id, challenge.id, challenge.points)
                     break
             else:
                 api_result = f"Checking service status: {service_name}\n"
@@ -4916,16 +5029,17 @@ def cmdi_level5():
     challenge = Challenge.query.filter_by(name="Command Injection in API Parameters").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('cmdi/cmdi_level5.html', flag=flag, cmdi_detected=cmdi_detected,
                           service_name=service_name, api_result=api_result, challenge=challenge)
 
 # Command Injection Level 6 - Command Injection with WAF Bypass
 @app.route('/cmdi/level6', methods=['GET', 'POST'])
+@login_required
 def cmdi_level6():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     cmdi_detected = False
     target = request.form.get('target', '')
@@ -4966,7 +5080,7 @@ def cmdi_level6():
                         if challenge:
                             completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                             if challenge.id not in completed_ids:
-                                update_user_progress(machine_id, challenge.id, challenge.points)
+                                update_user_progress(user.id, challenge.id, challenge.points)
                         break
                 else:
                     scan_result = f"Scanning target: {target}\n"
@@ -4977,16 +5091,17 @@ def cmdi_level6():
     challenge = Challenge.query.filter_by(name="Command Injection with WAF Bypass").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('cmdi/cmdi_level6.html', flag=flag, cmdi_detected=cmdi_detected,
                           target=target, scan_result=scan_result, waf_blocked=waf_blocked, challenge=challenge)
 
 # Command Injection Level 7 - Time-Based Blind Command Injection
 @app.route('/cmdi/level7', methods=['GET', 'POST'])
+@login_required
 def cmdi_level7():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     cmdi_detected = False
     hostname = request.form.get('hostname', '')
@@ -5028,7 +5143,7 @@ def cmdi_level7():
                         if challenge:
                             completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                             if challenge.id not in completed_ids:
-                                update_user_progress(machine_id, challenge.id, challenge.points)
+                                update_user_progress(user.id, challenge.id, challenge.points)
                     elif 'grep' in hostname and 'flag' in hostname:
                         check_result += "Server status: Online\n"
                         # Mark challenge as completed
@@ -5036,7 +5151,7 @@ def cmdi_level7():
                         if challenge:
                             completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                             if challenge.id not in completed_ids:
-                                update_user_progress(machine_id, challenge.id, challenge.points)
+                                update_user_progress(user.id, challenge.id, challenge.points)
                     else:
                         check_result += "Server status: Online\n"
 
@@ -5055,7 +5170,7 @@ def cmdi_level7():
     challenge = Challenge.query.filter_by(name="Time-Based Blind Command Injection").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('cmdi/cmdi_level7.html', flag=flag, cmdi_detected=cmdi_detected,
                           hostname=hostname, check_result=check_result,
@@ -5063,9 +5178,10 @@ def cmdi_level7():
 
 # Command Injection Level 8 - Command Injection with Burp Suite
 @app.route('/cmdi/level8', methods=['GET', 'POST'])
+@login_required
 def cmdi_level8():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     cmdi_detected = False
     device_id = request.form.get('device_id', '')
@@ -5095,7 +5211,7 @@ def cmdi_level8():
                     if challenge:
                         completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                         if challenge.id not in completed_ids:
-                            update_user_progress(machine_id, challenge.id, challenge.points)
+                            update_user_progress(user.id, challenge.id, challenge.points)
                     break
             else:
                 management_result = f"Managing device: {device_id}\n"
@@ -5106,16 +5222,17 @@ def cmdi_level8():
     challenge = Challenge.query.filter_by(name="Command Injection with Burp Suite").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('cmdi/cmdi_level8.html', flag=flag, cmdi_detected=cmdi_detected,
                           device_id=device_id, management_result=management_result, challenge=challenge)
 
 # Command Injection Level 9 - Command Injection in JSON APIs
 @app.route('/cmdi/level9', methods=['GET', 'POST'])
+@login_required
 def cmdi_level9():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     cmdi_detected = False
     build_config = request.form.get('build_config', '{"branch": "main", "environment": "production"}')
@@ -5149,7 +5266,7 @@ def cmdi_level9():
                                 if challenge:
                                     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                                     if challenge.id not in completed_ids:
-                                        update_user_progress(machine_id, challenge.id, challenge.points)
+                                        update_user_progress(user.id, challenge.id, challenge.points)
                                 break
                         if cmdi_detected:
                             break
@@ -5166,16 +5283,17 @@ def cmdi_level9():
     challenge = Challenge.query.filter_by(name="Command Injection in JSON APIs").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('cmdi/cmdi_level9.html', flag=flag, cmdi_detected=cmdi_detected,
                           build_config=build_config, build_result=build_result, challenge=challenge)
 
 # Command Injection Level 10 - Command Injection via Environment Variables
 @app.route('/cmdi/level10', methods=['GET', 'POST'])
+@login_required
 def cmdi_level10():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     cmdi_detected = False
     app_name = request.form.get('app_name', '')
@@ -5205,7 +5323,7 @@ def cmdi_level10():
                     if challenge:
                         completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                         if challenge.id not in completed_ids:
-                            update_user_progress(machine_id, challenge.id, challenge.points)
+                            update_user_progress(user.id, challenge.id, challenge.points)
                     break
             else:
                 deploy_result = f"Deploying application: {app_name}\n"
@@ -5216,16 +5334,17 @@ def cmdi_level10():
     challenge = Challenge.query.filter_by(name="Command Injection via Environment Variables").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('cmdi/cmdi_level10.html', flag=flag, cmdi_detected=cmdi_detected,
                           app_name=app_name, env_vars=env_vars, deploy_result=deploy_result, challenge=challenge)
 
 # Command Injection Level 11 - Command Injection in XML Processing
 @app.route('/cmdi/level11', methods=['GET', 'POST'])
+@login_required
 def cmdi_level11():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     cmdi_detected = False
     xml_config = request.form.get('xml_config', '<?xml version="1.0"?><config><service>web</service><action>restart</action></config>')
@@ -5254,7 +5373,7 @@ def cmdi_level11():
                     if challenge:
                         completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                         if challenge.id not in completed_ids:
-                            update_user_progress(machine_id, challenge.id, challenge.points)
+                            update_user_progress(user.id, challenge.id, challenge.points)
                     break
             else:
                 processing_result = "Processing XML configuration...\n"
@@ -5264,16 +5383,17 @@ def cmdi_level11():
     challenge = Challenge.query.filter_by(name="Command Injection in XML Processing").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('cmdi/cmdi_level11.html', flag=flag, cmdi_detected=cmdi_detected,
                           xml_config=xml_config, processing_result=processing_result, challenge=challenge)
 
 # Command Injection Level 12 - Command Injection with Nmap
 @app.route('/cmdi/level12', methods=['GET', 'POST'])
+@login_required
 def cmdi_level12():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     cmdi_detected = False
     target_network = request.form.get('target_network', '')
@@ -5308,7 +5428,7 @@ def cmdi_level12():
                     if challenge:
                         completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                         if challenge.id not in completed_ids:
-                            update_user_progress(machine_id, challenge.id, challenge.points)
+                            update_user_progress(user.id, challenge.id, challenge.points)
                     break
             else:
                 nmap_result = f"Starting Nmap scan on {target_network}\n"
@@ -5319,16 +5439,17 @@ def cmdi_level12():
     challenge = Challenge.query.filter_by(name="Command Injection with Nmap").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('cmdi/cmdi_level12.html', flag=flag, cmdi_detected=cmdi_detected,
                           target_network=target_network, scan_options=scan_options, nmap_result=nmap_result, challenge=challenge)
 
 # Command Injection Level 13 - Command Injection in GraphQL
 @app.route('/cmdi/level13', methods=['GET', 'POST'])
+@login_required
 def cmdi_level13():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     cmdi_detected = False
     graphql_query = request.form.get('graphql_query', 'query { systemInfo(hostname: "localhost") { status } }')
@@ -5367,7 +5488,7 @@ def cmdi_level13():
                     if challenge:
                         completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                         if challenge.id not in completed_ids:
-                            update_user_progress(machine_id, challenge.id, challenge.points)
+                            update_user_progress(user.id, challenge.id, challenge.points)
                     break
             else:
                 query_result = "Executing GraphQL query...\n"
@@ -5383,16 +5504,17 @@ def cmdi_level13():
     challenge = Challenge.query.filter_by(name="Command Injection in GraphQL").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('cmdi/cmdi_level13.html', flag=flag, cmdi_detected=cmdi_detected,
                           graphql_query=graphql_query, query_result=query_result, challenge=challenge)
 
 # Command Injection Level 14 - Command Injection via WebSockets
 @app.route('/cmdi/level14', methods=['GET', 'POST'])
+@login_required
 def cmdi_level14():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     cmdi_detected = False
     websocket_message = request.form.get('websocket_message', '{"type": "monitor", "target": "server1", "action": "status"}')
@@ -5428,7 +5550,7 @@ def cmdi_level14():
                                 if challenge:
                                     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                                     if challenge.id not in completed_ids:
-                                        update_user_progress(machine_id, challenge.id, challenge.points)
+                                        update_user_progress(user.id, challenge.id, challenge.points)
                                 break
                         if cmdi_detected:
                             break
@@ -5445,16 +5567,17 @@ def cmdi_level14():
     challenge = Challenge.query.filter_by(name="Command Injection via WebSockets").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('cmdi/cmdi_level14.html', flag=flag, cmdi_detected=cmdi_detected,
                           websocket_message=websocket_message, monitoring_result=monitoring_result, challenge=challenge)
 
 # Command Injection Level 15 - Command Injection in Serverless Functions
 @app.route('/cmdi/level15', methods=['GET', 'POST'])
+@login_required
 def cmdi_level15():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     cmdi_detected = False
     function_payload = request.form.get('function_payload', '{"event": "process_data", "input": "sample.txt", "options": "--format json"}')
@@ -5492,7 +5615,7 @@ def cmdi_level15():
                                 if challenge:
                                     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                                     if challenge.id not in completed_ids:
-                                        update_user_progress(machine_id, challenge.id, challenge.points)
+                                        update_user_progress(user.id, challenge.id, challenge.points)
                                 break
                         if cmdi_detected:
                             break
@@ -5509,16 +5632,17 @@ def cmdi_level15():
     challenge = Challenge.query.filter_by(name="Command Injection in Serverless Functions").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('cmdi/cmdi_level15.html', flag=flag, cmdi_detected=cmdi_detected,
                           function_payload=function_payload, lambda_result=lambda_result, challenge=challenge)
 
 # Command Injection Level 16 - Command Injection with Process Substitution
 @app.route('/cmdi/level16', methods=['GET', 'POST'])
+@login_required
 def cmdi_level16():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     cmdi_detected = False
     automation_script = request.form.get('automation_script', 'backup_database.sh')
@@ -5551,7 +5675,7 @@ def cmdi_level16():
                     if challenge:
                         completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                         if challenge.id not in completed_ids:
-                            update_user_progress(machine_id, challenge.id, challenge.points)
+                            update_user_progress(user.id, challenge.id, challenge.points)
                     break
             else:
                 execution_result = f"Executing automation script: {automation_script}\n"
@@ -5562,7 +5686,7 @@ def cmdi_level16():
     challenge = Challenge.query.filter_by(name="Command Injection with Process Substitution").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('cmdi/cmdi_level16.html', flag=flag, cmdi_detected=cmdi_detected,
                           automation_script=automation_script, script_params=script_params,
@@ -5570,9 +5694,10 @@ def cmdi_level16():
 
 # Command Injection Level 17 - Command Injection in Container Environments
 @app.route('/cmdi/level17', methods=['GET', 'POST'])
+@login_required
 def cmdi_level17():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     cmdi_detected = False
     container_image = request.form.get('container_image', 'nginx:latest')
@@ -5609,7 +5734,7 @@ def cmdi_level17():
                     if challenge:
                         completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                         if challenge.id not in completed_ids:
-                            update_user_progress(machine_id, challenge.id, challenge.points)
+                            update_user_progress(user.id, challenge.id, challenge.points)
                     break
             else:
                 docker_result = f"Creating container from image: {container_image}\n"
@@ -5620,7 +5745,7 @@ def cmdi_level17():
     challenge = Challenge.query.filter_by(name="Command Injection in Container Environments").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('cmdi/cmdi_level17.html', flag=flag, cmdi_detected=cmdi_detected,
                           container_image=container_image, container_cmd=container_cmd,
@@ -5628,9 +5753,10 @@ def cmdi_level17():
 
 # Command Injection Level 18 - Command Injection via Template Engines
 @app.route('/cmdi/level18', methods=['GET', 'POST'])
+@login_required
 def cmdi_level18():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     cmdi_detected = False
     report_template = request.form.get('report_template', 'Report for {{customer_name}} generated on {{date}}')
@@ -5672,7 +5798,7 @@ def cmdi_level18():
                     if challenge:
                         completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                         if challenge.id not in completed_ids:
-                            update_user_progress(machine_id, challenge.id, challenge.points)
+                            update_user_progress(user.id, challenge.id, challenge.points)
                 else:
                     # Safe template rendering
                     safe_template = report_template.replace('{{customer_name}}', data.get('customer_name', 'Unknown'))
@@ -5686,7 +5812,7 @@ def cmdi_level18():
     challenge = Challenge.query.filter_by(name="Command Injection via Template Engines").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('cmdi/cmdi_level18.html', flag=flag, cmdi_detected=cmdi_detected,
                           report_template=report_template, template_data=template_data,
@@ -5694,9 +5820,10 @@ def cmdi_level18():
 
 # Command Injection Level 19 - Command Injection in Message Queues
 @app.route('/cmdi/level19', methods=['GET', 'POST'])
+@login_required
 def cmdi_level19():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     cmdi_detected = False
     queue_message = request.form.get('queue_message', '{"task": "process_file", "filename": "data.csv", "options": "--format json"}')
@@ -5733,7 +5860,7 @@ def cmdi_level19():
                                 if challenge:
                                     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                                     if challenge.id not in completed_ids:
-                                        update_user_progress(machine_id, challenge.id, challenge.points)
+                                        update_user_progress(user.id, challenge.id, challenge.points)
                                 break
                         if cmdi_detected:
                             break
@@ -5750,16 +5877,17 @@ def cmdi_level19():
     challenge = Challenge.query.filter_by(name="Command Injection in Message Queues").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('cmdi/cmdi_level19.html', flag=flag, cmdi_detected=cmdi_detected,
                           queue_message=queue_message, processing_result=processing_result, challenge=challenge)
 
 # Command Injection Level 20 - Command Injection with Out-of-Band
 @app.route('/cmdi/level20', methods=['GET', 'POST'])
+@login_required
 def cmdi_level20():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     cmdi_detected = False
     system_config = request.form.get('system_config', 'network.interface=eth0')
@@ -5795,7 +5923,7 @@ def cmdi_level20():
                 if challenge:
                     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                     if challenge.id not in completed_ids:
-                        update_user_progress(machine_id, challenge.id, challenge.points)
+                        update_user_progress(user.id, challenge.id, challenge.points)
             else:
                 config_result = "Industrial Control System Configuration\n"
                 config_result += "Configuration applied successfully\n"
@@ -5805,7 +5933,7 @@ def cmdi_level20():
     challenge = Challenge.query.filter_by(name="Command Injection with Out-of-Band").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('cmdi/cmdi_level20.html', flag=flag, cmdi_detected=cmdi_detected,
                           system_config=system_config, webhook_url=webhook_url,
@@ -5813,9 +5941,10 @@ def cmdi_level20():
 
 # Command Injection Level 21 - Command Injection in Cloud Functions
 @app.route('/cmdi/level21', methods=['GET', 'POST'])
+@login_required
 def cmdi_level21():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     cmdi_detected = False
     function_code = request.form.get('function_code', 'def handler(event, context):\n    return {"status": "success"}')
@@ -5850,7 +5979,7 @@ def cmdi_level21():
                     if challenge:
                         completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                         if challenge.id not in completed_ids:
-                            update_user_progress(machine_id, challenge.id, challenge.points)
+                            update_user_progress(user.id, challenge.id, challenge.points)
                     break
             else:
                 cloud_result = "Google Cloud Functions Deployment\n"
@@ -5861,7 +5990,7 @@ def cmdi_level21():
     challenge = Challenge.query.filter_by(name="Command Injection in Cloud Functions").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('cmdi/cmdi_level21.html', flag=flag, cmdi_detected=cmdi_detected,
                           function_code=function_code, runtime_env=runtime_env,
@@ -5869,9 +5998,10 @@ def cmdi_level21():
 
 # Command Injection Level 22 - Command Injection via SSH Commands
 @app.route('/cmdi/level22', methods=['GET', 'POST'])
+@login_required
 def cmdi_level22():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     cmdi_detected = False
     ssh_host = request.form.get('ssh_host', 'production-server.company.com')
@@ -5905,7 +6035,7 @@ def cmdi_level22():
                     if challenge:
                         completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                         if challenge.id not in completed_ids:
-                            update_user_progress(machine_id, challenge.id, challenge.points)
+                            update_user_progress(user.id, challenge.id, challenge.points)
                     break
             else:
                 ssh_result = f"SSH Connection to {ssh_host}\n"
@@ -5916,7 +6046,7 @@ def cmdi_level22():
     challenge = Challenge.query.filter_by(name="Command Injection via SSH Commands").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('cmdi/cmdi_level22.html', flag=flag, cmdi_detected=cmdi_detected,
                           ssh_host=ssh_host, ssh_command=ssh_command,
@@ -5924,9 +6054,10 @@ def cmdi_level22():
 
 # Command Injection Level 23 - Advanced Command Injection Chaining
 @app.route('/cmdi/level23', methods=['GET', 'POST'])
+@login_required
 def cmdi_level23():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     cmdi_detected = False
     infrastructure_config = request.form.get('infrastructure_config', '{"terraform": {"provider": "aws", "region": "us-east-1"}, "ansible": {"playbook": "deploy.yml", "inventory": "production"}}')
@@ -5982,7 +6113,7 @@ def cmdi_level23():
                     if challenge:
                         completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                         if challenge.id not in completed_ids:
-                            update_user_progress(machine_id, challenge.id, challenge.points)
+                            update_user_progress(user.id, challenge.id, challenge.points)
                 else:
                     deployment_result = "Enterprise Infrastructure Deployment\n"
                     deployment_result += "Deployment completed successfully\n"
@@ -5995,16 +6126,17 @@ def cmdi_level23():
     challenge = Challenge.query.filter_by(name="Advanced Command Injection Chaining").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('cmdi/cmdi_level23.html', flag=flag, cmdi_detected=cmdi_detected,
                           infrastructure_config=infrastructure_config, deployment_result=deployment_result, challenge=challenge)
 
 # SSRF Level 1 - Basic SSRF
 @app.route('/ssrf/level1', methods=['GET', 'POST'])
+@login_required
 def ssrf_level1():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     ssrf_detected = False
     url = request.form.get('url', '')
@@ -6042,7 +6174,7 @@ def ssrf_level1():
                     if challenge:
                         completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                         if challenge.id not in completed_ids:
-                            update_user_progress(machine_id, challenge.id, challenge.points)
+                            update_user_progress(user.id, challenge.id, challenge.points)
                     break
             else:
                 # Normal external URL fetch simulation
@@ -6057,16 +6189,17 @@ def ssrf_level1():
     challenge = Challenge.query.filter_by(name="Basic SSRF").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('ssrf/ssrf_level1.html', flag=flag, ssrf_detected=ssrf_detected,
                           url=url, fetch_result=fetch_result, challenge=challenge)
 
 # SSRF Level 2 - SSRF with Internal Network Scanning
 @app.route('/ssrf/level2', methods=['GET', 'POST'])
+@login_required
 def ssrf_level2():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     ssrf_detected = False
     target_url = request.form.get('target_url', '')
@@ -6108,7 +6241,7 @@ def ssrf_level2():
                     if challenge:
                         completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                         if challenge.id not in completed_ids:
-                            update_user_progress(machine_id, challenge.id, challenge.points)
+                            update_user_progress(user.id, challenge.id, challenge.points)
                     break
             else:
                 # Normal external URL
@@ -6120,16 +6253,17 @@ def ssrf_level2():
     challenge = Challenge.query.filter_by(name="SSRF with Internal Network Scanning").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('ssrf/ssrf_level2.html', flag=flag, ssrf_detected=ssrf_detected,
                           target_url=target_url, scan_result=scan_result, challenge=challenge)
 
 # SSRF Level 3 - Cloud Metadata SSRF
 @app.route('/ssrf/level3', methods=['GET', 'POST'])
+@login_required
 def ssrf_level3():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     ssrf_detected = False
     webhook_url = request.form.get('webhook_url', '')
@@ -6186,7 +6320,7 @@ def ssrf_level3():
                     if challenge:
                         completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                         if challenge.id not in completed_ids:
-                            update_user_progress(machine_id, challenge.id, challenge.points)
+                            update_user_progress(user.id, challenge.id, challenge.points)
                     break
             else:
                 # Normal webhook URL
@@ -6198,16 +6332,17 @@ def ssrf_level3():
     challenge = Challenge.query.filter_by(name="Cloud Metadata SSRF").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('ssrf/ssrf_level3.html', flag=flag, ssrf_detected=ssrf_detected,
                           webhook_url=webhook_url, metadata_result=metadata_result, challenge=challenge)
 
 # SSRF Level 4 - Blind SSRF with DNS Exfiltration
 @app.route('/ssrf/level4', methods=['GET', 'POST'])
+@login_required
 def ssrf_level4():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     ssrf_detected = False
     callback_url = request.form.get('callback_url', '')
@@ -6237,7 +6372,7 @@ def ssrf_level4():
                     if challenge:
                         completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                         if challenge.id not in completed_ids:
-                            update_user_progress(machine_id, challenge.id, challenge.points)
+                            update_user_progress(user.id, challenge.id, challenge.points)
                     break
             else:
                 # Normal callback URL
@@ -6249,16 +6384,17 @@ def ssrf_level4():
     challenge = Challenge.query.filter_by(name="Blind SSRF with DNS Exfiltration").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('ssrf/ssrf_level4.html', flag=flag, ssrf_detected=ssrf_detected,
                           callback_url=callback_url, dns_result=dns_result, challenge=challenge)
 
 # SSRF Level 5 - SSRF with Basic Filters
 @app.route('/ssrf/level5', methods=['GET', 'POST'])
+@login_required
 def ssrf_level5():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     ssrf_detected = False
     image_url = request.form.get('image_url', '')
@@ -6299,7 +6435,7 @@ def ssrf_level5():
                         if challenge:
                             completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                             if challenge.id not in completed_ids:
-                                update_user_progress(machine_id, challenge.id, challenge.points)
+                                update_user_progress(user.id, challenge.id, challenge.points)
                         break
 
                 if not bypass_detected:
@@ -6311,16 +6447,17 @@ def ssrf_level5():
     challenge = Challenge.query.filter_by(name="SSRF with Basic Filters").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('ssrf/ssrf_level5.html', flag=flag, ssrf_detected=ssrf_detected,
                           image_url=image_url, filter_result=filter_result, challenge=challenge)
 
 # SSRF Level 6 - SSRF via File Upload
 @app.route('/ssrf/level6', methods=['GET', 'POST'])
+@login_required
 def ssrf_level6():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     ssrf_detected = False
     svg_content = request.form.get('svg_content', '')
@@ -6356,7 +6493,7 @@ def ssrf_level6():
                             if challenge:
                                 completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                                 if challenge.id not in completed_ids:
-                                    update_user_progress(machine_id, challenge.id, challenge.points)
+                                    update_user_progress(user.id, challenge.id, challenge.points)
                             break
                     else:
                         upload_result = f"Processing SVG file...\n"
@@ -6373,16 +6510,17 @@ def ssrf_level6():
     challenge = Challenge.query.filter_by(name="SSRF via File Upload").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('ssrf/ssrf_level6.html', flag=flag, ssrf_detected=ssrf_detected,
                           svg_content=svg_content, upload_result=upload_result, challenge=challenge)
 
 # SSRF Level 7 - SSRF in Webhooks
 @app.route('/ssrf/level7', methods=['GET', 'POST'])
+@login_required
 def ssrf_level7():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     ssrf_detected = False
     notification_url = request.form.get('notification_url', '')
@@ -6410,7 +6548,7 @@ def ssrf_level7():
                     if challenge:
                         completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                         if challenge.id not in completed_ids:
-                            update_user_progress(machine_id, challenge.id, challenge.points)
+                            update_user_progress(user.id, challenge.id, challenge.points)
                     break
             else:
                 webhook_result = f"Sending payment notification to: {notification_url}\n"
@@ -6421,16 +6559,17 @@ def ssrf_level7():
     challenge = Challenge.query.filter_by(name="SSRF in Webhooks").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('ssrf/ssrf_level7.html', flag=flag, ssrf_detected=ssrf_detected,
                           notification_url=notification_url, webhook_result=webhook_result, challenge=challenge)
 
 # SSRF Level 8 - SSRF with WAF Bypass
 @app.route('/ssrf/level8', methods=['GET', 'POST'])
+@login_required
 def ssrf_level8():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     ssrf_detected = False
     fetch_url = request.form.get('fetch_url', '')
@@ -6467,7 +6606,7 @@ def ssrf_level8():
                         if challenge:
                             completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                             if challenge.id not in completed_ids:
-                                update_user_progress(machine_id, challenge.id, challenge.points)
+                                update_user_progress(user.id, challenge.id, challenge.points)
                         break
                 else:
                     waf_result = f"Fetching URL: {fetch_url}\n"
@@ -6478,16 +6617,17 @@ def ssrf_level8():
     challenge = Challenge.query.filter_by(name="SSRF with WAF Bypass").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('ssrf/ssrf_level8.html', flag=flag, ssrf_detected=ssrf_detected,
                           fetch_url=fetch_url, waf_result=waf_result, challenge=challenge)
 
 # SSRF Level 9 - SSRF via XXE
 @app.route('/ssrf/level9', methods=['GET', 'POST'])
+@login_required
 def ssrf_level9():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     ssrf_detected = False
     xml_data = request.form.get('xml_data', '')
@@ -6533,7 +6673,7 @@ def ssrf_level9():
                             if challenge:
                                 completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                                 if challenge.id not in completed_ids:
-                                    update_user_progress(machine_id, challenge.id, challenge.points)
+                                    update_user_progress(user.id, challenge.id, challenge.points)
                             break
                     if ssrf_detected:
                         break
@@ -6550,16 +6690,17 @@ def ssrf_level9():
     challenge = Challenge.query.filter_by(name="SSRF via XXE").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('ssrf/ssrf_level9.html', flag=flag, ssrf_detected=ssrf_detected,
                           xml_data=xml_data, xxe_result=xxe_result, challenge=challenge)
 
 # SSRF Level 10 - SSRF with DNS Rebinding
 @app.route('/ssrf/level10', methods=['GET', 'POST'])
+@login_required
 def ssrf_level10():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     ssrf_detected = False
     target_domain = request.form.get('target_domain', '')
@@ -6589,7 +6730,7 @@ def ssrf_level10():
                     if challenge:
                         completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                         if challenge.id not in completed_ids:
-                            update_user_progress(machine_id, challenge.id, challenge.points)
+                            update_user_progress(user.id, challenge.id, challenge.points)
                     break
             else:
                 rebinding_result = f"Checking website health: {target_domain}\n"
@@ -6600,16 +6741,17 @@ def ssrf_level10():
     challenge = Challenge.query.filter_by(name="SSRF with DNS Rebinding").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('ssrf/ssrf_level10.html', flag=flag, ssrf_detected=ssrf_detected,
                           target_domain=target_domain, rebinding_result=rebinding_result, challenge=challenge)
 
 # SSRF Level 11 - SSRF in GraphQL
 @app.route('/ssrf/level11', methods=['GET', 'POST'])
+@login_required
 def ssrf_level11():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     ssrf_detected = False
     graphql_query = request.form.get('graphql_query', '')
@@ -6646,7 +6788,7 @@ def ssrf_level11():
                             if challenge:
                                 completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                                 if challenge.id not in completed_ids:
-                                    update_user_progress(machine_id, challenge.id, challenge.points)
+                                    update_user_progress(user.id, challenge.id, challenge.points)
                             break
                     if ssrf_detected:
                         break
@@ -6663,16 +6805,17 @@ def ssrf_level11():
     challenge = Challenge.query.filter_by(name="SSRF in GraphQL").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('ssrf/ssrf_level11.html', flag=flag, ssrf_detected=ssrf_detected,
                           graphql_query=graphql_query, graphql_result=graphql_result, challenge=challenge)
 
 # SSRF Level 12 - SSRF via Redis Protocol
 @app.route('/ssrf/level12', methods=['GET', 'POST'])
+@login_required
 def ssrf_level12():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     ssrf_detected = False
     gopher_url = request.form.get('gopher_url', '')
@@ -6702,7 +6845,7 @@ def ssrf_level12():
                         if challenge:
                             completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                             if challenge.id not in completed_ids:
-                                update_user_progress(machine_id, challenge.id, challenge.points)
+                                update_user_progress(user.id, challenge.id, challenge.points)
                         break
                 else:
                     redis_result = f"Processing Gopher request: {gopher_url}\n"
@@ -6714,16 +6857,17 @@ def ssrf_level12():
     challenge = Challenge.query.filter_by(name="SSRF via Redis Protocol").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('ssrf/ssrf_level12.html', flag=flag, ssrf_detected=ssrf_detected,
                           gopher_url=gopher_url, redis_result=redis_result, challenge=challenge)
 
 # SSRF Level 13 - SSRF in WebSocket Upgrade
 @app.route('/ssrf/level13', methods=['GET', 'POST'])
+@login_required
 def ssrf_level13():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     ssrf_detected = False
     websocket_url = request.form.get('websocket_url', '')
@@ -6761,7 +6905,7 @@ Internal WebSocket Service Response:
                 if challenge:
                     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                     if challenge.id not in completed_ids:
-                        update_user_progress(machine_id, challenge.id, challenge.points)
+                        update_user_progress(user.id, challenge.id, challenge.points)
             else:
                 websocket_result = f"""WebSocket Handshake Request:
 GET {websocket_url} HTTP/1.1
@@ -6779,7 +6923,7 @@ Invalid WebSocket upgrade request. Try targeting internal services."""
     challenge = Challenge.query.filter_by(name="SSRF in WebSocket Upgrade").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('ssrf/ssrf_level13.html', flag=flag, ssrf_detected=ssrf_detected,
                           websocket_url=websocket_url, upgrade_headers=upgrade_headers,
@@ -6787,9 +6931,10 @@ Invalid WebSocket upgrade request. Try targeting internal services."""
 
 # SSRF Level 14 - SSRF via SMTP Protocol
 @app.route('/ssrf/level14', methods=['GET', 'POST'])
+@login_required
 def ssrf_level14():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     ssrf_detected = False
     smtp_server = request.form.get('smtp_server', '')
@@ -6840,7 +6985,7 @@ Internal SMTP Data Leaked:
                 if challenge:
                     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                     if challenge.id not in completed_ids:
-                        update_user_progress(machine_id, challenge.id, challenge.points)
+                        update_user_progress(user.id, challenge.id, challenge.points)
             else:
                 smtp_result = f"""SMTP Connection Test:
 Target: {smtp_server}
@@ -6856,7 +7001,7 @@ Try using Gopher protocol to target internal SMTP servers."""
     challenge = Challenge.query.filter_by(name="SSRF via SMTP Protocol").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('ssrf/ssrf_level14.html', flag=flag, ssrf_detected=ssrf_detected,
                           smtp_server=smtp_server, test_email=test_email,
@@ -6864,9 +7009,10 @@ Try using Gopher protocol to target internal SMTP servers."""
 
 # SSRF Level 15 - SSRF in OAuth Callbacks
 @app.route('/ssrf/level15', methods=['GET', 'POST'])
+@login_required
 def ssrf_level15():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     ssrf_detected = False
     client_id = request.form.get('client_id', '')
@@ -6907,7 +7053,7 @@ Internal OAuth Service Response:
                 if challenge:
                     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                     if challenge.id not in completed_ids:
-                        update_user_progress(machine_id, challenge.id, challenge.points)
+                        update_user_progress(user.id, challenge.id, challenge.points)
             else:
                 oauth_result = f"""OAuth Authorization Request:
 Client ID: {client_id}
@@ -6924,7 +7070,7 @@ Try targeting internal services through redirect_uri manipulation."""
     challenge = Challenge.query.filter_by(name="SSRF in OAuth Callbacks").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('ssrf/ssrf_level15.html', flag=flag, ssrf_detected=ssrf_detected,
                           client_id=client_id, redirect_uri=redirect_uri, scope=scope,
@@ -6932,9 +7078,10 @@ Try targeting internal services through redirect_uri manipulation."""
 
 # SSRF Level 16 - SSRF via LDAP Protocol
 @app.route('/ssrf/level16', methods=['GET', 'POST'])
+@login_required
 def ssrf_level16():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     ssrf_detected = False
     ldap_query = request.form.get('ldap_query', '')
@@ -6984,7 +7131,7 @@ Internal LDAP Data:
                 if challenge:
                     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                     if challenge.id not in completed_ids:
-                        update_user_progress(machine_id, challenge.id, challenge.points)
+                        update_user_progress(user.id, challenge.id, challenge.points)
             else:
                 ldap_result = f"""LDAP Directory Search:
 Server: {ldap_server}
@@ -7000,7 +7147,7 @@ Try targeting internal LDAP servers."""
     challenge = Challenge.query.filter_by(name="SSRF via LDAP Protocol").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('ssrf/ssrf_level16.html', flag=flag, ssrf_detected=ssrf_detected,
                           ldap_query=ldap_query, ldap_server=ldap_server,
@@ -7008,9 +7155,10 @@ Try targeting internal LDAP servers."""
 
 # SSRF Level 17 - SSRF in Container Metadata
 @app.route('/ssrf/level17', methods=['GET', 'POST'])
+@login_required
 def ssrf_level17():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     ssrf_detected = False
     container_id = request.form.get('container_id', '')
@@ -7070,7 +7218,7 @@ Docker Daemon API Response:
                 if challenge:
                     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                     if challenge.id not in completed_ids:
-                        update_user_progress(machine_id, challenge.id, challenge.points)
+                        update_user_progress(user.id, challenge.id, challenge.points)
             else:
                 container_result = f"""Container Metadata Request:
 Container ID: {container_id}
@@ -7086,7 +7234,7 @@ Try targeting container metadata services."""
     challenge = Challenge.query.filter_by(name="SSRF in Container Metadata").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('ssrf/ssrf_level17.html', flag=flag, ssrf_detected=ssrf_detected,
                           container_id=container_id, metadata_endpoint=metadata_endpoint,
@@ -7094,9 +7242,10 @@ Try targeting container metadata services."""
 
 # SSRF Level 18 - SSRF via FTP Protocol
 @app.route('/ssrf/level18', methods=['GET', 'POST'])
+@login_required
 def ssrf_level18():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     ssrf_detected = False
     ftp_server = request.form.get('ftp_server', '')
@@ -7150,7 +7299,7 @@ Internal FTP Data:
                 if challenge:
                     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                     if challenge.id not in completed_ids:
-                        update_user_progress(machine_id, challenge.id, challenge.points)
+                        update_user_progress(user.id, challenge.id, challenge.points)
             else:
                 ftp_result = f"""FTP Connection Test:
 Server: {ftp_server}
@@ -7166,7 +7315,7 @@ Try targeting internal FTP servers."""
     challenge = Challenge.query.filter_by(name="SSRF via FTP Protocol").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('ssrf/ssrf_level18.html', flag=flag, ssrf_detected=ssrf_detected,
                           ftp_server=ftp_server, ftp_path=ftp_path,
@@ -7174,9 +7323,10 @@ Try targeting internal FTP servers."""
 
 # SSRF Level 19 - SSRF in API Gateway
 @app.route('/ssrf/level19', methods=['GET', 'POST'])
+@login_required
 def ssrf_level19():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     ssrf_detected = False
     api_endpoint = request.form.get('api_endpoint', '')
@@ -7227,7 +7377,7 @@ X-Service-Version: 2.1.0
                 if challenge:
                     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                     if challenge.id not in completed_ids:
-                        update_user_progress(machine_id, challenge.id, challenge.points)
+                        update_user_progress(user.id, challenge.id, challenge.points)
             else:
                 gateway_result = f"""API Gateway Request:
 Endpoint: {api_endpoint}
@@ -7243,7 +7393,7 @@ Try targeting internal microservices."""
     challenge = Challenge.query.filter_by(name="SSRF in API Gateway").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('ssrf/ssrf_level19.html', flag=flag, ssrf_detected=ssrf_detected,
                           api_endpoint=api_endpoint, upstream_url=upstream_url,
@@ -7251,9 +7401,10 @@ Try targeting internal microservices."""
 
 # SSRF Level 20 - SSRF via Time-based Attacks
 @app.route('/ssrf/level20', methods=['GET', 'POST'])
+@login_required
 def ssrf_level20():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     ssrf_detected = False
     target_url = request.form.get('target_url', '')
@@ -7301,7 +7452,7 @@ Internal Service Fingerprint:
                 if challenge:
                     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                     if challenge.id not in completed_ids:
-                        update_user_progress(machine_id, challenge.id, challenge.points)
+                        update_user_progress(user.id, challenge.id, challenge.points)
             else:
                 timing_result = f"""Time-based SSRF Analysis:
 Target: {target_url}
@@ -7319,7 +7470,7 @@ Try targeting internal services for timing analysis."""
     challenge = Challenge.query.filter_by(name="SSRF via Time-based Attacks").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('ssrf/ssrf_level20.html', flag=flag, ssrf_detected=ssrf_detected,
                           target_url=target_url, timeout_ms=timeout_ms,
@@ -7327,9 +7478,10 @@ Try targeting internal services for timing analysis."""
 
 # SSRF Level 21 - SSRF in Microservices
 @app.route('/ssrf/level21', methods=['GET', 'POST'])
+@login_required
 def ssrf_level21():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     ssrf_detected = False
     service_name = request.form.get('service_name', '')
@@ -7402,7 +7554,7 @@ Istio Service Mesh Response:
                 if challenge:
                     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
                     if challenge.id not in completed_ids:
-                        update_user_progress(machine_id, challenge.id, challenge.points)
+                        update_user_progress(user.id, challenge.id, challenge.points)
             else:
                 microservice_result = f"""Service Mesh Discovery:
 Service: {service_name}
@@ -7418,7 +7570,7 @@ Try targeting internal service mesh components."""
     challenge = Challenge.query.filter_by(name="SSRF in Microservices").first()
     completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
     if challenge and challenge.id in completed_ids:
-        flag = get_or_create_flag(challenge.id, machine_id)
+        flag = get_or_create_flag(challenge.id, user.id)
 
     return render_template('ssrf/ssrf_level21.html', flag=flag, ssrf_detected=ssrf_detected,
                           service_name=service_name, mesh_endpoint=mesh_endpoint,
@@ -7426,9 +7578,10 @@ Try targeting internal service mesh components."""
 
 # SSRF Level 22 - SSRF via Protocol Smuggling
 @app.route('/ssrf/level22', methods=['GET', 'POST'])
+@login_required
 def ssrf_level22():
-    machine_id = get_machine_id()
-    user = get_local_user()
+    # machine_id = get_machine_id() # Deprecated
+    user = get_current_user()
     flag = None
     ssrf_detected = False
     smuggled_request = request.form.get('smuggled_request', '')

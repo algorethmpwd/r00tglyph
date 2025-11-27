@@ -12,9 +12,11 @@
             <div class="card-body">
                 <div class="alert alert-dark">
                     <i class="bi bi-info-circle-fill me-2"></i>
-                    <strong>Real-World Security Training:</strong> Practice against vulnerabilities actively exploited in 2024. Each challenge simulates current attack techniques used by threat actors.
+                    <strong>Real-World Security Training:</strong> Practice against vulnerabilities actively exploited
+                    in 2024. Each challenge simulates current attack techniques used by threat actors.
                     <br>
-                    <small class="text-muted">📊 <strong>Current Threat Context:</strong> 22,254 CVEs reported in 2024 | 1,636 attacks per week per organization | 72% of vulnerabilities in web applications</small>
+                    <small class="text-muted">📊 <strong>Current Threat Context:</strong> 22,254 CVEs reported in 2024 |
+                        1,636 attacks per week per organization | 72% of vulnerabilities in web applications</small>
                 </div>
 
                 <!-- Overall Progress Bar -->
@@ -26,9 +28,10 @@
                     <div class="card-body">
                         <div class="progress" style="height: 25px;">
                             <div class="progress-bar bg-success" role="progressbar"
-                                 style="width: {{ (completed_count / total_count * 100) if total_count > 0 else 0 }}%;"
-                                 aria-valuenow="{{ completed_count }}" aria-valuemin="0" aria-valuemax="{{ total_count }}">
-                                {{ (completed_count / total_count * 100) | round | int }}%
+                                style="width: {{ (completed_count / total_count * 100) if total_count > 0 else 0 }}%;"
+                                aria-valuenow="{{ completed_count }}" aria-valuemin="0"
+                                aria-valuemax="{{ total_count }}">
+                                {{ ((completed_count / total_count * 100) | round | int) if total_count > 0 else 0 }}%
                             </div>
                         </div>
                     </div>
@@ -38,7 +41,10 @@
                     {% for category in categories %}
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="heading{{ category }}">
-                            <button class="accordion-button {% if not loop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ category }}" aria-expanded="{% if loop.first %}true{% else %}false{% endif %}" aria-controls="collapse{{ category }}">
+                            <button class="accordion-button {% if not loop.first %}collapsed{% endif %}" type="button"
+                                data-bs-toggle="collapse" data-bs-target="#collapse{{ category }}"
+                                aria-expanded="{% if loop.first %}true{% else %}false{% endif %}"
+                                aria-controls="collapse{{ category }}">
                                 <div class="d-flex justify-content-between align-items-center w-100">
                                     <div>
                                         <i class="bi bi-bug-fill me-2"></i>
@@ -46,18 +52,21 @@
                                     </div>
                                     <div>
                                         <span class="badge bg-success me-2">
-                                            {{ category_completion[category]['completed'] }} / {{ category_completion[category]['total'] }}
+                                            {{ category_completion[category]['completed'] }} / {{
+                                            category_completion[category]['total'] }}
                                         </span>
                                     </div>
                                 </div>
                             </button>
                         </h2>
-                        <div id="collapse{{ category }}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}" aria-labelledby="heading{{ category }}" data-bs-parent="#challengeAccordion">
+                        <div id="collapse{{ category }}"
+                            class="accordion-collapse collapse {% if loop.first %}show{% endif %}"
+                            aria-labelledby="heading{{ category }}" data-bs-parent="#challengeAccordion">
                             <div class="accordion-body p-0">
                                 <div class="list-group list-group-flush">
                                     {% for challenge in challenges_by_category[category] %}
                                     <a href="{% if category == 'xss' %}{{ url_for('xss_level' + (loop.index | string)) }}{% elif category == 'sqli' %}{{ url_for('sqli_level' + (loop.index | string)) }}{% elif category == 'cmdi' %}{{ url_for('cmdi_level' + (loop.index | string)) }}{% elif category == 'ssrf' %}{{ url_for('ssrf_level' + (loop.index | string)) }}{% elif category == 'csrf' %}{{ url_for('csrf_level' + (loop.index | string)) }}{% elif category == 'xxe' %}{{ url_for('xxe_level' + (loop.index | string)) }}{% elif category == 'ssti' and loop.index == 1 %}{{ url_for('ssti_level1') }}{% elif category == 'ssti' %}{{ url_for('ssti_level_dynamic', level=loop.index) }}{% elif category == 'deserial' %}{{ url_for('deserial_level', level=loop.index) }}{% elif category == 'auth' %}{{ url_for('auth_level', level=loop.index) }}{% else %}#{% endif %}"
-                                       class="list-group-item list-group-item-action {% if challenge.completed %}list-group-item-success{% endif %}">
+                                        class="list-group-item list-group-item-action {% if challenge.completed %}list-group-item-success{% endif %}">
                                         <div class="d-flex w-100 justify-content-between align-items-center">
                                             <div>
                                                 <h5 class="mb-1">
@@ -70,7 +79,8 @@
                                                 <p class="mb-1">{{ challenge.description }}</p>
                                             </div>
                                             <div class="text-end">
-                                                <span class="badge {% if challenge.difficulty == 'beginner' %}bg-success{% elif challenge.difficulty == 'intermediate' %}bg-warning{% else %}bg-danger{% endif %} mb-2 d-block">
+                                                <span
+                                                    class="badge {% if challenge.difficulty == 'beginner' %}bg-success{% elif challenge.difficulty == 'intermediate' %}bg-warning{% else %}bg-danger{% endif %} mb-2 d-block">
                                                     {{ challenge.difficulty | title }}
                                                 </span>
                                                 <span class="badge bg-primary">{{ challenge.points }} pts</span>
@@ -89,7 +99,8 @@
                 </div>
 
                 <div class="alert alert-success mt-4">
-                    <strong><i class="bi bi-check-circle-fill"></i> Complete Training Arsenal:</strong> 171 challenges covering the most critical vulnerabilities from OWASP Top 10 2021 and emerging threats.
+                    <strong><i class="bi bi-check-circle-fill"></i> Complete Training Arsenal:</strong> 171 challenges
+                    covering the most critical vulnerabilities from OWASP Top 10 2021 and emerging threats.
                     Master the skills needed to defend against real-world attacks happening today.
                 </div>
             </div>
@@ -100,7 +111,7 @@
 
 {% block extra_scripts %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         // Enable all tooltips
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {

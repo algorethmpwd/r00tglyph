@@ -3,45 +3,52 @@
 {% block title %}Login - R00tGlyph{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-6 offset-md-3">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Login to R00tGlyph</h2>
+<div class="row justify-content-center align-items-center" style="min-height: 60vh;">
+    <div class="col-md-4">
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-transparent border-0 text-center pt-4 pb-2">
+                <h3 class="mb-0 fw-bold text-primary"><i class="bi bi-shield-lock-fill me-2"></i>Login</h3>
+                <p class="text-secondary small">Access your R00tGlyph workspace</p>
             </div>
-            <div class="card-body">
-                {% if error %}
-                <div class="alert alert-danger">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                    {{ error }}
+            <div class="card-body p-4">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
+                {% endfor %}
                 {% endif %}
-                
-                <form method="post" action="{{ url_for('login') }}">
+                {% endwith %}
+
+                <form method="POST" action="{{ url_for('login') }}">
                     <div class="mb-3">
-                        <label for="username" class="form-label">Username</label>
+                        <label for="username" class="form-label text-secondary small fw-bold">USERNAME</label>
                         <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
-                            <input type="text" class="form-control" id="username" name="username" required>
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-person"></i></span>
+                            <input type="text" class="form-control bg-light border-start-0" id="username"
+                                name="username" required autofocus>
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
+                    <div class="mb-4">
+                        <label for="password" class="form-label text-secondary small fw-bold">PASSWORD</label>
                         <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-key-fill"></i></span>
-                            <input type="password" class="form-control" id="password" name="password" required>
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-key"></i></span>
+                            <input type="password" class="form-control bg-light border-start-0" id="password"
+                                name="password" required>
                         </div>
                     </div>
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-success">
-                            <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                        <button type="submit" class="btn btn-primary fw-bold py-2">
+                            Sign In <i class="bi bi-arrow-right ms-2"></i>
                         </button>
                     </div>
                 </form>
-                
-                <div class="text-center mt-3">
-                    <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
-                </div>
+            </div>
+            <div class="card-footer bg-transparent border-0 text-center pb-4">
+                <p class="small text-muted mb-0">Don't have an account? <a href="{{ url_for('register') }}"
+                        class="text-primary text-decoration-none fw-bold">Register here</a></p>
             </div>
         </div>
     </div>
