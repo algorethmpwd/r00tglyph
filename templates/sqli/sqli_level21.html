@@ -1,516 +1,106 @@
-{% extends 'base.html' %}
+{%extends 'base.html' %}
 
-{% block title %}Level 21: SQL Injection in GraphQL API - R00tGlyph{% endblock %}
+{%block title %}Level 21: SQL Truncation Attack - R00tGlyph{%endblock %}
 
-{% block content %}
-<style>
-    .graphql-header {
-        background: linear-gradient(135deg, #e535ab 0%, #9333ea 100%);
-        color: white;
-        padding: 20px;
-        border-radius: 5px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    .code-box {
-        background-color: #1e1e1e;
-        color: #d4d4d4;
-        padding: 15px;
-        border-radius: 5px;
-        font-family: monospace;
-        overflow-x: auto;
-        max-height: 400px;
-        overflow-y: auto;
-    }
-    .code-keyword {
-        color: #569cd6;
-    }
-    .code-string {
-        color: #ce9178;
-    }
-    .code-comment {
-        color: #6a9955;
-    }
-    .code-function {
-        color: #dcdcaa;
-    }
-    .code-class {
-        color: #4ec9b0;
-    }
-    .code-variable {
-        color: #9cdcfe;
-    }
-    .admin-note {
-        background-color: rgba(255, 193, 7, 0.1);
-        border-left: 4px solid var(--bs-warning);
-        padding: 15px;
-        margin-top: 20px;
-        border-radius: 5px;
-    }
-    .graphql-playground {
-        background-color: #0f1424;
-        color: #f8f9fa;
-        border-radius: 5px;
-        overflow: hidden;
-        margin-bottom: 20px;
-    }
-    .graphql-playground-header {
-        background-color: #1a1f36;
-        padding: 10px 15px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    .graphql-playground-tabs {
-        display: flex;
-        align-items: center;
-    }
-    .graphql-playground-tab {
-        padding: 5px 10px;
-        margin-right: 5px;
-        border-radius: 3px;
-        font-size: 0.9rem;
-        cursor: pointer;
-    }
-    .graphql-playground-tab.active {
-        background-color: #e535ab;
-        color: white;
-    }
-    .graphql-playground-actions {
-        display: flex;
-        align-items: center;
-    }
-    .graphql-playground-action {
-        padding: 5px 10px;
-        margin-left: 5px;
-        border-radius: 3px;
-        font-size: 0.9rem;
-        cursor: pointer;
-    }
-    .graphql-playground-action.primary {
-        background-color: #e535ab;
-        color: white;
-    }
-    .graphql-playground-content {
-        display: flex;
-        height: 500px;
-    }
-    .graphql-playground-editor {
-        flex: 1;
-        padding: 15px;
-        border-right: 1px solid #2d3748;
-    }
-    .graphql-playground-result {
-        flex: 1;
-        padding: 15px;
-        overflow-y: auto;
-    }
-    .graphql-playground-editor textarea {
-        width: 100%;
-        height: 100%;
-        background-color: transparent;
-        border: none;
-        color: #f8f9fa;
-        font-family: monospace;
-        resize: none;
-        outline: none;
-    }
-    .graphql-playground-result pre {
-        margin: 0;
-        white-space: pre-wrap;
-        word-break: break-word;
-    }
-    .graphql-schema {
-        background-color: #f8f9fa;
-        border-left: 4px solid #e535ab;
-        padding: 15px;
-        margin-top: 20px;
-        border-radius: 5px;
-        font-family: monospace;
-    }
-    .graphql-schema-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 10px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #dee2e6;
-    }
-    .graphql-schema-title {
-        font-weight: bold;
-        color: #e535ab;
-    }
-    .graphql-schema-content {
-        max-height: 300px;
-        overflow-y: auto;
-    }
-    .graphql-type {
-        margin-bottom: 15px;
-    }
-    .graphql-type-name {
-        font-weight: bold;
-        color: #9333ea;
-    }
-    .graphql-type-fields {
-        margin-left: 20px;
-    }
-    .graphql-field {
-        margin-bottom: 5px;
-    }
-    .graphql-field-name {
-        color: #e535ab;
-    }
-    .graphql-field-type {
-        color: #9333ea;
-    }
-    .graphql-field-args {
-        color: #6c757d;
-    }
-</style>
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">SQL Injection</span> / <span>Level 21</span>
+{%endblock %}
 
-<div class="row">
-    <div class="col-md-10 offset-md-1">
-        {% if sqli_detected %}
-        <div class="alert alert-success">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            <strong>Success!</strong> You've successfully exploited the SQL injection vulnerability in the GraphQL API! The challenge has been marked as completed.
-            {% if flag %}
-            <div class="mt-2">
-                <strong>Flag:</strong> <code>{{ flag }}</code>
-            </div>
-            {% endif %}
+{%block content %}
+<div class="challenge-lab">
+    <!-- LEFT PANEL: Mission & Intel -->
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
-        {% endif %}
-
-        <!-- Challenge description -->
-        <div class="alert alert-dark challenge-description">
-            <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-            <p>
-                Welcome to <strong>GraphQL Explorer</strong>, a fictional API platform! This challenge simulates a real-world scenario where a GraphQL API is vulnerable to SQL injection.
-            </p>
-            <p>
-                The developers of GraphQL Explorer have built a modern API using GraphQL to provide flexible data access. However, they've made a critical mistake: they're using user input from GraphQL queries directly in SQL queries without proper validation or parameterization.
-            </p>
-            <p>
-                <strong>Your Task:</strong> Exploit the SQL injection vulnerability in the GraphQL API to access sensitive data. The flag is hidden in a restricted database table that should not be accessible to regular users.
+        <div class="mission-content">
+            <h5 class="mb-3">SQL Truncation Attack</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>UserReg</strong>. Test for SQL injection vulnerabilities.
             </p>
 
-            <div class="card mb-3 border-secondary">
-                <div class="card-header">
-                    <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
-                </div>
-                <div class="card-body">
-                    <p class="mb-0">
-                        <strong>Client:</strong> API Security Team<br>
-                        <strong>Target:</strong> GraphQL Explorer API<br>
-                        <strong>Vulnerability:</strong> SQL Injection in GraphQL Resolvers<br>
-                        <strong>Objective:</strong> Access restricted data containing sensitive information
-                    </p>
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Exploit SQL truncation vulnerabilities</p>
                 </div>
             </div>
 
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
-                </div>
-                <div class="card-body">
-                    <p>
-                        GraphQL is a query language for APIs that allows clients to request exactly the data they need. Unlike REST APIs, GraphQL provides a more flexible and efficient approach to data fetching.
-                    </p>
-                    <p>
-                        SQL injection in GraphQL occurs when:
-                    </p>
-                    <ul>
-                        <li>The GraphQL resolvers process user-provided arguments</li>
-                        <li>These arguments are used directly in SQL queries without proper validation or parameterization</li>
-                        <li>The resolvers fail to properly sanitize or escape special characters in the input</li>
-                    </ul>
-                    <p>
-                        This type of vulnerability is particularly dangerous because:
-                    </p>
-                    <ul>
-                        <li>GraphQL APIs often provide access to multiple data sources and tables</li>
-                        <li>The flexible nature of GraphQL can make it harder to identify and secure all entry points</li>
-                        <li>Developers may focus on GraphQL-specific security concerns and overlook traditional vulnerabilities like SQL injection</li>
-                        <li>GraphQL's introspection feature can provide attackers with detailed information about the schema</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
-                </div>
-                <div class="card-body">
-                    <p>
-                        The GraphQL Explorer API likely processes queries similar to:
-                    </p>
-                    <div class="code-box">
-                        <span class="code-comment"># Example GraphQL query</span><br>
-                        query {<br>
-                        &nbsp;&nbsp;user(id: 1) {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;id<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;username<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;email<br>
-                        &nbsp;&nbsp;}<br>
-                        }
+            <!-- Integrated Hints System -->
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Truncation Attack
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            If username field is VARCHAR(20), entering 'admin' + 15 spaces + 'x' gets truncated to 'admin' + spaces, potentially creating duplicate admin.
+                        </div>
                     </div>
-                    <p>
-                        And then uses the values in SQL queries like:
-                    </p>
-                    <div class="code-box">
-                        <span class="code-comment">// Example of vulnerable SQL query in GraphQL resolver</span><br>
-                        <span class="code-keyword">const</span> <span class="code-variable">userResolver</span> = <span class="code-keyword">async</span> ({ id }) => {<br>
-                        &nbsp;&nbsp;<span class="code-keyword">const</span> <span class="code-variable">query</span> = <span class="code-string">`SELECT * FROM users WHERE id = ${id}`</span>;<br>
-                        &nbsp;&nbsp;<span class="code-keyword">const</span> <span class="code-variable">result</span> = <span class="code-keyword">await</span> <span class="code-variable">db</span>.<span class="code-function">query</span>(<span class="code-variable">query</span>);<br>
-                        &nbsp;&nbsp;<span class="code-keyword">return</span> <span class="code-variable">result</span>[0];<br>
-                        };
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Exploitation
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Register as: <code>admin[spaces]x</code> where total length exceeds column limit.
+                        </div>
                     </div>
-                    <p>
-                        To exploit this vulnerability, you'll need to:
-                    </p>
-                    <ol>
-                        <li>Understand the GraphQL schema and available queries</li>
-                        <li>Identify which fields or arguments are vulnerable to SQL injection</li>
-                        <li>Craft a malicious GraphQL query that includes SQL injection code</li>
-                        <li>Execute the query against the GraphQL API</li>
-                        <li>Analyze the response to extract the sensitive information</li>
-                    </ol>
-                    <p>
-                        For this challenge, we've provided a simulated GraphQL playground that allows you to interact with the API.
-                    </p>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Exploit truncation to create accounts with privileged usernames.
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="bi bi-shield-fill-check me-2"></i>Real-World Impact</h5>
+            {%if sqli_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
                 </div>
-                <div class="card-body">
-                    <p>
-                        SQL injection vulnerabilities in GraphQL APIs have affected several real-world applications:
-                    </p>
-                    <ul>
-                        <li><strong>E-commerce Platforms</strong>: GraphQL APIs used for product catalogs and user accounts.</li>
-                        <li><strong>Social Media Applications</strong>: GraphQL APIs used for user profiles and content feeds.</li>
-                        <li><strong>Financial Services</strong>: GraphQL APIs used for transaction data and account information.</li>
-                    </ul>
-                    <p>
-                        For API platforms like GraphQL Explorer, such vulnerabilities could lead to:
-                    </p>
-                    <ul>
-                        <li>Unauthorized access to sensitive user data</li>
-                        <li>Exposure of business information</li>
-                        <li>Manipulation of database records</li>
-                        <li>Complete compromise of the database</li>
-                    </ul>
-                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the SQL injection vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: The Vulnerable App -->
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>userreg.local/create</span>
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Level 21: SQL Injection in GraphQL API</h2>
-            </div>
-            <div class="card-body">
-                <div class="graphql-header">
-                    <div class="d-flex align-items-center justify-content-center">
-                        <i class="bi bi-diagram-3-fill me-2" class="icon-lg"></i>
-                        <h1 class="mb-0">GraphQL Explorer</h1>
-                    </div>
-                    <p class="text-center mb-0 mt-2">Modern API Platform</p>
-                </div>
-
-                <div class="row mb-4">
-                    <div class="col-md-8">
-                        <div class="scenario-box">
-                            <h4><i class="bi bi-exclamation-triangle-fill me-2"></i>Penetration Testing Scenario</h4>
-                            <p>You've been hired to perform a security assessment of GraphQL Explorer, an API platform that uses GraphQL to provide flexible data access to clients.</p>
-                            <p>During your initial testing, you notice that the GraphQL API might be vulnerable to SQL injection. The API seems to use arguments from GraphQL queries directly in database queries.</p>
-                            <p><strong>Your objective:</strong> Exploit the SQL injection vulnerability in the GraphQL API to access restricted data that contains the flag.</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="portal-stats">
-                            <h5 class="text-center mb-3"><i class="bi bi-bar-chart-fill me-2"></i>Platform Statistics</h5>
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="stat-item">
-                                        <div class="stat-number">50+</div>
-                                        <div>Endpoints</div>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="stat-item">
-                                        <div class="stat-number">10K+</div>
-                                        <div>Users</div>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="stat-item">
-                                        <div class="stat-number">99.9%</div>
-                                        <div>Uptime</div>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="stat-item">
-                                        <div class="stat-number">24/7</div>
-                                        <div>Support</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="graphql-playground">
-                    <div class="graphql-playground-header">
-                        <div class="graphql-playground-tabs">
-                            <div class="graphql-playground-tab active">Query</div>
-                            <div class="graphql-playground-tab">Schema</div>
-                        </div>
-                        <div class="graphql-playground-actions">
-                            <div class="graphql-playground-action primary" id="execute-query">Execute</div>
-                        </div>
-                    </div>
-                    <div class="graphql-playground-content">
-                        <div class="graphql-playground-editor">
-                            <form action="{{ url_for('sqli_level21') }}" method="post">
-                                <textarea id="graphql-query" name="graphql_query" placeholder="Enter your GraphQL query here...">{{ graphql_query if graphql_query else 'query {\n  user(id: 1) {\n    id\n    username\n    email\n  }\n}' }}</textarea>
-                                <input type="hidden" name="execute_query" value="true">
-                            </form>
-                        </div>
-                        <div class="graphql-playground-result">
-                            <pre id="graphql-result">{% if graphql_result %}{{ graphql_result|safe }}{% else %}# Result will appear here after execution{% endif %}</pre>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="graphql-schema">
-                    <div class="graphql-schema-header">
-                        <div class="graphql-schema-title">GraphQL Schema</div>
-                    </div>
-                    <div class="graphql-schema-content">
-                        <div class="graphql-type">
-                            <div class="graphql-type-name">type Query {</div>
-                            <div class="graphql-type-fields">
-                                <div class="graphql-field">
-                                    <span class="graphql-field-name">user</span>(<span class="graphql-field-args">id: ID!</span>): <span class="graphql-field-type">User</span>
-                                </div>
-                                <div class="graphql-field">
-                                    <span class="graphql-field-name">users</span>: [<span class="graphql-field-type">User</span>]
-                                </div>
-                                <div class="graphql-field">
-                                    <span class="graphql-field-name">product</span>(<span class="graphql-field-args">id: ID!</span>): <span class="graphql-field-type">Product</span>
-                                </div>
-                                <div class="graphql-field">
-                                    <span class="graphql-field-name">products</span>(<span class="graphql-field-args">category: String</span>): [<span class="graphql-field-type">Product</span>]
-                                </div>
-                                <div class="graphql-field">
-                                    <span class="graphql-field-name">order</span>(<span class="graphql-field-args">id: ID!</span>): <span class="graphql-field-type">Order</span>
-                                </div>
-                                <div class="graphql-field">
-                                    <span class="graphql-field-name">orders</span>(<span class="graphql-field-args">userId: ID</span>): [<span class="graphql-field-type">Order</span>]
-                                </div>
-                            </div>
-                            <div class="graphql-type-name">}</div>
-                        </div>
-
-                        <div class="graphql-type">
-                            <div class="graphql-type-name">type User {</div>
-                            <div class="graphql-type-fields">
-                                <div class="graphql-field">
-                                    <span class="graphql-field-name">id</span>: <span class="graphql-field-type">ID!</span>
-                                </div>
-                                <div class="graphql-field">
-                                    <span class="graphql-field-name">username</span>: <span class="graphql-field-type">String!</span>
-                                </div>
-                                <div class="graphql-field">
-                                    <span class="graphql-field-name">email</span>: <span class="graphql-field-type">String!</span>
-                                </div>
-                                <div class="graphql-field">
-                                    <span class="graphql-field-name">role</span>: <span class="graphql-field-type">String!</span>
-                                </div>
-                                <div class="graphql-field">
-                                    <span class="graphql-field-name">orders</span>: [<span class="graphql-field-type">Order</span>]
-                                </div>
-                            </div>
-                            <div class="graphql-type-name">}</div>
-                        </div>
-
-                        <div class="graphql-type">
-                            <div class="graphql-type-name">type Product {</div>
-                            <div class="graphql-type-fields">
-                                <div class="graphql-field">
-                                    <span class="graphql-field-name">id</span>: <span class="graphql-field-type">ID!</span>
-                                </div>
-                                <div class="graphql-field">
-                                    <span class="graphql-field-name">name</span>: <span class="graphql-field-type">String!</span>
-                                </div>
-                                <div class="graphql-field">
-                                    <span class="graphql-field-name">description</span>: <span class="graphql-field-type">String</span>
-                                </div>
-                                <div class="graphql-field">
-                                    <span class="graphql-field-name">price</span>: <span class="graphql-field-type">Float!</span>
-                                </div>
-                                <div class="graphql-field">
-                                    <span class="graphql-field-name">category</span>: <span class="graphql-field-type">String!</span>
-                                </div>
-                            </div>
-                            <div class="graphql-type-name">}</div>
-                        </div>
-
-                        <div class="graphql-type">
-                            <div class="graphql-type-name">type Order {</div>
-                            <div class="graphql-type-fields">
-                                <div class="graphql-field">
-                                    <span class="graphql-field-name">id</span>: <span class="graphql-field-type">ID!</span>
-                                </div>
-                                <div class="graphql-field">
-                                    <span class="graphql-field-name">userId</span>: <span class="graphql-field-type">ID!</span>
-                                </div>
-                                <div class="graphql-field">
-                                    <span class="graphql-field-name">products</span>: [<span class="graphql-field-type">Product</span>]
-                                </div>
-                                <div class="graphql-field">
-                                    <span class="graphql-field-name">total</span>: <span class="graphql-field-type">Float!</span>
-                                </div>
-                                <div class="graphql-field">
-                                    <span class="graphql-field-name">status</span>: <span class="graphql-field-type">String!</span>
-                                </div>
-                                <div class="graphql-field">
-                                    <span class="graphql-field-name">createdAt</span>: <span class="graphql-field-type">String!</span>
-                                </div>
-                            </div>
-                            <div class="graphql-type-name">}</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="admin-note">
-                    <h5><i class="bi bi-shield-lock me-2"></i>Developer Note</h5>
-                    <p>Reminder to the development team: The restricted table 'admin_secrets' contains sensitive information and should not be accessible through the GraphQL API. Make sure our resolvers properly validate and sanitize input before executing database queries.</p>
-                    <p class="mb-0"><small class="text-muted">Note: This message is for internal use only and should not be visible to regular users.</small></p>
-                </div>
-
-                <div class="mt-4">
-                    <a href="{{ url_for('solutions', level='sqli21') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
-                </div>
-            </div>
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for SQLi Level 21</p>
         </div>
     </div>
 </div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const executeButton = document.getElementById('execute-query');
-        const graphqlQuery = document.getElementById('graphql-query');
-
-        // Execute button click handler
-        executeButton.addEventListener('click', function() {
-            document.querySelector('form').submit();
-        });
-    });
-</script>
-{% endblock %}
+{%endblock %}

@@ -1,553 +1,106 @@
-{% extends 'base.html' %}
+{%extends 'base.html' %}
 
-{% block title %}Level 22: XSS in WebGPU Applications - R00tGlyph{% endblock %}
+{%block title %}Level 22: XSS in React - R00tGlyph{%endblock %}
 
-{% block content %}
-<div class="row">
-    <div class="col-md-8 offset-md-2">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Level 22: XSS in WebGPU Applications</h2>
-            </div>
-            <div class="card-body">
-                <div class="alert alert-dark challenge-description">
-                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-                    <p>
-                        Welcome to <strong>GPURenderer</strong>, a fictional 3D visualization platform! This challenge simulates a real-world scenario where a WebGPU application has an XSS vulnerability in its shader code handling.
-                    </p>
-                    
-                    <div class="card mb-3 border-secondary">
-                        <div class="card-header">
-                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
-                        </div>
-                        <div class="card-body">
-                            <p class="mb-0">
-                                <strong>Client:</strong> GPURenderer Inc.<br>
-                                <strong>Target:</strong> WebGPU 3D Visualization Platform<br>
-                                <strong>Vulnerability:</strong> XSS in Shader Code Handling<br>
-                                <strong>Objective:</strong> Exploit the WebGPU shader code editor to execute arbitrary JavaScript
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <p>
-                        <strong>Technical Background:</strong> WebGPU is a modern graphics API for the web that provides access to GPU hardware for rendering and computation. It's the successor to WebGL, offering more direct control over the GPU and better performance. WebGPU applications often allow users to write custom shader code, which is compiled and executed on the GPU. If the application doesn't properly sanitize user-supplied shader code or error messages before displaying them, XSS vulnerabilities can occur.
-                    </p>
-                    
-                    <p>
-                        <strong>Real-world Impact:</strong> WebGPU vulnerabilities are particularly dangerous because:
-                    </p>
-                    <ul>
-                        <li>WebGPU applications often process large amounts of sensitive data</li>
-                        <li>They typically have access to powerful GPU hardware</li>
-                        <li>Shader code compilation errors can expose internal details of the application</li>
-                        <li>WebGPU is increasingly used for scientific visualization, machine learning, and other critical applications</li>
-                        <li>The complexity of shader code can make it difficult to identify malicious inputs</li>
-                    </ul>
-                    
-                    <p>
-                        <strong>Your Task:</strong> In this challenge, you need to exploit a vulnerability in the GPURenderer application. The application allows users to write custom shader code for 3D visualization. However, there's a vulnerability in how the application handles and displays shader compilation errors. Find a way to inject JavaScript that will be executed when a shader compilation error is displayed. Make an alert box appear with the text "XSS Level 22 Completed!" to reveal the flag.
-                    </p>
-                    
-                    <div class="alert alert-warning">
-                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Look for ways to inject code into the shader that will cause a compilation error with a message that contains malicious JavaScript. The vulnerability might be in how the application renders error messages from the shader compiler.
-                    </div>
-                </div>
-                
-                <!-- GPURenderer Interface -->
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="bi bi-gpu-card me-2"></i>GPURenderer</h5>
-                        <div>
-                            <span class="badge bg-light text-dark">WebGPU Visualization Platform</span>
-                        </div>
-                    </div>
-                    <div class="card-body p-0">
-                        <!-- Navigation Bar -->
-                        <nav class="navbar navbar-expand navbar-light bg-light px-3">
-                            <div class="container-fluid">
-                                <ul class="navbar-nav">
-                                    <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-house-door me-1"></i>Home</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-grid-3x3 me-1"></i>Projects</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-book me-1"></i>Documentation</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-gear me-1"></i>Settings</a></li>
-                                </ul>
-                                <div class="d-flex">
-                                    <div class="dropdown">
-                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="bi bi-person-circle me-1"></i>Guest User
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                            <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
-                                            <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </nav>
-                        
-                        <div class="p-4">
-                            <div class="row">
-                                <div class="col-md-4 mb-4">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h6 class="mb-0">Project Information</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <p class="small mb-2"><strong>Name:</strong> 3D Visualization Demo</p>
-                                            <p class="small mb-2"><strong>Created:</strong> April 15, 2025</p>
-                                            <p class="small mb-0"><strong>Last Modified:</strong> April 21, 2025</p>
-                                            <hr>
-                                            <p class="small mb-0 fst-italic">This is a WebGPU-powered 3D visualization demo. You can edit the shader code to customize the visualization.</p>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="card mt-3">
-                                        <div class="card-header">
-                                            <h6 class="mb-0">Technical Information</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <p class="small mb-2">This application uses:</p>
-                                            <ul class="small mb-0">
-                                                <li>WebGPU API for GPU-accelerated rendering</li>
-                                                <li>WGSL (WebGPU Shading Language) for shader code</li>
-                                                <li>Custom shader compilation and error handling</li>
-                                            </ul>
-                                            <hr>
-                                            <p class="small mb-0 fst-italic">Note: This is a simulated WebGPU environment for the challenge. No actual GPU operations will be performed.</p>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="card mt-3">
-                                        <div class="card-header">
-                                            <h6 class="mb-0">Shader Templates</h6>
-                                        </div>
-                                        <div class="list-group list-group-flush">
-                                            <a href="#" class="list-group-item list-group-item-action" onclick="loadShaderTemplate('basic')">
-                                                <i class="bi bi-file-code me-2"></i>Basic Shader
-                                            </a>
-                                            <a href="#" class="list-group-item list-group-item-action" onclick="loadShaderTemplate('animated')">
-                                                <i class="bi bi-file-code me-2"></i>Animated Shader
-                                            </a>
-                                            <a href="#" class="list-group-item list-group-item-action" onclick="loadShaderTemplate('procedural')">
-                                                <i class="bi bi-file-code me-2"></i>Procedural Texture
-                                            </a>
-                                            <a href="#" class="list-group-item list-group-item-action" onclick="loadShaderTemplate('lighting')">
-                                                <i class="bi bi-file-code me-2"></i>Advanced Lighting
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="col-md-8">
-                                    <div class="card mb-4">
-                                        <div class="card-header d-flex justify-content-between align-items-center">
-                                            <h5 class="mb-0">Shader Editor</h5>
-                                            <div>
-                                                <button class="btn btn-sm btn-primary" id="compile-shader-btn">
-                                                    <i class="bi bi-play-fill me-1"></i>Compile & Run
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="mb-3">
-                                                <textarea class="form-control font-monospace" id="shader-editor" rows="15" placeholder="Enter your WGSL shader code here..."></textarea>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="card mb-4">
-                                        <div class="card-header">
-                                            <h5 class="mb-0">Shader Output</h5>
-                                        </div>
-                                        <div class="card-body p-0">
-                                            <div id="shader-output" class="bg-dark text-white p-3 rounded" style="height: 200px;">
-                                                <!-- Shader output will be displayed here -->
-                                                <div class="text-center py-5">
-                                                    <i class="bi bi-gpu-card display-1 text-muted"></i>
-                                                    <p class="mt-3">No shader compiled yet. Click "Compile & Run" to see the output.</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h5 class="mb-0">Compilation Log</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <div id="compilation-log" class="bg-light p-3 rounded" style="max-height: 200px; overflow-y: auto;">
-                                                <!-- Compilation log will be displayed here -->
-                                                <p class="text-muted mb-0">Compilation log will appear here after compiling the shader.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    {% if flag %}
-                                    <div class="alert alert-success mt-4">
-                                        <i class="bi bi-check-circle-fill me-2"></i>
-                                        <strong>Congratulations!</strong> Your XSS payload successfully executed through the WebGPU shader compiler.
-                                    </div>
-                                    <div class="card mt-2">
-                                        <div class="card-header">
-                                            <h5 class="mb-0"><i class="bi bi-trophy me-2"></i>Challenge Completed!</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <p>You've successfully demonstrated an XSS vulnerability in a WebGPU application. In a real-world scenario, this could allow attackers to execute arbitrary JavaScript when shader compilation errors are displayed, potentially leading to data theft, session hijacking, and other attacks.</p>
-                                            <div class="flag-container p-3 bg-light rounded">
-                                                <span class="flag-label">Your Flag:</span>
-                                                <code id="flag-value">{{ flag }}</code>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="mt-4">
-                    <a href="{{ url_for('solutions', level=22) }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">XSS</span> / <span>Level 22</span>
+{%endblock %}
+
+{%block content %}
+<div class="challenge-lab">
+    <!-- LEFT PANEL: Mission & Intel -->
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
+        </div>
+        <div class="mission-content">
+            <h5 class="mb-3">XSS in React</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>ReactApp</strong>. Test the security of this application.
+            </p>
+
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Exploit React dangerouslySetInnerHTML</p>
                 </div>
             </div>
+
+            <!-- Integrated Hints System -->
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: React XSS
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            React escapes by default, but dangerouslySetInnerHTML bypasses this.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Finding Vulnerable Code
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Look for components using dangerouslySetInnerHTML with user input.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Inject HTML through dangerouslySetInnerHTML to execute scripts.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {%if xss_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the XSS vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: The Vulnerable App -->
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>react.app/render</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for XSS Level 22</p>
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    // Simulated WebGPU environment
-    class WebGPUSimulator {
-        constructor() {
-            this.isSupported = true;
-            this.device = null;
-            this.context = null;
-            this.pipeline = null;
-            this.bindGroup = null;
-            this.buffer = null;
-            this.shaderModule = null;
-            
-            // Shader templates
-            this.shaderTemplates = {
-                basic: `
-// Vertex shader
-struct VertexOutput {
-    @builtin(position) position: vec4<f32>,
-    @location(0) color: vec4<f32>,
-};
-
-@vertex
-fn vertexMain(@location(0) position: vec3<f32>,
-              @location(1) color: vec3<f32>) -> VertexOutput {
-    var output: VertexOutput;
-    output.position = vec4<f32>(position, 1.0);
-    output.color = vec4<f32>(color, 1.0);
-    return output;
-}
-
-// Fragment shader
-@fragment
-fn fragmentMain(@location(0) color: vec4<f32>) -> @location(0) vec4<f32> {
-    return color;
-}`,
-                animated: `
-// Vertex shader
-struct VertexOutput {
-    @builtin(position) position: vec4<f32>,
-    @location(0) color: vec4<f32>,
-};
-
-struct Uniforms {
-    time: f32,
-    resolution: vec2<f32>,
-};
-
-@group(0) @binding(0) var<uniform> uniforms: Uniforms;
-
-@vertex
-fn vertexMain(@location(0) position: vec3<f32>,
-              @location(1) color: vec3<f32>) -> VertexOutput {
-    var output: VertexOutput;
-    var pos = position;
-    pos.x += sin(uniforms.time + position.y) * 0.1;
-    output.position = vec4<f32>(pos, 1.0);
-    output.color = vec4<f32>(color, 1.0);
-    return output;
-}
-
-// Fragment shader
-@fragment
-fn fragmentMain(@location(0) color: vec4<f32>) -> @location(0) vec4<f32> {
-    return color;
-}`,
-                procedural: `
-// Vertex shader
-struct VertexOutput {
-    @builtin(position) position: vec4<f32>,
-    @location(0) uv: vec2<f32>,
-};
-
-@vertex
-fn vertexMain(@location(0) position: vec3<f32>,
-              @location(1) uv: vec2<f32>) -> VertexOutput {
-    var output: VertexOutput;
-    output.position = vec4<f32>(position, 1.0);
-    output.uv = uv;
-    return output;
-}
-
-// Fragment shader
-struct Uniforms {
-    time: f32,
-    resolution: vec2<f32>,
-};
-
-@group(0) @binding(0) var<uniform> uniforms: Uniforms;
-
-@fragment
-fn fragmentMain(@location(0) uv: vec2<f32>) -> @location(0) vec4<f32> {
-    let st = uv;
-    let time = uniforms.time;
-    
-    // Create a procedural pattern
-    let pattern = sin(st.x * 10.0 + time) * sin(st.y * 10.0 + time) * 0.5 + 0.5;
-    
-    return vec4<f32>(pattern, pattern * 0.5, 1.0 - pattern, 1.0);
-}`,
-                lighting: `
-// Vertex shader
-struct VertexOutput {
-    @builtin(position) position: vec4<f32>,
-    @location(0) normal: vec3<f32>,
-    @location(1) worldPos: vec3<f32>,
-};
-
-struct Uniforms {
-    model: mat4x4<f32>,
-    view: mat4x4<f32>,
-    projection: mat4x4<f32>,
-    normalMatrix: mat3x3<f32>,
-    lightPos: vec3<f32>,
-    viewPos: vec3<f32>,
-    time: f32,
-};
-
-@group(0) @binding(0) var<uniform> uniforms: Uniforms;
-
-@vertex
-fn vertexMain(@location(0) position: vec3<f32>,
-              @location(1) normal: vec3<f32>) -> VertexOutput {
-    var output: VertexOutput;
-    let worldPos = (uniforms.model * vec4<f32>(position, 1.0)).xyz;
-    output.position = uniforms.projection * uniforms.view * vec4<f32>(worldPos, 1.0);
-    output.normal = uniforms.normalMatrix * normal;
-    output.worldPos = worldPos;
-    return output;
-}
-
-// Fragment shader
-@fragment
-fn fragmentMain(@location(0) normal: vec3<f32>,
-                @location(1) worldPos: vec3<f32>) -> @location(0) vec4<f32> {
-    let N = normalize(normal);
-    let L = normalize(uniforms.lightPos - worldPos);
-    let V = normalize(uniforms.viewPos - worldPos);
-    let H = normalize(L + V);
-    
-    let ambient = 0.1;
-    let diffuse = max(dot(N, L), 0.0);
-    let specular = pow(max(dot(N, H), 0.0), 32.0);
-    
-    let lightColor = vec3<f32>(1.0, 1.0, 1.0);
-    let objectColor = vec3<f32>(0.7, 0.2, 0.2);
-    
-    let result = (ambient + diffuse) * objectColor + specular * lightColor;
-    
-    return vec4<f32>(result, 1.0);
-}`
-            };
-        }
-        
-        // Initialize WebGPU
-        async initialize() {
-            // In a real application, this would initialize WebGPU
-            // For this simulation, we'll just return a success message
-            return "WebGPU initialized successfully.";
-        }
-        
-        // Compile a shader
-        async compileShader(shaderCode) {
-            // In a real application, this would compile the shader using WebGPU
-            // For this simulation, we'll check for some common errors and return appropriate messages
-            
-            // Check if the shader code is empty
-            if (!shaderCode.trim()) {
-                return {
-                    success: false,
-                    error: "Shader code cannot be empty."
-                };
-            }
-            
-            // Check for syntax errors (very simplified)
-            if (shaderCode.includes('ERROR_TRIGGER')) {
-                // This is the vulnerable part - it directly renders the error message
-                // without sanitizing it, allowing XSS
-                const errorMessage = shaderCode.split('ERROR_TRIGGER')[1].trim();
-                return {
-                    success: false,
-                    error: `Shader compilation failed: ${errorMessage}`
-                };
-            }
-            
-            // Check for missing semicolons
-            if (shaderCode.includes('\n}') && !shaderCode.includes(';\n}')) {
-                return {
-                    success: false,
-                    error: "Shader compilation failed: Missing semicolon before closing brace."
-                };
-            }
-            
-            // Check for missing function declarations
-            if (!shaderCode.includes('@vertex') || !shaderCode.includes('@fragment')) {
-                return {
-                    success: false,
-                    error: "Shader compilation failed: Missing @vertex or @fragment function declaration."
-                };
-            }
-            
-            // If no errors, return success
-            return {
-                success: true,
-                message: "Shader compiled successfully."
-            };
-        }
-        
-        // Run the shader
-        async runShader() {
-            // In a real application, this would run the shader using WebGPU
-            // For this simulation, we'll just return a success message
-            return "Shader executed successfully.";
-        }
-    }
-    
-    // Initialize the WebGPU simulator
-    const webgpu = new WebGPUSimulator();
-    
-    // DOM elements
-    const shaderEditor = document.getElementById('shader-editor');
-    const compileShaderBtn = document.getElementById('compile-shader-btn');
-    const shaderOutput = document.getElementById('shader-output');
-    const compilationLog = document.getElementById('compilation-log');
-    
-    // Initialize the app
-    async function initApp() {
-        // Initialize WebGPU
-        const initMessage = await webgpu.initialize();
-        updateCompilationLog(initMessage);
-        
-        // Load the basic shader template
-        loadShaderTemplate('basic');
-        
-        // Set up event listeners
-        compileShaderBtn.addEventListener('click', compileAndRunShader);
-    }
-    
-    // Load a shader template
-    function loadShaderTemplate(templateName) {
-        const template = webgpu.shaderTemplates[templateName];
-        if (template) {
-            shaderEditor.value = template;
-        }
-    }
-    
-    // Compile and run the shader
-    async function compileAndRunShader() {
-        // Get the shader code
-        const shaderCode = shaderEditor.value;
-        
-        // Update the compilation log
-        updateCompilationLog("Compiling shader...");
-        
-        // Compile the shader
-        const compileResult = await webgpu.compileShader(shaderCode);
-        
-        if (compileResult.success) {
-            // Update the compilation log
-            updateCompilationLog(compileResult.message);
-            
-            // Run the shader
-            const runResult = await webgpu.runShader();
-            updateCompilationLog(runResult);
-            
-            // Update the shader output
-            updateShaderOutput(true);
-        } else {
-            // Update the compilation log with the error
-            // This is the vulnerable part - it directly renders the error message
-            // without sanitizing it, allowing XSS
-            updateCompilationLog(compileResult.error, true);
-            
-            // Update the shader output to show an error
-            updateShaderOutput(false);
-        }
-    }
-    
-    // Update the compilation log
-    function updateCompilationLog(message, isError = false) {
-        // This is the vulnerable part - it uses innerHTML to render the message
-        // without sanitizing it, allowing XSS
-        const logEntry = document.createElement('div');
-        logEntry.className = isError ? 'text-danger' : 'text-success';
-        logEntry.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
-        
-        compilationLog.innerHTML = '';
-        compilationLog.appendChild(logEntry);
-    }
-    
-    // Update the shader output
-    function updateShaderOutput(success) {
-        if (success) {
-            // In a real application, this would show the rendered output
-            // For this simulation, we'll just show a placeholder
-            shaderOutput.innerHTML = `
-                <div class="text-center py-4">
-                    <canvas width="400" height="100" style="background: linear-gradient(to right, #ff0000, #00ff00, #0000ff);"></canvas>
-                    <p class="mt-3 text-success">Shader running successfully.</p>
-                </div>
-            `;
-        } else {
-            // Show an error message
-            shaderOutput.innerHTML = `
-                <div class="text-center py-5">
-                    <i class="bi bi-exclamation-triangle display-1 text-danger"></i>
-                    <p class="mt-3 text-danger">Shader compilation failed. Check the compilation log for details.</p>
-                </div>
-            `;
-        }
-    }
-    
-    // Initialize the app when the DOM is loaded
-    document.addEventListener('DOMContentLoaded', initApp);
-    
-    // Check for XSS success
-    window.addEventListener('DOMContentLoaded', function() {
-        // Original alert function
-        var originalAlert = window.alert;
-        
-        // Override alert
-        window.alert = function(message) {
-            // Call the original alert
-            originalAlert(message);
-            
-            // Check if this is the success message
-            if (message === "XSS Level 22 Completed!") {
-                // Redirect to success page
-                window.location.href = window.location.href + "?success=true";
-            }
-        };
-    });
-</script>
-{% endblock %}
+{%endblock %}

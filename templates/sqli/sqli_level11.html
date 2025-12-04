@@ -1,310 +1,106 @@
-{% extends 'base.html' %}
+{%extends 'base.html' %}
 
-{% block title %}Level 11: GraphQL Injection - R00tGlyph{% endblock %}
+{%block title %}Level 11: NoSQL Injection (MongoDB) - R00tGlyph{%endblock %}
 
-{% block content %}
-<style>
-    .graphql-header {
-        background: linear-gradient(135deg, #e535ab 0%, #9c1b7a 100%);
-        color: white;
-        padding: 20px;
-        border-radius: 5px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    .graphql-playground {
-        background-color: #1e1e1e;
-        color: #d4d4d4;
-        padding: 15px;
-        border-radius: 5px;
-        font-family: monospace;
-        overflow-x: auto;
-        max-height: 400px;
-        overflow-y: auto;
-    }
-    .graphql-keyword {
-        color: #569cd6;
-    }
-    .graphql-field {
-        color: #9cdcfe;
-    }
-    .graphql-type {
-        color: #4ec9b0;
-    }
-    .graphql-string {
-        color: #ce9178;
-    }
-    .graphql-variable {
-        color: #b5cea8;
-    }
-    .graphql-comment {
-        color: #6a9955;
-    }
-    .admin-note {
-        background-color: rgba(255, 193, 7, 0.1);
-        border-left: 4px solid var(--bs-warning);
-        padding: 15px;
-        margin-top: 20px;
-        border-radius: 5px;
-    }
-    .schema-box {
-        background-color: #f8f9fa;
-        border-left: 4px solid #e535ab;
-        padding: 15px;
-        margin-bottom: 20px;
-        border-radius: 5px;
-        font-family: monospace;
-    }
-    .response-box {
-        background-color: #f8f9fa;
-        border-left: 4px solid #28a745;
-        padding: 15px;
-        margin-top: 20px;
-        border-radius: 5px;
-        font-family: monospace;
-    }
-</style>
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">SQL Injection</span> / <span>Level 11</span>
+{%endblock %}
 
-<div class="row">
-    <div class="col-md-10 offset-md-1">
-        {% if sqli_detected %}
-        <div class="alert alert-success">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            <strong>Success!</strong> You've successfully exploited the GraphQL injection vulnerability! The challenge has been marked as completed.
-            {% if flag %}
-            <div class="mt-2">
-                <strong>Flag:</strong> <code>{{ flag }}</code>
-            </div>
-            {% endif %}
+{%block content %}
+<div class="challenge-lab">
+    <!-- LEFT PANEL: Mission & Intel -->
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
-        {% endif %}
-
-        <!-- Challenge description -->
-        <div class="alert alert-dark challenge-description">
-            <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-            <p>
-                Welcome to <strong>BlogQL</strong>, a fictional blogging platform built with GraphQL! This challenge simulates a real-world scenario where a GraphQL API is vulnerable to injection attacks.
-            </p>
-            <p>
-                The developers of BlogQL have created a modern blogging platform using GraphQL, a powerful query language for APIs. However, they've made a critical mistake: they're not properly validating or sanitizing user input in GraphQL queries, leading to potential injection vulnerabilities.
-            </p>
-            <p>
-                <strong>Your Task:</strong> Exploit the GraphQL injection vulnerability to access private blog posts that contain sensitive information. The flag is hidden in a private admin post.
+        <div class="mission-content">
+            <h5 class="mb-3">NoSQL Injection (MongoDB)</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>MongoApp</strong>. Test for SQL injection vulnerabilities.
             </p>
 
-            <div class="card mb-3 border-secondary">
-                <div class="card-header">
-                    <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
-                </div>
-                <div class="card-body">
-                    <p class="mb-0">
-                        <strong>Client:</strong> BlogQL Security Team<br>
-                        <strong>Target:</strong> BlogQL GraphQL API<br>
-                        <strong>Vulnerability:</strong> Suspected GraphQL Injection<br>
-                        <strong>Objective:</strong> Access private blog posts containing sensitive information
-                    </p>
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Exploit NoSQL injection in MongoDB</p>
                 </div>
             </div>
 
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
-                </div>
-                <div class="card-body">
-                    <p>
-                        GraphQL is a query language for APIs that provides a more efficient and powerful alternative to REST. Unlike REST, GraphQL allows clients to request exactly the data they need, making it more flexible but also introducing unique security challenges.
-                    </p>
-                    <p>
-                        GraphQL injection occurs when user input is not properly validated or sanitized before being used in GraphQL operations. This can lead to:
-                    </p>
-                    <ul>
-                        <li>Unauthorized access to data through field manipulation</li>
-                        <li>Information disclosure through introspection queries</li>
-                        <li>Denial of service through complex nested queries</li>
-                        <li>Injection of malicious queries or mutations</li>
-                    </ul>
-                    <p>
-                        These vulnerabilities are particularly dangerous because GraphQL APIs often have access to multiple data sources and can expose sensitive information if not properly secured.
-                    </p>
-                </div>
-            </div>
-
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
-                </div>
-                <div class="card-body">
-                    <p>
-                        The BlogQL API likely uses GraphQL queries similar to:
-                    </p>
-                    <div class="graphql-playground">
-                        <span class="graphql-keyword">query</span> {<br>
-                        &nbsp;&nbsp;getPost(<span class="graphql-field">id</span>: <span class="graphql-variable">1</span>) {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="graphql-field">id</span><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="graphql-field">title</span><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="graphql-field">content</span><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="graphql-field">author</span> {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="graphql-field">name</span><br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;}<br>
-                        &nbsp;&nbsp;}<br>
-                        }
-                    </div>
-                    <p>
-                        To exploit this vulnerability, you'll need to:
-                    </p>
-                    <ol>
-                        <li>Understand how GraphQL queries are structured and processed</li>
-                        <li>Explore the GraphQL schema to discover available types and fields</li>
-                        <li>Manipulate queries to access unauthorized data</li>
-                        <li>Use GraphQL-specific techniques like aliases and fragments</li>
-                    </ol>
-                    <p>
-                        Remember that GraphQL has introspection capabilities that allow you to query the schema itself, which can be useful for discovering available fields and types.
-                    </p>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="bi bi-shield-fill-check me-2"></i>Real-World Impact</h5>
-                </div>
-                <div class="card-body">
-                    <p>
-                        GraphQL injection vulnerabilities have led to several security incidents:
-                    </p>
-                    <ul>
-                        <li><strong>HackerOne (2019)</strong>: A vulnerability in a GraphQL API allowed attackers to access private reports.</li>
-                        <li><strong>GitHub (2018)</strong>: A vulnerability in their GraphQL API allowed unauthorized access to repository data.</li>
-                    </ul>
-                    <p>
-                        For blogging platforms like BlogQL, such vulnerabilities could lead to:
-                    </p>
-                    <ul>
-                        <li>Unauthorized access to private blog posts</li>
-                        <li>Exposure of user data and credentials</li>
-                        <li>Manipulation of blog content</li>
-                        <li>Complete compromise of the platform</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Level 11: GraphQL Injection</h2>
-            </div>
-            <div class="card-body">
-                <div class="graphql-header">
-                    <div class="d-flex align-items-center justify-content-center">
-                        <i class="bi bi-diagram-3-fill me-2" class="icon-lg"></i>
-                        <h1 class="mb-0">BlogQL</h1>
-                    </div>
-                    <p class="text-center mb-0 mt-2">Modern Blogging Platform with GraphQL API</p>
-                </div>
-
-                <div class="row mb-4">
-                    <div class="col-md-8">
-                        <div class="scenario-box">
-                            <h4><i class="bi bi-exclamation-triangle-fill me-2"></i>Penetration Testing Scenario</h4>
-                            <p>You've been hired to perform a security assessment of BlogQL, a modern blogging platform built with GraphQL. The platform allows users to create, read, update, and delete blog posts through a GraphQL API.</p>
-                            <p>During your initial testing, you notice that the GraphQL API might be vulnerable to injection attacks. The API allows users to query blog posts, but there might be a way to access private posts that should be restricted.</p>
-                            <p><strong>Your objective:</strong> Exploit the GraphQL injection vulnerability to access private blog posts and retrieve the flag hidden in an admin post.</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="portal-stats">
-                            <h5 class="text-center mb-3"><i class="bi bi-bar-chart-fill me-2"></i>Platform Statistics</h5>
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="stat-item">
-                                        <div class="stat-number">10K+</div>
-                                        <div>Blog Posts</div>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="stat-item">
-                                        <div class="stat-number">5K+</div>
-                                        <div>Users</div>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="stat-item">
-                                        <div class="stat-number">99.9%</div>
-                                        <div>Uptime</div>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="stat-item">
-                                        <div class="stat-number">24/7</div>
-                                        <div>Support</div>
-                                    </div>
-                                </div>
-                            </div>
+            <!-- Integrated Hints System -->
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: NoSQL Injection
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            NoSQL databases like MongoDB use JSON queries. Inject operators: <code>{"username": {"$ne": null}}</code> to bypass authentication.
                         </div>
                     </div>
                 </div>
-
-                <div class="schema-box mb-4">
-                    <h5 class="mb-3"><i class="bi bi-code-slash me-2"></i>GraphQL Schema (Partial)</h5>
-                    <pre><code>type Query {
-  getPost(id: ID!): Post
-  getPosts(limit: Int): [Post]
-  searchPosts(keyword: String!): [Post]
-}
-
-type Post {
-  id: ID!
-  title: String!
-  content: String!
-  isPrivate: Boolean!
-  author: User!
-  createdAt: String!
-}
-
-type User {
-  id: ID!
-  name: String!
-  email: String!
-  role: String!
-}</code></pre>
-                </div>
-
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h4 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>GraphQL Playground</h4>
-                    </div>
-                    <div class="card-body">
-                        <form action="{{ url_for('sqli_level11') }}" method="post">
-                            <div class="mb-3">
-                                <label for="graphql-query" class="form-label">Query:</label>
-                                <textarea class="form-control font-monospace" id="graphql-query" name="query" rows="8">{{ query if query else 'query {\n  getPost(id: 1) {\n    id\n    title\n    content\n    author {\n      name\n    }\n  }\n}' }}</textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-play-fill me-2"></i>Execute Query
-                            </button>
-                        </form>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: MongoDB Operators
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Use <code>$ne</code> (not equal), <code>$gt</code> (greater than), <code>$regex</code> for injection. Example: <code>username[$ne]=null&password[$ne]=null</code>
+                        </div>
                     </div>
                 </div>
-
-                {% if response %}
-                <div class="response-box">
-                    <h5 class="mb-3"><i class="bi bi-arrow-return-right me-2"></i>Response</h5>
-                    <pre><code>{{ response|safe }}</code></pre>
-                </div>
-                {% endif %}
-
-                <div class="admin-note">
-                    <h5><i class="bi bi-shield-lock me-2"></i>Developer Note</h5>
-                    <p>Reminder to the development team: Private blog posts (where isPrivate=true) should only be accessible to their authors and administrators. We've implemented access control in the GraphQL resolvers to ensure this restriction is enforced.</p>
-                    <p class="mb-0"><small class="text-muted">Note: This message is for internal use only and should not be visible to regular users.</small></p>
-                </div>
-
-                <div class="mt-4">
-                    <a href="{{ url_for('solutions', level='sqli11') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            In login form, use: <code>username[$ne]=null&password[$ne]=null</code> to bypass authentication by making the query always match.
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            {%if sqli_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the SQL injection vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: The Vulnerable App -->
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>mongo.local/find</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for SQLi Level 11</p>
         </div>
     </div>
 </div>
-{% endblock %}
+{%endblock %}

@@ -1,127 +1,103 @@
-{% extends 'base.html' %}
+{%extends 'base.html' %}
 
-{% block title %}Level 7: Time-Based Blind Command Injection - R00tGlyph{% endblock %}
+{%block title %}Level 7: Path Traversal in Commands - R00tGlyph{%endblock %}
 
-{% block content %}
-<div class="row">
-    <div class="col-md-8 offset-md-2">
-        {% if cmdi_detected %}
-        <div class="alert alert-success">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            <strong>Success!</strong> You've successfully exploited the time-based blind command injection vulnerability! The challenge has been marked as completed.
-            {% if flag %}
-            <div class="mt-2">
-                <strong>Flag:</strong> <code>{{ flag }}</code>
-            </div>
-            {% endif %}
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">Command Injection</span> / <span>Level 7</span>
+{%endblock %}
+
+{%block content %}
+<div class="challenge-lab">
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
-        {% endif %}
+        <div class="mission-content">
+            <h5 class="mb-3">Path Traversal in Commands</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>App7</strong>. Test for command injection vulnerabilities.
+            </p>
 
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Level 7: Time-Based Blind Command Injection</h2>
-            </div>
-            <div class="card-body">
-                <div class="alert alert-dark challenge-description" style="display: none;">
-                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-                    <p>
-                        Welcome to <strong>ServerStatus</strong>, a fictional server monitoring tool! This challenge simulates a real-world scenario where a system that checks server status is vulnerable to time-based blind command injection.
-                    </p>
-                    <p>
-                        The developers of ServerStatus have created a tool that allows users to check if a server is online. However, they've made a critical mistake in how they handle user input.
-                    </p>
-                    <p>
-                        <strong>Your Task:</strong> Exploit the time-based blind command injection vulnerability to read the contents of the flag.txt file on the server.
-                    </p>
-
-                    <div class="alert alert-warning">
-                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> The application doesn't show the output of commands, but you can use time-based techniques to extract information. What happens if you include a command that causes a delay?
-                    </div>
-
-                    <div class="card mt-3">
-                        <div class="card-header">
-                            <h5><i class="bi bi-info-circle-fill me-2"></i>Additional Hints</h5>
-                        </div>
-                        <div class="card-body">
-                            <p>
-                                When exploiting time-based blind command injection, consider:
-                            </p>
-                            <ul>
-                                <li>Using commands like <code>sleep</code> to introduce delays</li>
-                                <li>Conditional execution with <code>&&</code> or <code>||</code> operators</li>
-                                <li>Using <code>grep</code> with the <code>sleep</code> command to check for specific content</li>
-                            </ul>
-                            <p>
-                                Try using a payload like <code>example.com && sleep 5</code> to see if there's a delay in the response.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-
-
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h4 class="mb-0"><i class="bi bi-server me-2"></i>Server Status Checker</h4>
-                    </div>
-                    <div class="card-body">
-                        <form action="{{ url_for('cmdi_level7') }}" method="post">
-                            <div class="mb-3">
-                                <label for="hostname" class="form-label">Server Hostname or IP</label>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" id="hostname" name="hostname" placeholder="Enter hostname (e.g., example.com)" value="{{ hostname }}">
-                                    <button class="btn btn-primary" type="submit">Check Status</button>
-                                </div>
-                                <div class="form-text">Enter a hostname or IP address to check if the server is online.</div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                {% if check_result %}
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Status Check Result</h5>
-                    </div>
-                    <div class="card-body">
-                        <pre class="bg-dark text-light p-3 rounded"><code>{{ check_result }}</code></pre>
-                        <div class="mt-2">
-                            <span class="badge {% if response_time > 5 %}bg-danger{% elif response_time > 2 %}bg-warning{% else %}bg-success{% endif %}">
-                                Response time: {{ response_time }} seconds
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>
-                            Time-based blind command injection is a web security vulnerability that allows an attacker to extract information from a system by observing time differences in responses.
-                        </p>
-                        <p>
-                            In 2023-2024, this type of vulnerability remains a significant threat, especially in:
-                        </p>
-                        <ul>
-                            <li>Network monitoring tools</li>
-                            <li>Server management interfaces</li>
-                            <li>Diagnostic utilities</li>
-                            <li>IoT device management systems</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="mt-4">
-                    <a href="{{ url_for('solutions', level='cmdi7') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Exploit path traversal in commands</p>
                 </div>
             </div>
+
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Understanding the Technique
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            This level focuses on path traversal in commands. Research the specific technique.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Navigate directories
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Use: <code>../../etc/passwd</code> in file parameters
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Apply path traversal in commands techniques to execute commands and retrieve the flag.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {%if cmdi_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>app7.local/cmd</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for Command Injection Level 7</p>
         </div>
     </div>
 </div>
-
-
-{% endblock %}
+{%endblock %}

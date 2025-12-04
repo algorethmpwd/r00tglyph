@@ -1,308 +1,103 @@
-{% extends 'base.html' %}
+{%extends 'base.html' %}
 
-{% block title %}Level 4: XXE in XML File Upload - R00tGlyph{% endblock %}
+{%block title %}Level 4: XXE Technique 4 - R00tGlyph{%endblock %}
 
-{% block content %}
-<div class="row">
-    <div class="col-md-8 offset-md-2">
-        {% if xxe_detected %}
-        <div class="alert alert-success">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            <strong>Success!</strong> You've successfully exploited the XXE vulnerability through file upload! The challenge has been marked as completed.
-            {% if flag %}
-            <div class="mt-2">
-                <strong>Flag:</strong> <code>{{ flag }}</code>
-            </div>
-            {% endif %}
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">XXE</span> / <span>Level 4</span>
+{%endblock %}
+
+{%block content %}
+<div class="challenge-lab">
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
-        {% endif %}
+        <div class="mission-content">
+            <h5 class="mb-3">XXE Technique 4</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>XXEApp4</strong>. Test for XXE vulnerabilities.
+            </p>
 
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Level 4: XXE in XML File Upload</h2>
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Exploit XXE vulnerability 4</p>
+                </div>
             </div>
-            <div class="card-body">
-                <!-- Challenge Description Button -->
-                <div class="text-center mb-3">
-                    <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#challengeModal">
-                        <i class="bi bi-info-circle me-2"></i>Show Challenge Description
-                    </button>
-                    {% if flag %}
-                    <button type="button" class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#flagModal">
-                        <i class="bi bi-flag-fill me-2"></i>Submit Flag
-                    </button>
-                    {% endif %}
-                </div>
 
-                <!-- Challenge Description Modal -->
-                <div class="modal fade" id="challengeModal" tabindex="-1" aria-labelledby="challengeModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header bg-dark text-white">
-                                <h5 class="modal-title" id="challengeModalLabel">
-                                    <i class="bi bi-info-circle-fill me-2"></i>Challenge Description
-                                </h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <div class="card mb-3">
-                                    <div class="card-header">
-                                        <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
-                                    </div>
-                                    <div class="card-body">
-                                        <p class="mb-0">
-                                            <strong>Client:</strong> CloudDocs XML Storage Platform<br>
-                                            <strong>Target:</strong> XML File Upload Processing System<br>
-                                            <strong>Vulnerability:</strong> XXE via File Upload<br>
-                                            <strong>Objective:</strong> Exploit XXE through XML file upload to read server files
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <p>
-                                    <strong>Technical Background:</strong> CloudDocs provides a cloud storage platform that accepts 
-                                    XML file uploads for document management. The XML file processing engine parses uploaded files 
-                                    without proper XXE protection, making it vulnerable to external entity attacks.
-                                </p>
-
-                                <p>
-                                    <strong>File Upload XXE:</strong> Many applications accept XML file uploads for configuration, 
-                                    data import, or document processing. These file upload endpoints are prime targets for XXE 
-                                    attacks since they directly process XML content.
-                                </p>
-
-                                <p>
-                                    <strong>Real-world Impact:</strong> XXE through file upload can lead to:
-                                </p>
-                                <ul>
-                                    <li>Server-side file system access and data exfiltration</li>
-                                    <li>Internal network reconnaissance via SSRF</li>
-                                    <li>Credential theft from configuration files</li>
-                                    <li>Denial of Service through entity expansion attacks</li>
-                                </ul>
-
-                                <p>
-                                    <strong>Your Task:</strong> Upload a malicious XML file that exploits XXE to read the contents of 
-                                    <code>/etc/passwd</code> and display it in the processing results.
-                                </p>
-
-                                <div class="alert alert-warning">
-                                    <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Create an XML file with DTD declarations 
-                                    containing external entities. The file upload processing will parse the XML and execute the entities.
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            </div>
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Understanding
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            XXE level 4 covers advanced entity exploitation.
                         </div>
                     </div>
                 </div>
-
-                <!-- Simulated Cloud Storage Upload Interface -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h4><i class="bi bi-cloud-upload me-2"></i>CloudDocs XML File Upload</h4>
-                    </div>
-                    <div class="card-body">
-                        <p class="text-muted">Upload XML documents for processing and storage in the cloud platform.</p>
-                        
-                        <form method="POST" enctype="multipart/form-data" class="mb-4">
-                            <div class="mb-3">
-                                <label for="xml_file" class="form-label">Select XML File:</label>
-                                <input type="file" class="form-control" id="xml_file" name="xml_file" accept=".xml" required>
-                                <div class="form-text">Accepted formats: .xml files only</div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="description" class="form-label">Document Description (Optional):</label>
-                                <input type="text" class="form-control" id="description" name="description" placeholder="Enter a brief description of the document">
-                            </div>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-upload me-2"></i>Upload and Process
-                            </button>
-                        </form>
-
-                        <div class="alert alert-info">
-                            <h6><i class="bi bi-info-circle me-2"></i>Upload Guidelines</h6>
-                            <ul class="mb-0">
-                                <li>Maximum file size: 10MB</li>
-                                <li>Only XML files are accepted</li>
-                                <li>Files are automatically processed upon upload</li>
-                                <li>Processing results are displayed below</li>
-                            </ul>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Technique
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Research XXE techniques for this scenario.
                         </div>
-
-                        {% if file_processed %}
-                        <div class="card mt-4">
-                            <div class="card-header">
-                                <h5><i class="bi bi-terminal me-2"></i>File Processing Results</h5>
-                            </div>
-                            <div class="card-body">
-                                {% if xxe_detected %}
-                                <div class="alert alert-danger">
-                                    <strong>XXE Vulnerability Detected!</strong> External entity processing successful.
-                                </div>
-                                {% endif %}
-                                
-                                <h6>File Information:</h6>
-                                <ul>
-                                    <li><strong>Filename:</strong> {{ filename or 'Unknown' }}</li>
-                                    <li><strong>Size:</strong> {{ file_size or 'Unknown' }} bytes</li>
-                                    <li><strong>Status:</strong> {% if xxe_detected %}Processing completed with external entities{% else %}Processing completed{% endif %}</li>
-                                </ul>
-                                
-                                <h6>Parsed XML Content:</h6>
-                                <pre class="bg-dark text-light p-3 rounded"><code>{{ parsed_content or 'No content parsed' }}</code></pre>
-                                
-                                {% if file_content %}
-                                <h6 class="mt-3">External File Content Retrieved:</h6>
-                                <pre class="bg-danger text-white p-3 rounded"><code>{{ file_content }}</code></pre>
-                                {% endif %}
-                            </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Apply XXE exploitation to complete the challenge.
                         </div>
-                        {% endif %}
                     </div>
                 </div>
-
-                <!-- Sample XML Template -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5><i class="bi bi-file-code me-2"></i>Sample XML Document</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>Here's a sample XML document structure that you can use as a template:</p>
-                        <pre class="bg-light p-3 rounded"><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;document&gt;
-    &lt;metadata&gt;
-        &lt;title&gt;Sample Document&lt;/title&gt;
-        &lt;author&gt;User&lt;/author&gt;
-        &lt;created&gt;2024-01-01&lt;/created&gt;
-    &lt;/metadata&gt;
-    &lt;content&gt;
-        &lt;section&gt;
-            &lt;header&gt;Introduction&lt;/header&gt;
-            &lt;text&gt;This is a sample XML document for upload testing.&lt;/text&gt;
-        &lt;/section&gt;
-    &lt;/content&gt;
-&lt;/document&gt;</code></pre>
-                    </div>
-                </div>
-
-                <!-- Solution Link -->
-                <div class="text-center">
-                    <a href="/solutions/xxe4" class="btn btn-outline-info">
-                        <i class="bi bi-lightbulb me-2"></i>View Solution
-                    </a>
-                </div>
-
-                {% if flag %}
-                <div id="flag-display" class="mb-3">
-                    <div class="alert alert-success">
-                        <i class="bi bi-check-circle-fill me-2"></i>
-                        <strong>Congratulations!</strong> You've solved the challenge.
-                    </div>
-                    <div class="flag-container mb-2">
-                        <span class="flag-label">Your Flag</span>
-                        <code id="flag-value">{{ flag }}</code>
-                    </div>
-                    <!-- Visible flag submission form -->
-                    <form id="flag-submission-form" class="mt-3">
-                        <input type="hidden" name="challenge_id" value="{{ challenge.id }}">
-                        <div class="input-group">
-                            <input type="text" name="flag" class="form-control" value="{{ flag }}" readonly>
-                            <button type="submit" class="btn btn-success">Submit Flag</button>
-                        </div>
-                    </form>
-                    <div id="flag-result" class="alert" style="display: none;"></div>
-                </div>
-                {% endif %}
             </div>
+
+            {%if xxe_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>xxe4.local/parse</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for XXE Level 4</p>
         </div>
     </div>
 </div>
-
-<!-- Flag Submission Modal -->
-{% if flag %}
-<div class="modal fade" id="flagModal" tabindex="-1" aria-labelledby="flagModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="flagModalLabel">
-                    <i class="bi bi-flag-fill me-2"></i>Submit Flag
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="modal-flag-submission-form">
-                    <input type="hidden" name="challenge_id" value="{{ challenge.id }}">
-                    <div class="mb-3">
-                        <label for="modal-flag-input" class="form-label">Flag:</label>
-                        <input type="text" name="flag" id="modal-flag-input" class="form-control" value="{{ flag }}" readonly>
-                    </div>
-                    <button type="submit" class="btn btn-success w-100">Submit Flag</button>
-                </form>
-                <div id="modal-flag-result" class="alert mt-3" style="display: none;"></div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
-{% endblock %}
-
-{% block extra_scripts %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Show challenge description modal on page load (only once)
-    if (!sessionStorage.getItem('xxe4_description_shown')) {
-        var challengeModal = new bootstrap.Modal(document.getElementById('challengeModal'));
-        challengeModal.show();
-        sessionStorage.setItem('xxe4_description_shown', 'true');
-    }
-
-    // Handle flag submission
-    function handleFlagSubmission(formId, resultId) {
-        const form = document.getElementById(formId);
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const formData = new FormData(form);
-                
-                fetch('/submit_flag', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    const resultDiv = document.getElementById(resultId);
-                    resultDiv.style.display = 'block';
-                    
-                    if (data.success) {
-                        resultDiv.className = 'alert alert-success';
-                        resultDiv.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>' + data.message;
-                        
-                        // Redirect after a short delay
-                        setTimeout(() => {
-                            window.location.href = '/challenges';
-                        }, 2000);
-                    } else {
-                        resultDiv.className = 'alert alert-danger';
-                        resultDiv.innerHTML = '<i class="bi bi-x-circle-fill me-2"></i>' + data.message;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    const resultDiv = document.getElementById(resultId);
-                    resultDiv.style.display = 'block';
-                    resultDiv.className = 'alert alert-danger';
-                    resultDiv.innerHTML = '<i class="bi bi-x-circle-fill me-2"></i>An error occurred while submitting the flag.';
-                });
-            });
-        }
-    }
-
-    // Set up flag submission handlers
-    handleFlagSubmission('flag-submission-form', 'flag-result');
-    handleFlagSubmission('modal-flag-submission-form', 'modal-flag-result');
-});
-</script>
-{% endblock %}
+{%endblock %}

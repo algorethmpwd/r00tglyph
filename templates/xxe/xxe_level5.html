@@ -1,326 +1,103 @@
-{% extends 'base.html' %}
+{%extends 'base.html' %}
 
-{% block title %}Level 5: XXE with DTD External Subset - R00tGlyph{% endblock %}
+{%block title %}Level 5: XXE Technique 5 - R00tGlyph{%endblock %}
 
-{% block content %}
-<div class="row">
-    <div class="col-md-8 offset-md-2">
-        {% if xxe_detected %}
-        <div class="alert alert-success">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            <strong>Success!</strong> You've successfully exploited the XXE vulnerability using external DTD subset! The challenge has been marked as completed.
-            {% if flag %}
-            <div class="mt-2">
-                <strong>Flag:</strong> <code>{{ flag }}</code>
-            </div>
-            {% endif %}
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">XXE</span> / <span>Level 5</span>
+{%endblock %}
+
+{%block content %}
+<div class="challenge-lab">
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
-        {% endif %}
+        <div class="mission-content">
+            <h5 class="mb-3">XXE Technique 5</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>XXEApp5</strong>. Test for XXE vulnerabilities.
+            </p>
 
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Level 5: XXE with DTD External Subset</h2>
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Exploit XXE vulnerability 5</p>
+                </div>
             </div>
-            <div class="card-body">
-                <!-- Challenge Description Button -->
-                <div class="text-center mb-3">
-                    <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#challengeModal">
-                        <i class="bi bi-info-circle me-2"></i>Show Challenge Description
-                    </button>
-                    {% if flag %}
-                    <button type="button" class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#flagModal">
-                        <i class="bi bi-flag-fill me-2"></i>Submit Flag
-                    </button>
-                    {% endif %}
-                </div>
 
-                <!-- Challenge Description Modal -->
-                <div class="modal fade" id="challengeModal" tabindex="-1" aria-labelledby="challengeModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header bg-dark text-white">
-                                <h5 class="modal-title" id="challengeModalLabel">
-                                    <i class="bi bi-info-circle-fill me-2"></i>Challenge Description
-                                </h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <div class="card mb-3">
-                                    <div class="card-header">
-                                        <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
-                                    </div>
-                                    <div class="card-body">
-                                        <p class="mb-0">
-                                            <strong>Client:</strong> FinanceFlow Reporting System<br>
-                                            <strong>Target:</strong> XML Financial Report Generator<br>
-                                            <strong>Vulnerability:</strong> XXE via External DTD Subset<br>
-                                            <strong>Objective:</strong> Use external DTD subsets to exploit XXE and access financial data
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <p>
-                                    <strong>Technical Background:</strong> FinanceFlow's reporting system processes financial 
-                                    XML documents with DTD validation. The system supports external DTD subsets for schema 
-                                    validation, which creates an opportunity for XXE exploitation through malicious DTD references.
-                                </p>
-
-                                <p>
-                                    <strong>External DTD Subsets:</strong> XML documents can reference external DTD files that 
-                                    define the document structure and validation rules. When these external DTDs are fetched 
-                                    and processed, they can contain malicious entity definitions that exploit XXE vulnerabilities.
-                                </p>
-
-                                <p>
-                                    <strong>Real-world Impact:</strong> XXE via external DTD can lead to:
-                                </p>
-                                <ul>
-                                    <li>Remote code execution through DTD hosting</li>
-                                    <li>Data exfiltration via out-of-band channels</li>
-                                    <li>Internal network reconnaissance</li>
-                                    <li>Bypass of internal security controls</li>
-                                </ul>
-
-                                <p>
-                                    <strong>Your Task:</strong> Create an XML payload that references an external DTD subset 
-                                    containing XXE entities to read the contents of <code>/etc/passwd</code>.
-                                </p>
-
-                                <div class="alert alert-warning">
-                                    <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Use the SYSTEM keyword in the 
-                                    DOCTYPE declaration to reference an external DTD. The external DTD can contain entity 
-                                    definitions that reference local files.
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            </div>
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Understanding
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            XXE level 5 covers advanced entity exploitation.
                         </div>
                     </div>
                 </div>
-
-                <!-- Simulated Financial Reporting Interface -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h4><i class="bi bi-graph-up me-2"></i>FinanceFlow XML Report Generator</h4>
-                    </div>
-                    <div class="card-body">
-                        <p class="text-muted">Generate financial reports from XML data with DTD validation.</p>
-                        
-                        <form method="POST" class="mb-4">
-                            <div class="mb-3">
-                                <label for="xml_report" class="form-label">Financial XML Report:</label>
-                                <textarea class="form-control" id="xml_report" name="xml_report" rows="15" placeholder="Enter your financial XML report here...">{{ xml_report or '<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE financial_report [
-    <!ELEMENT financial_report (header, transactions, summary)>
-    <!ELEMENT header (company, period, currency)>
-    <!ELEMENT company (#PCDATA)>
-    <!ELEMENT period (#PCDATA)>
-    <!ELEMENT currency (#PCDATA)>
-    <!ELEMENT transactions (transaction+)>
-    <!ELEMENT transaction (date, amount, description)>
-    <!ELEMENT date (#PCDATA)>
-    <!ELEMENT amount (#PCDATA)>
-    <!ELEMENT description (#PCDATA)>
-    <!ELEMENT summary (total_income, total_expenses, net_profit)>
-    <!ELEMENT total_income (#PCDATA)>
-    <!ELEMENT total_expenses (#PCDATA)>
-    <!ELEMENT net_profit (#PCDATA)>
-]>
-<financial_report>
-    <header>
-        <company>Sample Corporation</company>
-        <period>Q4 2023</period>
-        <currency>USD</currency>
-    </header>
-    <transactions>
-        <transaction>
-            <date>2023-12-01</date>
-            <amount>5000.00</amount>
-            <description>Revenue from services</description>
-        </transaction>
-        <transaction>
-            <date>2023-12-15</date>
-            <amount>-1500.00</amount>
-            <description>Office expenses</description>
-        </transaction>
-    </transactions>
-    <summary>
-        <total_income>5000.00</total_income>
-        <total_expenses>1500.00</total_expenses>
-        <net_profit>3500.00</net_profit>
-    </summary>
-</financial_report>' }}</textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-play-fill me-2"></i>Generate Report
-                            </button>
-                        </form>
-
-                        {% if xml_report %}
-                        <div class="card">
-                            <div class="card-header">
-                                <h5><i class="bi bi-terminal me-2"></i>Report Generation Results</h5>
-                            </div>
-                            <div class="card-body">
-                                {% if xxe_detected %}
-                                <div class="alert alert-danger">
-                                    <strong>XXE Vulnerability Detected!</strong> External DTD subset processing successful.
-                                </div>
-                                {% endif %}
-                                
-                                <h6>DTD Validation Status:</h6>
-                                <p class="text-{% if dtd_valid %}success{% else %}danger{% endif %}">
-                                    <i class="bi bi-{% if dtd_valid %}check-circle{% else %}x-circle{% endif %}-fill me-2"></i>
-                                    {% if dtd_valid %}DTD validation successful{% else %}DTD validation failed{% endif %}
-                                </p>
-                                
-                                <h6>Generated Report:</h6>
-                                <pre class="bg-dark text-light p-3 rounded"><code>{{ generated_report or 'No report generated' }}</code></pre>
-                                
-                                {% if file_content %}
-                                <h6 class="mt-3">External DTD Content Retrieved:</h6>
-                                <pre class="bg-danger text-white p-3 rounded"><code>{{ file_content }}</code></pre>
-                                {% endif %}
-                            </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Technique
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Research XXE techniques for this scenario.
                         </div>
-                        {% endif %}
                     </div>
                 </div>
-
-                <!-- DTD Information -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5><i class="bi bi-info-circle me-2"></i>DTD External Subset Information</h5>
-                    </div>
-                    <div class="card-body">
-                        <p><strong>External DTD Syntax:</strong></p>
-                        <pre class="bg-light p-3 rounded"><code>&lt;!DOCTYPE root_element SYSTEM "external_dtd_url"&gt;</code></pre>
-                        
-                        <p class="mt-3"><strong>Mixed DTD (Internal + External):</strong></p>
-                        <pre class="bg-light p-3 rounded"><code>&lt;!DOCTYPE root_element SYSTEM "external_dtd_url" [
-    &lt;!-- Internal DTD declarations --&gt;
-    &lt;!ENTITY internal_entity "value"&gt;
-]&gt;</code></pre>
-                    </div>
-                </div>
-
-                <!-- Solution Link -->
-                <div class="text-center">
-                    <a href="/solutions/xxe5" class="btn btn-outline-info">
-                        <i class="bi bi-lightbulb me-2"></i>View Solution
-                    </a>
-                </div>
-
-                {% if flag %}
-                <div id="flag-display" class="mb-3">
-                    <div class="alert alert-success">
-                        <i class="bi bi-check-circle-fill me-2"></i>
-                        <strong>Congratulations!</strong> You've solved the challenge.
-                    </div>
-                    <div class="flag-container mb-2">
-                        <span class="flag-label">Your Flag</span>
-                        <code id="flag-value">{{ flag }}</code>
-                    </div>
-                    <!-- Visible flag submission form -->
-                    <form id="flag-submission-form" class="mt-3">
-                        <input type="hidden" name="challenge_id" value="{{ challenge.id }}">
-                        <div class="input-group">
-                            <input type="text" name="flag" class="form-control" value="{{ flag }}" readonly>
-                            <button type="submit" class="btn btn-success">Submit Flag</button>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Apply XXE exploitation to complete the challenge.
                         </div>
-                    </form>
-                    <div id="flag-result" class="alert" style="display: none;"></div>
+                    </div>
                 </div>
-                {% endif %}
             </div>
+
+            {%if xxe_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>xxe5.local/parse</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for XXE Level 5</p>
         </div>
     </div>
 </div>
-
-<!-- Flag Submission Modal -->
-{% if flag %}
-<div class="modal fade" id="flagModal" tabindex="-1" aria-labelledby="flagModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="flagModalLabel">
-                    <i class="bi bi-flag-fill me-2"></i>Submit Flag
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="modal-flag-submission-form">
-                    <input type="hidden" name="challenge_id" value="{{ challenge.id }}">
-                    <div class="mb-3">
-                        <label for="modal-flag-input" class="form-label">Flag:</label>
-                        <input type="text" name="flag" id="modal-flag-input" class="form-control" value="{{ flag }}" readonly>
-                    </div>
-                    <button type="submit" class="btn btn-success w-100">Submit Flag</button>
-                </form>
-                <div id="modal-flag-result" class="alert mt-3" style="display: none;"></div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
-{% endblock %}
-
-{% block extra_scripts %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Show challenge description modal on page load (only once)
-    if (!sessionStorage.getItem('xxe5_description_shown')) {
-        var challengeModal = new bootstrap.Modal(document.getElementById('challengeModal'));
-        challengeModal.show();
-        sessionStorage.setItem('xxe5_description_shown', 'true');
-    }
-
-    // Handle flag submission
-    function handleFlagSubmission(formId, resultId) {
-        const form = document.getElementById(formId);
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const formData = new FormData(form);
-                
-                fetch('/submit_flag', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    const resultDiv = document.getElementById(resultId);
-                    resultDiv.style.display = 'block';
-                    
-                    if (data.success) {
-                        resultDiv.className = 'alert alert-success';
-                        resultDiv.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>' + data.message;
-                        
-                        // Redirect after a short delay
-                        setTimeout(() => {
-                            window.location.href = '/challenges';
-                        }, 2000);
-                    } else {
-                        resultDiv.className = 'alert alert-danger';
-                        resultDiv.innerHTML = '<i class="bi bi-x-circle-fill me-2"></i>' + data.message;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    const resultDiv = document.getElementById(resultId);
-                    resultDiv.style.display = 'block';
-                    resultDiv.className = 'alert alert-danger';
-                    resultDiv.innerHTML = '<i class="bi bi-x-circle-fill me-2"></i>An error occurred while submitting the flag.';
-                });
-            });
-        }
-    }
-
-    // Set up flag submission handlers
-    handleFlagSubmission('flag-submission-form', 'flag-result');
-    handleFlagSubmission('modal-flag-submission-form', 'modal-flag-result');
-});
-</script>
-{% endblock %}
+{%endblock %}

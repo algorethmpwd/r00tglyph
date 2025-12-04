@@ -1,318 +1,106 @@
-{% extends 'base.html' %}
+{%extends 'base.html' %}
 
-{% block title %}Level 15: SQL Injection via XML - R00tGlyph{% endblock %}
+{%block title %}Level 15: SQL Injection via Cookies - R00tGlyph{%endblock %}
 
-{% block content %}
-<style>
-    .xml-header {
-        background: linear-gradient(135deg, #f77f00 0%, #d62828 100%);
-        color: white;
-        padding: 20px;
-        border-radius: 5px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    .code-box {
-        background-color: #1e1e1e;
-        color: #d4d4d4;
-        padding: 15px;
-        border-radius: 5px;
-        font-family: monospace;
-        overflow-x: auto;
-        max-height: 400px;
-        overflow-y: auto;
-    }
-    .code-keyword {
-        color: #569cd6;
-    }
-    .code-string {
-        color: #ce9178;
-    }
-    .code-comment {
-        color: #6a9955;
-    }
-    .code-function {
-        color: #dcdcaa;
-    }
-    .code-class {
-        color: #4ec9b0;
-    }
-    .code-variable {
-        color: #9cdcfe;
-    }
-    .xml-tag {
-        color: #4ec9b0;
-    }
-    .xml-attr {
-        color: #9cdcfe;
-    }
-    .xml-value {
-        color: #ce9178;
-    }
-    .admin-note {
-        background-color: rgba(255, 193, 7, 0.1);
-        border-left: 4px solid var(--bs-warning);
-        padding: 15px;
-        margin-top: 20px;
-        border-radius: 5px;
-    }
-    .report-card {
-        transition: all 0.3s ease;
-        margin-bottom: 15px;
-        border-left: 4px solid #f77f00;
-    }
-    .report-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-    }
-</style>
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">SQL Injection</span> / <span>Level 15</span>
+{%endblock %}
 
-<div class="row">
-    <div class="col-md-10 offset-md-1">
-        {% if sqli_detected %}
-        <div class="alert alert-success">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            <strong>Success!</strong> You've successfully exploited the SQL injection vulnerability in the XML processing! The challenge has been marked as completed.
-            {% if flag %}
-            <div class="mt-2">
-                <strong>Flag:</strong> <code>{{ flag }}</code>
-            </div>
-            {% endif %}
+{%block content %}
+<div class="challenge-lab">
+    <!-- LEFT PANEL: Mission & Intel -->
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
-        {% endif %}
-
-        <!-- Challenge description -->
-        <div class="alert alert-dark challenge-description">
-            <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-            <p>
-                Welcome to <strong>ReportHub</strong>, a fictional business intelligence platform! This challenge simulates a real-world scenario where a web application processes XML data and is vulnerable to SQL injection through XML.
-            </p>
-            <p>
-                The developers of ReportHub have built a reporting system that allows users to submit XML-formatted report queries. However, they've made a critical mistake: they're extracting values from the XML and using them directly in SQL queries without proper validation or parameterization.
-            </p>
-            <p>
-                <strong>Your Task:</strong> Exploit the SQL injection vulnerability in the XML processing to access sensitive data. The flag is hidden in a restricted report.
+        <div class="mission-content">
+            <h5 class="mb-3">SQL Injection via Cookies</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>SessionApp</strong>. Test for SQL injection vulnerabilities.
             </p>
 
-            <div class="card mb-3 border-secondary">
-                <div class="card-header">
-                    <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
-                </div>
-                <div class="card-body">
-                    <p class="mb-0">
-                        <strong>Client:</strong> Business Intelligence Security Team<br>
-                        <strong>Target:</strong> ReportHub XML Report Submission<br>
-                        <strong>Vulnerability:</strong> SQL Injection via XML<br>
-                        <strong>Objective:</strong> Access restricted report data containing sensitive information
-                    </p>
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Inject through cookie values</p>
                 </div>
             </div>
 
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
-                </div>
-                <div class="card-body">
-                    <p>
-                        XML (eXtensible Markup Language) is commonly used for data exchange between systems. Many applications process XML data from various sources, including user input, API responses, and configuration files.
-                    </p>
-                    <p>
-                        SQL injection via XML occurs when an application:
-                    </p>
-                    <ul>
-                        <li>Extracts values from XML documents</li>
-                        <li>Uses these values directly in SQL queries without proper validation or parameterization</li>
-                        <li>Fails to properly sanitize or escape special characters in the XML values</li>
-                    </ul>
-                    <p>
-                        This type of vulnerability is particularly dangerous because:
-                    </p>
-                    <ul>
-                        <li>XML processing often happens server-side, making it less visible to security testing</li>
-                        <li>Developers may focus on XML parsing security (like XXE) but overlook SQL injection risks</li>
-                        <li>XML data may come from trusted sources, leading to less scrutiny of its contents</li>
-                        <li>Complex XML structures can hide malicious payloads</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
-                </div>
-                <div class="card-body">
-                    <p>
-                        The ReportHub application likely processes XML data similar to:
-                    </p>
-                    <div class="code-box">
-                        <span class="xml-tag">&lt;report&gt;</span><br>
-                        &nbsp;&nbsp;<span class="xml-tag">&lt;type&gt;</span>sales<span class="xml-tag">&lt;/type&gt;</span><br>
-                        &nbsp;&nbsp;<span class="xml-tag">&lt;period&gt;</span>monthly<span class="xml-tag">&lt;/period&gt;</span><br>
-                        &nbsp;&nbsp;<span class="xml-tag">&lt;department&gt;</span>electronics<span class="xml-tag">&lt;/department&gt;</span><br>
-                        <span class="xml-tag">&lt;/report&gt;</span>
+            <!-- Integrated Hints System -->
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Cookie Injection
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Cookies can be used in SQL queries. Modify cookie values: <code>user_id=1' OR '1'='1'--</code>
+                        </div>
                     </div>
-                    <p>
-                        And then uses the extracted values in SQL queries like:
-                    </p>
-                    <div class="code-box">
-                        <span class="code-comment">-- Example of vulnerable SQL query</span><br>
-                        <span class="code-keyword">SELECT</span> report_id, title, data, created_at<br>
-                        <span class="code-keyword">FROM</span> reports<br>
-                        <span class="code-keyword">WHERE</span> type = '<span class="code-variable">$type</span>' <span class="code-keyword">AND</span> department = '<span class="code-variable">$department</span>' <span class="code-keyword">AND</span> period = '<span class="code-variable">$period</span>'
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Cookie Manipulation
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Use browser DevTools or Burp Suite to modify cookies before requests.
+                        </div>
                     </div>
-                    <p>
-                        To exploit this vulnerability, you'll need to:
-                    </p>
-                    <ol>
-                        <li>Identify which XML elements are vulnerable to SQL injection</li>
-                        <li>Craft a malicious XML payload that includes SQL injection code</li>
-                        <li>Submit the XML payload to the application</li>
-                        <li>Analyze the response to extract the sensitive information</li>
-                    </ol>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Change cookie value to: <code>session=abc'; UPDATE users SET role='admin' WHERE id=1--</code>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="bi bi-shield-fill-check me-2"></i>Real-World Impact</h5>
+            {%if sqli_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
                 </div>
-                <div class="card-body">
-                    <p>
-                        SQL injection via XML has affected several real-world applications:
-                    </p>
-                    <ul>
-                        <li><strong>SAP Business Intelligence (2018)</strong>: A vulnerability in XML report processing allowed attackers to access sensitive business data.</li>
-                        <li><strong>Oracle Business Intelligence (2019)</strong>: A SQL injection vulnerability in XML data processing affected multiple versions.</li>
-                    </ul>
-                    <p>
-                        For business intelligence platforms like ReportHub, such vulnerabilities could lead to:
-                    </p>
-                    <ul>
-                        <li>Unauthorized access to sensitive business data</li>
-                        <li>Exposure of financial information</li>
-                        <li>Competitive intelligence leaks</li>
-                        <li>Regulatory compliance violations</li>
-                    </ul>
-                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the SQL injection vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: The Vulnerable App -->
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>session.local/dashboard</span>
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Level 15: SQL Injection via XML</h2>
-            </div>
-            <div class="card-body">
-                <div class="xml-header">
-                    <div class="d-flex align-items-center justify-content-center">
-                        <i class="bi bi-file-earmark-bar-graph me-2" class="icon-lg"></i>
-                        <h1 class="mb-0">ReportHub</h1>
-                    </div>
-                    <p class="text-center mb-0 mt-2">Enterprise Business Intelligence Platform</p>
-                </div>
-
-                <div class="row mb-4">
-                    <div class="col-md-8">
-                        <div class="scenario-box">
-                            <h4><i class="bi bi-exclamation-triangle-fill me-2"></i>Penetration Testing Scenario</h4>
-                            <p>You've been hired to perform a security assessment of ReportHub, a business intelligence platform that allows users to generate custom reports. The platform accepts XML-formatted report queries from users.</p>
-                            <p>During your initial testing, you notice that the XML processing functionality might be vulnerable to SQL injection. The application seems to extract values from the XML and use them directly in database queries.</p>
-                            <p><strong>Your objective:</strong> Exploit the SQL injection vulnerability in the XML processing to access a restricted report that contains the flag.</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="portal-stats">
-                            <h5 class="text-center mb-3"><i class="bi bi-bar-chart-fill me-2"></i>Platform Statistics</h5>
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="stat-item">
-                                        <div class="stat-number">5K+</div>
-                                        <div>Reports</div>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="stat-item">
-                                        <div class="stat-number">100+</div>
-                                        <div>Companies</div>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="stat-item">
-                                        <div class="stat-number">99.9%</div>
-                                        <div>Uptime</div>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="stat-item">
-                                        <div class="stat-number">24/7</div>
-                                        <div>Support</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h4 class="mb-0"><i class="bi bi-file-earmark-code me-2"></i>XML Report Submission</h4>
-                    </div>
-                    <div class="card-body">
-                        <form action="{{ url_for('sqli_level15') }}" method="post">
-                            <div class="mb-3">
-                                <label for="xml_data" class="form-label">XML Report Query:</label>
-                                <textarea class="form-control font-monospace" id="xml_data" name="xml_data" rows="10" placeholder="Enter XML report query">{{ xml_data if xml_data else '<report>\n  <type>sales</type>\n  <period>monthly</period>\n  <department>electronics</department>\n</report>' }}</textarea>
-                                <small class="form-text text-muted">Submit an XML-formatted report query to generate a report.</small>
-                            </div>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-send me-2"></i>Submit Query
-                            </button>
-                        </form>
-                    </div>
-                </div>
-
-                {% if error %}
-                <div class="alert alert-danger">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                    {{ error }}
-                </div>
-                {% endif %}
-
-                {% if reports %}
-                <div class="reports-container">
-                    <h4 class="mb-3"><i class="bi bi-file-earmark-text me-2"></i>Generated Reports</h4>
-
-                    <div class="row">
-                        {% for report in reports %}
-                        <div class="col-md-6 mb-3">
-                            <div class="card report-card">
-                                <div class="card-body">
-                                    <h5 class="card-title">{{ report.title }}</h5>
-                                    <h6 class="card-subtitle mb-2 text-muted">{{ report.type }} - {{ report.period }}</h6>
-                                    <p class="card-text">{{ report.data }}</p>
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="badge bg-secondary">{{ report.department }}</span>
-                                        <small class="text-muted">ID: {{ report.id }}</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-
-                <div class="admin-note">
-                    <h5><i class="bi bi-shield-lock me-2"></i>Developer Note</h5>
-                    <p>Reminder to the development team: The restricted report (ID: 999) contains sensitive financial data and should only be accessible to administrators. Make sure our XML processing is secure against injection attacks.</p>
-                    <p class="mb-0"><small class="text-muted">Note: This message is for internal use only and should not be visible to regular users.</small></p>
-                </div>
-
-                <div class="mt-4">
-                    <a href="{{ url_for('solutions', level='sqli15') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
-                </div>
-            </div>
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for SQLi Level 15</p>
         </div>
     </div>
 </div>
-{% endblock %}
+{%endblock %}

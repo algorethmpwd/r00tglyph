@@ -1,183 +1,103 @@
-{% extends "base.html" %}
+{%extends 'base.html' %}
 
-{% block title %}Command Injection Level 22 - SSH Commands{% endblock %}
+{%block title %}Level 22: Command Injection in Python - R00tGlyph{%endblock %}
 
-{% block content %}
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3><i class="bi bi-terminal me-2"></i>Command Injection Level 22</h3>
-                    <div>
-                        <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#challengeModal">
-                            <i class="bi bi-info-circle me-1"></i>Challenge Info
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">Command Injection</span> / <span>Level 22</span>
+{%endblock %}
+
+{%block content %}
+<div class="challenge-lab">
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
+        </div>
+        <div class="mission-content">
+            <h5 class="mb-3">Command Injection in Python</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>App22</strong>. Test for command injection vulnerabilities.
+            </p>
+
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Exploit command injection in python</p>
+                </div>
+            </div>
+
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Understanding the Technique
                         </button>
-                        <a href="{{ url_for('solutions', level='cmdi22') }}" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-lightbulb me-1"></i>Solution
-                        </a>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            This level focuses on command injection in python. Research the specific technique.
+                        </div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="scenario-box mb-4">
-                        <h5><i class="bi bi-terminal me-2"></i>Remote Server Management Platform</h5>
-                        <p>You're testing a remote server management platform that executes SSH commands on production servers. The system allows administrators to run commands remotely, but may be vulnerable to command injection through SSH command parameters.</p>
-                        <p><strong>Context:</strong> Enterprise server management and remote administration tools</p>
-                        <p><strong>Technology:</strong> SSH, remote command execution, server management</p>
-                    </div>
-
-                    {% if flag %}
-                    <div class="alert alert-success">
-                        <i class="bi bi-flag-fill me-2"></i><strong>Challenge Completed!</strong>
-                        <br>Flag: <code>{{ flag }}</code>
-                    </div>
-                    {% endif %}
-
-                    <div class="alert alert-info mb-4">
-                        <i class="bi bi-info-circle me-2"></i>
-                        <strong>Remote Management:</strong> This platform executes commands on remote servers via SSH. Use appropriate tools like Burp Suite to intercept and modify requests.
-                    </div>
-
-                    <form method="POST" class="mb-4">
-                        <div class="mb-3">
-                            <label for="ssh_host" class="form-label">Target Server:</label>
-                            <input type="text" class="form-control" id="ssh_host" name="ssh_host" 
-                                   value="{{ ssh_host }}" placeholder="production-server.company.com">
-                            <div class="form-text">Enter the hostname or IP of the target server.</div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="ssh_command" class="form-label">SSH Command:</label>
-                            <input type="text" class="form-control" id="ssh_command" name="ssh_command" 
-                                   value="{{ ssh_command }}" placeholder="systemctl status nginx">
-                            <div class="form-text">Enter the command to execute on the remote server.</div>
-                        </div>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-arrow-right-circle me-2"></i>Execute Remote Command
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: os.system() exploitation
                         </button>
-                    </form>
-
-                    {% if ssh_result %}
-                    <div class="card">
-                        <div class="card-header">
-                            <h6><i class="bi bi-terminal me-2"></i>SSH Command Output</h6>
-                        </div>
-                        <div class="card-body">
-                            <pre class="command-output">{{ ssh_result }}</pre>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Exploit Python command execution
                         </div>
                     </div>
-                    {% endif %}
-
-                    <div class="mt-4">
-                        <h6>SSH Command Injection Techniques:</h6>
-                        <ul>
-                            <li>Command chaining: <code>systemctl status nginx; whoami</code></li>
-                            <li>Command substitution: <code>systemctl status $(id)</code></li>
-                            <li>Background execution: <code>systemctl status nginx & id</code></li>
-                            <li>Conditional execution: <code>systemctl status nginx && whoami</code></li>
-                        </ul>
-                        
-                        <h6>Remote Management Security:</h6>
-                        <p>SSH-based remote management tools are common in enterprise environments. Vulnerabilities in command processing can lead to unauthorized command execution on critical production servers.</p>
-                        
-                        <h6>Real-World Management Tools:</h6>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h6><i class="bi bi-server me-2"></i>Enterprise Tools</h6>
-                                <ul>
-                                    <li>Ansible</li>
-                                    <li>Puppet</li>
-                                    <li>Chef</li>
-                                </ul>
-                            </div>
-                            <div class="col-md-6">
-                                <h6><i class="bi bi-cloud me-2"></i>Cloud Platforms</h6>
-                                <ul>
-                                    <li>AWS Systems Manager</li>
-                                    <li>Azure Run Command</li>
-                                    <li>GCP Compute Engine</li>
-                                </ul>
-                            </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Apply command injection in python techniques to execute commands and retrieve the flag.
                         </div>
-                        
-                        <h6>Testing with Burp Suite:</h6>
-                        <ul>
-                            <li>Intercept HTTP requests containing SSH commands</li>
-                            <li>Modify command parameters in the request</li>
-                            <li>Use Burp Repeater for command injection testing</li>
-                            <li>Analyze responses for command execution evidence</li>
-                        </ul>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
 
-<!-- Challenge Info Modal -->
-<div class="modal fade" id="challengeModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Command Injection Level 22 - Challenge Information</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            {%if cmdi_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
             </div>
-            <div class="modal-body">
-                <h6>Objective:</h6>
-                <p>Exploit command injection vulnerabilities in a remote SSH command execution platform.</p>
-                
-                <h6>Scenario:</h6>
-                <p>You're testing an enterprise server management platform that allows administrators to execute SSH commands on remote production servers. The system processes user-provided commands and executes them remotely, but lacks proper input validation.</p>
-                
-                <h6>Learning Goals:</h6>
-                <ul>
-                    <li>Understand SSH command injection vulnerabilities</li>
-                    <li>Learn about remote management security</li>
-                    <li>Practice command injection in enterprise environments</li>
-                    <li>Explore the use of security tools like Burp Suite</li>
-                </ul>
-                
-                <h6>SSH Security Concepts:</h6>
-                <ul>
-                    <li><strong>Remote Command Execution:</strong> SSH-based command execution</li>
-                    <li><strong>Key-based Authentication:</strong> SSH key management</li>
-                    <li><strong>Command Validation:</strong> Input sanitization for SSH commands</li>
-                    <li><strong>Session Management:</strong> SSH session security</li>
-                </ul>
-                
-                <h6>Real-World Context:</h6>
-                <p>This challenge represents vulnerabilities in:</p>
-                <ul>
-                    <li>Enterprise server management platforms</li>
-                    <li>DevOps automation tools</li>
-                    <li>Cloud infrastructure management</li>
-                    <li>Remote administration interfaces</li>
-                </ul>
-                
-                <h6>Security Tool Integration:</h6>
-                <p>This level is designed to be tested with professional security tools:</p>
-                <ul>
-                    <li><strong>Burp Suite:</strong> Intercept and modify HTTP requests</li>
-                    <li><strong>OWASP ZAP:</strong> Automated security scanning</li>
-                    <li><strong>Custom Scripts:</strong> Automated command injection testing</li>
-                </ul>
-                
-                <h6>Enterprise Impact:</h6>
-                <ul>
-                    <li>Production server compromise</li>
-                    <li>Lateral movement through server infrastructure</li>
-                    <li>Data exfiltration from critical systems</li>
-                    <li>Service disruption and downtime</li>
-                </ul>
-                
-                <h6>Hints:</h6>
-                <ul>
-                    <li>Use command chaining: <code>systemctl status nginx; whoami</code></li>
-                    <li>Try conditional execution: <code>systemctl status nginx && id</code></li>
-                    <li>Test both host and command parameters for injection</li>
-                    <li>Use Burp Suite to intercept and modify requests</li>
-                </ul>
+            {%endif %}
+        </div>
+    </div>
+
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
             </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>app22.local/cmd</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for Command Injection Level 22</p>
         </div>
     </div>
 </div>
-{% endblock %}
+{%endblock %}

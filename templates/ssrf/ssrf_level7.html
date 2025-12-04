@@ -1,91 +1,103 @@
-{% extends 'base.html' %}
+{%extends 'base.html' %}
 
-{% block title %}SSRF Level 7 - R00tGlyph{% endblock %}
+{%block title %}Level 7: SSRF with Protocol Smuggling - R00tGlyph{%endblock %}
 
-{% block content %}
-<div class="row">
-    <div class="col-md-10 offset-md-1">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Level 7: SSRF in Webhooks</h2>
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">SSRF</span> / <span>Level 7</span>
+{%endblock %}
+
+{%block content %}
+<div class="challenge-lab">
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
+        </div>
+        <div class="mission-content">
+            <h5 class="mb-3">SSRF with Protocol Smuggling</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>SSRFApp7</strong>. Test for ssrf vulnerabilities.
+            </p>
+
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Exploit ssrf with protocol smuggling</p>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="alert alert-dark challenge-description" style="display: none;">
-                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-                    <p>
-                        Welcome to <strong>PaymentGateway Pro</strong>, a fictional payment processing service! This challenge demonstrates SSRF through webhook URL validation in payment systems.
-                    </p>
-                    <p>
-                        The service allows merchants to configure webhook URLs for payment notifications. However, it doesn't properly validate these URLs, allowing SSRF attacks against internal services.
-                    </p>
-                    <p>
-                        <strong>Your Task:</strong> Configure a webhook URL that targets internal services to exploit the SSRF vulnerability.
-                    </p>
-                    <p>
-                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Target internal payment processing APIs or admin interfaces.
-                    </p>
-                    <p>
-                        <i class="bi bi-tools me-2"></i><strong>Tools:</strong> Use Burp Suite to intercept webhook requests and analyze internal services.
-                    </p>
-                </div>
 
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h4 class="mb-0"><i class="bi bi-credit-card-fill me-2"></i>PaymentGateway Pro - Webhook Configuration</h4>
-                    </div>
-                    <div class="card-body">
-                        <form action="/ssrf/level7" method="post">
-                            <div class="input-group mb-3">
-                                <span class="input-group-text">Notification URL</span>
-                                <input type="text" class="form-control" name="notification_url" placeholder="Enter webhook URL for payment notifications" value="{{ notification_url }}">
-                                <button class="btn btn-primary" type="submit">Configure Webhook</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                {% if webhook_result %}
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Webhook Configuration Result</h5>
-                    </div>
-                    <div class="card-body">
-                        <pre class="bg-dark text-light p-3 rounded">{{ webhook_result }}</pre>
-                        {% if ssrf_detected %}
-                        <div class="alert alert-success mt-3">
-                            <i class="bi bi-check-circle-fill me-2"></i>
-                            <strong>Webhook SSRF Successful!</strong> Internal service accessed.
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Understanding the Technique
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            This level focuses on ssrf with protocol smuggling. Research SSRF in this context.
                         </div>
-                        {% endif %}
                     </div>
                 </div>
-                {% endif %}
-
-                {% if flag %}
-                <div class="alert alert-success">
-                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
-                    <p>Congratulations! You've successfully exploited SSRF in webhook functionality.</p>
-                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
-                </div>
-                {% endif %}
-
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Learning Objectives</h5>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Use alternative protocols
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Try: <code>file://</code>, <code>gopher://</code>, <code>dict://</code>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <ul>
-                            <li>Understand SSRF vulnerabilities in webhook implementations</li>
-                            <li>Learn how payment systems can be vulnerable to SSRF</li>
-                            <li>Practice exploiting webhook URL validation weaknesses</li>
-                            <li>Understand the business impact of SSRF in financial systems</li>
-                        </ul>
-                <div class="mt-4">
-                    <a href="{{ url_for('solutions', level='ssrf7') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Apply ssrf with protocol smuggling to access internal resources and retrieve the flag.
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            {%if ssrf_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>ssrf7.local/fetch</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for SSRF Level 7</p>
         </div>
     </div>
 </div>
-{% endblock %}
+{%endblock %}

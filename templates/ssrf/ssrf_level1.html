@@ -1,130 +1,103 @@
-{% extends 'base.html' %}
+{%extends 'base.html' %}
 
-{% block title %}Level 1: Basic SSRF - R00tGlyph{% endblock %}
+{%block title %}Level 1: Basic SSRF - R00tGlyph{%endblock %}
 
-{% block content %}
-<div class="row">
-    <div class="col-md-8 offset-md-2">
-        {% if ssrf_detected %}
-        <div class="alert alert-success">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            <strong>Success!</strong> You've successfully exploited the SSRF vulnerability! The challenge has been marked as completed.
-            {% if flag %}
-            <div class="mt-2">
-                <strong>Flag:</strong> <code>{{ flag }}</code>
-            </div>
-            {% endif %}
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">SSRF</span> / <span>Level 1</span>
+{%endblock %}
+
+{%block content %}
+<div class="challenge-lab">
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
-        {% endif %}
-        
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Level 1: Basic SSRF</h2>
-            </div>
-            <div class="card-body">
-                <div class="alert alert-info challenge-description">
-                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-                    <p>
-                        Welcome to <strong>WebFetch Pro</strong>, a fictional URL fetching service! You've been hired to perform a security assessment of their content retrieval functionality.
-                    </p>
+        <div class="mission-content">
+            <h5 class="mb-3">Basic SSRF</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>URLFetcher</strong>. Test for ssrf vulnerabilities.
+            </p>
 
-                    <div class="card mb-3">
-                        <div class="card-header">
-                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
-                        </div>
-                        <div class="card-body">
-                            <p class="mb-0">
-                                <strong>Client:</strong> WebFetch Pro Content Service<br>
-                                <strong>Target:</strong> URL Content Fetcher<br>
-                                <strong>Vulnerability:</strong> Server-Side Request Forgery (SSRF)<br>
-                                <strong>Objective:</strong> Access internal services and retrieve sensitive information
-                            </p>
-                        </div>
-                    </div>
-
-                    <p>
-                        <strong>Technical Background:</strong> WebFetch Pro's content retrieval system allows users to fetch content from any URL without proper validation. This enables attackers to make requests to internal services that are not accessible from the internet, bypassing firewalls and network security controls.
-                    </p>
-
-                    <p>
-                        <strong>Real-world Impact:</strong> In a real scenario, this vulnerability could allow attackers to:
-                    </p>
-                    <ul>
-                        <li>Access internal services and APIs that should not be publicly accessible</li>
-                        <li>Read local files through file:// protocol (in some configurations)</li>
-                        <li>Perform port scanning of internal networks</li>
-                        <li>Bypass authentication mechanisms by accessing localhost services</li>
-                    </ul>
-
-                    <p>
-                        <strong>Your Task:</strong> Exploit the SSRF vulnerability to access internal services and retrieve the flag from a local service.
-                    </p>
-
-                    <div class="alert alert-warning">
-                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Try fetching content from internal addresses like localhost, 127.0.0.1, or private IP ranges. Internal services often run on common ports.
-                    </div>
-                </div>
-
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h4 class="mb-0"><i class="bi bi-cloud-download-fill me-2"></i>WebFetch Pro - URL Content Fetcher</h4>
-                    </div>
-                    <div class="card-body">
-                        <form action="/ssrf/level1" method="post">
-                            <div class="input-group mb-3">
-                                <span class="input-group-text">URL</span>
-                                <input type="text" class="form-control" name="url" placeholder="Enter URL to fetch (e.g., https://example.com)" value="{{ url }}">
-                                <button class="btn btn-primary" type="submit">Fetch Content</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                {% if fetch_result %}
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Fetch Result</h5>
-                    </div>
-                    <div class="card-body">
-                        <pre class="p-3 rounded" style="background-color: var(--bs-body-bg); border: 1px solid var(--bs-border-color); color: var(--bs-body-color);">{{ fetch_result }}</pre>
-                        {% if ssrf_detected %}
-                        <div class="alert alert-success mt-3">
-                            <i class="bi bi-check-circle-fill me-2"></i>
-                            <strong>SSRF Vulnerability Exploited!</strong> You successfully accessed an internal service.
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endif %}
-
-                {% if flag %}
-                <div class="alert alert-success">
-                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
-                    <p>Congratulations! You've successfully exploited the SSRF vulnerability.</p>
-                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
-                </div>
-                {% endif %}
-
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-info-circle-fill text-info me-2"></i>Learning Objectives</h5>
-                    </div>
-                    <div class="card-body">
-                        <ul>
-                            <li>Understand what Server-Side Request Forgery (SSRF) is</li>
-                            <li>Learn how to identify SSRF vulnerabilities</li>
-                            <li>Practice exploiting SSRF to access internal services</li>
-                            <li>Understand the impact of SSRF vulnerabilities</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="mt-4">
-                    <a href="{{ url_for('solutions', level='ssrf1') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Access internal resources via SSRF</p>
                 </div>
             </div>
+
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: SSRF Basics
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            SSRF allows accessing internal resources. Try: <code>http://localhost</code>, <code>http://127.0.0.1</code>, <code>http://192.168.1.1</code>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Internal Services
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Target common ports: <code>http://localhost:80</code>, <code>http://localhost:8080</code>, <code>http://localhost:3306</code>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Access internal admin panel: <code>http://localhost/admin</code> or metadata: <code>http://169.254.169.254/latest/meta-data/</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {%if ssrf_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>fetch.local/get</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for SSRF Level 1</p>
         </div>
     </div>
 </div>
-{% endblock %}
+{%endblock %}

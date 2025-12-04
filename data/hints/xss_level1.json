@@ -1,0 +1,68 @@
+{
+  "level": 1,
+  "category": "xss",
+  "title": "Basic Reflected XSS",
+  "hints": [
+    {
+      "order": 1,
+      "title": "Understanding Reflected XSS",
+      "content": "Reflected XSS occurs when user input is immediately returned by the web application without proper sanitization. Look for input fields where your data gets displayed back to you.",
+      "type": "text",
+      "difficulty": 1,
+      "unlock_after_attempts": 0,
+      "points_cost": 0,
+      "tags": ["concept", "reflection"]
+    },
+    {
+      "order": 2,
+      "title": "Basic XSS Payload",
+      "content": "Try injecting a simple script tag: <script>alert('XSS')</script>. This is the most basic XSS payload that executes JavaScript code.",
+      "type": "code",
+      "difficulty": 2,
+      "unlock_after_attempts": 2,
+      "points_cost": 5,
+      "tags": ["payload", "script"]
+    },
+    {
+      "order": 3,
+      "title": "Alternative Payloads",
+      "content": "If script tags don't work, try event handlers like: <img src=x onerror=alert('XSS')> or <svg onload=alert('XSS')>",
+      "type": "code",
+      "difficulty": 3,
+      "unlock_after_attempts": 5,
+      "points_cost": 10,
+      "tags": ["payload", "event-handlers", "img", "svg"]
+    },
+    {
+      "order": 4,
+      "title": "URL Parameter Injection",
+      "content": "This challenge might accept input through URL parameters. Try modifying the URL with your payload: ?name=<script>alert('XSS')</script>",
+      "type": "technique",
+      "difficulty": 2,
+      "unlock_after_attempts": 3,
+      "points_cost": 8,
+      "tags": ["url", "parameters", "get-request"]
+    },
+    {
+      "order": 5,
+      "title": "Browser Developer Tools",
+      "content": "Use your browser's Developer Tools (F12) to inspect the HTML source and see exactly how your input is being reflected. Look for where your payload appears in the DOM.",
+      "type": "tool",
+      "difficulty": 1,
+      "unlock_after_attempts": 1,
+      "points_cost": 3,
+      "tags": ["devtools", "inspection", "dom"]
+    }
+  ],
+  "common_mistakes": [
+    "Not URL-encoding special characters when testing in URL parameters",
+    "Trying complex payloads when simple ones work better",
+    "Not checking if the payload is actually reflected in the response"
+  ],
+  "learning_objectives": [
+    "Understand how reflected XSS vulnerabilities work",
+    "Learn to identify input reflection points",
+    "Practice basic XSS payload construction",
+    "Use browser tools for vulnerability analysis"
+  ]
+}

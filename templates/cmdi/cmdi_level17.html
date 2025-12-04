@@ -1,174 +1,103 @@
-{% extends "base.html" %}
+{%extends 'base.html' %}
 
-{% block title %}Command Injection Level 17 - Container Escape{% endblock %}
+{%block title %}Level 17: Command Injection in Docker - R00tGlyph{%endblock %}
 
-{% block content %}
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3><i class="bi bi-terminal me-2"></i>Command Injection Level 17</h3>
-                    <div>
-                        <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#challengeModal">
-                            <i class="bi bi-info-circle me-1"></i>Challenge Info
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">Command Injection</span> / <span>Level 17</span>
+{%endblock %}
+
+{%block content %}
+<div class="challenge-lab">
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
+        </div>
+        <div class="mission-content">
+            <h5 class="mb-3">Command Injection in Docker</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>App17</strong>. Test for command injection vulnerabilities.
+            </p>
+
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Exploit command injection in docker</p>
+                </div>
+            </div>
+
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Understanding the Technique
                         </button>
-                        <a href="{{ url_for('solutions', level='cmdi17') }}" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-lightbulb me-1"></i>Solution
-                        </a>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            This level focuses on command injection in docker. Research the specific technique.
+                        </div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="scenario-box mb-4">
-                        <h5><i class="bi bi-box me-2"></i>Container Management Platform</h5>
-                        <p>You're testing a Kubernetes/Docker container management platform that allows users to deploy custom containers. The system processes container images and startup commands, potentially allowing container escape and host system access.</p>
-                        <p><strong>Context:</strong> Modern container orchestration and deployment platform</p>
-                        <p><strong>Technology:</strong> Docker, Kubernetes, container security</p>
-                        <p><strong>Risk:</strong> Container escape leading to host system compromise</p>
-                    </div>
-
-                    {% if flag %}
-                    <div class="alert alert-success">
-                        <i class="bi bi-flag-fill me-2"></i><strong>Challenge Completed!</strong>
-                        <br>Flag: <code>{{ flag }}</code>
-                    </div>
-                    {% endif %}
-
-                    <div class="alert alert-warning mb-4">
-                        <i class="bi bi-exclamation-triangle me-2"></i>
-                        <strong>Container Security:</strong> This challenge explores container escape techniques. In real environments, container breakouts can lead to full host compromise.
-                    </div>
-
-                    <form method="POST" class="mb-4">
-                        <div class="mb-3">
-                            <label for="container_image" class="form-label">Container Image:</label>
-                            <input type="text" class="form-control" id="container_image" name="container_image" 
-                                   value="{{ container_image }}" placeholder="nginx:latest">
-                            <div class="form-text">Specify the Docker image to deploy.</div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="container_cmd" class="form-label">Container Command:</label>
-                            <input type="text" class="form-control" id="container_cmd" name="container_cmd" 
-                                   value="{{ container_cmd }}" placeholder="/bin/sh -c 'nginx -g \"daemon off;\"'">
-                            <div class="form-text">Enter the command to run inside the container.</div>
-                        </div>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-box-arrow-up me-2"></i>Deploy Container
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Container escape
                         </button>
-                    </form>
-
-                    {% if docker_result %}
-                    <div class="card">
-                        <div class="card-header">
-                            <h6><i class="bi bi-terminal me-2"></i>Container Deployment Output</h6>
-                        </div>
-                        <div class="card-body">
-                            <pre class="command-output">{{ docker_result }}</pre>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Execute commands to escape Docker container
                         </div>
                     </div>
-                    {% endif %}
-
-                    <div class="mt-4">
-                        <h6>Container Escape Techniques:</h6>
-                        <ul>
-                            <li>Access host filesystem: <code>/bin/sh -c "ls /proc; whoami"</code></li>
-                            <li>Mount host directories: <code>nginx:latest; cat /proc/version</code></li>
-                            <li>Escape via /proc or /sys: <code>/bin/sh -c "cat /proc/1/environ"</code></li>
-                            <li>Use privileged operations for host access</li>
-                        </ul>
-                        
-                        <h6>Container Security Context:</h6>
-                        <p>Modern container platforms like Docker and Kubernetes provide isolation, but misconfigurations can lead to:</p>
-                        <ul>
-                            <li><strong>Container Escape:</strong> Breaking out of container isolation</li>
-                            <li><strong>Host Access:</strong> Gaining access to the underlying host system</li>
-                            <li><strong>Privilege Escalation:</strong> Escalating from container user to host root</li>
-                            <li><strong>Lateral Movement:</strong> Accessing other containers or services</li>
-                        </ul>
-                        
-                        <h6>Real-World Container Platforms:</h6>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h6><i class="bi bi-box me-2"></i>Docker</h6>
-                                <ul>
-                                    <li>Container runtime</li>
-                                    <li>Image management</li>
-                                    <li>Network isolation</li>
-                                </ul>
-                            </div>
-                            <div class="col-md-6">
-                                <h6><i class="bi bi-diagram-3 me-2"></i>Kubernetes</h6>
-                                <ul>
-                                    <li>Container orchestration</li>
-                                    <li>Pod security policies</li>
-                                    <li>Service mesh</li>
-                                </ul>
-                            </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Apply command injection in docker techniques to execute commands and retrieve the flag.
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
 
-<!-- Challenge Info Modal -->
-<div class="modal fade" id="challengeModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Command Injection Level 17 - Challenge Information</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            {%if cmdi_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
             </div>
-            <div class="modal-body">
-                <h6>Objective:</h6>
-                <p>Exploit command injection in a container management platform to achieve container escape and host system access.</p>
-                
-                <h6>Scenario:</h6>
-                <p>You're testing a modern container orchestration platform that allows users to deploy custom Docker containers. The system processes container images and startup commands, but lacks proper input validation, creating opportunities for container escape attacks.</p>
-                
-                <h6>Learning Goals:</h6>
-                <ul>
-                    <li>Understand container escape techniques</li>
-                    <li>Learn about Docker and Kubernetes security</li>
-                    <li>Practice command injection in containerized environments</li>
-                    <li>Explore container isolation bypass methods</li>
-                </ul>
-                
-                <h6>Container Security Concepts:</h6>
-                <ul>
-                    <li><strong>Container Isolation:</strong> How containers are separated from the host</li>
-                    <li><strong>Namespace Isolation:</strong> Process, network, and filesystem separation</li>
-                    <li><strong>Cgroup Limits:</strong> Resource constraints and security boundaries</li>
-                    <li><strong>Privileged Containers:</strong> Containers with elevated host access</li>
-                </ul>
-                
-                <h6>Real-World Impact:</h6>
-                <p>Container escape vulnerabilities can lead to:</p>
-                <ul>
-                    <li>Full host system compromise</li>
-                    <li>Access to other containers on the same host</li>
-                    <li>Kubernetes cluster compromise</li>
-                    <li>Cloud infrastructure takeover</li>
-                </ul>
-                
-                <h6>Modern Platforms:</h6>
-                <ul>
-                    <li><strong>AWS ECS/EKS:</strong> Amazon container services</li>
-                    <li><strong>Google GKE:</strong> Google Kubernetes Engine</li>
-                    <li><strong>Azure AKS:</strong> Azure Kubernetes Service</li>
-                    <li><strong>Docker Swarm:</strong> Docker's native orchestration</li>
-                </ul>
-                
-                <h6>Hints:</h6>
-                <ul>
-                    <li>Try accessing host filesystem paths like /proc or /sys</li>
-                    <li>Use command injection in both image and command fields</li>
-                    <li>Look for ways to break container isolation</li>
-                    <li>Consider how containers interact with the host kernel</li>
-                </ul>
+            {%endif %}
+        </div>
+    </div>
+
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
             </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>app17.local/cmd</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for Command Injection Level 17</p>
         </div>
     </div>
 </div>
-{% endblock %}
+{%endblock %}

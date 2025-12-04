@@ -2,213 +2,208 @@
 
 {% block title %}Level 2: DOM-based XSS - R00tGlyph{% endblock %}
 
+{% block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">XSS</span> / <span>Level 2</span>
+{% endblock %}
+
 {% block content %}
-<div class="row">
-    <div class="col-md-8 offset-md-2">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Level 2: DOM-based XSS</h2>
+<div class="challenge-lab">
+    <!-- LEFT PANEL: Mission & Intel -->
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
+        </div>
+        <div class="mission-content">
+            <h5 class="mb-3">DOM-based XSS</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>ColorPicker Pro</strong>, a web application for designers. You've been hired to test
+                the security of their color preview feature.
+            </p>
+
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Execute JavaScript via DOM manipulation to trigger
+                        <code>alert("XSS Level 2 Completed!")</code> and reveal the flag.
+                    </p>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="alert alert-dark challenge-description">
-                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-                    <p>
-                        Welcome to <strong>ColorPicker Pro</strong>, a fictional web application for designers! You've been hired to test the security of their color preview feature.
-                    </p>
 
-                    <div class="card mb-3 border-secondary">
-                        <div class="card-header">
-                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
-                        </div>
-                        <div class="card-body">
-                            <p class="mb-0">
-                                <strong>Client:</strong> ColorPicker Pro<br>
-                                <strong>Target:</strong> Color Preview Feature<br>
-                                <strong>Vulnerability:</strong> Suspected DOM-based Cross-Site Scripting (XSS)<br>
-                                <strong>Objective:</strong> Confirm the vulnerability by executing JavaScript in the browser
-                            </p>
-                        </div>
-                    </div>
-
-                    <p>
-                        <strong>Technical Background:</strong> DOM-based XSS occurs when JavaScript code takes data from a user-controllable source (like URL parameters)
-                        and passes it to a sink that supports dynamic code execution. Unlike reflected or stored XSS, the vulnerability exists entirely in client-side code.
-                    </p>
-
-                    <p>
-                        <strong>Real-world Impact:</strong> In a real scenario, this vulnerability could allow attackers to:
-                    </p>
-                    <ul>
-                        <li>Execute arbitrary JavaScript in the victim's browser</li>
-                        <li>Access sensitive information from other parts of the page</li>
-                        <li>Bypass client-side security controls</li>
-                        <li>Perform actions that appear to come from the victim</li>
-                    </ul>
-
-                    <p>
-                        <strong>Your Task:</strong> Make an alert box appear with the text "XSS Level 2 Completed!" to prove the vulnerability exists and reveal the flag.
-                    </p>
-
-                    <div class="alert alert-warning">
-                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Look at how the color parameter is used in the URL and how it affects the page. What happens if you provide something other than a valid color?
-                    </div>
-                </div>
-
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="bi bi-palette-fill me-2"></i>ColorPicker Pro</h5>
-                        <div>
-                            <span class="badge bg-success">Premium</span>
-                            <span class="ms-2">v2.5.1</span>
-                        </div>
-                    </div>
-                    <div class="card-body p-0">
-                        <!-- Navigation Bar -->
-                        <nav class="navbar navbar-expand navbar-light bg-light px-3">
-                            <div class="container-fluid">
-                                <ul class="navbar-nav">
-                                    <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-house-door me-1"></i>Home</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-palette me-1"></i>Colors</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-grid-3x3 me-1"></i>Palettes</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-brush me-1"></i>Tools</a></li>
-                                </ul>
-                                <div class="d-flex">
-                                    <a href="#" class="btn btn-sm btn-outline-primary me-2"><i class="bi bi-cloud-arrow-down me-1"></i>Export</a>
-                                    <a href="#" class="btn btn-sm btn-outline-secondary"><i class="bi bi-gear-fill me-1"></i>Settings</a>
-                                </div>
-                            </div>
-                        </nav>
-
-                        <div class="p-4">
-                            <div class="row">
-                                <div class="col-md-4 mb-4">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h6 class="mb-0">Color Tools</h6>
-                                        </div>
-                                        <div class="list-group list-group-flush">
-                                            <a href="#" class="list-group-item list-group-item-action active">
-                                                <i class="bi bi-eyedropper me-2"></i>Color Preview
-                                            </a>
-                                            <a href="#" class="list-group-item list-group-item-action">
-                                                <i class="bi bi-palette2 me-2"></i>Color Mixer
-                                            </a>
-                                            <a href="#" class="list-group-item list-group-item-action">
-                                                <i class="bi bi-circle-half me-2"></i>Contrast Checker
-                                            </a>
-                                            <a href="#" class="list-group-item list-group-item-action">
-                                                <i class="bi bi-grid me-2"></i>Color Grid
-                                            </a>
-                                            <a href="#" class="list-group-item list-group-item-action">
-                                                <i class="bi bi-code-slash me-2"></i>CSS Generator
-                                            </a>
-                                        </div>
-                                    </div>
-
-                                    <div class="card mt-3">
-                                        <div class="card-header">
-                                            <h6 class="mb-0">Recent Colors</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="d-flex flex-wrap gap-2">
-                                                <div class="color-swatch" style="background-color: #ff5733; width: 30px; height: 30px; border-radius: 4px;"></div>
-                                                <div class="color-swatch" style="background-color: #33ff57; width: 30px; height: 30px; border-radius: 4px;"></div>
-                                                <div class="color-swatch" style="background-color: #3357ff; width: 30px; height: 30px; border-radius: 4px;"></div>
-                                                <div class="color-swatch" style="background-color: #f3f3f3; width: 30px; height: 30px; border-radius: 4px;"></div>
-                                                <div class="color-swatch" style="background-color: #222222; width: 30px; height: 30px; border-radius: 4px;"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-8">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h5 class="mb-0"><i class="bi bi-eyedropper me-2"></i>Color Preview Tool</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <p>This tool allows you to preview different background colors for your design projects.</p>
-                                            <p>Try adding a color parameter to the URL (e.g., <code>?color=red</code>, <code>?color=blue</code>, <code>?color=#ff5733</code>)</p>
-
-                                            <div class="row mt-4">
-                                                <div class="col-md-6">
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Sample URL Format:</label>
-                                                        <div class="input-group">
-                                                            <span class="input-group-text">URL</span>
-                                                            <input type="text" class="form-control" value="/xss/level2?color=blue" readonly>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Color Input:</label>
-                                                        <div class="input-group mb-3">
-                                                            <input type="text" id="colorInput" class="form-control" placeholder="Enter color or code (e.g., red, #ff0000)">
-                                                            <button class="btn btn-primary" type="button" id="applyColorBtn">Apply</button>
-                                                        </div>
-                                                        <div class="form-text">Try entering a color name, hex code, or something else...</div>
-                                                    </div>
-
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Common Colors:</label>
-                                                        <div class="d-flex flex-wrap gap-2">
-                                                            <button type="button" class="btn btn-sm btn-outline-danger color-preset" data-color="red">Red</button>
-                                                            <button type="button" class="btn btn-sm btn-outline-primary color-preset" data-color="blue">Blue</button>
-                                                            <button type="button" class="btn btn-sm btn-outline-success color-preset" data-color="green">Green</button>
-                                                            <button type="button" class="btn btn-sm btn-outline-warning color-preset" data-color="yellow">Yellow</button>
-                                                            <button type="button" class="btn btn-sm btn-outline-secondary color-preset" data-color="purple">Purple</button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div class="col-md-6">
-                                                    <div id="colorBox" class="p-5 border shadow-sm" style="background-color: #f0f0f0; height: 100%; display: flex; align-items: center; justify-content: center;">
-                                                        <h3 class="text-center mb-0">Color Preview</h3>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+            <!-- Integrated Hints System -->
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Understanding DOM XSS
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            DOM-based XSS occurs entirely in the browser. Check the page's JavaScript code - look for
+                            how
+                            the <code>color</code> URL parameter is being used. The vulnerability exists in client-side
+                            code that takes user input from the URL and inserts it into the page without proper
+                            sanitization.
                         </div>
                     </div>
                 </div>
-
-                <!-- Flag container - visible when challenge is completed via AJAX or page load -->
-                <div id="flag-container" style="display: {% if flag and xss_detected %}block{% else %}none{% endif %};">
-                    <div class="alert alert-success">
-                        <i class="bi bi-flag-fill me-2"></i>
-                        <strong>Challenge completed!</strong> Your flag is: <code>{{ flag }}</code>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Crafting the Payload
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Try adding a <code>color</code> parameter to the URL. Instead of a valid color, inject
+                            JavaScript code. For example: <code>?color=red</code> works normally, but what if you try
+                            <code>?color=red'&gt;&lt;script&gt;alert("XSS Level 2 Completed!")&lt;/script&gt;</code>?
+                        </div>
                     </div>
                 </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            <strong>Step-by-step solution:</strong>
+                            <ol class="mb-2 mt-2">
+                                <li>Examine the page source and find where the color parameter is used</li>
+                                <li>Notice it's inserted directly into the DOM via JavaScript</li>
+                                <li>Craft a URL with the payload:
+                                    <code>/xss/level2?color=red'&gt;&lt;script&gt;alert("XSS Level 2
+                                        Completed!")&lt;/script&gt;</code>
+                                </li>
+                                <li>The script will execute when the page loads, revealing the flag</li>
+                            </ol>
+                            <strong>Why it works:</strong> The application uses <code>innerHTML</code> or similar DOM
+                            manipulation without sanitizing the color parameter, allowing script injection.
+                        </div>
+                    </div>
+                </div>
+            </div>
 
+            {% if xss_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the DOM-based XSS vulnerability.</p>
                 {% if flag %}
-                <!-- Hidden flag container that will be revealed when the challenge is solved -->
-                <div id="flag-display" style="display: none;">
-                    <div class="alert alert-success">
-                        <i class="bi bi-check-circle-fill me-2"></i>
-                        <strong>Congratulations!</strong> You've solved the challenge.
-                    </div>
-                    <div class="flag-container">
-                        <span class="flag-label">Your Flag</span>
-                        <code id="flag-value">{{ flag }}</code>
-                    </div>
-                </div>
-
-                <!-- Hidden form for the main page flag submission -->
-                <form id="flag-submission-form" style="display: none;">
-                    <input type="hidden" name="challenge_id" value="2">
-                    <input type="text" name="flag" value="">
-                </form>
-
-                <!-- Result container for flag submission -->
-                <div id="flag-result" class="alert" style="display: none;"></div>
+                <span class="flag-value">{{ flag }}</span>
                 {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
 
-                <div class="mt-4">
-                    <a href="{{ url_for('solutions', level=2) }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+    <!-- RIGHT PANEL: The Vulnerable App -->
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>colorpicker.pro/preview</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-0">
+            <!-- ColorPicker Pro App Content -->
+            <div class="p-4">
+                <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom mb-4">
+                    <div class="container-fluid px-0">
+                        <a class="navbar-brand fw-bold text-primary" href="#"><i
+                                class="bi bi-palette-fill me-2"></i>ColorPicker Pro</a>
+                        <div class="collapse navbar-collapse">
+                            <ul class="navbar-nav me-auto">
+                                <li class="nav-item"><a class="nav-link active" href="#">Preview</a></li>
+                                <li class="nav-item"><a class="nav-link" href="#">Palettes</a></li>
+                                <li class="nav-item"><a class="nav-link" href="#">Tools</a></li>
+                            </ul>
+                            <span class="badge bg-success">Premium</span>
+                        </div>
+                    </div>
+                </nav>
+
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Color Tools</h6>
+                            </div>
+                            <div class="list-group list-group-flush">
+                                <a href="#" class="list-group-item list-group-item-action active">
+                                    <i class="bi bi-eyedropper me-2"></i>Color Preview
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <i class="bi bi-palette2 me-2"></i>Color Mixer
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <i class="bi bi-circle-half me-2"></i>Contrast Checker
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="bi bi-eyedropper me-2"></i>Color Preview Tool</h5>
+                            </div>
+                            <div class="card-body">
+                                <p>Preview different background colors for your design projects.</p>
+                                <p class="small text-muted">Try adding a color parameter to the URL (e.g.,
+                                    <code>?color=red</code>, <code>?color=#ff5733</code>)
+                                </p>
+
+                                <div class="row mt-4">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Color Input:</label>
+                                            <div class="input-group mb-3">
+                                                <input type="text" id="colorInput" class="form-control"
+                                                    placeholder="Enter color (e.g., red, #ff0000)">
+                                                <button class="btn btn-primary" type="button"
+                                                    id="applyColorBtn">Apply</button>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Common Colors:</label>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                <button type="button" class="btn btn-sm btn-outline-danger color-preset"
+                                                    data-color="red">Red</button>
+                                                <button type="button"
+                                                    class="btn btn-sm btn-outline-primary color-preset"
+                                                    data-color="blue">Blue</button>
+                                                <button type="button"
+                                                    class="btn btn-sm btn-outline-success color-preset"
+                                                    data-color="green">Green</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div id="colorBox" class="p-5 border shadow-sm"
+                                            style="background-color: #f0f0f0; height: 100%; display: flex; align-items: center; justify-content: center;">
+                                            <h3 class="text-center mb-0">Color Preview</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -217,84 +212,72 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<!-- DOM XSS functionality is now handled by main.js -->
-
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Override the alert function to detect XSS
-    const originalAlert = window.alert;
-    window.alert = function(message) {
-        console.log("Alert intercepted:", message);
+    document.addEventListener('DOMContentLoaded', function () {
+        // Override the alert function to detect XSS
+        const originalAlert = window.alert;
+        window.alert = function (message) {
+            console.log("Alert intercepted:", message);
 
-        // Check if this is the XSS completion message
-        if (message === "XSS Level 2 Completed!") {
-            console.log("XSS Level 2 completed!");
+            // Check if this is the XSS completion message
+            if (message === "XSS Level 2 Completed!") {
+                console.log("XSS Level 2 completed!");
+                originalAlert(message);
 
-            // Call the original alert to show the message
-            originalAlert(message);
+                // Mark as completed
+                let url = new URL(window.location.href);
+                url.searchParams.set('success', 'true');
 
-            // Mark as completed without page reload
-            let url = new URL(window.location.href);
-            url.searchParams.set('success', 'true');
+                // Notify server
+                fetch(url.toString(), {
+                    method: 'GET',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Server response:", data);
+                        // Page will reload to show flag
+                        window.location.href = url.toString();
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                    });
 
-            // Use fetch to notify the server
-            fetch(url.toString(), {
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log("Server response:", data);
-
-                // Show the flag
-                const flagContainer = document.getElementById('flag-container');
-                if (flagContainer) {
-                    if (data.flag) {
-                        flagContainer.innerHTML = `
-                            <div class="alert alert-success">
-                                <i class="bi bi-flag-fill me-2"></i>
-                                <strong>Challenge completed!</strong> Your flag is: <code>${data.flag}</code>
-                            </div>
-                        `;
-                    }
-                    flagContainer.style.display = 'block';
-                }
-
-                // Update URL without reloading
-                history.pushState({}, '', url.toString());
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                originalAlert("Error completing challenge. Please try again.");
-            });
-
-            return;
-        }
-
-        // For other alerts, just call the original function
-        originalAlert(message);
-    };
-
-    // If the flag is present and the URL has success=true, reveal the flag
-    {% if flag %}
-    if (window.location.search.includes('success=true')) {
-        if (typeof revealFlag === 'function') {
-            revealFlag();
-        } else {
-            // fallback: just show the flag div
-            var flagDiv = document.getElementById('flag-display');
-            if (flagDiv) flagDiv.style.display = 'block';
-
-            // Also show the flag container
-            var flagContainer = document.getElementById('flag-container');
-            if (flagContainer) {
-                flagContainer.style.display = 'block';
+                return;
             }
+
+            originalAlert(message);
+        };
+
+        // DOM XSS vulnerability - color parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const color = urlParams.get('color');
+
+        if (color) {
+            const colorBox = document.getElementById('colorBox');
+            // VULNERABLE: Direct DOM manipulation without sanitization
+            colorBox.innerHTML = '<h3 class="text-center mb-0" style="color: ' + color + '">Color Preview: ' + color + '</h3>';
         }
-    }
-    {% endif %}
-});
+
+        // Apply color button
+        document.getElementById('applyColorBtn').addEventListener('click', function () {
+            const colorInput = document.getElementById('colorInput').value;
+            if (colorInput) {
+                const url = new URL(window.location.href);
+                url.searchParams.set('color', colorInput);
+                window.location.href = url.toString();
+            }
+        });
+
+        // Color preset buttons
+        document.querySelectorAll('.color-preset').forEach(button => {
+            button.addEventListener('click', function () {
+                const color = this.getAttribute('data-color');
+                const url = new URL(window.location.href);
+                url.searchParams.set('color', color);
+                window.location.href = url.toString();
+            });
+        });
+    });
 </script>
 {% endblock %}

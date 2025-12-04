@@ -1,327 +1,106 @@
-{% extends 'base.html' %}
+{%extends 'base.html' %}
 
-{% block title %}Level 9: XSS with CSP Bypass - R00tGlyph{% endblock %}
+{%block title %}Level 9: XSS via SVG - R00tGlyph{%endblock %}
 
-{% block content %}
-<div class="row">
-    <div class="col-md-8 offset-md-2">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Level 9: XSS with CSP Bypass</h2>
-            </div>
-            <div class="card-body">
-                <div class="alert alert-dark challenge-description">
-                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-                    <p>
-                        Welcome to <strong>SecureBlog</strong>, a fictional blogging platform with Content Security Policy (CSP) protection! This challenge simulates a real-world scenario where you need to bypass CSP to execute XSS.
-                    </p>
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">XSS</span> / <span>Level 9</span>
+{%endblock %}
 
-                    <div class="card mb-3 border-secondary">
-                        <div class="card-header">
-                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
-                        </div>
-                        <div class="card-body">
-                            <p class="mb-0">
-                                <strong>Client:</strong> SecureBlog Inc.<br>
-                                <strong>Target:</strong> Blog Comment System<br>
-                                <strong>Protection:</strong> Content Security Policy (CSP)<br>
-                                <strong>Objective:</strong> Bypass CSP and execute JavaScript
-                            </p>
-                        </div>
-                    </div>
+{%block content %}
+<div class="challenge-lab">
+    <!-- LEFT PANEL: Mission & Intel -->
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
+        </div>
+        <div class="mission-content">
+            <h5 class="mb-3">XSS via SVG</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>GraphicsEditor</strong>. Test the security of this application.
+            </p>
 
-                    <p>
-                        <strong>Technical Background:</strong> Content Security Policy (CSP) is a security standard that helps prevent XSS attacks by controlling which resources can be loaded and executed on a web page. It's implemented through HTTP headers or meta tags and restricts inline scripts, eval(), and other potentially dangerous features.
-                    </p>
-
-                    <p>
-                        <strong>Real-world Impact:</strong> CSP bypass vulnerabilities are particularly dangerous because:
-                    </p>
-                    <ul>
-                        <li>They undermine a key security control that many organizations rely on</li>
-                        <li>They can affect sites that believe they're protected against XSS</li>
-                        <li>They often exploit subtle configuration mistakes or browser quirks</li>
-                        <li>They can lead to data theft, account takeover, and other serious attacks</li>
-                        <li>They may be combined with other vulnerabilities for greater impact</li>
-                    </ul>
-
-                    <p>
-                        <strong>Your Task:</strong> The SecureBlog platform has implemented CSP to protect against XSS, but there may be weaknesses in the configuration. You need to find a way to bypass the CSP and execute JavaScript in the comment section. Make an alert box appear with the text "XSS Level 9 Completed!" to reveal the flag.
-                    </p>
-
-                    <div class="alert alert-warning">
-                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Examine the CSP header using browser developer tools. Look for misconfigurations or allowed sources that could be exploited. You might need to use creative techniques like JSONP, DOM clobbering, or dangling markup.
-                    </div>
-                </div>
-
-                <!-- SecureBlog Interface -->
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="bi bi-shield-lock me-2"></i>SecureBlog</h5>
-                        <div>
-                            <span class="badge bg-light text-dark">Protected by CSP</span>
-                        </div>
-                    </div>
-                    <div class="card-body p-0">
-                        <!-- Navigation Bar -->
-                        <nav class="navbar navbar-expand navbar-light bg-light px-3">
-                            <div class="container-fluid">
-                                <ul class="navbar-nav">
-                                    <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-house-door me-1"></i>Home</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-journal-text me-1"></i>Articles</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-people me-1"></i>Authors</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-info-circle me-1"></i>About</a></li>
-                                </ul>
-                                <div class="d-flex">
-                                    <div class="input-group">
-                                        <input type="text" class="form-control form-control-sm" placeholder="Search...">
-                                        <button class="btn btn-sm btn-outline-secondary" type="button"><i class="bi bi-search"></i></button>
-                                    </div>
-                                </div>
-                            </div>
-                        </nav>
-
-                        <div class="p-4">
-                            <div class="row">
-                                <div class="col-md-8">
-                                    <article class="blog-post">
-                                        <h2 class="blog-post-title">Understanding Content Security Policy</h2>
-                                        <p class="blog-post-meta text-muted">April 20, 2025 by <a href="#" class="text-decoration-none">Security Expert</a></p>
-
-                                        <p>Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks, including Cross-Site Scripting (XSS) and data injection attacks.</p>
-
-                                        <h3>How CSP Works</h3>
-                                        <p>CSP works by restricting the resources that a page can load and execute. It's implemented through HTTP headers or meta tags and can control:</p>
-
-                                        <ul>
-                                            <li>Which scripts can be executed</li>
-                                            <li>Which styles can be applied</li>
-                                            <li>Which images can be loaded</li>
-                                            <li>Which fonts can be used</li>
-                                            <li>Which connections can be established</li>
-                                        </ul>
-
-                                        <p>By carefully configuring CSP, website owners can significantly reduce the risk of XSS attacks.</p>
-
-                                        <h3>Common CSP Directives</h3>
-                                        <p>Here are some common CSP directives:</p>
-
-                                        <ul>
-                                            <li><code>default-src</code>: The fallback for other resource types</li>
-                                            <li><code>script-src</code>: Valid sources for JavaScript</li>
-                                            <li><code>style-src</code>: Valid sources for stylesheets</li>
-                                            <li><code>img-src</code>: Valid sources for images</li>
-                                            <li><code>connect-src</code>: Valid targets for fetch, XHR, WebSocket</li>
-                                        </ul>
-
-                                        <p>However, CSP is not foolproof. Misconfigurations and implementation errors can create opportunities for attackers to bypass these protections.</p>
-                                    </article>
-
-                                    <div class="card mt-4">
-                                        <div class="card-header">
-                                            <h5 class="mb-0"><i class="bi bi-chat-left-text me-2"></i>Comments</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="comments-section">
-                                                <div class="comment mb-3 pb-3 border-bottom">
-                                                    <div class="d-flex">
-                                                        <div class="flex-shrink-0">
-                                                            <img src="https://via.placeholder.com/50" class="rounded-circle" alt="User Avatar">
-                                                        </div>
-                                                        <div class="flex-grow-1 ms-3">
-                                                            <h6 class="mb-1">John Doe</h6>
-                                                            <p class="mb-1">Great article! I've been implementing CSP on my sites and it's definitely added an extra layer of security.</p>
-                                                            <small class="text-muted">Posted 2 hours ago</small>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div class="comment mb-3 pb-3 border-bottom">
-                                                    <div class="d-flex">
-                                                        <div class="flex-shrink-0">
-                                                            <img src="https://via.placeholder.com/50" class="rounded-circle" alt="User Avatar">
-                                                        </div>
-                                                        <div class="flex-grow-1 ms-3">
-                                                            <h6 class="mb-1">Jane Smith</h6>
-                                                            <p class="mb-1">I found that nonce-based CSP is more effective than whitelist-based approaches in many cases.</p>
-                                                            <small class="text-muted">Posted 1 hour ago</small>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                {% if user_comment %}
-                                                <div class="comment mb-3 pb-3 border-bottom">
-                                                    <div class="d-flex">
-                                                        <div class="flex-shrink-0">
-                                                            <img src="https://via.placeholder.com/50" class="rounded-circle" alt="User Avatar">
-                                                        </div>
-                                                        <div class="flex-grow-1 ms-3">
-                                                            <h6 class="mb-1">You</h6>
-                                                            <div id="user-comment">{{ user_comment | safe }}</div>
-                                                            <small class="text-muted">Posted just now</small>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                {% endif %}
-
-                                                {% if message %}
-                                                <div class="alert alert-info mt-3 mb-3">
-                                                    <i class="bi bi-info-circle-fill me-2"></i>{{ message }}
-                                                </div>
-                                                {% endif %}
-
-                                                <form action="{{ url_for('xss_level9') }}" method="post" class="mt-4">
-                                                    <div class="mb-3">
-                                                        <label for="comment" class="form-label">Add a Comment:</label>
-                                                        <textarea class="form-control" id="comment" name="comment" rows="3" required></textarea>
-                                                        <div class="form-text">
-                                                            <i class="bi bi-shield-check me-1"></i>This site is protected by Content Security Policy.
-                                                        </div>
-                                                    </div>
-                                                    <button type="submit" class="btn btn-primary">
-                                                        <i class="bi bi-send me-2"></i>Post Comment
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-4">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h6 class="mb-0">About the Author</h6>
-                                        </div>
-                                        <div class="card-body text-center">
-                                            <img src="https://via.placeholder.com/100" class="rounded-circle mb-3" alt="Author Avatar">
-                                            <h5>Security Expert</h5>
-                                            <p class="text-muted small">Web Security Consultant with 10+ years of experience in application security.</p>
-                                            <div class="d-flex justify-content-center gap-2">
-                                                <a href="#" class="btn btn-sm btn-outline-primary"><i class="bi bi-twitter"></i></a>
-                                                <a href="#" class="btn btn-sm btn-outline-primary"><i class="bi bi-linkedin"></i></a>
-                                                <a href="#" class="btn btn-sm btn-outline-primary"><i class="bi bi-github"></i></a>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="card mt-3">
-                                        <div class="card-header">
-                                            <h6 class="mb-0">Related Articles</h6>
-                                        </div>
-                                        <div class="list-group list-group-flush">
-                                            <a href="#" class="list-group-item list-group-item-action">
-                                                <div class="d-flex w-100 justify-content-between">
-                                                    <h6 class="mb-1">XSS Prevention Cheatsheet</h6>
-                                                </div>
-                                                <small class="text-muted">3 days ago</small>
-                                            </a>
-                                            <a href="#" class="list-group-item list-group-item-action">
-                                                <div class="d-flex w-100 justify-content-between">
-                                                    <h6 class="mb-1">CSRF Protection Techniques</h6>
-                                                </div>
-                                                <small class="text-muted">1 week ago</small>
-                                            </a>
-                                            <a href="#" class="list-group-item list-group-item-action">
-                                                <div class="d-flex w-100 justify-content-between">
-                                                    <h6 class="mb-1">Secure Cookie Configuration</h6>
-                                                </div>
-                                                <small class="text-muted">2 weeks ago</small>
-                                            </a>
-                                        </div>
-                                    </div>
-
-                                    <div class="card mt-3">
-                                        <div class="card-header">
-                                            <h6 class="mb-0">Security Resources</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <ul class="list-unstyled mb-0">
-                                                <li class="mb-2">
-                                                    <a href="#" class="text-decoration-none">
-                                                        <i class="bi bi-link me-2"></i>OWASP Top 10
-                                                    </a>
-                                                </li>
-                                                <li class="mb-2">
-                                                    <a href="#" class="text-decoration-none">
-                                                        <i class="bi bi-link me-2"></i>MDN Web Security
-                                                    </a>
-                                                </li>
-                                                <li class="mb-2">
-                                                    <a href="#" class="text-decoration-none">
-                                                        <i class="bi bi-link me-2"></i>CSP Evaluator Tool
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a href="#" class="text-decoration-none">
-                                                        <i class="bi bi-link me-2"></i>Report-URI
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {% if flag %}
-                <!-- Hidden flag container that will be revealed when the challenge is solved -->
-                <div id="flag-display" style="display: none;">
-                    <div class="alert alert-success">
-                        <i class="bi bi-check-circle-fill me-2"></i>
-                        <strong>Congratulations!</strong> You've solved the challenge.
-                    </div>
-                    <div class="flag-container">
-                        <span class="flag-label">Your Flag</span>
-                        <code id="flag-value">{{ flag }}</code>
-                    </div>
-                </div>
-
-                <!-- Hidden form for the main page flag submission -->
-                <form id="flag-submission-form" style="display: none;">
-                    <input type="hidden" name="challenge_id" value="9">
-                    <input type="text" name="flag" value="">
-                </form>
-
-                <!-- Result container for flag submission -->
-                <div id="flag-result" class="alert" style="display: none;"></div>
-                {% endif %}
-
-                <div class="mt-4">
-                    <a href="{{ url_for('solutions', level=9) }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Exploit SVG tags for XSS</p>
                 </div>
             </div>
+
+            <!-- Integrated Hints System -->
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: SVG Tags
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            SVG elements support event handlers. <code>&lt;svg&gt;</code> tags are often overlooked by filters.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: SVG Payload
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Try: <code>&lt;svg onload=alert(1)&gt;</code> or <code>&lt;svg&gt;&lt;script&gt;alert(1)&lt;/script&gt;&lt;/svg&gt;</code>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Enter: <code>&lt;svg onload="alert('XSS Level 9 Completed!')"&gt;</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {%if xss_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the XSS vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: The Vulnerable App -->
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>graphics.local/create</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for XSS Level 9</p>
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    // Listen for XSS success
-    window.addEventListener('DOMContentLoaded', function() {
-        // Original alert function
-        var originalAlert = window.alert;
-
-        // Override alert
-        window.alert = function(message) {
-            // Call the original alert
-            originalAlert(message);
-
-            // Check if this is the success message
-            if (message === "XSS Level 9 Completed!") {
-                // Show the flag
-                var flagDisplay = document.getElementById('flag-display');
-                if (flagDisplay) {
-                    flagDisplay.style.display = 'block';
-
-                    // Scroll to the flag
-                    flagDisplay.scrollIntoView({ behavior: 'smooth' });
-                }
-            }
-        };
-    });
-</script>
-{% endblock %}
+{%endblock %}

@@ -1,471 +1,106 @@
-{% extends 'base.html' %}
+{%extends 'base.html' %}
 
-{% block title %}Level 18: XSS via Web Components - R00tGlyph{% endblock %}
+{%block title %}Level 18: XSS via Markdown - R00tGlyph{%endblock %}
 
-{% block content %}
-<div class="row">
-    <div class="col-md-8 offset-md-2">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Level 18: XSS via Web Components</h2>
-            </div>
-            <div class="card-body">
-                <div class="alert alert-dark challenge-description">
-                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-                    <p>
-                        Welcome to <strong>ComponentHub</strong>, a fictional web component library! This challenge simulates a real-world scenario where a web application using custom elements and Shadow DOM has an XSS vulnerability.
-                    </p>
-                    
-                    <div class="card mb-3 border-secondary">
-                        <div class="card-header">
-                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
-                        </div>
-                        <div class="card-body">
-                            <p class="mb-0">
-                                <strong>Client:</strong> ComponentHub Inc.<br>
-                                <strong>Target:</strong> Web Component Showcase Application<br>
-                                <strong>Vulnerability:</strong> XSS in Custom Element Implementation<br>
-                                <strong>Objective:</strong> Exploit the Shadow DOM boundary to execute JavaScript
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <p>
-                        <strong>Technical Background:</strong> Web Components are a set of web platform APIs that allow you to create custom, reusable HTML elements with encapsulated functionality. They consist of Custom Elements, Shadow DOM, and HTML Templates. Shadow DOM provides encapsulation for DOM and CSS, creating a boundary that should prevent JavaScript in the main document from accessing the Shadow DOM and vice versa. However, improper implementation can lead to vulnerabilities.
-                    </p>
-                    
-                    <p>
-                        <strong>Real-world Impact:</strong> Web Component vulnerabilities are particularly dangerous because:
-                    </p>
-                    <ul>
-                        <li>They can bypass traditional XSS protections that rely on DOM structure</li>
-                        <li>Shadow DOM boundaries can create a false sense of security</li>
-                        <li>Web Components are increasingly used in modern web applications</li>
-                        <li>Vulnerabilities can affect all instances of a component across an application</li>
-                        <li>They can be difficult to detect with standard security tools</li>
-                    </ul>
-                    
-                    <p>
-                        <strong>Your Task:</strong> In this challenge, you need to exploit a vulnerability in the ComponentHub application. The application allows users to create custom cards with content that is rendered inside a Web Component with Shadow DOM. However, there's a vulnerability in how the component handles certain attributes. Find a way to inject JavaScript that will bypass the Shadow DOM boundary and execute in the main document context. Make an alert box appear with the text "XSS Level 18 Completed!" to reveal the flag.
-                    </p>
-                    
-                    <div class="alert alert-warning">
-                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Look for ways to inject code through component attributes or slots that might not be properly sanitized. The vulnerability might be in how the component processes certain attributes or renders slotted content.
-                    </div>
-                </div>
-                
-                <!-- ComponentHub Interface -->
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="bi bi-puzzle me-2"></i>ComponentHub</h5>
-                        <div>
-                            <span class="badge bg-light text-dark">Web Components Showcase</span>
-                        </div>
-                    </div>
-                    <div class="card-body p-0">
-                        <!-- Navigation Bar -->
-                        <nav class="navbar navbar-expand navbar-light bg-light px-3">
-                            <div class="container-fluid">
-                                <ul class="navbar-nav">
-                                    <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-house-door me-1"></i>Home</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-puzzle me-1"></i>Components</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-book me-1"></i>Documentation</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-question-circle me-1"></i>Help</a></li>
-                                </ul>
-                                <div class="d-flex">
-                                    <div class="dropdown">
-                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="bi bi-person-circle me-1"></i>Guest User
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                            <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
-                                            <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </nav>
-                        
-                        <div class="p-4">
-                            <div class="row">
-                                <div class="col-md-4 mb-4">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h6 class="mb-0">Available Components</h6>
-                                        </div>
-                                        <div class="list-group list-group-flush">
-                                            <a href="#" class="list-group-item list-group-item-action active">
-                                                <i class="bi bi-card-text me-2"></i>Custom Card
-                                            </a>
-                                            <a href="#" class="list-group-item list-group-item-action">
-                                                <i class="bi bi-ui-checks me-2"></i>Toggle Switch
-                                            </a>
-                                            <a href="#" class="list-group-item list-group-item-action">
-                                                <i class="bi bi-sliders me-2"></i>Range Slider
-                                            </a>
-                                            <a href="#" class="list-group-item list-group-item-action">
-                                                <i class="bi bi-calendar-event me-2"></i>Date Picker
-                                            </a>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="card mt-3">
-                                        <div class="card-header">
-                                            <h6 class="mb-0">Technical Information</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <p class="small mb-2">This application uses Web Components:</p>
-                                            <ul class="small mb-0">
-                                                <li>Custom Elements for defining new HTML elements</li>
-                                                <li>Shadow DOM for encapsulated styling and markup</li>
-                                                <li>HTML Templates for declaring fragments of markup</li>
-                                            </ul>
-                                            <hr>
-                                            <p class="small mb-0 fst-italic">Note: The Custom Card component uses Shadow DOM for encapsulation.</p>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="card mt-3">
-                                        <div class="card-header">
-                                            <h6 class="mb-0">Component Preview</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <div id="component-preview">
-                                                <!-- Component preview will be shown here -->
-                                                <p class="text-center text-muted">Create a card to see the preview</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="col-md-8">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h5 class="mb-0">Custom Card Component</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="mb-4">
-                                                <p>Create a custom card component with your own content. The card uses Shadow DOM for style encapsulation.</p>
-                                            </div>
-                                            
-                                            <form id="card-form">
-                                                <div class="mb-3">
-                                                    <label for="card-title" class="form-label">Card Title</label>
-                                                    <input type="text" class="form-control" id="card-title" placeholder="Enter card title">
-                                                </div>
-                                                
-                                                <div class="mb-3">
-                                                    <label for="card-content" class="form-label">Card Content</label>
-                                                    <textarea class="form-control" id="card-content" rows="4" placeholder="Enter card content"></textarea>
-                                                    <div class="form-text">
-                                                        <i class="bi bi-info-circle me-1"></i>You can use basic HTML formatting.
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="mb-3">
-                                                    <label for="card-theme" class="form-label">Card Theme</label>
-                                                    <select class="form-select" id="card-theme">
-                                                        <option value="light">Light</option>
-                                                        <option value="dark">Dark</option>
-                                                        <option value="primary">Primary</option>
-                                                        <option value="secondary">Secondary</option>
-                                                        <option value="success">Success</option>
-                                                        <option value="danger">Danger</option>
-                                                        <option value="warning">Warning</option>
-                                                        <option value="info">Info</option>
-                                                    </select>
-                                                </div>
-                                                
-                                                <div class="mb-3">
-                                                    <label for="card-image" class="form-label">Card Image URL (optional)</label>
-                                                    <input type="text" class="form-control" id="card-image" placeholder="Enter image URL">
-                                                </div>
-                                                
-                                                <div class="mb-3">
-                                                    <label for="card-footer" class="form-label">Card Footer (optional)</label>
-                                                    <input type="text" class="form-control" id="card-footer" placeholder="Enter footer text">
-                                                </div>
-                                                
-                                                <div class="mb-3">
-                                                    <label for="card-attributes" class="form-label">Custom Attributes (optional)</label>
-                                                    <input type="text" class="form-control" id="card-attributes" placeholder="attr1=value1,attr2=value2">
-                                                    <div class="form-text">
-                                                        <i class="bi bi-info-circle me-1"></i>Comma-separated list of attribute=value pairs.
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="d-grid">
-                                                    <button type="button" class="btn btn-primary" id="create-card-btn">
-                                                        <i class="bi bi-plus-circle me-2"></i>Create Card
-                                                    </button>
-                                                </div>
-                                            </form>
-                                            
-                                            <div id="card-result" class="mt-4"></div>
-                                        </div>
-                                    </div>
-                                    
-                                    {% if flag %}
-                                    <div class="alert alert-success mt-4">
-                                        <i class="bi bi-check-circle-fill me-2"></i>
-                                        <strong>Congratulations!</strong> Your XSS payload successfully executed by bypassing the Shadow DOM boundary.
-                                    </div>
-                                    <div class="card mt-2">
-                                        <div class="card-header">
-                                            <h5 class="mb-0"><i class="bi bi-trophy me-2"></i>Challenge Completed!</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <p>You've successfully demonstrated an XSS vulnerability in a Web Component. In a real-world scenario, this could allow attackers to bypass the Shadow DOM boundary and execute arbitrary JavaScript in the main document context, potentially leading to data theft, session hijacking, and other attacks.</p>
-                                            <div class="flag-container p-3 bg-light rounded">
-                                                <span class="flag-label">Your Flag:</span>
-                                                <code id="flag-value">{{ flag }}</code>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="mt-4">
-                    <a href="{{ url_for('solutions', level=18) }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">XSS</span> / <span>Level 18</span>
+{%endblock %}
+
+{%block content %}
+<div class="challenge-lab">
+    <!-- LEFT PANEL: Mission & Intel -->
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
+        </div>
+        <div class="mission-content">
+            <h5 class="mb-3">XSS via Markdown</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>MarkdownEditor</strong>. Test the security of this application.
+            </p>
+
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Exploit Markdown parser</p>
                 </div>
             </div>
+
+            <!-- Integrated Hints System -->
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Markdown Parsers
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Markdown parsers convert text to HTML. Some allow raw HTML or have XSS vulnerabilities.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Markdown XSS
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Try: <code>[link](javascript:alert(1))</code> or raw HTML if allowed.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Use Markdown syntax that generates malicious HTML.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {%if xss_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the XSS vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: The Vulnerable App -->
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>markdown.local/preview</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for XSS Level 18</p>
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    // Define the custom card component
-    class CustomCard extends HTMLElement {
-        constructor() {
-            super();
-            
-            // Create a shadow root
-            this.attachShadow({ mode: 'open' });
-            
-            // Create the component's HTML structure
-            this.shadowRoot.innerHTML = `
-                <style>
-                    :host {
-                        display: block;
-                        margin: 10px 0;
-                    }
-                    .card {
-                        border-radius: 8px;
-                        overflow: hidden;
-                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                    }
-                    .card-header {
-                        padding: 15px;
-                        font-weight: bold;
-                        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-                    }
-                    .card-body {
-                        padding: 15px;
-                    }
-                    .card-footer {
-                        padding: 10px 15px;
-                        border-top: 1px solid rgba(0, 0, 0, 0.1);
-                        font-size: 0.9em;
-                    }
-                    .card-img {
-                        width: 100%;
-                        height: auto;
-                    }
-                    
-                    /* Themes */
-                    .light {
-                        background-color: #fff;
-                        color: #333;
-                    }
-                    .dark {
-                        background-color: #333;
-                        color: #fff;
-                    }
-                    .primary {
-                        background-color: #0d6efd;
-                        color: #fff;
-                    }
-                    .secondary {
-                        background-color: #6c757d;
-                        color: #fff;
-                    }
-                    .success {
-                        background-color: #198754;
-                        color: #fff;
-                    }
-                    .danger {
-                        background-color: #dc3545;
-                        color: #fff;
-                    }
-                    .warning {
-                        background-color: #ffc107;
-                        color: #333;
-                    }
-                    .info {
-                        background-color: #0dcaf0;
-                        color: #333;
-                    }
-                </style>
-                <div class="card">
-                    <div class="card-header"></div>
-                    <div class="card-body">
-                        <slot name="content"></slot>
-                    </div>
-                    <div class="card-footer" style="display: none;"></div>
-                </div>
-            `;
-        }
-        
-        connectedCallback() {
-            // Get references to elements in the shadow DOM
-            const card = this.shadowRoot.querySelector('.card');
-            const header = this.shadowRoot.querySelector('.card-header');
-            const body = this.shadowRoot.querySelector('.card-body');
-            const footer = this.shadowRoot.querySelector('.card-footer');
-            
-            // Set the card theme
-            const theme = this.getAttribute('theme') || 'light';
-            card.classList.add(theme);
-            
-            // Set the card title
-            header.textContent = this.getAttribute('title') || 'Card Title';
-            
-            // Set the card image if provided
-            const imageUrl = this.getAttribute('image');
-            if (imageUrl) {
-                const img = document.createElement('img');
-                img.src = imageUrl;
-                img.className = 'card-img';
-                img.alt = 'Card image';
-                body.insertBefore(img, body.firstChild);
-            }
-            
-            // Set the card footer if provided
-            const footerText = this.getAttribute('footer');
-            if (footerText) {
-                footer.textContent = footerText;
-                footer.style.display = 'block';
-            }
-            
-            // This is the vulnerable part - it processes custom attributes
-            // and adds them to the component without proper sanitization
-            const customAttrs = this.getAttribute('custom-attrs');
-            if (customAttrs) {
-                const attrs = customAttrs.split(',');
-                attrs.forEach(attr => {
-                    const [name, value] = attr.split('=');
-                    if (name && value) {
-                        // Vulnerable: directly setting attributes without sanitization
-                        this.setAttribute(name.trim(), value.trim());
-                        
-                        // Even more vulnerable: if the attribute starts with "on", it's treated as an event handler
-                        if (name.trim().startsWith('on')) {
-                            // This is extremely dangerous - it creates an event handler from user input
-                            // This is where the XSS vulnerability lies
-                            try {
-                                this[name.trim()] = new Function(value.trim());
-                            } catch (error) {
-                                console.error('Error setting event handler:', error);
-                            }
-                        }
-                    }
-                });
-            }
-        }
-    }
-    
-    // Register the custom element
-    customElements.define('custom-card', CustomCard);
-    
-    // DOM elements
-    const cardForm = document.getElementById('card-form');
-    const cardTitleInput = document.getElementById('card-title');
-    const cardContentInput = document.getElementById('card-content');
-    const cardThemeInput = document.getElementById('card-theme');
-    const cardImageInput = document.getElementById('card-image');
-    const cardFooterInput = document.getElementById('card-footer');
-    const cardAttributesInput = document.getElementById('card-attributes');
-    const createCardBtn = document.getElementById('create-card-btn');
-    const cardResult = document.getElementById('card-result');
-    const componentPreview = document.getElementById('component-preview');
-    
-    // Create a card when the button is clicked
-    createCardBtn.addEventListener('click', function() {
-        const title = cardTitleInput.value.trim();
-        const content = cardContentInput.value.trim();
-        const theme = cardThemeInput.value;
-        const image = cardImageInput.value.trim();
-        const footer = cardFooterInput.value.trim();
-        const attributes = cardAttributesInput.value.trim();
-        
-        if (!title && !content) {
-            alert('Please enter a title or content for your card.');
-            return;
-        }
-        
-        // Create the custom card element
-        const card = document.createElement('custom-card');
-        card.setAttribute('title', title);
-        card.setAttribute('theme', theme);
-        
-        if (image) {
-            card.setAttribute('image', image);
-        }
-        
-        if (footer) {
-            card.setAttribute('footer', footer);
-        }
-        
-        if (attributes) {
-            card.setAttribute('custom-attrs', attributes);
-        }
-        
-        // Add the content to the card
-        const contentSlot = document.createElement('div');
-        contentSlot.slot = 'content';
-        contentSlot.innerHTML = content;
-        card.appendChild(contentSlot);
-        
-        // Clear previous results
-        cardResult.innerHTML = '';
-        componentPreview.innerHTML = '';
-        
-        // Add the card to the result and preview
-        cardResult.appendChild(card.cloneNode(true));
-        componentPreview.appendChild(card);
-        
-        // Show success message
-        cardResult.insertAdjacentHTML('beforeend', `
-            <div class="alert alert-success mt-3">
-                <i class="bi bi-check-circle-fill me-2"></i>
-                <strong>Success!</strong> Custom card created successfully.
-            </div>
-        `);
-    });
-    
-    // Check for XSS success
-    window.addEventListener('DOMContentLoaded', function() {
-        // Original alert function
-        var originalAlert = window.alert;
-        
-        // Override alert
-        window.alert = function(message) {
-            // Call the original alert
-            originalAlert(message);
-            
-            // Check if this is the success message
-            if (message === "XSS Level 18 Completed!") {
-                // Redirect to success page
-                window.location.href = window.location.href + "?success=true";
-            }
-        };
-    });
-</script>
-{% endblock %}
+{%endblock %}

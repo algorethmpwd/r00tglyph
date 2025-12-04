@@ -1,91 +1,103 @@
-{% extends 'base.html' %}
+{%extends 'base.html' %}
 
-{% block title %}SSRF Level 4 - R00tGlyph{% endblock %}
+{%block title %}Level 4: SSRF via PDF Generation - R00tGlyph{%endblock %}
 
-{% block content %}
-<div class="row">
-    <div class="col-md-10 offset-md-1">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Level 4: Blind SSRF with DNS Exfiltration</h2>
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">SSRF</span> / <span>Level 4</span>
+{%endblock %}
+
+{%block content %}
+<div class="challenge-lab">
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
+        </div>
+        <div class="mission-content">
+            <h5 class="mb-3">SSRF via PDF Generation</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>SSRFApp4</strong>. Test for ssrf vulnerabilities.
+            </p>
+
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Exploit ssrf via pdf generation</p>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="alert alert-dark challenge-description" style="display: none;">
-                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-                    <p>
-                        Welcome to <strong>PDF Generator Pro</strong>, a fictional PDF generation service! This challenge simulates a blind SSRF vulnerability where you can't see the response but can detect the request through DNS exfiltration.
-                    </p>
-                    <p>
-                        The service generates PDFs and can include external resources via callback URLs. However, you won't see the response directly - you need to use DNS exfiltration techniques to confirm the SSRF.
-                    </p>
-                    <p>
-                        <strong>Your Task:</strong> Exploit the blind SSRF vulnerability using DNS exfiltration techniques to confirm that the server is making requests to your controlled domain.
-                    </p>
-                    <p>
-                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Use DNS exfiltration services like Burp Collaborator, OAST, or dnslog.cn to detect the blind SSRF.
-                    </p>
-                    <p>
-                        <i class="bi bi-tools me-2"></i><strong>Tools:</strong> Burp Suite Professional (Collaborator), OAST.pro, dnslog.cn, or set up your own DNS server.
-                    </p>
-                </div>
 
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h4 class="mb-0"><i class="bi bi-file-earmark-pdf-fill me-2"></i>PDF Generator Pro - Document Creation</h4>
-                    </div>
-                    <div class="card-body">
-                        <form action="/ssrf/level4" method="post">
-                            <div class="input-group mb-3">
-                                <span class="input-group-text">Callback URL</span>
-                                <input type="text" class="form-control" name="callback_url" placeholder="Enter callback URL for PDF generation (e.g., https://your-domain.com/callback)" value="{{ callback_url }}">
-                                <button class="btn btn-primary" type="submit">Generate PDF</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                {% if dns_result %}
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>PDF Generation Result</h5>
-                    </div>
-                    <div class="card-body">
-                        <pre class="bg-dark text-light p-3 rounded">{{ dns_result }}</pre>
-                        {% if ssrf_detected %}
-                        <div class="alert alert-success mt-3">
-                            <i class="bi bi-check-circle-fill me-2"></i>
-                            <strong>Blind SSRF Detected!</strong> DNS exfiltration successful.
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Understanding the Technique
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            This level focuses on ssrf via pdf generation. Research SSRF in this context.
                         </div>
-                        {% endif %}
                     </div>
                 </div>
-                {% endif %}
-
-                {% if flag %}
-                <div class="alert alert-success">
-                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
-                    <p>Congratulations! You've successfully exploited blind SSRF using DNS exfiltration.</p>
-                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
-                </div>
-                {% endif %}
-
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Learning Objectives</h5>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Exploit PDF generators
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Inject URLs in PDF generation
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <ul>
-                            <li>Understand blind SSRF vulnerabilities and detection techniques</li>
-                            <li>Learn DNS exfiltration methods for confirming SSRF</li>
-                            <li>Practice using out-of-band techniques for vulnerability detection</li>
-                            <li>Master tools like Burp Collaborator and OAST services</li>
-                        </ul>
-                <div class="mt-4">
-                    <a href="{{ url_for('solutions', level='ssrf4') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Apply ssrf via pdf generation to access internal resources and retrieve the flag.
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            {%if ssrf_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>ssrf4.local/fetch</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for SSRF Level 4</p>
         </div>
     </div>
 </div>
-{% endblock %}
+{%endblock %}

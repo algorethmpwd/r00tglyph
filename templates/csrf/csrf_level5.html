@@ -1,130 +1,103 @@
-{% extends 'base.html' %}
+{%extends 'base.html' %}
 
-{% block title %}CSRF Level 5 - R00tGlyph{% endblock %}
+{%block title %}Level 5: CSRF Technique 5 - R00tGlyph{%endblock %}
 
-{% block content %}
-<div class="row">
-    <div class="col-md-10 offset-md-1">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Level 5: CSRF with Weak Tokens</h2>
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">CSRF</span> / <span>Level 5</span>
+{%endblock %}
+
+{%block content %}
+<div class="challenge-lab">
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
+        </div>
+        <div class="mission-content">
+            <h5 class="mb-3">CSRF Technique 5</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>CSRFApp5</strong>. Test for CSRF vulnerabilities.
+            </p>
+
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Exploit CSRF vulnerability 5</p>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="alert alert-dark challenge-description" style="display: none;">
-                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-                    <p>
-                        Welcome to <strong>SecureForm Portal</strong>, a Corporate form management system! This challenge demonstrates weak CSRF token implementations.
-                    </p>
-                    <p>
-                        <strong>Your Task:</strong> Bypass the weak CSRF token protection mechanism.
-                    </p>
-                    <p>
-                        <strong>Learning Objective:</strong> Understand common weaknesses in CSRF token implementations and how to exploit them.
-                    </p>
-                </div>
 
-                <div class="text-center mb-3">
-                    <button class="btn btn-info btn-sm" onclick="toggleDescription()">
-                        <i class="bi bi-info-circle me-1"></i>Show Challenge Description
-                    </button>
-                    <a href="/solutions/csrf5" class="btn btn-success btn-sm ms-2">
-                        <i class="bi bi-lightbulb me-1"></i>View Solution
-                    </a>
-                </div>
-
-                {% if flag %}
-                <div class="alert alert-success">
-                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
-                    <p>Congratulations! You've successfully completed this CSRF challenge.</p>
-                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
-                </div>
-                {% endif %}
-
-                <div class="card mb-4">
-                    <div class="card-header bg-warning text-white">
-                        <h4 class="mb-0"><i class="bi-shield-exclamation me-2"></i>SecureForm Portal - Interface</h4>
-                    </div>
-                    <div class="card-body">
-                        <form action="/csrf/level5" method="post">
-                            <div class="mb-3">
-                                <label for="csrf_token" class="form-label">CSRF Token</label>
-                                <input type="text" class="form-control" id="csrf_token" name="csrf_token"
-                                       placeholder="Auto-generated token" value="{{ csrf_token or '' }}">
-                            </div>
-                            <div class="mb-3">
-                                <label for="form_data" class="form-label">Form Data</label>
-                                <input type="text" class="form-control" id="form_data" name="form_data"
-                                       placeholder="Enter form data" value="{{ form_data or '' }}">
-                            </div>
-                            <div class="mb-3">
-                                <label for="submit_action" class="form-label">Action</label>
-                                <select class="form-control" id="submit_action" name="submit_action">
-                                    <option value="Create">Create</option>
-                                    <option value="Update">Update</option>
-                                    <option value="Delete">Delete</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-arrow-right-circle me-1"></i>Submit Request
-                            </button>
-                        </form>
-                    </div>
-                </div>
-
-                {% if result %}
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-check-circle-fill me-2"></i>Request Result</h5>
-                    </div>
-                    <div class="card-body">
-                        <pre class="bg-dark text-light p-3 rounded">{{ result }}</pre>
-
-                        {% if csrf_detected %}
-                        <div class="alert alert-success mt-3">
-                            <i class="bi bi-check-circle-fill me-2"></i>
-                            <strong>CSRF Attack Successful! CSRF with Weak Tokens vulnerability exploited.</strong>
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Understanding
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            CSRF level 5 focuses on advanced bypass techniques.
                         </div>
-                        {% endif %}
-
                     </div>
                 </div>
-                {% endif %}
-
-                <div class="card mt-4">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-lightbulb-fill me-2"></i>Hint</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>Focus on the csrf with weak tokens vulnerability. Consider how this type of CSRF attack differs from basic form submissions.</p>
-                        <p><strong>Key concepts:</strong> CSRF with Weak Tokens, cross-origin requests, protection bypass</p>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Technique
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Research CSRF bypass methods for this scenario.
+                        </div>
                     </div>
                 </div>
-
-                <div class="text-center mt-4">
-                    <a href="/csrf/level4" class="btn btn-secondary me-2">
-                        <i class="bi bi-arrow-left me-1"></i>Previous Challenge
-                    </a>
-                    <a href="/csrf/level6" class="btn btn-primary">
-                        <i class="bi bi-arrow-right me-1"></i>Next Challenge
-                    </a>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Apply CSRF exploitation techniques to complete the challenge.
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            {%if csrf_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>csrf5.local/action</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for CSRF Level 5</p>
         </div>
     </div>
 </div>
-
-<script>
-function toggleDescription() {
-    const desc = document.querySelector('.challenge-description');
-    const btn = event.target.closest('button');
-
-    if (desc.style.display === 'none') {
-        desc.style.display = 'block';
-        btn.innerHTML = '<i class="bi bi-info-circle me-1"></i>Hide Challenge Description';
-    } else {
-        desc.style.display = 'none';
-        btn.innerHTML = '<i class="bi bi-info-circle me-1"></i>Show Challenge Description';
-    }
-}
-</script>
-{% endblock %}
+{%endblock %}

@@ -1,255 +1,106 @@
-{% extends 'base.html' %}
+{%extends 'base.html' %}
 
-{% block title %}Level 11: XSS via SVG and CDATA - R00tGlyph{% endblock %}
+{%block title %}Level 11: XSS via CSS - R00tGlyph{%endblock %}
 
-{% block content %}
-<div class="row">
-    <div class="col-md-8 offset-md-2">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Level 11: XSS via SVG and CDATA</h2>
-            </div>
-            <div class="card-body">
-                <div class="alert alert-dark challenge-description">
-                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-                    <p>
-                        Welcome to <strong>DesignShare</strong>, a fictional graphic design sharing platform! This challenge simulates a real-world scenario where a web application allows users to upload and share SVG images, but attempts to filter out malicious content.
-                    </p>
-                    
-                    <div class="card mb-3 border-secondary">
-                        <div class="card-header">
-                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
-                        </div>
-                        <div class="card-body">
-                            <p class="mb-0">
-                                <strong>Client:</strong> DesignShare Inc.<br>
-                                <strong>Target:</strong> SVG Image Upload System<br>
-                                <strong>Protection:</strong> Content Filtering for SVG Files<br>
-                                <strong>Objective:</strong> Bypass the SVG filtering and execute JavaScript
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <p>
-                        <strong>Technical Background:</strong> SVG (Scalable Vector Graphics) is an XML-based vector image format that can include JavaScript. Many applications allow users to upload SVG files but attempt to filter out potentially malicious content. However, SVG has many features that can be abused for XSS attacks, including CDATA sections, which allow embedding content that isn't parsed as XML.
-                    </p>
-                    
-                    <p>
-                        <strong>Real-world Impact:</strong> SVG-based XSS vulnerabilities are particularly dangerous because:
-                    </p>
-                    <ul>
-                        <li>They can bypass content filters that focus on HTML tags</li>
-                        <li>They can affect applications that allow image uploads but don't properly validate SVG content</li>
-                        <li>They can be triggered simply by viewing an image</li>
-                        <li>They can lead to data theft, account takeover, and other serious attacks</li>
-                        <li>They may persist in the application's storage, affecting multiple users</li>
-                    </ul>
-                    
-                    <p>
-                        <strong>Your Task:</strong> The DesignShare platform allows users to submit SVG code directly, but it filters out script tags and event handlers. You need to find a way to bypass this filtering and execute JavaScript. Make an alert box appear with the text "XSS Level 11 Completed!" to reveal the flag.
-                    </p>
-                    
-                    <div class="alert alert-warning">
-                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> SVG files can include CDATA sections, which are not parsed as XML. Also, SVG has several elements that can execute JavaScript without using script tags or common event handlers.
-                    </div>
-                </div>
-                
-                <!-- DesignShare Interface -->
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="bi bi-vector-pen me-2"></i>DesignShare</h5>
-                        <div>
-                            <span class="badge bg-light text-dark">SVG Playground</span>
-                        </div>
-                    </div>
-                    <div class="card-body p-0">
-                        <!-- Navigation Bar -->
-                        <nav class="navbar navbar-expand navbar-light bg-light px-3">
-                            <div class="container-fluid">
-                                <ul class="navbar-nav">
-                                    <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-house-door me-1"></i>Home</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-grid-3x3-gap me-1"></i>Gallery</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-people me-1"></i>Community</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-book me-1"></i>Tutorials</a></li>
-                                </ul>
-                                <div class="d-flex">
-                                    <div class="dropdown">
-                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="bi bi-person-circle me-1"></i>Guest Designer
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                            <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
-                                            <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </nav>
-                        
-                        <div class="p-4">
-                            <div class="row">
-                                <div class="col-md-6 mb-4">
-                                    <div class="card">
-                                        <div class="card-header d-flex justify-content-between align-items-center">
-                                            <h5 class="mb-0">SVG Editor</h5>
-                                            <div>
-                                                <button class="btn btn-sm btn-outline-secondary" id="clear-svg">
-                                                    <i class="bi bi-trash me-1"></i>Clear
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div class="card-body">
-                                            <form action="{{ url_for('xss_level11') }}" method="post">
-                                                <div class="mb-3">
-                                                    <label for="svg-code" class="form-label">Enter your SVG code:</label>
-                                                    <textarea class="form-control font-monospace" id="svg-code" name="svg_code" rows="15" placeholder="<svg width='200' height='200'>...</svg>" required>{{ svg_code if svg_code else '<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="100" cy="100" r="50" fill="blue" />
-  <text x="100" y="100" text-anchor="middle" fill="white">SVG</text>
-</svg>' }}</textarea>
-                                                    <div class="form-text">
-                                                        <i class="bi bi-shield-check me-1"></i>SVG code is filtered for security. Script tags and event handlers are removed.
-                                                    </div>
-                                                </div>
-                                                <button type="submit" class="btn btn-primary w-100">
-                                                    <i class="bi bi-arrow-right-circle-fill me-2"></i>Render SVG
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="card mt-3">
-                                        <div class="card-header">
-                                            <h6 class="mb-0">SVG Security Info</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <p class="small mb-2">For security reasons, we filter out:</p>
-                                            <ul class="small">
-                                                <li><code>&lt;script&gt;</code> tags</li>
-                                                <li>Event handlers (attributes starting with "on")</li>
-                                                <li>JavaScript URLs</li>
-                                                <li>Potentially dangerous elements</li>
-                                            </ul>
-                                            <p class="small mb-0">This ensures that SVG files cannot execute malicious code.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="col-md-6">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h5 class="mb-0">SVG Preview</h5>
-                                        </div>
-                                        <div class="card-body text-center p-4">
-                                            {% if svg_code %}
-                                            <div id="svg-container">{{ filtered_svg | safe }}</div>
-                                            {% else %}
-                                            <div class="svg-placeholder">
-                                                <i class="bi bi-image text-muted" class="icon-xxl"></i>
-                                                <p class="mt-3 text-muted">Your SVG will appear here</p>
-                                            </div>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="card mt-3">
-                                        <div class="card-header">
-                                            <h6 class="mb-0">SVG Examples</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="row">
-                                                <div class="col-4 text-center">
-                                                    <div class="example-svg p-2 border rounded mb-2">
-                                                        <svg width="80" height="80" xmlns="http://www.w3.org/2000/svg">
-                                                            <circle cx="40" cy="40" r="30" fill="red" />
-                                                        </svg>
-                                                    </div>
-                                                    <button class="btn btn-sm btn-outline-secondary example-btn" data-svg="<svg width='200' height='200' xmlns='http://www.w3.org/2000/svg'><circle cx='100' cy='100' r='80' fill='red' /></svg>">
-                                                        Circle
-                                                    </button>
-                                                </div>
-                                                <div class="col-4 text-center">
-                                                    <div class="example-svg p-2 border rounded mb-2">
-                                                        <svg width="80" height="80" xmlns="http://www.w3.org/2000/svg">
-                                                            <rect x="10" y="10" width="60" height="60" fill="green" />
-                                                        </svg>
-                                                    </div>
-                                                    <button class="btn btn-sm btn-outline-secondary example-btn" data-svg="<svg width='200' height='200' xmlns='http://www.w3.org/2000/svg'><rect x='50' y='50' width='100' height='100' fill='green' /></svg>">
-                                                        Rectangle
-                                                    </button>
-                                                </div>
-                                                <div class="col-4 text-center">
-                                                    <div class="example-svg p-2 border rounded mb-2">
-                                                        <svg width="80" height="80" xmlns="http://www.w3.org/2000/svg">
-                                                            <polygon points="40,10 70,70 10,70" fill="blue" />
-                                                        </svg>
-                                                    </div>
-                                                    <button class="btn btn-sm btn-outline-secondary example-btn" data-svg="<svg width='200' height='200' xmlns='http://www.w3.org/2000/svg'><polygon points='100,20 180,180 20,180' fill='blue' /></svg>">
-                                                        Triangle
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                {% if flag %}
-                <!-- Hidden flag container that will be revealed when the challenge is solved -->
-                <div id="flag-display" style="display: none;">
-                    <div class="alert alert-success">
-                        <i class="bi bi-check-circle-fill me-2"></i>
-                        <strong>Congratulations!</strong> You've solved the challenge.
-                    </div>
-                    <div class="flag-container">
-                        <span class="flag-label">Your Flag</span>
-                        <code id="flag-value">{{ flag }}</code>
-                    </div>
-                </div>
-                
-                <!-- Hidden form for the main page flag submission -->
-                <form id="flag-submission-form" style="display: none;">
-                    <input type="hidden" name="challenge_id" value="11">
-                    <input type="text" name="flag" value="">
-                </form>
-                
-                <!-- Result container for flag submission -->
-                <div id="flag-result" class="alert" style="display: none;"></div>
-                {% endif %}
-                
-                <div class="mt-4">
-                    <a href="{{ url_for('solutions', level=11) }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">XSS</span> / <span>Level 11</span>
+{%endblock %}
+
+{%block content %}
+<div class="challenge-lab">
+    <!-- LEFT PANEL: Mission & Intel -->
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
+        </div>
+        <div class="mission-content">
+            <h5 class="mb-3">XSS via CSS</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>StyleEditor</strong>. Test the security of this application.
+            </p>
+
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Exploit CSS for JavaScript execution</p>
                 </div>
             </div>
+
+            <!-- Integrated Hints System -->
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: CSS Expressions
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Older browsers supported CSS expressions. Modern attacks use CSS imports or background URLs.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: CSS Injection
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Try: <code>@import 'javascript:alert(1)';</code> or <code>background:url('javascript:alert(1)')</code>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Inject CSS that loads external resources or uses expression() in legacy contexts.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {%if xss_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the XSS vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: The Vulnerable App -->
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>style.local/custom</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for XSS Level 11</p>
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Handle example buttons
-        const exampleButtons = document.querySelectorAll('.example-btn');
-        const svgCodeTextarea = document.getElementById('svg-code');
-        
-        exampleButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const svgCode = this.getAttribute('data-svg');
-                svgCodeTextarea.value = svgCode;
-            });
-        });
-        
-        // Handle clear button
-        const clearButton = document.getElementById('clear-svg');
-        if (clearButton) {
-            clearButton.addEventListener('click', function() {
-                svgCodeTextarea.value = '<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg"></svg>';
-            });
-        }
-    });
-</script>
-{% endblock %}
+{%endblock %}

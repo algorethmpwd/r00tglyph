@@ -1,283 +1,106 @@
-{% extends 'base.html' %}
+{%extends 'base.html' %}
 
-{% block title %}Level 8: Second-Order SQL Injection - R00tGlyph{% endblock %}
+{%block title %}Level 8: SQL Injection in UPDATE - R00tGlyph{%endblock %}
 
-{% block content %}
-<style>
-    .profile-header {
-        background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
-        color: white;
-        padding: 20px;
-        border-radius: 5px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    .profile-card {
-        transition: all 0.3s ease;
-        margin-bottom: 15px;
-    }
-    .profile-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-    }
-    .profile-section {
-        border-left: 4px solid var(--bs-primary);
-        padding: 15px;
-        margin-bottom: 20px;
-        background-color: rgba(0, 0, 0, 0.03);
-        border-radius: 5px;
-    }
-    .admin-note {
-        background-color: rgba(255, 193, 7, 0.1);
-        border-left: 4px solid var(--bs-warning);
-        padding: 15px;
-        margin-top: 20px;
-        border-radius: 5px;
-    }
-</style>
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">SQL Injection</span> / <span>Level 8</span>
+{%endblock %}
 
-<div class="row">
-    <div class="col-md-10 offset-md-1">
-        {% if sqli_detected %}
-        <div class="alert alert-success">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            <strong>Success!</strong> You've successfully exploited the second-order SQL injection vulnerability! The challenge has been marked as completed.
-            {% if flag %}
-            <div class="mt-2">
-                <strong>Flag:</strong> <code>{{ flag }}</code>
-            </div>
-            {% endif %}
+{%block content %}
+<div class="challenge-lab">
+    <!-- LEFT PANEL: Mission & Intel -->
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
-        {% endif %}
-
-        <!-- Challenge description -->
-        <div class="alert alert-dark challenge-description">
-            <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-            <p>
-                Welcome to <strong>ConnectSphere</strong>, a fictional social media platform! This challenge simulates a real-world scenario where a user profile update feature is vulnerable to second-order SQL injection.
-            </p>
-            <p>
-                The developers of ConnectSphere have implemented a feature that allows users to update their profile information. However, they've made a critical mistake: while they sanitize user input when it's first stored in the database, they don't sanitize it when it's later retrieved and used in another SQL query.
-            </p>
-            <p>
-                <strong>Your Task:</strong> Exploit the second-order SQL injection vulnerability to access the admin account. The admin's profile contains the flag.
+        <div class="mission-content">
+            <h5 class="mb-3">SQL Injection in UPDATE</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>ProfileManager</strong>. Test for SQL injection vulnerabilities.
             </p>
 
-            <div class="card mb-3 border-secondary">
-                <div class="card-header">
-                    <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
-                </div>
-                <div class="card-body">
-                    <p class="mb-0">
-                        <strong>Client:</strong> ConnectSphere Social Media Platform<br>
-                        <strong>Target:</strong> User Profile Update Functionality<br>
-                        <strong>Vulnerability:</strong> Suspected Second-Order SQL Injection<br>
-                        <strong>Objective:</strong> Access the admin account to retrieve sensitive information
-                    </p>
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Exploit UPDATE statement vulnerabilities</p>
                 </div>
             </div>
 
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
+            <!-- Integrated Hints System -->
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: UPDATE Injection
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            UPDATE queries: <code>UPDATE users SET email='INPUT' WHERE id=1</code>. You can modify other columns: <code>test', role='admin' WHERE '1'='1</code>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <p>
-                        Second-order SQL injection (also known as stored SQL injection) occurs when user input is first stored in the database and then later used in an unsafe way in another SQL query.
-                    </p>
-                    <p>
-                        This type of vulnerability is particularly dangerous because:
-                    </p>
-                    <ul>
-                        <li>It can bypass input sanitization that only happens at the point of initial storage</li>
-                        <li>It can affect parts of the application that developers might consider "safe" because they don't directly accept user input</li>
-                        <li>It can be triggered by users other than the attacker, potentially escalating the impact</li>
-                    </ul>
-                    <p>
-                        In this challenge, you'll need to think about how your input is stored and later used by the application.
-                    </p>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Privilege Escalation
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Change your role to admin: <code>user@test.com', role='admin'--</code> in the email field.
+                        </div>
+                    </div>
                 </div>
-            </div>
-
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
-                </div>
-                <div class="card-body">
-                    <p>
-                        The profile update feature likely uses SQL queries like:
-                    </p>
-                    <pre class="bg-light p-3 rounded"><code>-- When storing your profile information:
-INSERT INTO profiles (user_id, bio, location, website) VALUES (1, 'user_bio', 'user_location', 'user_website');
-
--- When displaying your profile later:
-SELECT * FROM profiles WHERE user_id = 1;
-
--- When viewing another user's profile:
-SELECT * FROM users WHERE username = 'profile_username';</code></pre>
-                    <p>
-                        Think about how your input in one field might be used in a different query later. For example:
-                    </p>
-                    <ul>
-                        <li>Could your profile information be used in a query when someone views your profile?</li>
-                        <li>Could your username be used in a query when someone searches for users?</li>
-                        <li>What happens if you include SQL syntax in these fields?</li>
-                    </ul>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            <strong>Step-by-step:</strong><ol class='mb-2 mt-2'><li>In email field: <code>test@test.com', role='admin' WHERE username='youruser'--</code></li><li>Submit the update</li><li>Refresh and verify you now have admin privileges</li></ol><strong>Why it works:</strong> You inject additional SET clauses to modify unintended columns.
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="bi bi-shield-fill-check me-2"></i>Real-World Impact</h5>
+            {%if sqli_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
                 </div>
-                <div class="card-body">
-                    <p>
-                        Second-order SQL injection vulnerabilities have been found in major applications:
-                    </p>
-                    <ul>
-                        <li><strong>WordPress (2017)</strong>: A second-order SQL injection vulnerability was discovered in the popular CMS, potentially affecting millions of websites.</li>
-                        <li><strong>Joomla (2015)</strong>: A critical second-order SQL injection vulnerability allowed attackers to gain administrative access.</li>
-                    </ul>
-                    <p>
-                        For social media platforms like ConnectSphere, such vulnerabilities could lead to:
-                    </p>
-                    <ul>
-                        <li>Unauthorized access to user accounts</li>
-                        <li>Data breaches exposing personal information</li>
-                        <li>Platform-wide account takeovers</li>
-                        <li>Reputation damage and regulatory penalties</li>
-                    </ul>
-                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the SQL injection vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: The Vulnerable App -->
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>profile.local/update</span>
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Level 8: Second-Order SQL Injection</h2>
-            </div>
-            <div class="card-body">
-                <div class="profile-header">
-                    <div class="d-flex align-items-center justify-content-center">
-                        <i class="bi bi-people-fill me-2" class="icon-lg"></i>
-                        <h1 class="mb-0">ConnectSphere</h1>
-                    </div>
-                    <p class="text-center mb-0 mt-2">Connect with friends and the world around you</p>
-                </div>
-
-                <div class="row mb-4">
-                    <div class="col-md-8">
-                        <div class="scenario-box">
-                            <h4><i class="bi bi-exclamation-triangle-fill me-2"></i>Penetration Testing Scenario</h4>
-                            <p>You've been hired to perform a security assessment of ConnectSphere, a growing social media platform. The platform allows users to create profiles, connect with friends, and share content.</p>
-                            <p>During your initial testing, you notice that the profile update functionality might be vulnerable to a second-order SQL injection attack. The platform's developers have implemented input sanitization when storing user data, but they might not be properly handling the data when it's retrieved and used in subsequent queries.</p>
-                            <p><strong>Your objective:</strong> Exploit the second-order SQL injection vulnerability to access the admin account and retrieve the flag.</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="portal-stats">
-                            <h5 class="text-center mb-3"><i class="bi bi-bar-chart-fill me-2"></i>Platform Statistics</h5>
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="stat-item">
-                                        <div class="stat-number">10M+</div>
-                                        <div>Users</div>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="stat-item">
-                                        <div class="stat-number">5M+</div>
-                                        <div>Daily Active</div>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="stat-item">
-                                        <div class="stat-number">50M+</div>
-                                        <div>Connections</div>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="stat-item">
-                                        <div class="stat-number">24/7</div>
-                                        <div>Support</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="card mb-4">
-                            <div class="card-header">
-                                <h4 class="mb-0"><i class="bi bi-person-fill me-2"></i>Update Your Profile</h4>
-                            </div>
-                            <div class="card-body">
-                                <form action="{{ url_for('sqli_level8') }}" method="post">
-                                    <div class="mb-3">
-                                        <label for="username" class="form-label">Username:</label>
-                                        <input type="text" class="form-control" id="username" name="username" value="{{ username }}" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="bio" class="form-label">Bio:</label>
-                                        <textarea class="form-control" id="bio" name="bio" rows="3">{{ bio }}</textarea>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="location" class="form-label">Location:</label>
-                                        <input type="text" class="form-control" id="location" name="location" value="{{ location }}">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="website" class="form-label">Website:</label>
-                                        <input type="text" class="form-control" id="website" name="website" value="{{ website }}">
-                                    </div>
-                                    <button type="submit" class="btn btn-primary">Update Profile</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card mb-4">
-                            <div class="card-header">
-                                <h4 class="mb-0"><i class="bi bi-search me-2"></i>View User Profile</h4>
-                            </div>
-                            <div class="card-body">
-                                <form action="{{ url_for('sqli_level8') }}" method="get">
-                                    <div class="input-group mb-3">
-                                        <input type="text" class="form-control" name="view_user" placeholder="Enter username to view" value="{{ view_user }}">
-                                        <button class="btn btn-info" type="submit">View Profile</button>
-                                    </div>
-                                </form>
-
-                                {% if profile %}
-                                <div class="profile-section mt-4">
-                                    <h5><i class="bi bi-person-circle me-2"></i>{{ profile.username }}</h5>
-                                    <p><strong>Bio:</strong> {{ profile.bio|safe }}</p>
-                                    <p><strong>Location:</strong> {{ profile.location|safe }}</p>
-                                    <p><strong>Website:</strong> <a href="{{ profile.website }}" target="_blank">{{ profile.website|safe }}</a></p>
-                                </div>
-                                {% elif view_user %}
-                                <div class="alert alert-warning mt-3">
-                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                                    User not found: {{ view_user }}
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="admin-note">
-                    <h5><i class="bi bi-shield-lock me-2"></i>Developer Note</h5>
-                    <p>Reminder to the development team: The admin account (username: <code>admin</code>) has special privileges and contains sensitive information. We've implemented input sanitization for all user inputs to prevent SQL injection attacks.</p>
-                    <p class="mb-0"><small class="text-muted">Note: This message is for internal use only and should not be visible to regular users.</small></p>
-                </div>
-
-                <div class="mt-4">
-                    <a href="{{ url_for('solutions', level='sqli8') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
-                </div>
-            </div>
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for SQLi Level 8</p>
         </div>
     </div>
 </div>
-{% endblock %}
+{%endblock %}

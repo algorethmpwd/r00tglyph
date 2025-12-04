@@ -1,95 +1,103 @@
-{% extends 'base.html' %}
+{%extends 'base.html' %}
 
-{% block title %}SSRF Level 16 - R00tGlyph{% endblock %}
+{%block title %}Level 16: SSRF via WebSockets - R00tGlyph{%endblock %}
 
-{% block content %}
-<div class="row">
-    <div class="col-md-10 offset-md-1">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Level 16: SSRF via LDAP Protocol</h2>
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">SSRF</span> / <span>Level 16</span>
+{%endblock %}
+
+{%block content %}
+<div class="challenge-lab">
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
+        </div>
+        <div class="mission-content">
+            <h5 class="mb-3">SSRF via WebSockets</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>SSRFApp16</strong>. Test for ssrf vulnerabilities.
+            </p>
+
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Exploit ssrf via websockets</p>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="alert alert-dark challenge-description" style="display: none;">
-                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-                    <p>
-                        Welcome to <strong>Directory Service</strong>, a fictional service platform! This challenge demonstrates LDAP injection through user directory lookups allowing SSRF attacks against internal LDAP servers.
-                    </p>
-                    <p>
-                        <strong>Your Task:</strong> Use LDAP injection to perform SSRF attacks against internal directory services.
-                    </p>
-                    <p>
-                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Inject LDAP queries that target internal directory servers and services.
-                    </p>
-                    <p>
-                        <i class="bi bi-tools me-2"></i><strong>Tools:</strong> Use LDAP query tools, directory enumeration utilities, and LDAP injection payloads.
-                    </p>
-                </div>
 
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h4 class="mb-0"><i class="bi bi-people me-2"></i>Directory Service - Interface</h4>
-                    </div>
-                    <div class="card-body">
-                        <form action="/ssrf/level16" method="post">
-                            <div class="mb-3">
-                                <label for="ldap_query" class="form-label">LDAP Search Query</label>
-                                <input type="text" class="form-control" name="ldap_query" placeholder="(&(objectClass=user)(cn=admin))" value="{{ ldap_query }}">
-                            </div>
-                            <div class="mb-3">
-                                <label for="ldap_server" class="form-label">LDAP Server</label>
-                                <input type="text" class="form-control" name="ldap_server" placeholder="ldap://directory.internal.com:389" value="{{ ldap_server }}">
-                            </div>
-                            <button class="btn btn-primary" type="submit">Execute Request</button>
-                        </form>
-                    </div>
-                </div>
-
-                {% if ldap_result %}
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Request Result</h5>
-                    </div>
-                    <div class="card-body">
-                        <pre class="bg-dark text-light p-3 rounded">{{ ldap_result }}</pre>
-                        {% if ssrf_detected %}
-                        <div class="alert alert-success mt-3">
-                            <i class="bi bi-check-circle-fill me-2"></i>
-                            <strong>LDAP SSRF Successful! Internal directory service accessed.</strong>
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Understanding the Technique
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            This level focuses on ssrf via websockets. Research SSRF in this context.
                         </div>
-                        {% endif %}
                     </div>
                 </div>
-                {% endif %}
-
-                {% if flag %}
-                <div class="alert alert-success">
-                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
-                    <p>Congratulations! You've successfully completed this advanced SSRF challenge.</p>
-                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
-                </div>
-                {% endif %}
-
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Learning Objectives</h5>
-                    </div>
-                    <div class="card-body">
-                        <ul>
-                            <li>Understand advanced SSRF attack vectors</li>
-                            <li>Learn modern exploitation techniques</li>
-                            <li>Practice real-world attack scenarios</li>
-                            <li>Master cutting-edge security testing methods</li>
-                        </ul>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: WebSocket exploitation
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Exploit WebSocket connections
+                        </div>
                     </div>
                 </div>
-
-                <div class="mt-4">
-                    <a href="{{ url_for('solutions', level='ssrf16') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Apply ssrf via websockets to access internal resources and retrieve the flag.
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            {%if ssrf_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>ssrf16.local/fetch</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for SSRF Level 16</p>
         </div>
     </div>
 </div>
-{% endblock %}
+{%endblock %}

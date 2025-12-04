@@ -1,311 +1,106 @@
-{% extends 'base.html' %}
+{%extends 'base.html' %}
 
-{% block title %}Level 4: Blind SQL Injection - R00tGlyph{% endblock %}
+{%block title %}Level 4: Time-based Blind SQL Injection - R00tGlyph{%endblock %}
 
-{% block content %}
-<style>
-    .portal-header {
-        background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-        color: white;
-        padding: 20px;
-        border-radius: 5px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    .user-card {
-        transition: all 0.3s ease;
-        margin-bottom: 15px;
-    }
-    .user-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-    }
-    .portal-stats {
-        background-color: var(--bs-body-bg);
-        padding: 15px;
-        border-radius: 5px;
-        margin-bottom: 20px;
-        border: 1px solid var(--bs-border-color);
-    }
-    .stat-item {
-        text-align: center;
-        padding: 10px;
-    }
-    .stat-number {
-        font-size: 2rem;
-        font-weight: bold;
-        color: var(--bs-primary);
-    }
-    .user-lookup-container, .result-container {
-        border-radius: 10px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        padding: 20px;
-        margin-bottom: 20px;
-    }
-    .admin-note {
-        background-color: rgba(255, 193, 7, 0.1);
-        border-left: 4px solid var(--bs-warning);
-        padding: 15px;
-        margin-top: 20px;
-        border-radius: 5px;
-    }
-</style>
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">SQL Injection</span> / <span>Level 4</span>
+{%endblock %}
 
-<div class="row">
-    <div class="col-md-10 offset-md-1">
-        {% if sqli_detected %}
-        <div class="alert alert-success">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            <strong>Success!</strong> You've successfully exploited the blind SQL injection vulnerability! The challenge has been marked as completed.
-            {% if flag %}
-            <div class="mt-2">
-                <strong>Flag:</strong> <code>{{ flag }}</code>
-            </div>
-            {% endif %}
+{%block content %}
+<div class="challenge-lab">
+    <!-- LEFT PANEL: Mission & Intel -->
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
-        {% endif %}
-
-        <!-- Challenge description -->
-        <div class="alert alert-dark challenge-description">
-            <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-            <p>
-                Welcome to <strong>UserPortal Pro</strong>, a fictional user management system! This challenge simulates a real-world scenario where a user profile lookup feature is vulnerable to blind SQL injection.
+        <div class="mission-content">
+            <h5 class="mb-3">Time-based Blind SQL Injection</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>UserDirectory</strong>. Test for SQL injection vulnerabilities.
             </p>
-            <p>
-                The developers of UserPortal have implemented a feature that allows administrators to check if a user with a specific ID exists in the database. However, they've made a critical mistake in how they handle user input, allowing attackers to perform blind SQL injection attacks.
-            </p>
-            <p>
-                <strong>Your Task:</strong> The system has a hidden user with the username <code>admin_secret</code>. You need to find this user's ID and extract the flag stored in their password field. Since this is a blind SQL injection vulnerability, you won't see the actual data returned from the database - you'll only see whether a user exists or not based on your query.
-            </p>
-                    <div class="card mb-3 border-secondary">
-                        <div class="card-header">
-                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
-                        </div>
-                        <div class="card-body">
-                            <p class="mb-0">
-                                <strong>Client:</strong> Security Testing Client<br>
-                                <strong>Target:</strong> SQL Injection Vulnerability<br>
-                                <strong>Vulnerability:</strong> Suspected SQL Injection<br>
-                                <strong>Objective:</strong> Exploit the vulnerability to extract data
-                            </p>
-                        </div>
-                    </div>
 
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
-                </div>
-                <div class="card-body">
-                    <p>
-                        Blind SQL injection is a type of SQL injection attack that asks the database true/false questions and determines the answer based on the application's response. It's used when the application doesn't display SQL error messages or the results of the query.
-                    </p>
-                    <p>
-                        There are two main types of blind SQL injection:
-                    </p>
-                    <ul>
-                        <li><strong>Boolean-based:</strong> The attacker can determine if a condition is true or false based on whether the application behaves differently (like showing "user exists" vs "user doesn't exist").</li>
-                        <li><strong>Time-based:</strong> The attacker can determine if a condition is true or false based on how long the database takes to respond.</li>
-                    </ul>
-                    <p>
-                        This challenge focuses on boolean-based blind SQL injection, where you'll need to extract data one bit at a time by asking yes/no questions.
-                    </p>
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Use time delays to extract data</p>
                 </div>
             </div>
 
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
-                </div>
-                <div class="card-body">
-                    <p>
-                        The application likely uses a SQL query similar to:
-                    </p>
-                    <pre class="bg-light p-3 rounded"><code>SELECT * FROM users WHERE id = [user_input]</code></pre>
-                    <p>
-                        For blind SQL injection, you need to:
-                    </p>
-                    <ol>
-                        <li>Use boolean conditions to extract information bit by bit</li>
-                        <li>Construct queries that return true or false based on your guesses</li>
-                        <li>Use techniques like binary search to efficiently extract data</li>
-                    </ol>
-                    <p>
-                        Try using conditions like:
-                    </p>
-                    <pre class="bg-light p-3 rounded"><code>1 AND (SELECT 1 FROM users WHERE username = 'admin_secret')</code></pre>
-                    <p>
-                        To extract data character by character, you can use:
-                    </p>
-                    <pre class="bg-light p-3 rounded"><code>1 AND ASCII(SUBSTRING((SELECT password FROM users WHERE username = 'admin_secret'), 1, 1)) > 97</code></pre>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="bi bi-shield-fill-check me-2"></i>Real-World Impact</h5>
-                </div>
-                <div class="card-body">
-                    <p>
-                        Blind SQL injection attacks have been used in several major data breaches:
-                    </p>
-                    <ul>
-                        <li><strong>British Airways (2018)</strong>: Attackers used blind SQL injection as part of an attack that compromised 380,000 customer payment details.</li>
-                        <li><strong>Cisco (2018)</strong>: A vulnerability in Cisco's Prime License Manager allowed blind SQL injection attacks.</li>
-                    </ul>
-                    <p>
-                        For user management systems like this one, such vulnerabilities could expose:
-                    </p>
-                    <ul>
-                        <li>User credentials and personal information</li>
-                        <li>Administrative account details</li>
-                        <li>Internal company structure and hierarchy</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div class="portal-header">
-            <div class="d-flex align-items-center justify-content-center">
-                <i class="bi bi-people-fill me-2" class="icon-lg"></i>
-                <h1 class="mb-0">UserPortal Pro</h1>
-            </div>
-            <p class="text-center mb-0 mt-2">Enterprise User Management System v3.5</p>
-        </div>
-
-        <div class="row mb-4">
-            <div class="col-md-8">
-                <div class="scenario-box">
-                    <h4><i class="bi bi-exclamation-triangle-fill me-2"></i>Penetration Testing Scenario</h4>
-                    <p>You're conducting a security assessment for TechCorp, which recently implemented UserPortal Pro for managing employee accounts. As part of your assessment, you're testing the admin panel's user lookup functionality.</p>
-                    <p>During your initial testing, you notice that the user lookup feature only returns whether a user exists or not, without displaying any user details. However, you suspect this limited information might still be exploitable through blind SQL injection techniques.</p>
-                    <p><strong>Your objective:</strong> Determine if you can extract sensitive information from the database using only the boolean responses (user exists/doesn't exist) provided by the application.</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="portal-stats">
-                    <h5 class="text-center mb-3"><i class="bi bi-bar-chart-fill me-2"></i>System Statistics</h5>
-                    <div class="row">
-                        <div class="col-6">
-                            <div class="stat-item">
-                                <div class="stat-number">5,432</div>
-                                <div>Users</div>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="stat-item">
-                                <div class="stat-number">128</div>
-                                <div>Departments</div>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="stat-item">
-                                <div class="stat-number">99.9%</div>
-                                <div>Uptime</div>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="stat-item">
-                                <div class="stat-number">24/7</div>
-                                <div>Support</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="feature-box">
-                    <div class="feature-icon">
-                        <i class="bi bi-shield-lock"></i>
-                    </div>
-                    <h5>Secure Access</h5>
-                    <p class="text-muted">Role-based access control for enterprise security</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="feature-box">
-                    <div class="feature-icon">
-                        <i class="bi bi-graph-up"></i>
-                    </div>
-                    <h5>Advanced Analytics</h5>
-                    <p class="text-muted">Track user activity and system performance</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="feature-box">
-                    <div class="feature-icon">
-                        <i class="bi bi-gear"></i>
-                    </div>
-                    <h5>Easy Integration</h5>
-                    <p class="text-muted">Connects with all major enterprise systems</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="user-lookup-container login-container">
-            <h4 class="mb-3"><i class="bi bi-search me-2"></i>Admin User Lookup</h4>
-            <div class="alert alert-secondary">
-                <i class="bi bi-info-circle-fill me-2"></i>
-                <strong>Admin Note:</strong> This tool allows administrators to verify if a user ID exists in the system without revealing sensitive user information.
-            </div>
-            <form action="{{ url_for('sqli_level4') }}" method="get">
-                <div class="mb-3">
-                    <label for="user_id" class="form-label">Enter User ID:</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control form-control-lg" id="user_id" name="id" value="{{ user_id }}" placeholder="e.g., 1">
-                        <button class="btn btn-primary" type="submit">
-                            <i class="bi bi-search me-2"></i>Verify User
+            <!-- Integrated Hints System -->
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Time-based Technique
                         </button>
-                    </div>
-                    <div class="form-text">
-                        <i class="bi bi-info-circle me-1"></i>
-                        Enter a numeric user ID to check if the user exists in the database.
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            When boolean-based blind SQLi doesn't work, use time delays. Inject: <code>' AND SLEEP(5)--</code> (MySQL) or <code>' AND pg_sleep(5)--</code> (PostgreSQL). If the page delays 5 seconds, you have SQLi.
+                        </div>
                     </div>
                 </div>
-            </form>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Conditional Delays
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Extract data using conditional delays: <code>' AND IF(SUBSTRING(password,1,1)='a',SLEEP(5),0)--</code>. If it delays, the first character is 'a'.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            <strong>Step-by-step:</strong><ol class='mb-2 mt-2'><li>Test: <code>?id=1' AND SLEEP(5)--</code> (page delays 5 seconds)</li><li>Extract: <code>?id=1' AND IF(SUBSTRING((SELECT password FROM users LIMIT 1),1,1)='a',SLEEP(3),0)--</code></li><li>Iterate through characters, noting delays</li></ol><strong>Why it works:</strong> Time delays reveal information when no other output is available.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {%if sqli_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the SQL injection vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: The Vulnerable App -->
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>directory.local/lookup</span>
+            </div>
         </div>
 
-        {% if user_exists is not none %}
-        <div class="result-container login-container">
-            <h4 class="mb-3"><i class="bi bi-person-circle me-2"></i>Verification Result</h4>
-            {% if user_exists %}
-            <div class="alert alert-success">
-                <i class="bi bi-check-circle-fill me-2"></i>
-                <strong>User Found:</strong> User with ID {{ user_id }} exists in the database.
-            </div>
-            <div class="alert alert-secondary">
-                <i class="bi bi-shield-lock me-2"></i>
-                For security reasons, detailed user information is not displayed in this interface. Please use the full user management console to view complete user profiles.
-            </div>
-            {% else %}
-            <div class="alert alert-danger">
-                <i class="bi bi-x-circle-fill me-2"></i>
-                <strong>User Not Found:</strong> User with ID {{ user_id }} does not exist in the database.
-            </div>
-            <div class="alert alert-secondary">
-                <i class="bi bi-info-circle-fill me-2"></i>
-                Please check the ID and try again, or contact the system administrator if you believe this is an error.
-            </div>
-            {% endif %}
-        </div>
-        {% endif %}
-
-        <div class="admin-note">
-            <h5><i class="bi bi-shield-lock me-2"></i>System Administrator Note</h5>
-            <p>Reminder: The special administrative account (username: <code>admin_secret</code>) should only be used for emergency system recovery. This account has elevated privileges and should be kept secure at all times.</p>
-            <p class="mb-0"><small class="text-muted">Note: This message is visible only to system administrators and should not be displayed to regular users.</small></p>
-        </div>
-
-
-
-        <div class="mt-4">
-            <a href="{{ url_for('solutions', level='sqli4') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
-            <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for SQLi Level 4</p>
         </div>
     </div>
 </div>
-
-
-{% endblock %}
+{%endblock %}

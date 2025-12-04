@@ -1,184 +1,103 @@
-{% extends "base.html" %}
+{%extends 'base.html' %}
 
-{% block title %}Command Injection Level 23 - Advanced Chaining{% endblock %}
+{%block title %}Level 23: Advanced Filter Evasion - R00tGlyph{%endblock %}
 
-{% block content %}
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card border-danger">
-                <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
-                    <h3><i class="bi bi-terminal me-2"></i>Command Injection Level 23 - EXPERT</h3>
-                    <div>
-                        <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#challengeModal">
-                            <i class="bi bi-info-circle me-1"></i>Challenge Info
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">Command Injection</span> / <span>Level 23</span>
+{%endblock %}
+
+{%block content %}
+<div class="challenge-lab">
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
+        </div>
+        <div class="mission-content">
+            <h5 class="mb-3">Advanced Filter Evasion</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>App23</strong>. Test for command injection vulnerabilities.
+            </p>
+
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Exploit advanced filter evasion</p>
+                </div>
+            </div>
+
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Understanding the Technique
                         </button>
-                        <a href="{{ url_for('solutions', level='cmdi23') }}" class="btn btn-outline-light btn-sm">
-                            <i class="bi bi-lightbulb me-1"></i>Solution
-                        </a>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            This level focuses on advanced filter evasion. Research the specific technique.
+                        </div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="alert alert-danger">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                        <strong>EXPERT LEVEL:</strong> This challenge requires advanced knowledge of infrastructure automation, command injection chaining, and enterprise security concepts.
-                    </div>
-
-                    <div class="scenario-box mb-4">
-                        <h5><i class="bi bi-cloud-arrow-up me-2"></i>Enterprise Infrastructure Deployment Platform</h5>
-                        <p>You're testing a complex enterprise infrastructure deployment platform that orchestrates multi-cloud deployments using Terraform, Ansible, and Kubernetes. The system processes JSON configuration files to automate infrastructure provisioning and application deployment across hybrid cloud environments.</p>
-                        <p><strong>Context:</strong> Enterprise-grade multi-cloud infrastructure automation platform</p>
-                        <p><strong>Technologies:</strong> Terraform, Ansible, Kubernetes, AWS, GCP, Azure</p>
-                        <p><strong>Complexity:</strong> Advanced command injection chaining across multiple tools</p>
-                    </div>
-
-                    {% if flag %}
-                    <div class="alert alert-success">
-                        <i class="bi bi-flag-fill me-2"></i><strong>EXPERT CHALLENGE COMPLETED!</strong>
-                        <br>Flag: <code>{{ flag }}</code>
-                        <br><small>Congratulations! You've mastered advanced command injection techniques.</small>
-                    </div>
-                    {% endif %}
-
-                    <form method="POST" class="mb-4">
-                        <div class="mb-3">
-                            <label for="infrastructure_config" class="form-label">Infrastructure Configuration (JSON):</label>
-                            <textarea class="form-control" id="infrastructure_config" name="infrastructure_config" rows="12" 
-                                      style="font-family: monospace; font-size: 0.9em;">{{ infrastructure_config }}</textarea>
-                            <div class="form-text">Enter JSON configuration for multi-cloud infrastructure deployment.</div>
-                        </div>
-                        <button type="submit" class="btn btn-danger">
-                            <i class="bi bi-rocket me-2"></i>Deploy Infrastructure
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Complex bypass techniques
                         </button>
-                    </form>
-
-                    {% if deployment_result %}
-                    <div class="card">
-                        <div class="card-header">
-                            <h6><i class="bi bi-terminal me-2"></i>Enterprise Deployment Pipeline Output</h6>
-                        </div>
-                        <div class="card-body">
-                            <pre class="command-output">{{ deployment_result }}</pre>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Combine encoding, obfuscation, alternative syntax
                         </div>
                     </div>
-                    {% endif %}
-
-                    <div class="mt-4">
-                        <h6>Advanced Chaining Techniques:</h6>
-                        <ul>
-                            <li>Chain commands across Terraform and Ansible configurations</li>
-                            <li>Try: <code>{"terraform": {"provider": "aws; whoami", "region": "us-east-1"}}</code></li>
-                            <li>Use command substitution: <code>{"ansible": {"playbook": "$(uname -a).yml"}}</code></li>
-                            <li>Combine multiple injection points for maximum impact</li>
-                        </ul>
-                        
-                        <h6>Enterprise Technologies:</h6>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <h6><i class="bi bi-diagram-3 me-2"></i>Terraform</h6>
-                                <ul>
-                                    <li>Infrastructure as Code</li>
-                                    <li>Multi-cloud provisioning</li>
-                                    <li>State management</li>
-                                </ul>
-                            </div>
-                            <div class="col-md-4">
-                                <h6><i class="bi bi-gear me-2"></i>Ansible</h6>
-                                <ul>
-                                    <li>Configuration management</li>
-                                    <li>Application deployment</li>
-                                    <li>Orchestration</li>
-                                </ul>
-                            </div>
-                            <div class="col-md-4">
-                                <h6><i class="bi bi-box me-2"></i>Kubernetes</h6>
-                                <ul>
-                                    <li>Container orchestration</li>
-                                    <li>Service mesh</li>
-                                    <li>Auto-scaling</li>
-                                </ul>
-                            </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Apply advanced filter evasion techniques to execute commands and retrieve the flag.
                         </div>
-                        
-                        <h6>Real-World Impact:</h6>
-                        <p>This level simulates vulnerabilities that could lead to complete compromise of enterprise infrastructure, including:</p>
-                        <ul>
-                            <li>Multi-cloud account takeover</li>
-                            <li>Infrastructure destruction or manipulation</li>
-                            <li>Data exfiltration across cloud providers</li>
-                            <li>Persistent backdoor installation</li>
-                        </ul>
                     </div>
                 </div>
             </div>
+
+            {%if cmdi_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>app23.local/cmd</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for Command Injection Level 23</p>
         </div>
     </div>
 </div>
-
-<!-- Challenge Info Modal -->
-<div class="modal fade" id="challengeModal" tabindex="-1">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title">Command Injection Level 23 - EXPERT CHALLENGE</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <h6>Objective:</h6>
-                <p>Exploit advanced command injection chaining in a complex enterprise infrastructure deployment platform.</p>
-                
-                <h6>Scenario:</h6>
-                <p>You're testing the most sophisticated infrastructure automation platform used by large enterprises. This system orchestrates deployments across multiple cloud providers using industry-standard tools like Terraform, Ansible, and Kubernetes. The platform processes complex JSON configurations that define entire infrastructure stacks.</p>
-                
-                <h6>Learning Goals:</h6>
-                <ul>
-                    <li>Master advanced command injection chaining techniques</li>
-                    <li>Understand enterprise infrastructure automation vulnerabilities</li>
-                    <li>Learn about multi-cloud security implications</li>
-                    <li>Practice complex payload construction across multiple tools</li>
-                    <li>Explore the intersection of DevOps and security</li>
-                </ul>
-                
-                <h6>Enterprise Context:</h6>
-                <p>This challenge represents the pinnacle of modern infrastructure vulnerabilities, simulating:</p>
-                <ul>
-                    <li><strong>Fortune 500 Companies:</strong> Complex multi-cloud deployments</li>
-                    <li><strong>Financial Institutions:</strong> Highly regulated infrastructure automation</li>
-                    <li><strong>Government Agencies:</strong> Secure cloud infrastructure management</li>
-                    <li><strong>Tech Giants:</strong> Massive scale infrastructure orchestration</li>
-                </ul>
-                
-                <h6>Technical Complexity:</h6>
-                <ul>
-                    <li><strong>Multi-Tool Chaining:</strong> Exploit vulnerabilities across Terraform, Ansible, and Kubernetes</li>
-                    <li><strong>JSON Parsing:</strong> Complex nested configuration processing</li>
-                    <li><strong>Cloud APIs:</strong> Integration with AWS, GCP, and Azure</li>
-                    <li><strong>Infrastructure State:</strong> Persistent infrastructure modifications</li>
-                </ul>
-                
-                <h6>Advanced Techniques Required:</h6>
-                <ul>
-                    <li>Command substitution across configuration files</li>
-                    <li>Multi-stage payload delivery</li>
-                    <li>Tool-specific injection vectors</li>
-                    <li>Infrastructure persistence mechanisms</li>
-                    <li>Cross-cloud privilege escalation</li>
-                </ul>
-                
-                <h6>Hints:</h6>
-                <ul>
-                    <li>Inject commands in both Terraform and Ansible configurations</li>
-                    <li>Use command substitution and chaining operators</li>
-                    <li>Consider how each tool processes the configuration</li>
-                    <li>Think about the execution order and dependencies</li>
-                    <li>Exploit the trust relationships between tools</li>
-                </ul>
-                
-                <div class="alert alert-warning mt-3">
-                    <strong>Note:</strong> This is the most advanced challenge in R00tGlyph. Success here indicates mastery of command injection techniques and deep understanding of enterprise infrastructure security.
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
+{%endblock %}

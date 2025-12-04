@@ -1,5 +1,200 @@
+# Core Flask Framework
 Flask==2.3.3
 Flask-SQLAlchemy==3.1.1
+Flask-Migrate==4.0.5
+Flask-Caching==2.1.0
+Flask-SocketIO==5.3.6
+Flask-Limiter==3.5.0
 Werkzeug==2.3.7
-gunicorn==21.2.0
 
+# Database
+SQLAlchemy==2.0.21
+alembic==1.12.0
+
+# Security & Cryptography
+cryptography==41.0.4
+bcrypt==4.0.1
+PyJWT==2.8.0
+
+# Redis for Caching & Rate Limiting
+redis==5.0.0
+hiredis==2.2.3
+
+# Web Server
+gunicorn==21.2.0
+eventlet==0.33.3
+
+# Data Processing & Analytics
+pandas==2.1.1
+numpy==1.24.4
+
+# HTTP Requests
+requests==2.31.0
+urllib3==2.0.4
+
+# JSON & Data Validation
+jsonschema==4.19.1
+marshmallow==3.20.1
+
+# Date & Time
+python-dateutil==2.8.2
+pytz==2023.3
+
+# Environment & Configuration
+python-dotenv==1.0.0
+click==8.1.7
+
+# Testing (Development)
+pytest==7.4.2
+pytest-flask==1.2.0
+pytest-cov==4.1.0
+factory-boy==3.3.0
+
+# Code Quality (Development)
+black==23.7.0
+flake8==6.0.0
+isort==5.12.0
+mypy==1.5.1
+
+# Documentation (Development)
+Sphinx==7.2.6
+sphinx-rtd-theme==1.3.0
+
+# API Documentation
+flask-restx==1.2.0
+apispec==6.3.0
+
+# File Processing
+Pillow==10.0.1
+python-magic==0.4.27
+
+# Monitoring & Logging
+psutil==5.9.5
+structlog==23.1.0
+
+# Task Queue (Optional - for future features)
+celery==5.3.1
+kombu==5.3.2
+
+# XML Processing (for XXE challenges)
+lxml==4.9.3
+defusedxml==0.7.1
+
+# YAML Processing
+PyYAML==6.0.1
+
+# Development Server
+python-decouple==3.8
+
+# Email (Optional - for notifications)
+Flask-Mail==0.9.1
+
+# Backup & Recovery
+boto3==1.28.57  # For AWS S3 backups if needed
+
+# Performance Monitoring
+py-spy==0.3.14  # For profiling
+
+# Security Scanning
+bandit==1.7.5
+safety==2.3.5
+
+# Docker Health Checks
+docker==6.1.3
+
+# Machine Learning (for advanced analytics - optional)
+scikit-learn==1.3.0
+matplotlib==3.7.2
+seaborn==0.12.2
+
+# GraphQL Support (for GraphQL challenges)
+graphene==3.3
+graphene-sqlalchemy==3.0.0b4
+
+# WebSocket Support
+python-socketio==5.8.0
+
+# Advanced Parsing
+beautifulsoup4==4.12.2
+html5lib==1.1
+
+# Compression
+gzip-reader==0.1
+
+# Memory Profiling (Development)
+memory-profiler==0.61.0
+
+# Async Support
+asyncio==3.4.3
+aiohttp==3.8.5
+
+# Time Zone Support
+tzdata==2023.3
+
+# Color Terminal Output
+colorama==0.4.6
+rich==13.5.2
+
+# Progress Bars
+tqdm==4.66.1
+
+# Configuration Management
+dynaconf==3.2.0
+
+# Rate Limiting Storage
+limits==3.6.0
+
+# Session Management
+Flask-Session==0.5.0
+
+# CORS Support
+Flask-CORS==4.0.0
+
+# Input Validation
+WTForms==3.0.1
+Flask-WTF==1.1.1
+
+# Internationalization
+Flask-Babel==3.1.0
+
+# Development Tools
+watchdog==3.0.0
+flask-shell-ipython==1.4.0
+
+# Performance Optimization
+Brotli==1.0.9
+zstandard==0.21.0
+
+# Health Checks
+healthcheck==1.3.3
+
+# Metrics Collection
+prometheus-client==0.17.1
+
+# Advanced Logging
+python-json-logger==2.0.7
+loguru==0.7.2
+
+# Container Support
+kubernetes==27.2.0
+
+# Advanced Security Headers
+flask-talisman==1.1.0
+
+# Content Security Policy
+flask-csp==1.1.0
+
+# SQL Query Analysis
+sqlparse==0.4.4
+
+# Advanced Caching
+flask-caching[redis]==2.1.0
+
+# Background Tasks
+APScheduler==3.10.4
+
+# Version Information
+packaging==23.1
+
+# System Information
+distro==1.8.0

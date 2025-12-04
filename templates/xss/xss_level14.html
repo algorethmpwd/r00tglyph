@@ -1,361 +1,106 @@
-{% extends 'base.html' %}
+{%extends 'base.html' %}
 
-{% block title %}Level 14: XSS via Prototype Pollution - R00tGlyph{% endblock %}
+{%block title %}Level 14: XSS in JSON Context - R00tGlyph{%endblock %}
 
-{% block content %}
-<div class="row">
-    <div class="col-md-8 offset-md-2">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Level 14: XSS via Prototype Pollution</h2>
-            </div>
-            <div class="card-body">
-                <div class="alert alert-dark challenge-description">
-                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-                    <p>
-                        Welcome to <strong>ConfigHub</strong>, a fictional configuration management platform! This challenge simulates a real-world scenario where a prototype pollution vulnerability can be exploited to achieve XSS.
-                    </p>
-                    
-                    <div class="card mb-3 border-secondary">
-                        <div class="card-header">
-                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
-                        </div>
-                        <div class="card-body">
-                            <p class="mb-0">
-                                <strong>Client:</strong> ConfigHub Inc.<br>
-                                <strong>Target:</strong> Configuration Management System<br>
-                                <strong>Vulnerability:</strong> Prototype Pollution leading to XSS<br>
-                                <strong>Objective:</strong> Exploit prototype pollution to execute JavaScript
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <p>
-                        <strong>Technical Background:</strong> Prototype pollution is a JavaScript vulnerability that occurs when an attacker is able to modify the prototype of a base object like Object.prototype. Since JavaScript objects inherit properties from their prototype, polluting Object.prototype can affect all objects in the application, potentially leading to XSS.
-                    </p>
-                    
-                    <p>
-                        <strong>Real-world Impact:</strong> Prototype pollution vulnerabilities are particularly dangerous because:
-                    </p>
-                    <ul>
-                        <li>They can affect all objects in the application, creating a wide attack surface</li>
-                        <li>They can bypass traditional XSS protections that focus on direct input</li>
-                        <li>They're often found in JavaScript libraries and frameworks</li>
-                        <li>They can lead to various attack vectors beyond XSS, including remote code execution</li>
-                        <li>They're difficult to detect through standard security testing</li>
-                    </ul>
-                    
-                    <p>
-                        <strong>Your Task:</strong> In this challenge, you need to exploit a prototype pollution vulnerability in the configuration management system. The application uses a vulnerable function to merge user configurations with default settings. You need to find a way to pollute Object.prototype and inject a payload that will execute JavaScript. Make an alert box appear with the text "XSS Level 14 Completed!" to reveal the flag.
-                    </p>
-                    
-                    <div class="alert alert-warning">
-                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Look for ways to inject properties into Object.prototype that will be used by the application to render HTML or execute JavaScript. Common targets include innerHTML, src, or event handlers.
-                    </div>
-                </div>
-                
-                <!-- ConfigHub Interface -->
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="bi bi-gear me-2"></i>ConfigHub</h5>
-                        <div>
-                            <span class="badge bg-light text-dark">Configuration Manager</span>
-                        </div>
-                    </div>
-                    <div class="card-body p-0">
-                        <!-- Navigation Bar -->
-                        <nav class="navbar navbar-expand navbar-light bg-light px-3">
-                            <div class="container-fluid">
-                                <ul class="navbar-nav">
-                                    <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-house-door me-1"></i>Dashboard</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-gear me-1"></i>Configurations</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-clock-history me-1"></i>History</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-question-circle me-1"></i>Help</a></li>
-                                </ul>
-                                <div class="d-flex">
-                                    <div class="dropdown">
-                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="bi bi-person-circle me-1"></i>Admin User
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                            <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
-                                            <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </nav>
-                        
-                        <div class="p-4">
-                            <div class="row">
-                                <div class="col-md-4 mb-4">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h6 class="mb-0">Configuration Options</h6>
-                                        </div>
-                                        <div class="list-group list-group-flush">
-                                            <a href="#" class="list-group-item list-group-item-action active">
-                                                <i class="bi bi-plus-circle me-2"></i>Create Configuration
-                                            </a>
-                                            <a href="#" class="list-group-item list-group-item-action">
-                                                <i class="bi bi-list-check me-2"></i>View Configurations
-                                            </a>
-                                            <a href="#" class="list-group-item list-group-item-action">
-                                                <i class="bi bi-arrow-repeat me-2"></i>Import/Export
-                                            </a>
-                                            <a href="#" class="list-group-item list-group-item-action">
-                                                <i class="bi bi-gear me-2"></i>Settings
-                                            </a>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="card mt-3">
-                                        <div class="card-header">
-                                            <h6 class="mb-0">Technical Information</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <p class="small mb-2">This application uses a recursive merge function to combine user configurations with default settings.</p>
-                                            <p class="small mb-0">For this challenge, the merge function is vulnerable to prototype pollution.</p>
-                                            <hr>
-                                            <p class="small mb-0 fst-italic">Hint: Try to inject properties that will be used when rendering the configuration preview.</p>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="card mt-3">
-                                        <div class="card-header">
-                                            <h6 class="mb-0">Default Configuration</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <pre class="small mb-0 bg-light p-2 rounded"><code>{
-  "theme": "light",
-  "sidebar": true,
-  "notifications": true,
-  "autoSave": false,
-  "refreshRate": 60
-}</code></pre>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="col-md-8">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h5 class="mb-0">Create Configuration</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            {% if config_saved %}
-                                            <div class="alert alert-success">
-                                                <i class="bi bi-check-circle-fill me-2"></i>
-                                                <strong>Configuration Saved!</strong> Your configuration has been processed.
-                                            </div>
-                                            
-                                            <div class="card mb-4">
-                                                <div class="card-header">
-                                                    <h6 class="mb-0">Configuration Preview</h6>
-                                                </div>
-                                                <div class="card-body">
-                                                    <div id="config-preview">
-                                                        <!-- This is where the configuration preview will be rendered -->
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="d-grid gap-2">
-                                                <a href="{{ url_for('xss_level14') }}" class="btn btn-primary">
-                                                    <i class="bi bi-plus-circle me-2"></i>Create Another Configuration
-                                                </a>
-                                            </div>
-                                            {% else %}
-                                            <form action="{{ url_for('xss_level14') }}" method="post" id="config-form">
-                                                <div class="mb-3">
-                                                    <label for="config-name" class="form-label">Configuration Name:</label>
-                                                    <input type="text" class="form-control" id="config-name" name="config_name" required>
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label for="config-json" class="form-label">Configuration JSON:</label>
-                                                    <textarea class="form-control font-monospace" id="config-json" name="config_json" rows="10" required>{
-  "theme": "dark",
-  "sidebar": true,
-  "notifications": false,
-  "autoSave": true,
-  "refreshRate": 30
-}</textarea>
-                                                    <div class="form-text">
-                                                        <i class="bi bi-info-circle me-1"></i>Enter your configuration in JSON format. This will be merged with the default configuration.
-                                                    </div>
-                                                </div>
-                                                <div class="d-grid">
-                                                    <button type="submit" class="btn btn-primary">
-                                                        <i class="bi bi-save me-2"></i>Save Configuration
-                                                    </button>
-                                                </div>
-                                            </form>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                    
-                                    {% if flag %}
-                                    <div class="alert alert-success mt-4">
-                                        <i class="bi bi-check-circle-fill me-2"></i>
-                                        <strong>Congratulations!</strong> Your prototype pollution payload successfully executed JavaScript.
-                                    </div>
-                                    <div class="card mt-2">
-                                        <div class="card-header">
-                                            <h5 class="mb-0"><i class="bi bi-trophy me-2"></i>Challenge Completed!</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <p>You've successfully demonstrated a prototype pollution vulnerability leading to XSS. In a real-world scenario, this could allow attackers to execute arbitrary JavaScript in the context of the application.</p>
-                                            <div class="flag-container p-3 bg-light rounded">
-                                                <span class="flag-label">Your Flag:</span>
-                                                <code id="flag-value">{{ flag }}</code>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="mt-4">
-                    <a href="{{ url_for('solutions', level=14) }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">XSS</span> / <span>Level 14</span>
+{%endblock %}
+
+{%block content %}
+<div class="challenge-lab">
+    <!-- LEFT PANEL: Mission & Intel -->
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
+        </div>
+        <div class="mission-content">
+            <h5 class="mb-3">XSS in JSON Context</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>APIViewer</strong>. Test the security of this application.
+            </p>
+
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Break out of JSON context</p>
                 </div>
             </div>
+
+            <!-- Integrated Hints System -->
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: JSON Context
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Your input might be in JSON: <code>{"name":"YOUR_INPUT"}</code>. Break out of the JSON structure.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: JSON Escape
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Use: <code>","xss":"&lt;script&gt;alert(1)&lt;/script&gt;</code> to inject new JSON keys.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Break JSON structure and inject HTML that gets rendered.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {%if xss_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the XSS vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: The Vulnerable App -->
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>api.local/view</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for XSS Level 14</p>
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Function to merge objects (vulnerable to prototype pollution)
-        function mergeObjects(target, source) {
-            for (let key in source) {
-                if (typeof source[key] === 'object' && source[key] !== null) {
-                    if (!target[key]) {
-                        target[key] = {};
-                    }
-                    mergeObjects(target[key], source[key]);
-                } else {
-                    target[key] = source[key];
-                }
-            }
-            return target;
-        }
-        
-        // Function to render configuration preview
-        function renderConfigPreview(config) {
-            const previewElement = document.getElementById('config-preview');
-            if (!previewElement) return;
-            
-            // Create HTML for the configuration preview
-            let html = '<div class="config-item">';
-            
-            // This is the vulnerable part - it uses properties from the config object
-            // to create HTML elements without proper sanitization
-            html += `<h4>${config.name || 'Unnamed Configuration'}</h4>`;
-            html += '<ul class="list-group">';
-            
-            // Add configuration items
-            html += `<li class="list-group-item d-flex justify-content-between align-items-center">
-                        Theme
-                        <span class="badge bg-primary">${config.theme}</span>
-                    </li>`;
-            html += `<li class="list-group-item d-flex justify-content-between align-items-center">
-                        Sidebar
-                        <span class="badge bg-${config.sidebar ? 'success' : 'danger'}">${config.sidebar ? 'Enabled' : 'Disabled'}</span>
-                    </li>`;
-            html += `<li class="list-group-item d-flex justify-content-between align-items-center">
-                        Notifications
-                        <span class="badge bg-${config.notifications ? 'success' : 'danger'}">${config.notifications ? 'Enabled' : 'Disabled'}</span>
-                    </li>`;
-            html += `<li class="list-group-item d-flex justify-content-between align-items-center">
-                        Auto Save
-                        <span class="badge bg-${config.autoSave ? 'success' : 'danger'}">${config.autoSave ? 'Enabled' : 'Disabled'}</span>
-                    </li>`;
-            html += `<li class="list-group-item d-flex justify-content-between align-items-center">
-                        Refresh Rate
-                        <span class="badge bg-info">${config.refreshRate} seconds</span>
-                    </li>`;
-            
-            html += '</ul>';
-            
-            // Add a div that will use the innerHTML property
-            // This is the target for prototype pollution
-            html += '<div id="config-notes" class="mt-3 p-3 bg-light rounded">';
-            html += '<h6>Notes:</h6>';
-            html += '<div id="notes-content">No notes available for this configuration.</div>';
-            html += '</div>';
-            
-            html += '</div>';
-            
-            // Set the HTML content
-            previewElement.innerHTML = html;
-            
-            // After rendering, check if the prototype pollution worked
-            setTimeout(function() {
-                // Check if an alert with the correct message was triggered
-                if (window.xssDetected) {
-                    // Redirect to success page
-                    window.location.href = window.location.href + "?success=true";
-                }
-            }, 1000);
-        }
-        
-        // Process the configuration if it exists
-        {% if config_saved and config_json %}
-            try {
-                // Parse the user configuration
-                const userConfig = JSON.parse('{{ config_json | safe }}');
-                
-                // Default configuration
-                const defaultConfig = {
-                    theme: "light",
-                    sidebar: true,
-                    notifications: true,
-                    autoSave: false,
-                    refreshRate: 60
-                };
-                
-                // Add the configuration name
-                userConfig.name = '{{ config_name | safe }}';
-                
-                // Merge the configurations (vulnerable to prototype pollution)
-                const mergedConfig = mergeObjects({}, defaultConfig);
-                mergeObjects(mergedConfig, userConfig);
-                
-                // Render the configuration preview
-                renderConfigPreview(mergedConfig);
-                
-                // Check for XSS success
-                window.addEventListener('XSSSuccess', function(e) {
-                    if (e.detail && e.detail.message === "XSS Level 14 Completed!") {
-                        // Flag the XSS as detected
-                        window.xssDetected = true;
-                    }
-                });
-                
-                // Override alert function to detect successful XSS
-                const originalAlert = window.alert;
-                window.alert = function(message) {
-                    // Call the original alert
-                    originalAlert(message);
-                    
-                    // Check if this is the success message
-                    if (message === "XSS Level 14 Completed!") {
-                        // Dispatch an event to indicate XSS success
-                        window.dispatchEvent(new CustomEvent('XSSSuccess', {
-                            detail: { message: message }
-                        }));
-                    }
-                };
-            } catch (error) {
-                console.error('Error processing configuration:', error);
-            }
-        {% endif %}
-    });
-</script>
-{% endblock %}
+{%endblock %}

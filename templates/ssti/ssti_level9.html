@@ -1,47 +1,103 @@
-{%- set level_number = 9 -%}
-{%- set category = "SSTI" -%}
-{%- set category_lower = "ssti" -%}
-{%- set title = "Blind SSTI" -%}
-{%- set difficulty = "intermediate" -%}
-{%- set description = "No direct output visible. Use time-based or out-of-band techniques to confirm exploitation." -%}
-{#- challenge_id passed from route -#}
+{%extends 'base.html' %}
 
-{%extends 'components/base_challenge.html' %}
+{%block title %}Level 9: SSTI Technique 9 - R00tGlyph{%endblock %}
 
-{%block challenge_content %}
-<div class="card">
-    <div class="card-header">
-        <h5><i class="bi bi-info-circle me-2"></i>Scenario</h5>
-    </div>
-    <div class="card-body">
-        <p><strong>Context:</strong> A background job processor that logs template rendering.</p>
-        <p><strong>Framework/Language:</strong> Jinja2</p>
-        <p><strong>Your Mission:</strong> Exploit the vulnerability to capture the flag.</p>
-    </div>
-</div>
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">SSTI</span> / <span>Level 9</span>
+{%endblock %}
 
-<div class="card mt-3">
-    <div class="card-header">
-        <h5><i class="bi bi-laptop me-2"></i>Vulnerable Application</h5>
-    </div>
-    <div class="card-body">
-        <!-- Challenge-specific interactive content will go here -->
-        <form method="POST">
-            <div class="mb-3">
-                <label for="payload" class="form-label">Enter your payload:</label>
-                <textarea class="form-control" id="payload" name="payload" rows="5" placeholder="Your exploit payload here..."></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary">
-                <i class="bi bi-play-fill me-1"></i>Execute
-            </button>
-        </form>
-
-        {%if result %}
-        <div class="alert alert-secondary mt-3">
-            <strong>Output:</strong>
-            <pre>{{ result }}</pre>
+{%block content %}
+<div class="challenge-lab">
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
-        {%endif %}
+        <div class="mission-content">
+            <h5 class="mb-3">SSTI Technique 9</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>SSTIApp9</strong>. Test for SSTI vulnerabilities.
+            </p>
+
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Exploit SSTI vulnerability 9</p>
+                </div>
+            </div>
+
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Understanding
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            SSTI level 9 focuses on specific template engines.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Technique
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Research SSTI for this template engine.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Apply SSTI techniques to achieve code execution.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {%if ssti_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>ssti9.local/render</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for SSTI Level 9</p>
+        </div>
     </div>
 </div>
 {%endblock %}

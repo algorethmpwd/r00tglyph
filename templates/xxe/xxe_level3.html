@@ -1,303 +1,103 @@
-{% extends 'base.html' %}
+{%extends 'base.html' %}
 
-{% block title %}Level 3: XXE via SOAP Services - R00tGlyph{% endblock %}
+{%block title %}Level 3: XXE Technique 3 - R00tGlyph{%endblock %}
 
-{% block content %}
-<div class="row">
-    <div class="col-md-8 offset-md-2">
-        {% if xxe_detected %}
-        <div class="alert alert-success">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            <strong>Success!</strong> You've successfully exploited the XXE vulnerability in the SOAP service! The challenge has been marked as completed.
-            {% if flag %}
-            <div class="mt-2">
-                <strong>Flag:</strong> <code>{{ flag }}</code>
-            </div>
-            {% endif %}
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">XXE</span> / <span>Level 3</span>
+{%endblock %}
+
+{%block content %}
+<div class="challenge-lab">
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
-        {% endif %}
+        <div class="mission-content">
+            <h5 class="mb-3">XXE Technique 3</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>XXEApp3</strong>. Test for XXE vulnerabilities.
+            </p>
 
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Level 3: XXE via SOAP Services</h2>
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Exploit XXE vulnerability 3</p>
+                </div>
             </div>
-            <div class="card-body">
-                <!-- Challenge Description Button -->
-                <div class="text-center mb-3">
-                    <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#challengeModal">
-                        <i class="bi bi-info-circle me-2"></i>Show Challenge Description
-                    </button>
-                    {% if flag %}
-                    <button type="button" class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#flagModal">
-                        <i class="bi bi-flag-fill me-2"></i>Submit Flag
-                    </button>
-                    {% endif %}
-                </div>
 
-                <!-- Challenge Description Modal -->
-                <div class="modal fade" id="challengeModal" tabindex="-1" aria-labelledby="challengeModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header bg-dark text-white">
-                                <h5 class="modal-title" id="challengeModalLabel">
-                                    <i class="bi bi-info-circle-fill me-2"></i>Challenge Description
-                                </h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <div class="card mb-3">
-                                    <div class="card-header">
-                                        <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
-                                    </div>
-                                    <div class="card-body">
-                                        <p class="mb-0">
-                                            <strong>Client:</strong> EnterpriseConnect Legacy Integration Platform<br>
-                                            <strong>Target:</strong> SOAP Web Service Endpoint<br>
-                                            <strong>Vulnerability:</strong> XXE in SOAP XML Processing<br>
-                                            <strong>Objective:</strong> Exploit XXE through SOAP requests to access server files
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <p>
-                                    <strong>Technical Background:</strong> EnterpriseConnect maintains legacy SOAP web services for 
-                                    enterprise integration. These services process XML SOAP envelopes without proper XXE protection, 
-                                    making them vulnerable to XML External Entity attacks through SOAP requests.
-                                </p>
-
-                                <p>
-                                    <strong>SOAP and XXE:</strong> SOAP (Simple Object Access Protocol) services are particularly 
-                                    vulnerable to XXE attacks because they rely heavily on XML parsing. Legacy SOAP implementations 
-                                    often lack modern security configurations.
-                                </p>
-
-                                <p>
-                                    <strong>Real-world Impact:</strong> XXE in SOAP services can lead to:
-                                </p>
-                                <ul>
-                                    <li>Access to sensitive enterprise configuration files</li>
-                                    <li>Internal network reconnaissance through SSRF</li>
-                                    <li>Credential theft from configuration files</li>
-                                    <li>Business logic bypass through file manipulation</li>
-                                </ul>
-
-                                <p>
-                                    <strong>Your Task:</strong> Craft a SOAP request with XXE payload to read the contents of 
-                                    <code>/etc/passwd</code> through the user lookup service.
-                                </p>
-
-                                <div class="alert alert-warning">
-                                    <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> SOAP requests use XML envelopes. 
-                                    You can inject XXE entities in the SOAP body or even in the envelope itself. Try using Burp Suite 
-                                    to intercept and modify requests.
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            </div>
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Understanding
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            XXE level 3 covers advanced entity exploitation.
                         </div>
                     </div>
                 </div>
-
-                <!-- Simulated SOAP Service Interface -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h4><i class="bi bi-cloud-arrow-up me-2"></i>EnterpriseConnect SOAP Service</h4>
-                    </div>
-                    <div class="card-body">
-                        <p class="text-muted">Legacy SOAP web service for enterprise user management and integration.</p>
-                        
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <strong>Service Endpoint:</strong> <code>/soap/userservice</code><br>
-                                <strong>WSDL:</strong> <code>/soap/userservice?wsdl</code><br>
-                                <strong>Method:</strong> <code>getUserInfo</code>
-                            </div>
-                            <div class="col-md-6">
-                                <strong>Content-Type:</strong> <code>text/xml; charset=utf-8</code><br>
-                                <strong>SOAPAction:</strong> <code>"getUserInfo"</code>
-                            </div>
-                        </div>
-                        
-                        <form method="POST" class="mb-4">
-                            <div class="mb-3">
-                                <label for="soap_request" class="form-label">SOAP Request XML:</label>
-                                <textarea class="form-control" id="soap_request" name="soap_request" rows="15" placeholder="Enter your SOAP request here...">{{ soap_request or '<?xml version="1.0" encoding="UTF-8"?>
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-    <soap:Header/>
-    <soap:Body>
-        <getUserInfo xmlns="http://enterpriseconnect.com/userservice">
-            <username>admin</username>
-            <includeDetails>true</includeDetails>
-        </getUserInfo>
-    </soap:Body>
-</soap:Envelope>' }}</textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-send me-2"></i>Send SOAP Request
-                            </button>
-                        </form>
-
-                        {% if soap_request %}
-                        <div class="card">
-                            <div class="card-header">
-                                <h5><i class="bi bi-terminal me-2"></i>SOAP Response</h5>
-                            </div>
-                            <div class="card-body">
-                                {% if xxe_detected %}
-                                <div class="alert alert-danger">
-                                    <strong>XXE Vulnerability Detected!</strong> External entity processing in SOAP request.
-                                </div>
-                                {% endif %}
-                                
-                                <h6>SOAP Response:</h6>
-                                <pre class="bg-dark text-light p-3 rounded"><code>{{ soap_response or 'No response received' }}</code></pre>
-                                
-                                {% if file_content %}
-                                <h6 class="mt-3">External File Content:</h6>
-                                <pre class="bg-danger text-white p-3 rounded"><code>{{ file_content }}</code></pre>
-                                {% endif %}
-                            </div>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- Tools Section -->
-                <div class="card mb-4">
-                    <div class="card-header bg-warning text-dark">
-                        <h5><i class="bi bi-tools me-2"></i>Recommended Tools</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h6><i class="bi bi-shield-check me-2"></i>Burp Suite</h6>
-                                <p class="small">Use Burp Suite to intercept and modify SOAP requests. The Repeater tool is particularly useful for testing XXE payloads.</p>
-                            </div>
-                            <div class="col-md-6">
-                                <h6><i class="bi bi-terminal me-2"></i>SOAP Clients</h6>
-                                <p class="small">Tools like SoapUI or curl can be used to craft and send custom SOAP requests with XXE payloads.</p>
-                            </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Technique
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Research XXE techniques for this scenario.
                         </div>
                     </div>
                 </div>
-
-                <!-- Solution Link -->
-                <div class="text-center">
-                    <a href="/solutions/xxe3" class="btn btn-outline-info">
-                        <i class="bi bi-lightbulb me-2"></i>View Solution
-                    </a>
-                </div>
-
-                {% if flag %}
-                <div id="flag-display" class="mb-3">
-                    <div class="alert alert-success">
-                        <i class="bi bi-check-circle-fill me-2"></i>
-                        <strong>Congratulations!</strong> You've solved the challenge.
-                    </div>
-                    <div class="flag-container mb-2">
-                        <span class="flag-label">Your Flag</span>
-                        <code id="flag-value">{{ flag }}</code>
-                    </div>
-                    <!-- Visible flag submission form -->
-                    <form id="flag-submission-form" class="mt-3">
-                        <input type="hidden" name="challenge_id" value="{{ challenge.id }}">
-                        <div class="input-group">
-                            <input type="text" name="flag" class="form-control" value="{{ flag }}" readonly>
-                            <button type="submit" class="btn btn-success">Submit Flag</button>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Apply XXE exploitation to complete the challenge.
                         </div>
-                    </form>
-                    <div id="flag-result" class="alert" style="display: none;"></div>
+                    </div>
                 </div>
-                {% endif %}
             </div>
+
+            {%if xxe_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>xxe3.local/parse</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for XXE Level 3</p>
         </div>
     </div>
 </div>
-
-<!-- Flag Submission Modal -->
-{% if flag %}
-<div class="modal fade" id="flagModal" tabindex="-1" aria-labelledby="flagModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="flagModalLabel">
-                    <i class="bi bi-flag-fill me-2"></i>Submit Flag
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="modal-flag-submission-form">
-                    <input type="hidden" name="challenge_id" value="{{ challenge.id }}">
-                    <div class="mb-3">
-                        <label for="modal-flag-input" class="form-label">Flag:</label>
-                        <input type="text" name="flag" id="modal-flag-input" class="form-control" value="{{ flag }}" readonly>
-                    </div>
-                    <button type="submit" class="btn btn-success w-100">Submit Flag</button>
-                </form>
-                <div id="modal-flag-result" class="alert mt-3" style="display: none;"></div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
-{% endblock %}
-
-{% block extra_scripts %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Show challenge description modal on page load (only once)
-    if (!sessionStorage.getItem('xxe3_description_shown')) {
-        var challengeModal = new bootstrap.Modal(document.getElementById('challengeModal'));
-        challengeModal.show();
-        sessionStorage.setItem('xxe3_description_shown', 'true');
-    }
-
-    // Handle flag submission
-    function handleFlagSubmission(formId, resultId) {
-        const form = document.getElementById(formId);
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const formData = new FormData(form);
-                
-                fetch('/submit_flag', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    const resultDiv = document.getElementById(resultId);
-                    resultDiv.style.display = 'block';
-                    
-                    if (data.success) {
-                        resultDiv.className = 'alert alert-success';
-                        resultDiv.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>' + data.message;
-                        
-                        // Redirect after a short delay
-                        setTimeout(() => {
-                            window.location.href = '/challenges';
-                        }, 2000);
-                    } else {
-                        resultDiv.className = 'alert alert-danger';
-                        resultDiv.innerHTML = '<i class="bi bi-x-circle-fill me-2"></i>' + data.message;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    const resultDiv = document.getElementById(resultId);
-                    resultDiv.style.display = 'block';
-                    resultDiv.className = 'alert alert-danger';
-                    resultDiv.innerHTML = '<i class="bi bi-x-circle-fill me-2"></i>An error occurred while submitting the flag.';
-                });
-            });
-        }
-    }
-
-    // Set up flag submission handlers
-    handleFlagSubmission('flag-submission-form', 'flag-result');
-    handleFlagSubmission('modal-flag-submission-form', 'modal-flag-result');
-});
-</script>
-{% endblock %}
+{%endblock %}

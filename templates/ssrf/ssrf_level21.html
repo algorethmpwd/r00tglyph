@@ -1,95 +1,103 @@
-{% extends 'base.html' %}
+{%extends 'base.html' %}
 
-{% block title %}SSRF Level 21 - R00tGlyph{% endblock %}
+{%block title %}Level 21: SSRF with Time-based Detection - R00tGlyph{%endblock %}
 
-{% block content %}
-<div class="row">
-    <div class="col-md-10 offset-md-1">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Level 21: SSRF in Microservices</h2>
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">SSRF</span> / <span>Level 21</span>
+{%endblock %}
+
+{%block content %}
+<div class="challenge-lab">
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
+        </div>
+        <div class="mission-content">
+            <h5 class="mb-3">SSRF with Time-based Detection</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>SSRFApp21</strong>. Test for ssrf vulnerabilities.
+            </p>
+
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Exploit ssrf with time-based detection</p>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="alert alert-dark challenge-description" style="display: none;">
-                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-                    <p>
-                        Welcome to <strong>Service Mesh</strong>, a fictional service platform! This challenge demonstrates Microservices architecture exploitation allowing lateral movement through service mesh.
-                    </p>
-                    <p>
-                        <strong>Your Task:</strong> Exploit microservices communication to perform lateral SSRF attacks.
-                    </p>
-                    <p>
-                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Target service discovery mechanisms and inter-service communication.
-                    </p>
-                    <p>
-                        <i class="bi bi-tools me-2"></i><strong>Tools:</strong> Use service mesh tools, Istio/Envoy exploitation, and microservice scanners.
-                    </p>
-                </div>
 
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h4 class="mb-0"><i class="bi bi-diagram-2 me-2"></i>Service Mesh - Interface</h4>
-                    </div>
-                    <div class="card-body">
-                        <form action="/ssrf/level21" method="post">
-                            <div class="mb-3">
-                                <label for="service_name" class="form-label">Service Name</label>
-                                <input type="text" class="form-control" name="service_name" placeholder="user-service" value="{{ service_name }}">
-                            </div>
-                            <div class="mb-3">
-                                <label for="mesh_endpoint" class="form-label">Service Mesh Endpoint</label>
-                                <input type="text" class="form-control" name="mesh_endpoint" placeholder="http://istio-proxy:15000/config_dump" value="{{ mesh_endpoint }}">
-                            </div>
-                            <button class="btn btn-primary" type="submit">Execute Request</button>
-                        </form>
-                    </div>
-                </div>
-
-                {% if microservice_result %}
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Request Result</h5>
-                    </div>
-                    <div class="card-body">
-                        <pre class="bg-dark text-light p-3 rounded">{{ microservice_result }}</pre>
-                        {% if ssrf_detected %}
-                        <div class="alert alert-success mt-3">
-                            <i class="bi bi-check-circle-fill me-2"></i>
-                            <strong>Microservices SSRF Successful! Service mesh compromised.</strong>
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Understanding the Technique
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            This level focuses on ssrf with time-based detection. Research SSRF in this context.
                         </div>
-                        {% endif %}
                     </div>
                 </div>
-                {% endif %}
-
-                {% if flag %}
-                <div class="alert alert-success">
-                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
-                    <p>Congratulations! You've successfully completed this advanced SSRF challenge.</p>
-                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
-                </div>
-                {% endif %}
-
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Learning Objectives</h5>
-                    </div>
-                    <div class="card-body">
-                        <ul>
-                            <li>Understand advanced SSRF attack vectors</li>
-                            <li>Learn modern exploitation techniques</li>
-                            <li>Practice real-world attack scenarios</li>
-                            <li>Master cutting-edge security testing methods</li>
-                        </ul>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Blind SSRF
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Use timing to detect internal services
+                        </div>
                     </div>
                 </div>
-
-                <div class="mt-4">
-                    <a href="{{ url_for('solutions', level='ssrf21') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Apply ssrf with time-based detection to access internal resources and retrieve the flag.
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            {%if ssrf_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>ssrf21.local/fetch</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for SSRF Level 21</p>
         </div>
     </div>
 </div>
-{% endblock %}
+{%endblock %}

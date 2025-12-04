@@ -1,156 +1,103 @@
-{% extends "base.html" %}
+{%extends 'base.html' %}
 
-{% block title %}Command Injection Level 19 - Message Queues{% endblock %}
+{%block title %}Level 19: Command Injection in ImageMagick - R00tGlyph{%endblock %}
 
-{% block content %}
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3><i class="bi bi-terminal me-2"></i>Command Injection Level 19</h3>
-                    <div>
-                        <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#challengeModal">
-                            <i class="bi bi-info-circle me-1"></i>Challenge Info
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">Command Injection</span> / <span>Level 19</span>
+{%endblock %}
+
+{%block content %}
+<div class="challenge-lab">
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
+        </div>
+        <div class="mission-content">
+            <h5 class="mb-3">Command Injection in ImageMagick</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>App19</strong>. Test for command injection vulnerabilities.
+            </p>
+
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Exploit command injection in imagemagick</p>
+                </div>
+            </div>
+
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Understanding the Technique
                         </button>
-                        <a href="{{ url_for('solutions', level='cmdi19') }}" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-lightbulb me-1"></i>Solution
-                        </a>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            This level focuses on command injection in imagemagick. Research the specific technique.
+                        </div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="scenario-box mb-4">
-                        <h5><i class="bi bi-arrow-repeat me-2"></i>Distributed Task Processing System</h5>
-                        <p>You're testing a distributed system that uses message queues for task processing. The system processes JSON messages from queues and executes tasks on worker nodes, potentially allowing command injection through message payloads.</p>
-                        <p><strong>Context:</strong> Modern distributed systems and microservices architecture</p>
-                        <p><strong>Technology:</strong> Message queues, distributed computing, worker nodes</p>
-                    </div>
-
-                    {% if flag %}
-                    <div class="alert alert-success">
-                        <i class="bi bi-flag-fill me-2"></i><strong>Challenge Completed!</strong>
-                        <br>Flag: <code>{{ flag }}</code>
-                    </div>
-                    {% endif %}
-
-                    <form method="POST" class="mb-4">
-                        <div class="mb-3">
-                            <label for="queue_message" class="form-label">Queue Message (JSON):</label>
-                            <textarea class="form-control" id="queue_message" name="queue_message" rows="6" 
-                                      style="font-family: monospace;">{{ queue_message }}</textarea>
-                            <div class="form-text">Enter JSON message for task queue processing.</div>
-                        </div>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-send me-2"></i>Send to Queue
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Image processing exploit
                         </button>
-                    </form>
-
-                    {% if processing_result %}
-                    <div class="card">
-                        <div class="card-header">
-                            <h6><i class="bi bi-terminal me-2"></i>Task Processing Output</h6>
-                        </div>
-                        <div class="card-body">
-                            <pre class="command-output">{{ processing_result }}</pre>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Use ImageMagick vulnerabilities
                         </div>
                     </div>
-                    {% endif %}
-
-                    <div class="mt-4">
-                        <h6>Message Queue Injection Techniques:</h6>
-                        <ul>
-                            <li>Inject commands in message values</li>
-                            <li>Try: <code>{"task": "process_file", "filename": "data.csv; uname", "options": "--format json"}</code></li>
-                            <li>Exploit worker node processing</li>
-                            <li>Use distributed system attack vectors</li>
-                        </ul>
-                        
-                        <h6>Distributed System Security:</h6>
-                        <p>Message queues are critical components in modern distributed systems. Vulnerabilities in message processing can lead to widespread compromise across worker nodes and microservices.</p>
-                        
-                        <h6>Real-World Message Queue Systems:</h6>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h6><i class="bi bi-arrow-repeat me-2"></i>Queue Systems</h6>
-                                <ul>
-                                    <li>Apache Kafka</li>
-                                    <li>RabbitMQ</li>
-                                    <li>Amazon SQS</li>
-                                </ul>
-                            </div>
-                            <div class="col-md-6">
-                                <h6><i class="bi bi-cpu me-2"></i>Processing</h6>
-                                <ul>
-                                    <li>Celery workers</li>
-                                    <li>Apache Storm</li>
-                                    <li>Apache Spark</li>
-                                </ul>
-                            </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Apply command injection in imagemagick techniques to execute commands and retrieve the flag.
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
 
-<!-- Challenge Info Modal -->
-<div class="modal fade" id="challengeModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Command Injection Level 19 - Challenge Information</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            {%if cmdi_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
             </div>
-            <div class="modal-body">
-                <h6>Objective:</h6>
-                <p>Exploit command injection vulnerabilities in a distributed message queue processing system.</p>
-                
-                <h6>Scenario:</h6>
-                <p>You're testing a distributed task processing platform that uses message queues to coordinate work across multiple worker nodes. The system processes JSON messages containing task instructions, but lacks proper input validation on worker nodes.</p>
-                
-                <h6>Learning Goals:</h6>
-                <ul>
-                    <li>Understand distributed system security</li>
-                    <li>Learn about message queue vulnerabilities</li>
-                    <li>Practice command injection in microservices</li>
-                    <li>Explore worker node security concepts</li>
-                </ul>
-                
-                <h6>Distributed System Concepts:</h6>
-                <ul>
-                    <li><strong>Message Queues:</strong> Asynchronous communication between services</li>
-                    <li><strong>Worker Nodes:</strong> Distributed processing units</li>
-                    <li><strong>Task Serialization:</strong> Converting tasks to transmittable formats</li>
-                    <li><strong>Service Mesh:</strong> Inter-service communication</li>
-                </ul>
-                
-                <h6>Real-World Context:</h6>
-                <p>This challenge represents vulnerabilities in:</p>
-                <ul>
-                    <li>Microservices architectures</li>
-                    <li>Distributed data processing systems</li>
-                    <li>Event-driven architectures</li>
-                    <li>Cloud-native applications</li>
-                </ul>
-                
-                <h6>Attack Implications:</h6>
-                <ul>
-                    <li>Compromise of multiple worker nodes</li>
-                    <li>Lateral movement through distributed systems</li>
-                    <li>Data processing pipeline manipulation</li>
-                    <li>Service mesh compromise</li>
-                </ul>
-                
-                <h6>Hints:</h6>
-                <ul>
-                    <li>Inject commands in JSON message values</li>
-                    <li>Try system information commands like 'uname' or 'hostname'</li>
-                    <li>Use command separators within JSON strings</li>
-                    <li>Test different message fields for injection opportunities</li>
-                </ul>
+            {%endif %}
+        </div>
+    </div>
+
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
             </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>app19.local/cmd</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for Command Injection Level 19</p>
         </div>
     </div>
 </div>
-{% endblock %}
+{%endblock %}

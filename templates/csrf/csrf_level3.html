@@ -1,218 +1,103 @@
-{% extends 'base.html' %}
+{%extends 'base.html' %}
 
-{% block title %}Level 3: JSON-based CSRF - R00tGlyph{% endblock %}
+{%block title %}Level 3: CSRF Technique 3 - R00tGlyph{%endblock %}
 
-{% block content %}
-<div class="row">
-    <div class="col-md-8 offset-md-2">
-        {% if csrf_detected %}
-        <div class="alert alert-success">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            <strong>Success!</strong> You've successfully exploited the JSON-based CSRF vulnerability! The challenge has been marked as completed.
-            {% if flag %}
-            <div class="mt-2">
-                <strong>Flag:</strong> <code>{{ flag }}</code>
-            </div>
-            {% endif %}
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">CSRF</span> / <span>Level 3</span>
+{%endblock %}
+
+{%block content %}
+<div class="challenge-lab">
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
-        {% endif %}
-        
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Level 3: JSON-based CSRF</h2>
-            </div>
-            <div class="card-body">
-                <div class="alert alert-info challenge-description">
-                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-                    <p>
-                        Welcome to <strong>ShopSmart</strong>, a modern e-commerce platform! You've been hired to test the security of their checkout system that processes JSON-based payment requests.
-                    </p>
+        <div class="mission-content">
+            <h5 class="mb-3">CSRF Technique 3</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>CSRFApp3</strong>. Test for CSRF vulnerabilities.
+            </p>
 
-                    <div class="card mb-3">
-                        <div class="card-header">
-                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
-                        </div>
-                        <div class="card-body">
-                            <p class="mb-0">
-                                <strong>Client:</strong> ShopSmart E-commerce Platform<br>
-                                <strong>Target:</strong> JSON-based Checkout System<br>
-                                <strong>Vulnerability:</strong> JSON Cross-Site Request Forgery (CSRF)<br>
-                                <strong>Objective:</strong> Execute unauthorized purchase orders via JSON payload manipulation
-                            </p>
-                        </div>
-                    </div>
-
-                    <p>
-                        <strong>Technical Background:</strong> ShopSmart's checkout system accepts JSON payloads for processing orders, but lacks proper CSRF protection for JSON requests. Many developers mistakenly believe that JSON requests are immune to CSRF attacks, but this is not always true.
-                    </p>
-
-                    <p>
-                        <strong>Real-world Impact:</strong> In a real scenario, this vulnerability could allow attackers to:
-                    </p>
-                    <ul>
-                        <li>Process unauthorized purchases using victim's stored payment methods</li>
-                        <li>Modify shipping addresses to redirect orders to attacker-controlled locations</li>
-                        <li>Apply unauthorized discounts or promotional codes</li>
-                        <li>Manipulate inventory levels through bulk order submissions</li>
-                    </ul>
-
-                    <p>
-                        <strong>Your Task:</strong> Create a malicious web page that can submit JSON-based purchase orders to the ShopSmart checkout API when visited by an authenticated user.
-                    </p>
-
-                    <div class="alert alert-warning">
-                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Modern browsers have specific rules about JSON CSRF. Consider how Content-Type headers affect cross-origin requests and explore techniques to bypass same-origin policy restrictions.
-                    </div>
-                </div>
-
-                {% if flag %}
-                <div class="alert alert-success">
-                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
-                    <p>Congratulations! You've successfully completed this CSRF challenge.</p>
-                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
-                </div>
-                {% endif %}
-
-                <div class="card mb-4">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="bi bi-cart-fill me-2"></i>ShopSmart E-commerce</h5>
-                        <div>
-                            <span class="badge bg-success">SSL Secured</span>
-                            <span class="ms-2">Checkout v2.1</span>
-                        </div>
-                    </div>
-                    <div class="card-body p-0">
-                        <nav class="navbar navbar-expand px-3" style="background-color: rgba(var(--bs-success-rgb), 0.1);">
-                            <div class="container-fluid">
-                                <ul class="navbar-nav">
-                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-house-door me-1"></i>Home</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-grid me-1"></i>Products</a></li>
-                                    <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-cart me-1"></i>Checkout</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-person me-1"></i>Account</a></li>
-                                </ul>
-                                <div class="d-flex">
-                                    <span class="navbar-text me-3">Welcome, Sarah Wilson</span>
-                                    <a href="#" class="btn btn-sm btn-outline-secondary"><i class="bi bi-box-arrow-right me-1"></i>Logout</a>
-                                </div>
-                            </div>
-                        </nav>
-
-                        <div class="p-3">
-                            <div class="row mb-4">
-                                <div class="col-md-8">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h5 class="mb-0"><i class="bi bi-credit-card me-2"></i>Complete Your Order</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <form action="{{ url_for('csrf_level3') }}" method="post">
-                                                <div class="mb-3">
-                                                    <label for="product_id" class="form-label">Product ID</label>
-                                                    <input type="text" class="form-control" id="product_id" name="product_id"
-                                                           placeholder="LAPTOP-001" value="{{ product_id or '' }}">
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-md-6">
-                                                        <div class="mb-3">
-                                                            <label for="quantity" class="form-label">Quantity</label>
-                                                            <input type="number" class="form-control" id="quantity" name="quantity"
-                                                                   placeholder="1" min="1" value="{{ quantity or '1' }}">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="mb-3">
-                                                            <label for="price" class="form-label">Unit Price ($)</label>
-                                                            <input type="number" class="form-control" id="price" name="price"
-                                                                   placeholder="999.99" step="0.01" value="{{ price or '' }}">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label for="shipping_address" class="form-label">Shipping Address</label>
-                                                    <textarea class="form-control" id="shipping_address" name="shipping_address"
-                                                             placeholder="123 Main St, City, State 12345" rows="3">{{ shipping_address or '' }}</textarea>
-                                                </div>
-                                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                                    <button type="button" class="btn btn-outline-secondary">
-                                                        <i class="bi bi-arrow-left me-1"></i>Back to Cart
-                                                    </button>
-                                                    <button type="submit" class="btn btn-success">
-                                                        <i class="bi bi-credit-card me-1"></i>Complete Purchase
-                                                    </button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="card">
-                                        <div class="card-header">Order Summary</div>
-                                        <div class="card-body">
-                                            <p><strong>Customer:</strong> Sarah Wilson</p>
-                                            <p><strong>Payment Method:</strong> **** 4532</p>
-                                            <p><strong>Saved Addresses:</strong> 2 locations</p>
-                                            <hr>
-                                            <p><strong>Subtotal:</strong> $999.99</p>
-                                            <p><strong>Shipping:</strong> $9.99</p>
-                                            <p><strong>Tax:</strong> $80.99</p>
-                                            <hr>
-                                            <p><strong>Total:</strong> $1,090.97</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {% if result %}
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-receipt me-2"></i>Order Processing Result</h5>
-                    </div>
-                    <div class="card-body">
-                        <pre class="p-3 rounded" style="background-color: var(--bs-body-bg); border: 1px solid var(--bs-border-color); color: var(--bs-body-color);">{{ result }}</pre>
-                        
-                        {% if csrf_detected %}
-                        <div class="alert alert-success mt-3">
-                            <i class="bi bi-check-circle-fill me-2"></i>
-                            <strong>JSON-based CSRF Attack Successful! Order processed without proper validation.</strong>
-                        </div>
-                        {% endif %}
-                        
-                    </div>
-                </div>
-                {% endif %}
-
-                {% if flag %}
-                <div id="flag-display" class="mb-3">
-                    <div class="alert alert-success">
-                        <i class="bi bi-check-circle-fill me-2"></i>
-                        <strong>Congratulations!</strong> You've solved the challenge.
-                    </div>
-                    <div class="flag-container mb-2">
-                        <span class="flag-label">Your Flag</span>
-                        <code id="flag-value">{{ flag }}</code>
-                    </div>
-                    <!-- Visible flag submission form -->
-                    <form id="flag-submission-form" class="mt-3">
-                        <input type="hidden" name="challenge_id" value="{{ challenge.id }}">
-                        <div class="input-group">
-                            <input type="text" name="flag" class="form-control" value="{{ flag }}" readonly>
-                            <button type="submit" class="btn btn-success">Submit Flag</button>
-                        </div>
-                    </form>
-                    <div id="flag-result" class="alert" style="display: none;"></div>
-                </div>
-                {% endif %}
-
-                <div class="mt-4">
-                    <a href="{{ url_for('solutions', level=3) }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Exploit CSRF vulnerability 3</p>
                 </div>
             </div>
+
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Understanding
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            CSRF level 3 focuses on advanced bypass techniques.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Technique
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Research CSRF bypass methods for this scenario.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Apply CSRF exploitation techniques to complete the challenge.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {%if csrf_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>csrf3.local/action</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for CSRF Level 3</p>
         </div>
     </div>
 </div>
-
-{% endblock %}
+{%endblock %}

@@ -1,421 +1,106 @@
-{% extends 'base.html' %}
+{%extends 'base.html' %}
 
-{% block title %}Level 22: SQL Injection in NoSQL Database - R00tGlyph{% endblock %}
+{%block title %}Level 22: SQL Injection with Encoding - R00tGlyph{%endblock %}
 
-{% block content %}
-<style>
-    .nosql-header {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        color: white;
-        padding: 20px;
-        border-radius: 5px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    .code-box {
-        background-color: #1e1e1e;
-        color: #d4d4d4;
-        padding: 15px;
-        border-radius: 5px;
-        font-family: monospace;
-        overflow-x: auto;
-        max-height: 400px;
-        overflow-y: auto;
-    }
-    .code-keyword {
-        color: #569cd6;
-    }
-    .code-string {
-        color: #ce9178;
-    }
-    .code-comment {
-        color: #6a9955;
-    }
-    .code-function {
-        color: #dcdcaa;
-    }
-    .code-class {
-        color: #4ec9b0;
-    }
-    .code-variable {
-        color: #9cdcfe;
-    }
-    .admin-note {
-        background-color: rgba(255, 193, 7, 0.1);
-        border-left: 4px solid var(--bs-warning);
-        padding: 15px;
-        margin-top: 20px;
-        border-radius: 5px;
-    }
-    .document-card {
-        background-color: #f8f9fa;
-        border-radius: 5px;
-        padding: 15px;
-        margin-bottom: 15px;
-        border-left: 4px solid #10b981;
-        transition: all 0.3s ease;
-    }
-    .document-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-    }
-    .document-id {
-        color: #6c757d;
-        font-size: 0.9rem;
-        margin-bottom: 5px;
-    }
-    .document-title {
-        font-weight: bold;
-        margin-bottom: 10px;
-        color: #10b981;
-    }
-    .document-content {
-        margin-bottom: 10px;
-    }
-    .document-meta {
-        display: flex;
-        justify-content: space-between;
-        font-size: 0.8rem;
-        color: #6c757d;
-    }
-    .query-builder {
-        background-color: #f8f9fa;
-        border-radius: 5px;
-        padding: 15px;
-        margin-bottom: 20px;
-    }
-    .query-builder-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 15px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #dee2e6;
-    }
-    .query-builder-title {
-        font-weight: bold;
-        color: #10b981;
-    }
-    .query-builder-content {
-        margin-bottom: 15px;
-    }
-    .query-result {
-        background-color: #f8f9fa;
-        border-radius: 5px;
-        padding: 15px;
-        margin-top: 20px;
-        border-left: 4px solid #10b981;
-    }
-    .query-result-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 15px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #dee2e6;
-    }
-    .query-result-title {
-        font-weight: bold;
-        color: #10b981;
-    }
-    .query-result-content {
-        max-height: 400px;
-        overflow-y: auto;
-    }
-    .json-key {
-        color: #10b981;
-    }
-    .json-string {
-        color: #059669;
-    }
-    .json-number {
-        color: #3b82f6;
-    }
-    .json-boolean {
-        color: #8b5cf6;
-    }
-    .json-null {
-        color: #ef4444;
-    }
-</style>
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">SQL Injection</span> / <span>Level 22</span>
+{%endblock %}
 
-<div class="row">
-    <div class="col-md-10 offset-md-1">
-        {% if sqli_detected %}
-        <div class="alert alert-success">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            <strong>Success!</strong> You've successfully exploited the SQL injection vulnerability in the NoSQL database! The challenge has been marked as completed.
-            {% if flag %}
-            <div class="mt-2">
-                <strong>Flag:</strong> <code>{{ flag }}</code>
-            </div>
-            {% endif %}
+{%block content %}
+<div class="challenge-lab">
+    <!-- LEFT PANEL: Mission & Intel -->
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
-        {% endif %}
-
-        <!-- Challenge description -->
-        <div class="alert alert-dark challenge-description">
-            <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-            <p>
-                Welcome to <strong>DocumentDB</strong>, a fictional document database platform! This challenge simulates a real-world scenario where a NoSQL database is vulnerable to SQL injection.
-            </p>
-            <p>
-                The developers of DocumentDB have built a modern database platform using NoSQL technology. However, they've made a critical mistake: they're using string concatenation to build database queries and not properly validating user input.
-            </p>
-            <p>
-                <strong>Your Task:</strong> Exploit the SQL injection vulnerability in the NoSQL database to access sensitive data. The flag is hidden in a restricted collection that should not be accessible to regular users.
+        <div class="mission-content">
+            <h5 class="mb-3">SQL Injection with Encoding</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>EncodedInput</strong>. Test for SQL injection vulnerabilities.
             </p>
 
-            <div class="card mb-3 border-secondary">
-                <div class="card-header">
-                    <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
-                </div>
-                <div class="card-body">
-                    <p class="mb-0">
-                        <strong>Client:</strong> Database Security Team<br>
-                        <strong>Target:</strong> DocumentDB Query Interface<br>
-                        <strong>Vulnerability:</strong> SQL Injection in NoSQL Database<br>
-                        <strong>Objective:</strong> Access restricted data containing sensitive information
-                    </p>
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Bypass filters using encoding</p>
                 </div>
             </div>
 
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
-                </div>
-                <div class="card-body">
-                    <p>
-                        NoSQL databases store data in formats other than traditional tables, such as documents, key-value pairs, or graphs. Despite the name "NoSQL," these databases are still vulnerable to injection attacks, often called NoSQL injection.
-                    </p>
-                    <p>
-                        SQL injection in NoSQL databases occurs when:
-                    </p>
-                    <ul>
-                        <li>The application constructs database queries using string concatenation</li>
-                        <li>User input is directly incorporated into these queries without proper validation or parameterization</li>
-                        <li>The application fails to properly sanitize or escape special characters in the input</li>
-                    </ul>
-                    <p>
-                        This type of vulnerability is particularly dangerous because:
-                    </p>
-                    <ul>
-                        <li>Developers may assume NoSQL databases are immune to SQL injection</li>
-                        <li>NoSQL databases often have powerful query languages that can be exploited</li>
-                        <li>NoSQL injection can lead to data leakage, authentication bypass, and other security issues</li>
-                        <li>Traditional SQL injection protection mechanisms may not be effective against NoSQL injection</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
-                </div>
-                <div class="card-body">
-                    <p>
-                        The DocumentDB platform likely processes queries similar to:
-                    </p>
-                    <div class="code-box">
-                        <span class="code-comment">// Example MongoDB query</span><br>
-                        db.collection.find({ author: "John Doe" })
+            <!-- Integrated Hints System -->
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Encoding Techniques
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Use URL encoding, Unicode, or hex encoding to bypass filters. Example: <code>%27%20OR%20%271%27%3D%271</code>
+                        </div>
                     </div>
-                    <p>
-                        And then constructs these queries using string concatenation:
-                    </p>
-                    <div class="code-box">
-                        <span class="code-comment">// Example of vulnerable query construction</span><br>
-                        <span class="code-keyword">const</span> <span class="code-variable">query</span> = <span class="code-string">`{ "author": "${authorName}" }`</span>;<br>
-                        <span class="code-keyword">const</span> <span class="code-variable">result</span> = <span class="code-keyword">await</span> <span class="code-variable">db</span>.<span class="code-variable">collection</span>.<span class="code-function">find</span>(JSON.parse(<span class="code-variable">query</span>));
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Double Encoding
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Try double encoding: <code>%2527</code> (encoded apostrophe) might bypass some filters.
+                        </div>
                     </div>
-                    <p>
-                        To exploit this vulnerability, you'll need to:
-                    </p>
-                    <ol>
-                        <li>Understand how the NoSQL database constructs and executes queries</li>
-                        <li>Identify which fields or parameters are vulnerable to injection</li>
-                        <li>Craft a malicious input that breaks out of the intended query structure</li>
-                        <li>Execute the query against the database</li>
-                        <li>Analyze the response to extract the sensitive information</li>
-                    </ol>
-                    <p>
-                        For this challenge, we've provided a simulated NoSQL query interface that allows you to interact with the database.
-                    </p>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Encode payloads to evade input validation while still executing SQL injection.
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="bi bi-shield-fill-check me-2"></i>Real-World Impact</h5>
+            {%if sqli_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
                 </div>
-                <div class="card-body">
-                    <p>
-                        SQL injection vulnerabilities in NoSQL databases have affected several real-world applications:
-                    </p>
-                    <ul>
-                        <li><strong>Content Management Systems</strong>: Many modern CMS platforms use NoSQL databases for content storage.</li>
-                        <li><strong>Mobile Applications</strong>: Backend services for mobile apps often use NoSQL databases for flexibility.</li>
-                        <li><strong>IoT Platforms</strong>: Internet of Things platforms use NoSQL databases to store sensor data and device information.</li>
-                    </ul>
-                    <p>
-                        For database platforms like DocumentDB, such vulnerabilities could lead to:
-                    </p>
-                    <ul>
-                        <li>Unauthorized access to sensitive user data</li>
-                        <li>Authentication bypass and privilege escalation</li>
-                        <li>Manipulation of database records</li>
-                        <li>Complete compromise of the database</li>
-                    </ul>
-                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the SQL injection vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: The Vulnerable App -->
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>encoded.local/search</span>
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Level 22: SQL Injection in NoSQL Database</h2>
-            </div>
-            <div class="card-body">
-                <div class="nosql-header">
-                    <div class="d-flex align-items-center justify-content-center">
-                        <i class="bi bi-database-fill me-2" class="icon-lg"></i>
-                        <h1 class="mb-0">DocumentDB</h1>
-                    </div>
-                    <p class="text-center mb-0 mt-2">Modern Document Database Platform</p>
-                </div>
-
-                <div class="row mb-4">
-                    <div class="col-md-8">
-                        <div class="scenario-box">
-                            <h4><i class="bi bi-exclamation-triangle-fill me-2"></i>Penetration Testing Scenario</h4>
-                            <p>You've been hired to perform a security assessment of DocumentDB, a document database platform that stores data in JSON-like documents.</p>
-                            <p>During your initial testing, you notice that the query interface might be vulnerable to SQL injection. The platform seems to construct database queries using string concatenation and not properly validating user input.</p>
-                            <p><strong>Your objective:</strong> Exploit the SQL injection vulnerability in the NoSQL database to access restricted data that contains the flag.</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="portal-stats">
-                            <h5 class="text-center mb-3"><i class="bi bi-bar-chart-fill me-2"></i>Platform Statistics</h5>
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="stat-item">
-                                        <div class="stat-number">100+</div>
-                                        <div>Collections</div>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="stat-item">
-                                        <div class="stat-number">10K+</div>
-                                        <div>Documents</div>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="stat-item">
-                                        <div class="stat-number">99.9%</div>
-                                        <div>Uptime</div>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="stat-item">
-                                        <div class="stat-number">24/7</div>
-                                        <div>Support</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="query-builder">
-                    <div class="query-builder-header">
-                        <div class="query-builder-title">
-                            <i class="bi bi-search me-2"></i>Query Builder
-                        </div>
-                    </div>
-                    <div class="query-builder-content">
-                        <form action="{{ url_for('sqli_level22') }}" method="post">
-                            <div class="mb-3">
-                                <label for="collection" class="form-label">Collection:</label>
-                                <select class="form-select" id="collection" name="collection">
-                                    <option value="articles" {% if collection == 'articles' %}selected{% endif %}>articles</option>
-                                    <option value="users" {% if collection == 'users' %}selected{% endif %}>users</option>
-                                    <option value="products" {% if collection == 'products' %}selected{% endif %}>products</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="query" class="form-label">Query (JSON):</label>
-                                <textarea class="form-control font-monospace" id="query" name="query" rows="5">{{ query if query else '{\n  "author": "John Doe"\n}' }}</textarea>
-                                <small class="form-text text-muted">Enter a JSON query to filter documents in the selected collection.</small>
-                            </div>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-search me-2"></i>Execute Query
-                            </button>
-                        </form>
-                    </div>
-                </div>
-
-                {% if error %}
-                <div class="alert alert-danger">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                    {{ error }}
-                </div>
-                {% endif %}
-
-                {% if results %}
-                <div class="query-result">
-                    <div class="query-result-header">
-                        <div class="query-result-title">
-                            <i class="bi bi-list-ul me-2"></i>Query Results
-                        </div>
-                        <div>
-                            <span class="badge bg-secondary">{{ results|length }} documents</span>
-                        </div>
-                    </div>
-                    <div class="query-result-content">
-                        {% for document in results %}
-                        <div class="document-card">
-                            <div class="document-id">ID: {{ document._id }}</div>
-                            <div class="document-title">{{ document.title }}</div>
-                            <div class="document-content">
-                                {% if document.content %}
-                                {{ document.content }}
-                                {% elif document.description %}
-                                {{ document.description }}
-                                {% elif document.flag %}
-                                <strong>Flag:</strong> {{ document.flag }}
-                                {% endif %}
-                            </div>
-                            <div class="document-meta">
-                                <div>
-                                    {% if document.author %}
-                                    <i class="bi bi-person-fill me-1"></i>{{ document.author }}
-                                    {% elif document.username %}
-                                    <i class="bi bi-person-fill me-1"></i>{{ document.username }}
-                                    {% endif %}
-                                </div>
-                                <div>
-                                    {% if document.created_at %}
-                                    <i class="bi bi-calendar-fill me-1"></i>{{ document.created_at }}
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-
-                <div class="admin-note">
-                    <h5><i class="bi bi-shield-lock me-2"></i>Developer Note</h5>
-                    <p>Reminder to the development team: The restricted collection 'secrets' contains sensitive information and should not be accessible through the query interface. Make sure our query parser properly validates and sanitizes user input before executing database queries.</p>
-                    <p class="mb-0"><small class="text-muted">Note: This message is for internal use only and should not be visible to regular users.</small></p>
-                </div>
-
-                <div class="mt-4">
-                    <a href="{{ url_for('solutions', level='sqli22') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
-                </div>
-            </div>
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for SQLi Level 22</p>
         </div>
     </div>
 </div>
-{% endblock %}
+{%endblock %}

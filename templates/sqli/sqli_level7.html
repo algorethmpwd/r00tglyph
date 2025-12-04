@@ -1,175 +1,106 @@
-{% extends 'base.html' %}
+{%extends 'base.html' %}
 
-{% block title %}Level 7: Error-Based SQL Injection - R00tGlyph{% endblock %}
+{%block title %}Level 7: SQL Injection in INSERT - R00tGlyph{%endblock %}
 
-{% block content %}
-<div class="row">
-    <div class="col-md-8 offset-md-2">
-        {% if sqli_detected %}
-        <div class="alert alert-success">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            <strong>Success!</strong> You've successfully exploited the error-based SQL injection vulnerability! The challenge has been marked as completed.
-            {% if flag %}
-            <div class="mt-2">
-                <strong>Flag:</strong> <code>{{ flag }}</code>
-            </div>
-            {% endif %}
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">SQL Injection</span> / <span>Level 7</span>
+{%endblock %}
+
+{%block content %}
+<div class="challenge-lab">
+    <!-- LEFT PANEL: Mission & Intel -->
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
-        {% endif %}
+        <div class="mission-content">
+            <h5 class="mb-3">SQL Injection in INSERT</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>RegistrationPortal</strong>. Test for SQL injection vulnerabilities.
+            </p>
 
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Level 7: Error-Based SQL Injection</h2>
-            </div>
-            <div class="card-body">
-                <!-- Challenge description -->
-        <div class="alert alert-dark challenge-description">
-                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-                    <p>
-                        Welcome to <strong>CatalogManager</strong>, a fictional product catalog system! This challenge simulates a real-world scenario where a category browser feature is vulnerable to error-based SQL injection.
-                    </p>
-                    <p>
-                        The developers of CatalogManager have implemented a feature that allows users to browse product categories by ID. However, they've made two critical mistakes:
-                    </p>
-                    <ol>
-                        <li>They directly concatenate user input into SQL queries without proper sanitization</li>
-                        <li>They display detailed database error messages to users when queries fail</li>
-                    </ol>
-                    <p>
-                        <strong>Your Task:</strong> Exploit the error-based SQL injection vulnerability to extract the flag from the hidden <code>secrets</code> table. The flag is stored in a column called <code>flag_value</code> where the <code>key_name</code> column equals <code>'level7_flag'</code>.
-                    </p>
-                    <div class="card mb-3 border-secondary">
-                        <div class="card-header">
-                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
-                        </div>
-                        <div class="card-body">
-                            <p class="mb-0">
-                                <strong>Client:</strong> Security Testing Client<br>
-                                <strong>Target:</strong> SQL Injection Vulnerability<br>
-                                <strong>Vulnerability:</strong> Suspected SQL Injection<br>
-                                <strong>Objective:</strong> Exploit the vulnerability to extract data
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="card mb-3">
-                        <div class="card-header">
-                            <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
-                        </div>
-                        <div class="card-body">
-                            <p>
-                                Error-based SQL injection is a technique that exploits the way database errors are handled and displayed by an application. When a database operation fails, the error message often contains detailed information about the database structure and the query that caused the error.
-                            </p>
-                            <p>
-                                By deliberately causing specific errors, attackers can extract data from the database by reading the error messages. This technique is particularly useful when other SQL injection methods (like UNION-based or blind) are not feasible.
-                            </p>
-                            <p>
-                                Error-based SQL injection relies on the application displaying detailed error messages to the user, which is a security misconfiguration that should be avoided in production environments.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="card mb-3">
-                        <div class="card-header">
-                            <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
-                        </div>
-                        <div class="card-body">
-                            <p>
-                                The application likely uses a SQL query similar to:
-                            </p>
-                            <pre class="bg-light p-3 rounded"><code>SELECT id, name, description FROM categories WHERE id = [user_input]</code></pre>
-                            <p>
-                                For error-based SQL injection, you need to:
-                            </p>
-                            <ol>
-                                <li>Craft queries that cause errors containing the data you want to extract</li>
-                                <li>Use SQL functions that can extract and display data in error messages</li>
-                                <li>Chain multiple SQL operations to extract specific data from other tables</li>
-                            </ol>
-                            <p>
-                                Try using techniques like:
-                            </p>
-                            <pre class="bg-light p-3 rounded"><code>1 AND (SELECT 1 FROM (SELECT COUNT(*), CONCAT(flag_value, FLOOR(RAND(0)*2)) AS x FROM secrets GROUP BY x) AS y)</code></pre>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-header">
-                            <h5><i class="bi bi-shield-fill-check me-2"></i>Real-World Impact</h5>
-                        </div>
-                        <div class="card-body">
-                            <p>
-                                Error-based SQL injection attacks have been used in several major security incidents:
-                            </p>
-                            <ul>
-                                <li><strong>vBulletin (2019)</strong>: A zero-day vulnerability in vBulletin allowed attackers to use error-based techniques to extract sensitive information.</li>
-                                <li><strong>WordPress Plugins (2020)</strong>: Several popular WordPress plugins were found vulnerable to error-based SQL injection, affecting millions of websites.</li>
-                            </ul>
-                            <p>
-                                For catalog systems like this one, such vulnerabilities could expose:
-                            </p>
-                            <ul>
-                                <li>Internal product information and pricing strategies</li>
-                                <li>Customer data and order history</li>
-                                <li>Administrative credentials and system configuration</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h4 class="mb-0"><i class="bi bi-card-list me-2"></i>Category Browser</h4>
-                    </div>
-                    <div class="card-body">
-                        <form action="{{ url_for('sqli_level7') }}" method="get">
-                            <div class="mb-3">
-                                <label for="category_id" class="form-label">Select Category ID:</label>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" id="category_id" name="id" value="{{ category_id }}" placeholder="e.g., 1">
-                                    <button class="btn btn-primary" type="submit">View Category</button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                {% if error_message %}
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-exclamation-triangle-fill me-2"></i>Database Error</h5>
-                    </div>
-                    <div class="card-body">
-                        <pre class="bg-light p-3 rounded"><code>{{ error_message }}</code></pre>
-                        <div class="alert alert-warning mt-3">
-                            <i class="bi bi-info-circle-fill me-2"></i>
-                            <strong>Note:</strong> In a production environment, detailed error messages like this should never be displayed to users as they can reveal sensitive information about the database structure.
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-
-                {% if category %}
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5><i class="bi bi-folder-fill me-2"></i>Category Information</h5>
-                    </div>
-                    <div class="card-body">
-                        <h4>{{ category.name }}</h4>
-                        <p class="text-muted">ID: {{ category.id }}</p>
-                        <p>{{ category.description }}</p>
-                    </div>
-                </div>
-                {% endif %}
-
-                <div class="mt-4">
-                    <a href="{{ url_for('solutions', level='sqli7') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Inject into INSERT statements</p>
                 </div>
             </div>
+
+            <!-- Integrated Hints System -->
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: INSERT Injection
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            INSERT statements can be vulnerable too. The query might be: <code>INSERT INTO users (username, email) VALUES ('INPUT', 'INPUT')</code>. You can inject additional columns or values.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Multi-statement Injection
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Try: <code>test', 'test@test.com'); INSERT INTO users (username, password, role) VALUES ('hacker', 'pass', 'admin')--</code> to inject a new admin user.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            <strong>Step-by-step:</strong><ol class='mb-2 mt-2'><li>In username field: <code>test', 'test@test.com'); INSERT INTO users VALUES ('admin', 'password', 'admin')--</code></li><li>Complete registration</li><li>Login as the newly created admin user</li></ol><strong>Why it works:</strong> Multiple statements execute, creating your malicious user.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {%if sqli_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the SQL injection vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: The Vulnerable App -->
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>register.local/signup</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for SQLi Level 7</p>
         </div>
     </div>
 </div>
-
-
-{% endblock %}
+{%endblock %}

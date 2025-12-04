@@ -1,0 +1,84 @@
+{
+  "level": 2,
+  "category": "xss",
+  "title": "DOM-based XSS",
+  "hints": [
+    {
+      "order": 1,
+      "title": "Understanding DOM-based XSS",
+      "content": "DOM-based XSS occurs entirely in the browser's Document Object Model (DOM). Unlike reflected XSS, the malicious payload never reaches the server - it's processed entirely by client-side JavaScript. Look for JavaScript code that reads from URL fragments (#hash) or other client-side sources.",
+      "type": "text",
+      "difficulty": 1,
+      "unlock_after_attempts": 0,
+      "points_cost": 0,
+      "tags": ["concept", "dom", "client-side"]
+    },
+    {
+      "order": 2,
+      "title": "URL Fragment Manipulation",
+      "content": "DOM-based XSS often uses the URL fragment (everything after #). Try modifying the URL hash with JavaScript code: #<script>alert('XSS')</script> or #<img src=x onerror=alert('XSS')>",
+      "type": "technique",
+      "difficulty": 2,
+      "unlock_after_attempts": 1,
+      "points_cost": 5,
+      "tags": ["url-fragment", "hash", "payload"]
+    },
+    {
+      "order": 3,
+      "title": "JavaScript Sources and Sinks",
+      "content": "Look for JavaScript that uses dangerous functions like innerHTML, document.write(), or eval() with user-controllable data from location.hash, location.search, or document.URL. These are common DOM XSS sinks.",
+      "type": "technical",
+      "difficulty": 3,
+      "unlock_after_attempts": 3,
+      "points_cost": 10,
+      "tags": ["javascript", "sinks", "sources", "innerhtml"]
+    },
+    {
+      "order": 4,
+      "title": "Browser Developer Tools Investigation",
+      "content": "Open Developer Tools (F12), go to the Console tab, and examine any JavaScript errors or console.log outputs. Also check the Elements tab to see how the DOM changes when you modify the URL fragment.",
+      "type": "tool",
+      "difficulty": 2,
+      "unlock_after_attempts": 2,
+      "points_cost": 7,
+      "tags": ["devtools", "console", "debugging", "dom-inspection"]
+    },
+    {
+      "order": 5,
+      "title": "Success Parameter Trigger",
+      "content": "This challenge might require triggering a specific condition. Try adding ?success=true to the URL or look for ways to trigger the DOM XSS payload execution that sets this parameter automatically.",
+      "type": "technique",
+      "difficulty": 3,
+      "unlock_after_attempts": 5,
+      "points_cost": 15,
+      "tags": ["trigger", "success-parameter", "url-params"]
+    },
+    {
+      "order": 6,
+      "title": "Common DOM XSS Payloads",
+      "content": "Try these DOM-specific payloads: #<svg onload=alert('XSS')>, #<iframe onload=alert('XSS')>, or #javascript:alert('XSS'). The key is finding how the JavaScript processes the URL fragment.",
+      "type": "code",
+      "difficulty": 3,
+      "unlock_after_attempts": 4,
+      "points_cost": 12,
+      "tags": ["payload", "svg", "iframe", "javascript-protocol"]
+    }
+  ],
+  "common_mistakes": [
+    "Trying to use reflected XSS payloads instead of DOM-specific techniques",
+    "Not understanding that the payload executes entirely in the browser",
+    "Forgetting to check the URL fragment (#) as the input source",
+    "Not monitoring the DOM changes in developer tools"
+  ],
+  "learning_objectives": [
+    "Understand the difference between reflected and DOM-based XSS",
+    "Learn to identify JavaScript sources and sinks for DOM XSS",
+    "Practice using URL fragments for payload delivery",
+    "Use browser tools to analyze client-side code execution"
+  ],
+  "real_world_context": {
+    "scenario": "Single Page Application (SPA) Router",
+    "description": "Many modern web applications use client-side routing where JavaScript reads the URL hash to determine what content to display. If this routing logic doesn't properly sanitize the hash value before inserting it into the DOM, it creates a DOM XSS vulnerability.",
+    "impact": "Attackers can craft malicious URLs that execute JavaScript when victims visit them, potentially stealing session cookies or performing actions on behalf of the user."
+  }
+}

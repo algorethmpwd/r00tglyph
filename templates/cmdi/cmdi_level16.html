@@ -1,168 +1,103 @@
-{% extends "base.html" %}
+{%extends 'base.html' %}
 
-{% block title %}Command Injection Level 16 - Process Substitution{% endblock %}
+{%block title %}Level 16: Command Injection via LDAP - R00tGlyph{%endblock %}
 
-{% block content %}
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3><i class="bi bi-terminal me-2"></i>Command Injection Level 16</h3>
-                    <div>
-                        <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#challengeModal">
-                            <i class="bi bi-info-circle me-1"></i>Challenge Info
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">Command Injection</span> / <span>Level 16</span>
+{%endblock %}
+
+{%block content %}
+<div class="challenge-lab">
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
+        </div>
+        <div class="mission-content">
+            <h5 class="mb-3">Command Injection via LDAP</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>App16</strong>. Test for command injection vulnerabilities.
+            </p>
+
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Exploit command injection via ldap</p>
+                </div>
+            </div>
+
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Understanding the Technique
                         </button>
-                        <a href="{{ url_for('solutions', level='cmdi16') }}" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-lightbulb me-1"></i>Solution
-                        </a>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            This level focuses on command injection via ldap. Research the specific technique.
+                        </div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="scenario-box mb-4">
-                        <h5><i class="bi bi-gear me-2"></i>Linux Automation Platform</h5>
-                        <p>You're testing an advanced Linux automation platform that executes shell scripts with complex parameters. The system supports process substitution and advanced shell features, creating opportunities for sophisticated command injection attacks.</p>
-                        <p><strong>Context:</strong> Advanced Linux system automation and DevOps tools</p>
-                        <p><strong>Technology:</strong> Bash, process substitution, shell scripting</p>
-                        <p><strong>Complexity:</strong> Advanced shell injection techniques</p>
-                    </div>
-
-                    {% if flag %}
-                    <div class="alert alert-success">
-                        <i class="bi bi-flag-fill me-2"></i><strong>Challenge Completed!</strong>
-                        <br>Flag: <code>{{ flag }}</code>
-                    </div>
-                    {% endif %}
-
-                    <div class="alert alert-warning mb-4">
-                        <i class="bi bi-exclamation-triangle me-2"></i>
-                        <strong>Advanced Level:</strong> This challenge requires knowledge of advanced shell features like process substitution and command expansion.
-                    </div>
-
-                    <form method="POST" class="mb-4">
-                        <div class="mb-3">
-                            <label for="automation_script" class="form-label">Automation Script:</label>
-                            <input type="text" class="form-control" id="automation_script" name="automation_script" 
-                                   value="{{ automation_script }}" placeholder="backup_database.sh">
-                            <div class="form-text">Specify the automation script to execute.</div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="script_params" class="form-label">Script Parameters:</label>
-                            <input type="text" class="form-control" id="script_params" name="script_params" 
-                                   value="{{ script_params }}" placeholder="--target production --format tar.gz">
-                            <div class="form-text">Enter parameters for the automation script.</div>
-                        </div>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-play me-2"></i>Execute Automation Script
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: LDAP injection to commands
                         </button>
-                    </form>
-
-                    {% if execution_result %}
-                    <div class="card">
-                        <div class="card-header">
-                            <h6><i class="bi bi-terminal me-2"></i>Script Execution Output</h6>
-                        </div>
-                        <div class="card-body">
-                            <pre class="command-output">{{ execution_result }}</pre>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            LDAP queries leading to command execution
                         </div>
                     </div>
-                    {% endif %}
-
-                    <div class="mt-4">
-                        <h6>Advanced Injection Techniques:</h6>
-                        <ul>
-                            <li>Process substitution: <code>--input <(whoami)</code></li>
-                            <li>Command substitution: <code>--target $(hostname)</code></li>
-                            <li>Brace expansion: <code>--format {tar,zip}; id</code></li>
-                            <li>Advanced shell features for complex attacks</li>
-                        </ul>
-                        
-                        <h6>Process Substitution Context:</h6>
-                        <p>Process substitution is an advanced shell feature that allows the output of commands to be used as file inputs. This creates sophisticated attack vectors in automation systems.</p>
-                        
-                        <h6>Real-World Automation Tools:</h6>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h6><i class="bi bi-gear me-2"></i>DevOps Tools</h6>
-                                <ul>
-                                    <li>Ansible automation</li>
-                                    <li>Jenkins CI/CD</li>
-                                    <li>GitLab runners</li>
-                                </ul>
-                            </div>
-                            <div class="col-md-6">
-                                <h6><i class="bi bi-server me-2"></i>System Tools</h6>
-                                <ul>
-                                    <li>Cron job automation</li>
-                                    <li>System monitoring</li>
-                                    <li>Backup systems</li>
-                                </ul>
-                            </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Apply command injection via ldap techniques to execute commands and retrieve the flag.
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
 
-<!-- Challenge Info Modal -->
-<div class="modal fade" id="challengeModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Command Injection Level 16 - Challenge Information</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            {%if cmdi_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
             </div>
-            <div class="modal-body">
-                <h6>Objective:</h6>
-                <p>Exploit advanced command injection using process substitution and shell expansion techniques.</p>
-                
-                <h6>Scenario:</h6>
-                <p>You're testing a sophisticated Linux automation platform used by DevOps teams. The system executes shell scripts with complex parameters and supports advanced shell features like process substitution, creating opportunities for sophisticated attacks.</p>
-                
-                <h6>Learning Goals:</h6>
-                <ul>
-                    <li>Master advanced shell injection techniques</li>
-                    <li>Understand process substitution vulnerabilities</li>
-                    <li>Learn about complex shell expansion attacks</li>
-                    <li>Practice sophisticated payload construction</li>
-                </ul>
-                
-                <h6>Advanced Shell Features:</h6>
-                <ul>
-                    <li><strong>Process Substitution:</strong> <code>&lt;(command)</code> and <code>&gt;(command)</code></li>
-                    <li><strong>Command Substitution:</strong> <code>$(command)</code> and <code>`command`</code></li>
-                    <li><strong>Brace Expansion:</strong> <code>{a,b,c}</code> patterns</li>
-                    <li><strong>Parameter Expansion:</strong> Variable manipulation</li>
-                </ul>
-                
-                <h6>Real-World Context:</h6>
-                <p>This challenge simulates vulnerabilities in:</p>
-                <ul>
-                    <li>CI/CD pipeline automation</li>
-                    <li>Infrastructure as Code tools</li>
-                    <li>System administration scripts</li>
-                    <li>DevOps automation platforms</li>
-                </ul>
-                
-                <h6>Advanced Techniques:</h6>
-                <ul>
-                    <li>Use process substitution to execute commands as file inputs</li>
-                    <li>Combine multiple shell features for complex attacks</li>
-                    <li>Exploit parameter parsing vulnerabilities</li>
-                    <li>Chain commands using advanced shell operators</li>
-                </ul>
-                
-                <h6>Hints:</h6>
-                <ul>
-                    <li>Try process substitution: <code>--input &lt;(whoami)</code></li>
-                    <li>Use command substitution in parameters</li>
-                    <li>Combine brace expansion with command injection</li>
-                    <li>Test both script name and parameter injection</li>
-                </ul>
+            {%endif %}
+        </div>
+    </div>
+
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
             </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>app16.local/cmd</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for Command Injection Level 16</p>
         </div>
     </div>
 </div>
-{% endblock %}
+{%endblock %}

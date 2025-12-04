@@ -1,0 +1,236 @@
+{
+  "level": 2,
+  "category": "xss",
+  "title": "DOM-based XSS - Complete Solution",
+  "difficulty": "beginner",
+  "summary": "This challenge demonstrates DOM-based XSS where malicious JavaScript executes entirely in the browser through client-side DOM manipulation, typically via URL fragment processing.",
+
+  "vulnerability_details": {
+    "type": "DOM-based XSS (Cross-Site Scripting)",
+    "cwe": "CWE-79: Cross-site Scripting",
+    "severity": "Medium to High",
+    "description": "The application uses client-side JavaScript to process URL fragments or other browser-controlled data sources and dynamically updates the DOM without proper sanitization. Unlike reflected XSS, the malicious payload never reaches the server."
+  },
+
+  "step_by_step_solution": [
+    {
+      "step": 1,
+      "title": "Analyze the Application Structure",
+      "description": "Examine the page source to understand how the application processes user input on the client side.",
+      "action": "View page source and look for JavaScript that reads from URL fragments, location.hash, or other client-side sources.",
+      "example": "Look for code like: document.getElementById('output').innerHTML = location.hash.substring(1);"
+    },
+    {
+      "step": 2,
+      "title": "Identify the DOM Manipulation Point",
+      "description": "Find where the application takes user-controlled data and inserts it into the DOM.",
+      "action": "Use browser Developer Tools to examine JavaScript execution and DOM changes.",
+      "technical_details": "Common DOM XSS sinks include innerHTML, outerHTML, document.write(), eval(), setTimeout(), setInterval()"
+    },
+    {
+      "step": 3,
+      "title": "Test URL Fragment Injection",
+      "description": "Modify the URL fragment (hash) to inject JavaScript code.",
+      "action": "Add a hash with XSS payload to the URL",
+      "payload": "#<script>alert('DOM XSS')</script>",
+      "example": "URL becomes: /xss/level2#<script>alert('DOM XSS')</script>"
+    },
+    {
+      "step": 4,
+      "title": "Monitor DOM Changes",
+      "description": "Observe how the JavaScript processes your hash input and updates the page content.",
+      "action": "Open Developer Tools, watch the Elements tab as the page loads with your payload.",
+      "expected_result": "Your script tag should appear in the DOM and execute JavaScript"
+    },
+    {
+      "step": 5,
+      "title": "Trigger Success Condition",
+      "description": "Some DOM XSS challenges require triggering a success parameter to complete.",
+      "action": "Execute payload that sets success=true parameter or triggers completion logic.",
+      "technical_note": "The challenge may automatically detect XSS execution and set ?success=true"
+    },
+    {
+      "step": 6,
+      "title": "Capture the Flag",
+      "description": "Once DOM XSS executes successfully, the flag will be displayed.",
+      "action": "Look for flag display after successful payload execution or page redirect with success parameter."
+    }
+  ],
+
+  "successful_payloads": [
+    {
+      "payload": "#<script>alert('XSS')</script>",
+      "description": "Basic script tag in URL fragment",
+      "context": "Works when JavaScript uses innerHTML or similar to process hash"
+    },
+    {
+      "payload": "#<img src=x onerror=alert('XSS')>",
+      "description": "Image tag with error event handler",
+      "context": "Alternative when script tags are filtered client-side"
+    },
+    {
+      "payload": "#<svg onload=alert('XSS')>",
+      "description": "SVG element with onload event",
+      "context": "Modern browsers support SVG events, compact payload"
+    },
+    {
+      "payload": "#<iframe onload=alert('XSS')>",
+      "description": "iframe with onload event",
+      "context": "Works in most contexts, creates new browsing context"
+    },
+    {
+      "payload": "#javascript:alert('XSS')",
+      "description": "JavaScript protocol in fragment",
+      "context": "Depends on how the application processes the fragment data"
+    }
+  ],
+
+  "tools_used": [
+    {
+      "name": "Browser Developer Tools",
+      "purpose": "Essential for DOM XSS analysis and debugging",
+      "usage": "F12 -> Console tab to see JavaScript errors/output, Elements tab to watch DOM changes, Sources tab to examine JavaScript code"
+    },
+    {
+      "name": "Browser Console",
+      "purpose": "Test JavaScript execution and examine DOM state",
+      "usage": "Type location.hash, document.URL, or examine specific DOM elements"
+    },
+    {
+      "name": "Burp Suite (Optional)",
+      "purpose": "Intercept and analyze HTTP traffic",
+      "usage": "Note: DOM XSS payloads don't appear in HTTP requests since they're processed client-side"
+    }
+  ],
+
+  "technical_analysis": {
+    "vulnerability_source": "Client-side JavaScript processing of user-controllable data",
+    "common_sources": [
+      "location.hash (URL fragment)",
+      "location.search (URL parameters)",
+      "document.URL",
+      "document.referrer",
+      "window.name",
+      "postMessage data"
+    ],
+    "common_sinks": [
+      "innerHTML",
+      "outerHTML",
+      "document.write()",
+      "document.writeln()",
+      "eval()",
+      "setTimeout()",
+      "setInterval()",
+      "Function()"
+    ],
+    "execution_flow": "User input -> JavaScript processing -> DOM manipulation -> Code execution",
+    "key_difference": "Unlike reflected XSS, malicious payload never leaves the browser or reaches the server"
+  },
+
+  "prevention_measures": [
+    {
+      "method": "Safe DOM Manipulation",
+      "description": "Use safe methods for DOM updates that don't execute JavaScript",
+      "implementation": "Use textContent instead of innerHTML, or properly sanitize before using innerHTML",
+      "example": "element.textContent = userInput; // Safe, vs element.innerHTML = userInput; // Dangerous"
+    },
+    {
+      "method": "Input Validation",
+      "description": "Validate and sanitize all client-side input sources",
+      "implementation": "Check URL fragments, parameters, and other sources before processing",
+      "example": "if (/^[a-zA-Z0-9]+$/.test(location.hash)) { /* process */ }"
+    },
+    {
+      "method": "Content Security Policy (CSP)",
+      "description": "Implement strict CSP to prevent inline script execution",
+      "implementation": "CSP: script-src 'self'; object-src 'none'; prevents most DOM XSS",
+      "benefit": "Even if DOM XSS exists, CSP blocks execution"
+    },
+    {
+      "method": "DOM Sanitization Libraries",
+      "description": "Use proven libraries like DOMPurify for safe HTML processing",
+      "implementation": "element.innerHTML = DOMPurify.sanitize(userInput);",
+      "benefit": "Professional-grade sanitization with regular security updates"
+    },
+    {
+      "method": "Avoid Dangerous Functions",
+      "description": "Never use eval(), setTimeout/setInterval with strings, or Function() constructor with user input",
+      "implementation": "Use safer alternatives or strict validation if these functions are necessary"
+    }
+  ],
+
+  "learning_outcomes": [
+    "Understanding of DOM-based XSS mechanics and client-side execution",
+    "Knowledge of JavaScript sources and sinks for DOM XSS",
+    "Experience with browser developer tools for client-side security analysis",
+    "Understanding the difference between reflected and DOM-based XSS",
+    "Awareness of modern client-side security practices"
+  ],
+
+  "real_world_examples": [
+    {
+      "scenario": "Single Page Application (SPA) Routing",
+      "description": "React/Angular/Vue apps that use hash-based routing without proper sanitization",
+      "vulnerable_code": "const route = location.hash.substring(1); document.getElementById('content').innerHTML = getPageContent(route);",
+      "risk": "Malicious URLs can execute JavaScript when users navigate to crafted links"
+    },
+    {
+      "scenario": "Dynamic Content Loading",
+      "description": "AJAX applications that update page content based on URL parameters",
+      "vulnerable_code": "const params = new URLSearchParams(location.search); document.body.innerHTML += params.get('message');",
+      "risk": "URL parameters can inject malicious content directly into the DOM"
+    },
+    {
+      "scenario": "Client-Side Templates",
+      "description": "JavaScript templating engines that process user input without escaping",
+      "vulnerable_code": "template.innerHTML = `<div>Welcome ${location.search.split('name=')[1]}</div>`;",
+      "risk": "Template injection leading to code execution"
+    },
+    {
+      "scenario": "Embedded Analytics/Widgets",
+      "description": "Third-party widgets that process page URL or referrer data",
+      "vulnerable_code": "analytics.track('page_view', {url: document.URL, ref: document.referrer});",
+      "risk": "If analytics system reflects data back to page without sanitization"
+    }
+  ],
+
+  "advanced_concepts": [
+    {
+      "concept": "DOM Clobbering",
+      "description": "Technique where HTML elements override JavaScript variables or functions",
+      "example": "<img name='someGlobalVar' src='x'> can override window.someGlobalVar"
+    },
+    {
+      "concept": "Mutation Events/Observers",
+      "description": "JavaScript events that fire when DOM changes, can be exploited for persistent DOM XSS",
+      "relevance": "Understanding how DOM modifications trigger events"
+    },
+    {
+      "concept": "PostMessage XSS",
+      "description": "DOM XSS via cross-frame communication",
+      "example": "window.addEventListener('message', function(e) { document.body.innerHTML = e.data; });"
+    }
+  ],
+
+  "next_steps": [
+    "Progress to XSS Level 3 for stored XSS challenges",
+    "Practice identifying DOM XSS in real applications",
+    "Learn about advanced DOM XSS vectors and filter bypasses",
+    "Study Content Security Policy implementation and bypasses",
+    "Explore modern JavaScript frameworks and their XSS protections"
+  ],
+
+  "references": [
+    "OWASP DOM-based XSS Prevention Cheat Sheet",
+    "PortSwigger Web Security Academy - DOM-based XSS",
+    "Google XSS Game - Level 2 (similar concept)",
+    "DOMPurify Library Documentation",
+    "MDN Web Docs - Content Security Policy"
+  ],
+
+  "difficulty_explanation": {
+    "why_beginner": "Straightforward concept with clear input/output relationship",
+    "key_learning": "Understanding client-side vs server-side XSS execution",
+    "progression": "Builds foundation for more complex DOM manipulation attacks"
+  }
+}

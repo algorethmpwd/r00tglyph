@@ -1,224 +1,106 @@
-{% extends 'base.html' %}
+{%extends 'base.html' %}
 
-{% block title %}Level 7: XSS via HTTP Headers - R00tGlyph{% endblock %}
+{%block title %}Level 7: XSS via JavaScript String - R00tGlyph{%endblock %}
 
-{% block content %}
-<div class="row">
-    <div class="col-md-8 offset-md-2">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Level 7: XSS via HTTP Headers</h2>
-            </div>
-            <div class="card-body">
-                <div class="alert alert-dark challenge-description">
-                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-                    <p>
-                        Welcome to <strong>WebAnalytics Pro</strong>, a fictional web analytics platform! This challenge simulates a real-world scenario where XSS vulnerabilities can exist in HTTP header processing.
-                    </p>
-                    
-                    <div class="card mb-3 border-secondary">
-                        <div class="card-header">
-                            <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
-                        </div>
-                        <div class="card-body">
-                            <p class="mb-0">
-                                <strong>Client:</strong> WebAnalytics Pro<br>
-                                <strong>Target:</strong> User-Agent Analytics Dashboard<br>
-                                <strong>Protection:</strong> Input validation on form fields only<br>
-                                <strong>Objective:</strong> Execute JavaScript by exploiting header-based XSS vulnerability
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <p>
-                        <strong>Technical Background:</strong> Many web applications process HTTP headers like User-Agent, Referer, and X-Forwarded-For for analytics, logging, or debugging purposes. If these headers are displayed without proper sanitization, they can be vulnerable to XSS attacks.
-                    </p>
-                    
-                    <p>
-                        <strong>Real-world Impact:</strong> Header-based XSS vulnerabilities are particularly dangerous because:
-                    </p>
-                    <ul>
-                        <li>They often bypass WAF and input validation focused on form fields</li>
-                        <li>They can affect administrative dashboards that display visitor information</li>
-                        <li>They're harder to detect through standard security scanning</li>
-                        <li>They can lead to session hijacking and admin account compromise</li>
-                        <li>They may persist in logs and affect multiple users over time</li>
-                    </ul>
-                    
-                    <p>
-                        <strong>Your Task:</strong> This analytics dashboard displays the User-Agent of visitors. You need to craft a malicious User-Agent header that will execute JavaScript when viewed on the dashboard. Make an alert box appear with the text "XSS Level 7 Completed!" to reveal the flag.
-                    </p>
-                    
-                    <div class="alert alert-warning">
-                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> You'll need a tool like Burp Suite, OWASP ZAP, or a custom script to modify the User-Agent header in your request. The standard browser interface won't let you do this.
-                    </div>
-                </div>
-                
-                <!-- Analytics Dashboard Interface -->
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>WebAnalytics Pro</h5>
-                        <div>
-                            <span class="badge bg-light text-dark">Enterprise Edition</span>
-                        </div>
-                    </div>
-                    <div class="card-body p-0">
-                        <!-- Navigation Bar -->
-                        <nav class="navbar navbar-expand navbar-light bg-light px-3">
-                            <div class="container-fluid">
-                                <ul class="navbar-nav">
-                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a></li>
-                                    <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-people me-1"></i>Visitors</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-bar-chart me-1"></i>Reports</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-gear me-1"></i>Settings</a></li>
-                                </ul>
-                                <div class="d-flex">
-                                    <span class="navbar-text me-3">Admin</span>
-                                    <a href="#" class="btn btn-sm btn-outline-secondary"><i class="bi bi-box-arrow-right me-1"></i>Logout</a>
-                                </div>
-                            </div>
-                        </nav>
-                        
-                        <div class="p-4">
-                            <div class="row">
-                                <div class="col-md-3 mb-4">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h6 class="mb-0">Analytics Tools</h6>
-                                        </div>
-                                        <div class="list-group list-group-flush">
-                                            <a href="#" class="list-group-item list-group-item-action">
-                                                <i class="bi bi-globe me-2"></i>Traffic Overview
-                                            </a>
-                                            <a href="#" class="list-group-item list-group-item-action">
-                                                <i class="bi bi-geo-alt me-2"></i>Geographic Data
-                                            </a>
-                                            <a href="#" class="list-group-item list-group-item-action active">
-                                                <i class="bi bi-laptop me-2"></i>Browser Info
-                                            </a>
-                                            <a href="#" class="list-group-item list-group-item-action">
-                                                <i class="bi bi-clock-history me-2"></i>Visit Duration
-                                            </a>
-                                            <a href="#" class="list-group-item list-group-item-action">
-                                                <i class="bi bi-link-45deg me-2"></i>Referral Sources
-                                            </a>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="card mt-3">
-                                        <div class="card-header">
-                                            <h6 class="mb-0">Quick Stats</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <p class="small mb-2">Today's Visitors: <span class="badge bg-primary">1,245</span></p>
-                                            <p class="small mb-2">Active Now: <span class="badge bg-success">78</span></p>
-                                            <p class="small mb-0">Bounce Rate: <span class="badge bg-warning text-dark">32%</span></p>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="col-md-9">
-                                    <div class="card">
-                                        <div class="card-header d-flex justify-content-between align-items-center">
-                                            <h5 class="mb-0"><i class="bi bi-laptop me-2"></i>Browser Information</h5>
-                                            <div>
-                                                <button class="btn btn-sm btn-outline-secondary me-2"><i class="bi bi-download me-1"></i>Export</button>
-                                                <button class="btn btn-sm btn-outline-primary"><i class="bi bi-arrow-repeat me-1"></i>Refresh</button>
-                                            </div>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="alert alert-info">
-                                                <i class="bi bi-info-circle-fill me-2"></i>
-                                                This dashboard shows the browser information of recent visitors to your website.
-                                            </div>
-                                            
-                                            <div class="table-responsive">
-                                                <table class="table table-hover">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Visitor ID</th>
-                                                            <th>Time</th>
-                                                            <th>IP Address</th>
-                                                            <th>User Agent</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <tr>
-                                                            <td>V-{{ random_id }}</td>
-                                                            <td>Just now</td>
-                                                            <td>{{ client_ip }}</td>
-                                                            <td class="text-break">{{ user_agent | safe }}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>V-8721</td>
-                                                            <td>5 minutes ago</td>
-                                                            <td>192.168.1.45</td>
-                                                            <td>Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>V-8720</td>
-                                                            <td>12 minutes ago</td>
-                                                            <td>192.168.1.32</td>
-                                                            <td>Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Safari/605.1.15</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>V-8719</td>
-                                                            <td>18 minutes ago</td>
-                                                            <td>192.168.1.87</td>
-                                                            <td>Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                            
-                                            <div class="alert alert-secondary mt-3">
-                                                <i class="bi bi-info-circle me-2"></i>
-                                                <small>Note: This table updates automatically when new visitors access your site. Your current User-Agent is displayed in the first row.</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    {% if message %}
-                                    <div class="alert alert-success mt-3">
-                                        <i class="bi bi-check-circle-fill me-2"></i>
-                                        {{ message }}
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                {% if flag %}
-                <!-- Hidden flag container that will be revealed when the challenge is solved -->
-                <div id="flag-display" style="display: none;">
-                    <div class="alert alert-success">
-                        <i class="bi bi-check-circle-fill me-2"></i>
-                        <strong>Congratulations!</strong> You've solved the challenge.
-                    </div>
-                    <div class="flag-container">
-                        <span class="flag-label">Your Flag</span>
-                        <code id="flag-value">{{ flag }}</code>
-                    </div>
-                </div>
-                
-                <!-- Hidden form for the main page flag submission -->
-                <form id="flag-submission-form" style="display: none;">
-                    <input type="hidden" name="challenge_id" value="7">
-                    <input type="text" name="flag" value="">
-                </form>
-                
-                <!-- Result container for flag submission -->
-                <div id="flag-result" class="alert" style="display: none;"></div>
-                {% endif %}
-                
-                <div class="mt-4">
-                    <a href="{{ url_for('solutions', level=7) }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">XSS</span> / <span>Level 7</span>
+{%endblock %}
+
+{%block content %}
+<div class="challenge-lab">
+    <!-- LEFT PANEL: Mission & Intel -->
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
+        </div>
+        <div class="mission-content">
+            <h5 class="mb-3">XSS via JavaScript String</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>UserDashboard</strong>. Test the security of this application.
+            </p>
+
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Break out of JavaScript string context</p>
                 </div>
             </div>
+
+            <!-- Integrated Hints System -->
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: JavaScript Context
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Your input might be in a JS string: <code>var name = "YOUR_INPUT";</code>. Break out of the string.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: String Escape
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Use: <code>"; alert("XSS"); //</code> to close the string, execute code, and comment out the rest.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Enter: <code>"; alert("XSS Level 7 Completed!"); //</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {%if xss_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the XSS vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: The Vulnerable App -->
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>dashboard.local/welcome</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for XSS Level 7</p>
         </div>
     </div>
 </div>
-{% endblock %}
+{%endblock %}

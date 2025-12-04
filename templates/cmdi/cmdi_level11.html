@@ -1,120 +1,103 @@
-{% extends "base.html" %}
+{%extends 'base.html' %}
 
-{% block title %}Command Injection Level 11 - XML Processing{% endblock %}
+{%block title %}Level 11: Command Injection in Windows - R00tGlyph{%endblock %}
 
-{% block content %}
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3><i class="bi bi-terminal me-2"></i>Command Injection Level 11</h3>
-                    <div>
-                        <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#challengeModal">
-                            <i class="bi bi-info-circle me-1"></i>Challenge Info
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">Command Injection</span> / <span>Level 11</span>
+{%endblock %}
+
+{%block content %}
+<div class="challenge-lab">
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
+        </div>
+        <div class="mission-content">
+            <h5 class="mb-3">Command Injection in Windows</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>App11</strong>. Test for command injection vulnerabilities.
+            </p>
+
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Exploit command injection in windows</p>
+                </div>
+            </div>
+
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Understanding the Technique
                         </button>
-                        <a href="{{ url_for('solutions', level='cmdi11') }}" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-lightbulb me-1"></i>Solution
-                        </a>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            This level focuses on command injection in windows. Research the specific technique.
+                        </div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="scenario-box mb-4">
-                        <h5><i class="bi bi-building-gear me-2"></i>Legacy Enterprise System</h5>
-                        <p>You're testing a legacy enterprise system that processes XML configuration files for service management. The system uses XML parsing to execute service management commands.</p>
-                        <p><strong>Context:</strong> Enterprise service management platform with XML-based configuration</p>
-                        <p><strong>Technology:</strong> Legacy XML processing with command execution</p>
-                    </div>
-
-                    {% if flag %}
-                    <div class="alert alert-success">
-                        <i class="bi bi-flag-fill me-2"></i><strong>Challenge Completed!</strong>
-                        <br>Flag: <code>{{ flag }}</code>
-                    </div>
-                    {% endif %}
-
-                    <form method="POST" class="mb-4">
-                        <div class="mb-3">
-                            <label for="xml_config" class="form-label">XML Configuration:</label>
-                            <textarea class="form-control" id="xml_config" name="xml_config" rows="8" 
-                                      style="font-family: monospace;">{{ xml_config }}</textarea>
-                            <div class="form-text">Enter XML configuration for service management.</div>
-                        </div>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-gear me-2"></i>Process Configuration
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Windows-specific
                         </button>
-                    </form>
-
-                    {% if processing_result %}
-                    <div class="card">
-                        <div class="card-header">
-                            <h6><i class="bi bi-terminal me-2"></i>Processing Output</h6>
-                        </div>
-                        <div class="card-body">
-                            <pre class="command-output">{{ processing_result }}</pre>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Use: <code>&</code>, <code>&&</code>, <code>|</code>, <code>||</code> for cmd.exe
                         </div>
                     </div>
-                    {% endif %}
-
-                    <div class="mt-4">
-                        <h6>XML Injection Techniques:</h6>
-                        <ul>
-                            <li>Inject commands in XML element values</li>
-                            <li>Try: <code>&lt;service&gt;web; whoami&lt;/service&gt;</code></li>
-                            <li>Use XML attributes for injection</li>
-                            <li>Test different XML elements for command execution</li>
-                        </ul>
-                        
-                        <h6>Legacy System Context:</h6>
-                        <p>This challenge simulates vulnerabilities in legacy enterprise systems that process XML for system management, commonly found in older SOAP services, configuration management systems, and enterprise service buses.</p>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Apply command injection in windows techniques to execute commands and retrieve the flag.
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
 
-<!-- Challenge Info Modal -->
-<div class="modal fade" id="challengeModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Command Injection Level 11 - Challenge Information</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            {%if cmdi_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
             </div>
-            <div class="modal-body">
-                <h6>Objective:</h6>
-                <p>Exploit command injection through XML processing in a legacy enterprise system.</p>
-                
-                <h6>Scenario:</h6>
-                <p>You're testing a legacy enterprise service management platform that processes XML configuration files. The system parses XML and uses element values in system commands without proper validation, creating opportunities for command injection.</p>
-                
-                <h6>Learning Goals:</h6>
-                <ul>
-                    <li>Understand command injection in XML processing contexts</li>
-                    <li>Learn about legacy enterprise system vulnerabilities</li>
-                    <li>Practice XML-based payload construction</li>
-                    <li>Explore enterprise service management security</li>
-                </ul>
-                
-                <h6>Real-World Context:</h6>
-                <p>This challenge simulates vulnerabilities commonly found in:</p>
-                <ul>
-                    <li>Legacy SOAP web services</li>
-                    <li>Enterprise service buses (ESB)</li>
-                    <li>Configuration management systems</li>
-                    <li>Older enterprise applications with XML-based APIs</li>
-                </ul>
-                
-                <h6>Hints:</h6>
-                <ul>
-                    <li>Inject commands within XML element values</li>
-                    <li>Try system information commands like 'whoami' or 'id'</li>
-                    <li>Use command separators within XML content</li>
-                    <li>Test different XML elements for injection opportunities</li>
-                </ul>
+            {%endif %}
+        </div>
+    </div>
+
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
             </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>app11.local/cmd</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for Command Injection Level 11</p>
         </div>
     </div>
 </div>
-{% endblock %}
+{%endblock %}

@@ -1,99 +1,103 @@
-{% extends 'base.html' %}
+{%extends 'base.html' %}
 
-{% block title %}SSRF Level 15 - R00tGlyph{% endblock %}
+{%block title %}Level 15: SSRF to FTP - R00tGlyph{%endblock %}
 
-{% block content %}
-<div class="row">
-    <div class="col-md-10 offset-md-1">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Level 15: SSRF in OAuth Callbacks</h2>
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">SSRF</span> / <span>Level 15</span>
+{%endblock %}
+
+{%block content %}
+<div class="challenge-lab">
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
+        </div>
+        <div class="mission-content">
+            <h5 class="mb-3">SSRF to FTP</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>SSRFApp15</strong>. Test for ssrf vulnerabilities.
+            </p>
+
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Exploit ssrf to ftp</p>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="alert alert-dark challenge-description" style="display: none;">
-                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-                    <p>
-                        Welcome to <strong>OAuth Provider</strong>, a fictional service platform! This challenge demonstrates OAuth callback URL validation bypass allowing SSRF attacks through redirect_uri parameter manipulation.
-                    </p>
-                    <p>
-                        <strong>Your Task:</strong> Exploit OAuth callback validation to perform SSRF attacks against internal services.
-                    </p>
-                    <p>
-                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> Manipulate the redirect_uri parameter to target internal services during OAuth flows.
-                    </p>
-                    <p>
-                        <i class="bi bi-tools me-2"></i><strong>Tools:</strong> Use OAuth testing tools, Burp Suite OAuth extensions, and callback URL manipulation.
-                    </p>
-                </div>
 
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h4 class="mb-0"><i class="bi bi-shield-lock me-2"></i>OAuth Provider - Interface</h4>
-                    </div>
-                    <div class="card-body">
-                        <form action="/ssrf/level15" method="post">
-                            <div class="mb-3">
-                                <label for="client_id" class="form-label">OAuth Client ID</label>
-                                <input type="text" class="form-control" name="client_id" placeholder="your_client_id_here" value="{{ client_id }}">
-                            </div>
-                            <div class="mb-3">
-                                <label for="redirect_uri" class="form-label">Callback URL</label>
-                                <input type="text" class="form-control" name="redirect_uri" placeholder="https://your-app.com/callback" value="{{ redirect_uri }}">
-                            </div>
-                            <div class="mb-3">
-                                <label for="scope" class="form-label">OAuth Scope</label>
-                                <input type="text" class="form-control" name="scope" placeholder="read write" value="{{ scope }}">
-                            </div>
-                            <button class="btn btn-primary" type="submit">Execute Request</button>
-                        </form>
-                    </div>
-                </div>
-
-                {% if oauth_result %}
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>Request Result</h5>
-                    </div>
-                    <div class="card-body">
-                        <pre class="bg-dark text-light p-3 rounded">{{ oauth_result }}</pre>
-                        {% if ssrf_detected %}
-                        <div class="alert alert-success mt-3">
-                            <i class="bi bi-check-circle-fill me-2"></i>
-                            <strong>OAuth SSRF Successful! Internal service accessed via callback manipulation.</strong>
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Understanding the Technique
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            This level focuses on ssrf to ftp. Research SSRF in this context.
                         </div>
-                        {% endif %}
                     </div>
                 </div>
-                {% endif %}
-
-                {% if flag %}
-                <div class="alert alert-success">
-                    <h4><i class="bi bi-flag-fill me-2"></i>Challenge Completed!</h4>
-                    <p>Congratulations! You've successfully completed this advanced SSRF challenge.</p>
-                    <p><strong>Flag:</strong> <code>{{ flag }}</code></p>
-                </div>
-                {% endif %}
-
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Learning Objectives</h5>
-                    </div>
-                    <div class="card-body">
-                        <ul>
-                            <li>Understand advanced SSRF attack vectors</li>
-                            <li>Learn modern exploitation techniques</li>
-                            <li>Practice real-world attack scenarios</li>
-                            <li>Master cutting-edge security testing methods</li>
-                        </ul>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: FTP server access
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Access internal FTP servers
+                        </div>
                     </div>
                 </div>
-
-                <div class="mt-4">
-                    <a href="{{ url_for('solutions', level='ssrf15') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Apply ssrf to ftp to access internal resources and retrieve the flag.
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            {%if ssrf_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>ssrf15.local/fetch</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for SSRF Level 15</p>
         </div>
     </div>
 </div>
-{% endblock %}
+{%endblock %}

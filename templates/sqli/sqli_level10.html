@@ -1,260 +1,106 @@
-{% extends 'base.html' %}
+{%extends 'base.html' %}
 
-{% block title %}Level 10: NoSQL Injection - R00tGlyph{% endblock %}
+{%block title %}Level 10: SQL Injection with WAF Bypass - R00tGlyph{%endblock %}
 
-{% block content %}
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">SQL Injection</span> / <span>Level 10</span>
+{%endblock %}
 
-<div class="row">
-    <div class="col-md-10 offset-md-1">
-        {% if sqli_detected %}
-        <div class="alert alert-success">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            <strong>Success!</strong> You've successfully exploited the NoSQL injection vulnerability! The challenge has been marked as completed.
-            {% if flag %}
-            <div class="mt-2">
-                <strong>Flag:</strong> <code>{{ flag }}</code>
-            </div>
-            {% endif %}
+{%block content %}
+<div class="challenge-lab">
+    <!-- LEFT PANEL: Mission & Intel -->
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
-        {% endif %}
-
-        <!-- Challenge description -->
-        <div class="alert alert-dark challenge-description">
-            <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-            <p>
-                Welcome to <strong>DocuStore</strong>, a fictional document management system built with MongoDB! This challenge simulates a real-world scenario where a MongoDB-based application is vulnerable to NoSQL injection.
-            </p>
-            <p>
-                The developers of DocuStore have created a document management system using MongoDB, a popular NoSQL database. However, they've made a critical mistake: they're directly using user input in MongoDB queries without proper validation or sanitization.
-            </p>
-            <p>
-                <strong>Your Task:</strong> Exploit the NoSQL injection vulnerability in the login form to bypass authentication and access the admin account. The admin account contains the flag.
+        <div class="mission-content">
+            <h5 class="mb-3">SQL Injection with WAF Bypass</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>ProtectedDB</strong>. Test for SQL injection vulnerabilities.
             </p>
 
-            <div class="card mb-3 border-secondary">
-                <div class="card-header">
-                    <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
-                </div>
-                <div class="card-body">
-                    <p class="mb-0">
-                        <strong>Client:</strong> Document Management System Security Team<br>
-                        <strong>Target:</strong> DocuStore Authentication System<br>
-                        <strong>Vulnerability:</strong> Suspected NoSQL Injection<br>
-                        <strong>Objective:</strong> Bypass authentication to access administrative documents
-                    </p>
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Bypass Web Application Firewall</p>
                 </div>
             </div>
 
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
-                </div>
-                <div class="card-body">
-                    <p>
-                        NoSQL injection is a type of injection attack that targets NoSQL databases like MongoDB, Cassandra, or CouchDB. Unlike traditional SQL injection, NoSQL injection exploits the query structure and operators specific to NoSQL databases.
-                    </p>
-                    <p>
-                        MongoDB, in particular, uses a document-oriented data model with queries expressed in JSON-like syntax. This introduces unique vulnerabilities:
-                    </p>
-                    <ul>
-                        <li>MongoDB operators like <code>$eq</code>, <code>$ne</code>, <code>$gt</code>, and <code>$regex</code> can be manipulated</li>
-                        <li>JSON structure can be exploited to change query logic</li>
-                        <li>Type conversion between strings and objects can lead to unexpected behavior</li>
-                    </ul>
-                    <p>
-                        These characteristics make NoSQL injection different from traditional SQL injection, requiring specific techniques to exploit and mitigate.
-                    </p>
-                </div>
-            </div>
-
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h5><i class="bi bi-info-circle-fill me-2"></i>Hints</h5>
-                </div>
-                <div class="card-body">
-                    <p>
-                        The login form likely uses a MongoDB query similar to:
-                    </p>
-                    <div class="query-box">
-                        <span class="query-keyword">db.users.findOne</span>({<br>
-                        &nbsp;&nbsp;<span class="query-string">"username"</span>: <span class="query-string">"user_input_username"</span>,<br>
-                        &nbsp;&nbsp;<span class="query-string">"password"</span>: <span class="query-string">"user_input_password"</span><br>
-                        });
+            <!-- Integrated Hints System -->
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: WAF Detection
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            WAFs block common SQLi patterns. Test what's blocked: <code>UNION</code>, <code>SELECT</code>, <code>OR</code>, etc. Then find bypass techniques.
+                        </div>
                     </div>
-                    <p>
-                        To exploit this vulnerability, you'll need to:
-                    </p>
-                    <ol>
-                        <li>Understand how MongoDB queries work and how they differ from SQL</li>
-                        <li>Use MongoDB-specific operators to manipulate the query logic</li>
-                        <li>Consider how the application handles different input types (strings vs. objects)</li>
-                    </ol>
-                    <p>
-                        Remember that in MongoDB, you can use operators like <code>$ne</code> (not equal) to change query conditions.
-                    </p>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Bypass Techniques
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Use: Case variations (<code>UnIoN</code>), comments (<code>UN/**/ION</code>), encoding (<code>%55NION</code>), or alternative syntax (<code>||</code> instead of <code>OR</code>).
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            <strong>Bypass examples:</strong><ul class='mb-2 mt-2'><li><code>' /*!50000UNION*/ /*!50000SELECT*/ 1,2,3--</code></li><li><code>' %55NION %53ELECT 1,2,3--</code></li><li><code>' UNION/**/SELECT/**/1,2,3--</code></li></ul><strong>Why it works:</strong> WAF rules miss obfuscated variations.
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="bi bi-shield-fill-check me-2"></i>Real-World Impact</h5>
+            {%if sqli_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
                 </div>
-                <div class="card-body">
-                    <p>
-                        NoSQL injection vulnerabilities have led to several security incidents:
-                    </p>
-                    <ul>
-                        <li><strong>Alibaba Cloud (2019)</strong>: A NoSQL injection vulnerability allowed attackers to access sensitive customer data.</li>
-                        <li><strong>Rocket.Chat (2018)</strong>: A vulnerability in their MongoDB implementation allowed unauthorized access to private messages.</li>
-                    </ul>
-                    <p>
-                        For document management systems like DocuStore, such vulnerabilities could lead to:
-                    </p>
-                    <ul>
-                        <li>Unauthorized access to sensitive documents</li>
-                        <li>Data breaches exposing confidential information</li>
-                        <li>Complete compromise of the authentication system</li>
-                        <li>Regulatory compliance violations and legal consequences</li>
-                    </ul>
-                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the SQL injection vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: The Vulnerable App -->
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>protected.local/query</span>
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Level 10: NoSQL Injection</h2>
-            </div>
-            <div class="card-body">
-                <div class="mongodb-header">
-                    <div class="d-flex align-items-center justify-content-center">
-                        <i class="bi bi-file-earmark-text me-2" class="icon-lg"></i>
-                        <h1 class="mb-0">DocuStore</h1>
-                    </div>
-                    <p class="text-center mb-0 mt-2">Secure Document Management System</p>
-                </div>
-
-                <div class="row mb-4">
-                    <div class="col-md-8">
-                        <div class="scenario-box">
-                            <h4><i class="bi bi-exclamation-triangle-fill me-2"></i>Penetration Testing Scenario</h4>
-                            <p>You've been hired to perform a security assessment of DocuStore, a document management system built with MongoDB. The system allows users to store, organize, and share documents securely.</p>
-                            <p>During your initial testing, you notice that the login form might be vulnerable to NoSQL injection. The application uses MongoDB for user authentication and document storage.</p>
-                            <p><strong>Your objective:</strong> Exploit the NoSQL injection vulnerability to bypass authentication and access the admin account, which contains the flag.</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="portal-stats">
-                            <h5 class="text-center mb-3"><i class="bi bi-bar-chart-fill me-2"></i>System Statistics</h5>
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="stat-item">
-                                        <div class="stat-number">500K+</div>
-                                        <div>Documents</div>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="stat-item">
-                                        <div class="stat-number">10K+</div>
-                                        <div>Users</div>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="stat-item">
-                                        <div class="stat-number">99.9%</div>
-                                        <div>Uptime</div>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="stat-item">
-                                        <div class="stat-number">24/7</div>
-                                        <div>Support</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="login-container">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h4 class="mb-0"><i class="bi bi-person-fill me-2"></i>User Login</h4>
-                        </div>
-                        <div class="card-body">
-                            {% if error %}
-                            <div class="alert alert-danger">
-                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                                {{ error }}
-                            </div>
-                            {% endif %}
-                            
-                            {% if success %}
-                            <div class="alert alert-success">
-                                <i class="bi bi-check-circle-fill me-2"></i>
-                                {{ success }}
-                            </div>
-                            {% endif %}
-                            
-                            <form action="{{ url_for('sqli_level10') }}" method="post">
-                                <div class="mb-3">
-                                    <label for="username" class="form-label">Username:</label>
-                                    <input type="text" class="form-control" id="username" name="username" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="password" class="form-label">Password:</label>
-                                    <input type="password" class="form-control" id="password" name="password" required>
-                                </div>
-                                <div class="mb-3 form-check">
-                                    <input type="checkbox" class="form-check-input" id="rememberMe">
-                                    <label class="form-check-label" for="rememberMe">Remember me</label>
-                                    <a href="#" class="float-end">Forgot password?</a>
-                                </div>
-                                <div class="d-grid">
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-box-arrow-in-right me-2"></i>Login
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
-                {% if documents %}
-                <div class="documents-container">
-                    <h4 class="mb-3"><i class="bi bi-file-earmark-text me-2"></i>Your Documents</h4>
-                    
-                    <div class="row">
-                        {% for doc in documents %}
-                        <div class="col-md-6 mb-3">
-                            <div class="card document-card">
-                                <div class="card-body">
-                                    <h5 class="card-title">{{ doc.title }}</h5>
-                                    <h6 class="card-subtitle mb-2 text-muted">{{ doc.category }}</h6>
-                                    <p class="card-text">{{ doc.content }}</p>
-                                    <div class="d-flex justify-content-between">
-                                        <small class="text-muted">Created: {{ doc.created }}</small>
-                                        <small class="text-muted">ID: {{ doc.id }}</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-
-                <div class="admin-note">
-                    <h5><i class="bi bi-shield-lock me-2"></i>Developer Note</h5>
-                    <p>Reminder to the development team: The admin account (username: <code>admin</code>) has access to all documents in the system, including sensitive ones. We've implemented authentication to ensure only users with valid credentials can access their documents.</p>
-                    <p class="mb-0"><small class="text-muted">Note: This message is for internal use only and should not be visible to regular users.</small></p>
-                </div>
-
-                <div class="mt-4">
-                    <a href="{{ url_for('solutions', level='sqli10') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
-                </div>
-            </div>
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for SQLi Level 10</p>
         </div>
     </div>
 </div>
-{% endblock %}
+{%endblock %}

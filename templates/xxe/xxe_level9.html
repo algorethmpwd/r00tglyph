@@ -1,252 +1,103 @@
-{% extends 'base.html' %}
+{%extends 'base.html' %}
 
-{% block title %}Level 9: Blind XXE with Out-of-Band - R00tGlyph{% endblock %}
+{%block title %}Level 9: XXE Technique 9 - R00tGlyph{%endblock %}
 
-{% block content %}
-<div class="row">
-    <div class="col-md-8 offset-md-2">
-        {% if xxe_detected %}
-        <div class="alert alert-success">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            <strong>Success\!</strong> You've successfully exploited the XXE vulnerability\! The challenge has been marked as completed.
-            {% if flag %}
-            <div class="mt-2">
-                <strong>Flag:</strong> <code>{{ flag }}</code>
-            </div>
-            {% endif %}
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">XXE</span> / <span>Level 9</span>
+{%endblock %}
+
+{%block content %}
+<div class="challenge-lab">
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
-        {% endif %}
+        <div class="mission-content">
+            <h5 class="mb-3">XXE Technique 9</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>XXEApp9</strong>. Test for XXE vulnerabilities.
+            </p>
 
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Level 9: Blind XXE with Out-of-Band</h2>
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Exploit XXE vulnerability 9</p>
+                </div>
             </div>
-            <div class="card-body">
-                <\!-- Challenge Description Button -->
-                <div class="text-center mb-3">
-                    <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#challengeModal">
-                        <i class="bi bi-info-circle me-2"></i>Show Challenge Description
-                    </button>
-                    {% if flag %}
-                    <button type="button" class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#flagModal">
-                        <i class="bi bi-flag-fill me-2"></i>Submit Flag
-                    </button>
-                    {% endif %}
-                </div>
 
-                <\!-- Challenge Description Modal -->
-                <div class="modal fade" id="challengeModal" tabindex="-1" aria-labelledby="challengeModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header bg-dark text-white">
-                                <h5 class="modal-title" id="challengeModalLabel">
-                                    <i class="bi bi-info-circle-fill me-2"></i>Challenge Description
-                                </h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <div class="card mb-3">
-                                    <div class="card-header">
-                                        <i class="bi bi-briefcase-fill me-2"></i>Mission Briefing
-                                    </div>
-                                    <div class="card-body">
-                                        <p class="mb-0">
-                                            <strong>Client:</strong> MicroAPI Gateway Services<br>
-                                            <strong>Target:</strong> XML API Request Processor<br>
-                                            <strong>Vulnerability:</strong> XXE Exploitation<br>
-                                            <strong>Objective:</strong> Exploit XXE using out-of-band techniques in a microservices API
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <p>
-                                    <strong>Technical Background:</strong> This challenge focuses on advanced XXE exploitation 
-                                    techniques in modern enterprise environments. You'll need to demonstrate sophisticated 
-                                    understanding of XML processing vulnerabilities.
-                                </p>
-
-                                <p>
-                                    <strong>Your Task:</strong> Exploit the XXE vulnerability to read the contents of 
-                                    <code>/etc/passwd</code> using advanced techniques specific to this challenge.
-                                </p>
-
-                                <div class="alert alert-warning">
-                                    <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> This challenge requires 
-                                    advanced XXE exploitation techniques. Consider the specific context and technology stack.
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            </div>
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Understanding
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            XXE level 9 covers advanced entity exploitation.
                         </div>
                     </div>
                 </div>
-
-                <\!-- Simulated Application Interface -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h4><i class="bi bi-code me-2"></i>XML Processing Interface</h4>
-                    </div>
-                    <div class="card-body">
-                        <p class="text-muted">Process XML content using enterprise-grade parsing capabilities.</p>
-                        
-                        <form method="POST" class="mb-4">
-                            <div class="mb-3">
-                                <label for="xml_input" class="form-label">XML Input:</label>
-                                <textarea class="form-control" id="xml_input" name="xml_input" rows="12" placeholder="Enter your XML here...">{{ xml_input or '<?xml version="1.0" encoding="UTF-8"?>
-<data>
-    <item>
-        <name>Sample Item</name>
-        <value>Sample Value</value>
-    </item>
-</data>' }}</textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-play-fill me-2"></i>Process XML
-                            </button>
-                        </form>
-
-                        {% if xml_input %}
-                        <div class="card">
-                            <div class="card-header">
-                                <h5><i class="bi bi-terminal me-2"></i>Processing Results</h5>
-                            </div>
-                            <div class="card-body">
-                                {% if xxe_detected %}
-                                <div class="alert alert-danger">
-                                    <strong>XXE Vulnerability Detected\!</strong> External entity processing successful.
-                                </div>
-                                {% endif %}
-                                
-                                <h6>Processed Output:</h6>
-                                <pre class="bg-dark text-light p-3 rounded"><code>{{ processed_output or 'No output generated' }}</code></pre>
-                                
-                                {% if file_content %}
-                                <h6 class="mt-3">External Content Retrieved:</h6>
-                                <pre class="bg-danger text-white p-3 rounded"><code>{{ file_content }}</code></pre>
-                                {% endif %}
-                            </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Technique
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Research XXE techniques for this scenario.
                         </div>
-                        {% endif %}
                     </div>
                 </div>
-
-                <\!-- Solution Link -->
-                <div class="text-center">
-                    <a href="/solutions/xxe9" class="btn btn-outline-info">
-                        <i class="bi bi-lightbulb me-2"></i>View Solution
-                    </a>
-                </div>
-
-                {% if flag %}
-                <div id="flag-display" class="mb-3">
-                    <div class="alert alert-success">
-                        <i class="bi bi-check-circle-fill me-2"></i>
-                        <strong>Congratulations\!</strong> You've solved the challenge.
-                    </div>
-                    <div class="flag-container mb-2">
-                        <span class="flag-label">Your Flag</span>
-                        <code id="flag-value">{{ flag }}</code>
-                    </div>
-                    <\!-- Visible flag submission form -->
-                    <form id="flag-submission-form" class="mt-3">
-                        <input type="hidden" name="challenge_id" value="{{ challenge.id }}">
-                        <div class="input-group">
-                            <input type="text" name="flag" class="form-control" value="{{ flag }}" readonly>
-                            <button type="submit" class="btn btn-success">Submit Flag</button>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Apply XXE exploitation to complete the challenge.
                         </div>
-                    </form>
-                    <div id="flag-result" class="alert" style="display: none;"></div>
+                    </div>
                 </div>
-                {% endif %}
             </div>
+
+            {%if xxe_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>xxe9.local/parse</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for XXE Level 9</p>
         </div>
     </div>
 </div>
-
-<\!-- Flag Submission Modal -->
-{% if flag %}
-<div class="modal fade" id="flagModal" tabindex="-1" aria-labelledby="flagModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="flagModalLabel">
-                    <i class="bi bi-flag-fill me-2"></i>Submit Flag
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="modal-flag-submission-form">
-                    <input type="hidden" name="challenge_id" value="{{ challenge.id }}">
-                    <div class="mb-3">
-                        <label for="modal-flag-input" class="form-label">Flag:</label>
-                        <input type="text" name="flag" id="modal-flag-input" class="form-control" value="{{ flag }}" readonly>
-                    </div>
-                    <button type="submit" class="btn btn-success w-100">Submit Flag</button>
-                </form>
-                <div id="modal-flag-result" class="alert mt-3" style="display: none;"></div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
-{% endblock %}
-
-{% block extra_scripts %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Show challenge description modal on page load (only once)
-    if (\!sessionStorage.getItem('xxe9_description_shown')) {
-        var challengeModal = new bootstrap.Modal(document.getElementById('challengeModal'));
-        challengeModal.show();
-        sessionStorage.setItem('xxe9_description_shown', 'true');
-    }
-
-    // Handle flag submission
-    function handleFlagSubmission(formId, resultId) {
-        const form = document.getElementById(formId);
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const formData = new FormData(form);
-                
-                fetch('/submit_flag', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    const resultDiv = document.getElementById(resultId);
-                    resultDiv.style.display = 'block';
-                    
-                    if (data.success) {
-                        resultDiv.className = 'alert alert-success';
-                        resultDiv.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>' + data.message;
-                        
-                        // Redirect after a short delay
-                        setTimeout(() => {
-                            window.location.href = '/challenges';
-                        }, 2000);
-                    } else {
-                        resultDiv.className = 'alert alert-danger';
-                        resultDiv.innerHTML = '<i class="bi bi-x-circle-fill me-2"></i>' + data.message;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    const resultDiv = document.getElementById(resultId);
-                    resultDiv.style.display = 'block';
-                    resultDiv.className = 'alert alert-danger';
-                    resultDiv.innerHTML = '<i class="bi bi-x-circle-fill me-2"></i>An error occurred while submitting the flag.';
-                });
-            });
-        }
-    }
-
-    // Set up flag submission handlers
-    handleFlagSubmission('flag-submission-form', 'flag-result');
-    handleFlagSubmission('modal-flag-submission-form', 'modal-flag-result');
-});
-</script>
-{% endblock %}
+{%endblock %}

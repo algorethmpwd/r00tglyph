@@ -1,123 +1,103 @@
-{% extends 'base.html' %}
+{%extends 'base.html' %}
 
-{% block title %}Level 2: Command Injection with Basic Filters - R00tGlyph{% endblock %}
+{%block title %}Level 2: Command Injection with Filters - R00tGlyph{%endblock %}
 
-{% block content %}
-<div class="row">
-    <div class="col-md-8 offset-md-2">
-        {% if cmdi_detected %}
-        <div class="alert alert-success">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            <strong>Success!</strong> You've successfully bypassed the filters and exploited the command injection vulnerability! The challenge has been marked as completed.
-            {% if flag %}
-            <div class="mt-2">
-                <strong>Flag:</strong> <code>{{ flag }}</code>
-            </div>
-            {% endif %}
+{%block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">Command Injection</span> / <span>Level 2</span>
+{%endblock %}
+
+{%block content %}
+<div class="challenge-lab">
+    <div class="mission-panel">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
-        {% endif %}
+        <div class="mission-content">
+            <h5 class="mb-3">Command Injection with Filters</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>SystemMonitor</strong>. Test for command injection vulnerabilities.
+            </p>
 
-        {% if waf_blocked %}
-        <div class="alert alert-danger">
-            <i class="bi bi-shield-exclamation me-2"></i>
-            <strong>WAF Alert!</strong> {{ dns_result }}
-        </div>
-        {% endif %}
-
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Level 2: Command Injection with Basic Filters</h2>
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Bypass basic command filters</p>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="alert alert-dark challenge-description" style="display: none;">
-                    <h4><i class="bi bi-info-circle-fill me-2"></i>Challenge Description</h4>
-                    <p>
-                        Welcome to <strong>DNSLookup</strong>, a fictional DNS lookup tool! This challenge simulates a real-world scenario where a DNS lookup utility is vulnerable to command injection, but has basic security filters in place.
-                    </p>
-                    <p>
-                        The developers of DNSLookup have implemented basic security filters to prevent command injection attacks. However, their filtering is incomplete and can be bypassed.
-                    </p>
-                    <p>
-                        <strong>Your Task:</strong> Bypass the security filters and exploit the command injection vulnerability to read the contents of the flag.txt file on the server.
-                    </p>
 
-                    <div class="alert alert-warning">
-                        <i class="bi bi-lightbulb-fill me-2"></i><strong>Hint:</strong> The application blocks obvious command injection characters like semicolons and pipes, but there are other ways to execute commands.
-                    </div>
-
-                    <div class="card mt-3">
-                        <div class="card-header">
-                            <h5><i class="bi bi-info-circle-fill me-2"></i>Additional Hints</h5>
-                        </div>
-                        <div class="card-body">
-                            <p>
-                                When basic command injection characters are blocked, consider alternative techniques:
-                            </p>
-                            <ul>
-                                <li>Command substitution using $() or ``</li>
-                                <li>Environment variables like $IFS for spaces</li>
-                                <li>Bash parameter expansion ${...}</li>
-                                <li>URL encoding to bypass filters</li>
-                            </ul>
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Filter Detection
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Test what's blocked: <code>;</code>, <code>|</code>, <code>&</code>, spaces. Find alternatives.
                         </div>
                     </div>
                 </div>
-
-
-
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h4 class="mb-0"><i class="bi bi-globe me-2"></i>DNS Lookup Tool</h4>
-                    </div>
-                    <div class="card-body">
-                        <form action="{{ url_for('cmdi_level2') }}" method="post">
-                            <div class="input-group mb-3">
-                                <span class="input-group-text">Domain</span>
-                                <input type="text" class="form-control" name="domain" placeholder="Enter domain (e.g., example.com)" value="{{ domain }}">
-                                <button class="btn btn-primary" type="submit">Lookup</button>
-                            </div>
-                        </form>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Bypass Techniques
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Use: <code>${IFS}</code> for spaces, <code>`command`</code> for execution, <code>$((expression))</code> for arithmetic.
+                        </div>
                     </div>
                 </div>
-
-                {% if dns_result and not waf_blocked %}
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-terminal-fill me-2"></i>DNS Lookup Results</h5>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Bypass filters with: <code>127.0.0.1`whoami`</code> or <code>127.0.0.1${IFS}&&${IFS}id</code>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <pre class="bg-dark text-light p-3 rounded"><code>{{ dns_result }}</code></pre>
-                    </div>
-                </div>
-                {% endif %}
-
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <h5><i class="bi bi-lightbulb-fill me-2"></i>Background Information</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>
-                            Many applications implement basic security filters to prevent command injection attacks. These filters often block obvious command injection characters like semicolons (;), pipes (|), and ampersands (&).
-                        </p>
-                        <p>
-                            However, these filters are often incomplete and can be bypassed using alternative techniques. In 2023, researchers found that:
-                        </p>
-                        <ul>
-                            <li>Over 60% of WAF bypass techniques use environment variables</li>
-                            <li>Command substitution using $() or `` is often overlooked</li>
-                            <li>String concatenation and variable expansion can bypass filters</li>
-                        </ul>
-                    </div>
-                </div>
-
-
-
-                <div class="mt-4">
-                    <a href="{{ url_for('solutions', level='cmdi2') }}" class="btn btn-outline-secondary"><i class="bi bi-lightbulb-fill me-2"></i>View Solution</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-primary float-end"><i class="bi bi-arrow-left me-2"></i>Back to Challenges</a>
                 </div>
             </div>
+
+            {%if cmdi_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited the vulnerability.</p>
+                {%if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {%endif %}
+            </div>
+            {%endif %}
+        </div>
+    </div>
+
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>monitor.local/exec</span>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <p class="text-muted">Challenge interface for Command Injection Level 2</p>
         </div>
     </div>
 </div>
-{% endblock %}
+{%endblock %}
