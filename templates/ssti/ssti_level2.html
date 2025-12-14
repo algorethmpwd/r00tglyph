@@ -48,7 +48,7 @@
                     </h2>
                     <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Find subprocess.Popen: <code>{{''.__class__.__mro__[1].__subclasses__()}}</code> then use index to call it.
+                            Find subprocess.Popen: <code>{% raw %}{{''.__class__.__mro__[1].__subclasses__()}}{% endraw %}</code> then use index to call it.
                         </div>
                     </div>
                 </div>
