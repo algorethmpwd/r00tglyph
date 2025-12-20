@@ -37,7 +37,8 @@
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Cookies can be used in SQL queries. Modify cookie values: <code>user_id=1' OR '1'='1'--</code>
+                            Cookies can be used in SQL queries. Modify cookie values:
+                            <code>user_id=1' OR '1'='1'--</code>
                         </div>
                     </div>
                 </div>
@@ -63,7 +64,8 @@
                     </h2>
                     <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Change cookie value to: <code>session=abc'; UPDATE users SET role='admin' WHERE id=1--</code>
+                            Change cookie value to:
+                            <code>session=abc'; UPDATE users SET role='admin' WHERE id=1--</code>
                         </div>
                     </div>
                 </div>
@@ -98,8 +100,56 @@
             </div>
         </div>
 
-        <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for SQLi Level 15</p>
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0 d-flex align-items-center">
+                <i class="bi bi-filetype-xml me-2 text-primary"></i>
+                <h6 class="mb-0">Legacy Report Generator</h6>
+            </div>
+            <div class="card-body">
+                {% if error %}
+                <div class="alert alert-danger small py-2 mb-3">
+                    <i class="bi bi-exclamation-circle me-1"></i> {{ error }}
+                </div>
+                {% endif %}
+
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="xml_data" class="form-label small fw-bold text-muted">XML Input</label>
+                        <textarea class="form-control font-monospace form-control-sm" id="xml_data" name="xml_data"
+                            rows="8">{{ xml_data if xml_data else '<report>
+  <type>sales</type>
+  <period>quarterly</period>
+  <department>sales</department>
+</report>' }}</textarea>
+                        <div class="form-text text-muted small">
+                            Backend uses <code>XPath</code> or XML parsing that might be vulnerable.
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="bi bi-gear-wide-connected me-1"></i> Generate Report
+                        </button>
+                    </div>
+                </form>
+
+                {% if reports %}
+                <div class="mt-4">
+                    <h6 class="small fw-bold text-muted mb-3">Generated Reports</h6>
+                    <div class="list-group list-group-flush border rounded">
+                        {% for report in reports %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ report.title }}</h6>
+                                <small class="text-muted">{{ report.type|upper }}</small>
+                            </div>
+                            <p class="mb-1 small text-secondary">{{ report.data }}</p>
+                            <small class="text-muted fst-italic">Dept: {{ report.department }}</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>

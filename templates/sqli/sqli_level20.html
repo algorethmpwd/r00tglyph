@@ -37,7 +37,8 @@
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Applications logging HTTP headers (User-Agent, Referer, X-Forwarded-For) might be vulnerable if logs are queried.
+                            Applications logging HTTP headers (User-Agent, Referer, X-Forwarded-For) might be vulnerable
+                            if logs are queried.
                         </div>
                     </div>
                 </div>
@@ -98,8 +99,76 @@
             </div>
         </div>
 
-        <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for SQLi Level 20</p>
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0 d-flex align-items-center">
+                <i class="bi bi-database-gear me-2 text-primary"></i>
+                <h6 class="mb-0">Product Filter (Stored Proc)</h6>
+            </div>
+            <div class="card-body">
+                {% if error %}
+                <div class="alert alert-danger small py-2 mb-3">
+                    <i class="bi bi-exclamation-circle me-1"></i> {{ error }}
+                </div>
+                {% endif %}
+
+                <form method="POST" class="row g-3">
+                    <div class="col-md-6">
+                        <label for="category" class="form-label small fw-bold text-muted">Category</label>
+                        <select class="form-select form-select-sm" id="category" name="category">
+                            <option value="Electronics">Electronics</option>
+                            <option value="Clothing">Clothing</option>
+                            <option value="Books">Books</option>
+                            <option value="Home">Home</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="search_term" class="form-label small fw-bold text-muted">Search Term</label>
+                        <input type="text" class="form-control form-control-sm" id="search_term" name="search_term"
+                            placeholder="Optional keyword...">
+                    </div>
+                    <div class="col-12 text-end">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="bi bi-search me-1"></i> Filter Products
+                        </button>
+                    </div>
+                </form>
+
+                {% if generated_sql %}
+                <div class="mt-4 mb-3">
+                    <h6 class="small fw-bold text-muted mb-2">Executed Procedure Logic</h6>
+                    <div class="bg-light p-2 rounded border font-monospace small text-muted">
+                        -- Simulated internal query logic:<br>
+                        {{ generated_sql }}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if result_rows %}
+                <div class="mt-4">
+                    <h6 class="small fw-bold text-muted mb-2">Results</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped border mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    {% for col in result_columns %}
+                                    <th>{{ col|title }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in result_rows %}
+                                <tr>
+                                    {% for cell in row %}
+                                    <td>{{ cell }}</td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>

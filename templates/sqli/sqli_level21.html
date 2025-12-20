@@ -37,7 +37,8 @@
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            If username field is VARCHAR(20), entering 'admin' + 15 spaces + 'x' gets truncated to 'admin' + spaces, potentially creating duplicate admin.
+                            If username field is VARCHAR(20), entering 'admin' + 15 spaces + 'x' gets truncated to
+                            'admin' + spaces, potentially creating duplicate admin.
                         </div>
                     </div>
                 </div>
@@ -98,8 +99,43 @@
             </div>
         </div>
 
-        <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for SQLi Level 21</p>
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0 d-flex align-items-center">
+                <i class="bi bi-diagram-3 me-2 text-primary"></i>
+                <h6 class="mb-0">GraphQL Explorer</h6>
+            </div>
+            <div class="card-body">
+                {% if graphql_result %}
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">Query Result</label>
+                    <div class="bg-dark text-light p-3 rounded font-monospace small"
+                        style="white-space: pre-wrap; max-height: 200px; overflow-y: auto;">{{ graphql_result }}</div>
+                </div>
+                {% endif %}
+
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="graphql_query" class="form-label small fw-bold text-muted">GraphQL Query</label>
+                        <textarea class="form-control font-monospace form-control-sm" id="graphql_query"
+                            name="graphql_query" rows="8">{{ 
+                                graphql_query if graphql_query else 'query {
+  user(id: "1") {
+    username
+    email
+  }
+}' 
+                            }}</textarea>
+                        <div class="form-text text-muted small">
+                            Execute GraphQL queries. Backend resolvers might be vulnerable to SQL injection.
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="bi bi-play-fill me-1"></i> Execute Query
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>

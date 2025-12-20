@@ -37,7 +37,8 @@
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            SOAP/XML services can be vulnerable. Inject in XML elements: <code>&lt;username&gt;admin' OR '1'='1&lt;/username&gt;</code>
+                            SOAP/XML services can be vulnerable. Inject in XML elements:
+                            <code>&lt;username&gt;admin' OR '1'='1&lt;/username&gt;</code>
                         </div>
                     </div>
                 </div>
@@ -50,7 +51,8 @@
                     </h2>
                     <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Craft XML with SQLi: <code>&lt;user&gt;&lt;name&gt;admin'--&lt;/name&gt;&lt;pass&gt;x&lt;/pass&gt;&lt;/user&gt;</code>
+                            Craft XML with SQLi:
+                            <code>&lt;user&gt;&lt;name&gt;admin'--&lt;/name&gt;&lt;pass&gt;x&lt;/pass&gt;&lt;/user&gt;</code>
                         </div>
                     </div>
                 </div>
@@ -98,8 +100,73 @@
             </div>
         </div>
 
-        <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for SQLi Level 14</p>
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-shop me-2 text-primary"></i>
+                    <h6 class="mb-0">Product Search (WAF Protected)</h6>
+                </div>
+                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">
+                    <i class="bi bi-shield-check me-1"></i>WAF Active
+                </span>
+            </div>
+            <div class="card-body">
+                {% if waf_logs %}
+                <div class="alert alert-danger small mb-3 border-danger border-opacity-25">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-shield-x me-2 fs-5"></i>
+                        <strong>Request Blocked by WAF</strong>
+                    </div>
+                    <ul class="mb-0 ps-3">
+                        {% for log in waf_logs %}
+                        <li>{{ log.rule_name }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                {% if error %}
+                <div class="alert alert-warning small py-2 mb-3">
+                    <i class="bi bi-exclamation-triangle me-1"></i> {{ error }}
+                </div>
+                {% endif %}
+
+                <form method="POST" class="mb-4">
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-4">
+                            <select class="form-select form-select-sm" name="category">
+                                <option value="Electronics">Electronics</option>
+                                <option value="Clothing">Clothing</option>
+                            </select>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="input-group input-group-sm">
+                                <input type="text" class="form-control" name="search_term"
+                                    placeholder="Search products..." value="{{ search_term }}">
+                                <button class="btn btn-primary" type="submit">Search</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-text text-muted small">
+                        Protects against: <code>SELECT</code>, <code>UNION</code>, <code>'</code>, <code>"</code>, etc.
+                    </div>
+                </form>
+
+                {% if products %}
+                <div class="list-group list-group-flush border rounded">
+                    {% for product in products %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ product.name }}</h6>
+                            <small class="text-muted">${{ product.price }}</small>
+                        </div>
+                        <p class="mb-1 small text-secondary">{{ product.description }}</p>
+                        <small class="text-muted fst-italic">{{ product.category }}</small>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>

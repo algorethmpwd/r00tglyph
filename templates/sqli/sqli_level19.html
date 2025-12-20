@@ -37,7 +37,8 @@
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Stored procedures can be vulnerable if they use dynamic SQL internally. Test parameters for SQLi.
+                            Stored procedures can be vulnerable if they use dynamic SQL internally. Test parameters for
+                            SQLi.
                         </div>
                     </div>
                 </div>
@@ -98,8 +99,55 @@
             </div>
         </div>
 
-        <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for SQLi Level 19</p>
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0 d-flex align-items-center">
+                <i class="bi bi-file-earmark-spreadsheet me-2 text-primary"></i>
+                <h6 class="mb-0">Batch Employee Import</h6>
+            </div>
+            <div class="card-body">
+                {% if error %}
+                <div class="alert alert-danger small py-2 mb-3">
+                    <i class="bi bi-exclamation-circle me-1"></i> {{ error }}
+                </div>
+                {% endif %}
+
+                {% if upload_success %}
+                <div class="alert alert-success small py-2 mb-3">
+                    <i class="bi bi-check-circle me-1"></i> Upload processed!
+                    <div class="mt-1">
+                        <strong>Status:</strong> {{ import_status }} ({{ rows_imported }}/{{ rows_processed }} rows)<br>
+                    </div>
+                </div>
+                {% endif %}
+
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="csv_content" class="form-label small fw-bold text-muted">CSV Content</label>
+                        <textarea class="form-control font-monospace form-control-sm" id="csv_content"
+                            name="csv_content" rows="8">{{ 
+                                csv_content if csv_content else 'id,name,email,department
+101,John Doe,john@example.com,Sales
+102,Jane Smith,jane@example.com,Marketing' 
+                            }}</textarea>
+                        <div class="form-text text-muted small">
+                            Upload CSV data to bulk import employees. System validates columns.
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="bi bi-upload me-1"></i> Import CSV
+                        </button>
+                    </div>
+                </form>
+
+                {% if import_output %}
+                <div class="mt-4">
+                    <h6 class="small fw-bold text-muted mb-2">Import Logs</h6>
+                    <div class="bg-dark text-light p-3 rounded font-monospace small"
+                        style="white-space: pre-wrap; max-height: 200px; overflow-y: auto;">{{ import_output }}</div>
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>

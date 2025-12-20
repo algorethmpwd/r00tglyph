@@ -37,7 +37,9 @@
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            ORDER BY clauses can leak data: <code>?sort=username</code> becomes <code>ORDER BY username</code>. Inject: <code>?sort=(SELECT CASE WHEN (1=1) THEN username ELSE email END)</code>
+                            ORDER BY clauses can leak data: <code>?sort=username</code> becomes
+                            <code>ORDER BY username</code>. Inject:
+                            <code>?sort=(SELECT CASE WHEN (1=1) THEN username ELSE email END)</code>
                         </div>
                     </div>
                 </div>
@@ -98,9 +100,92 @@
             </div>
         </div>
 
-        <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for SQLi Level 16</p>
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-chat-dots me-2 text-primary"></i>
+                    <h6 class="mb-0">Live Chat Support</h6>
+                </div>
+                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25"
+                    id="ws-status">
+                    <i class="bi bi-lightning-charge-fill me-1"></i>Connected
+                </span>
+            </div>
+            <div class="card-body p-0">
+                <div class="chat-window bg-light p-3" style="height: 300px; overflow-y: auto;" id="chat-messages">
+                    <div class="chat-message mb-2">
+                        <small class="text-muted fw-bold">System:</small>
+                        <span class="bg-white px-2 py-1 rounded shadow-sm small">Welcome to customer support. How can we
+                            help?</span>
+                    </div>
+                </div>
+                <div class="p-3 border-top bg-white">
+                    <div class="input-group input-group-sm">
+                        <input type="text" class="form-control" id="ws-input" placeholder="Type your message...">
+                        <button class="btn btn-primary" type="button" id="ws-send">
+                            <i class="bi bi-send-fill"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const sendBtn = document.getElementById('ws-send');
+                const input = document.getElementById('ws-input');
+                const chatWindow = document.getElementById('chat-messages');
+
+                function addMessage(sender, text, isSystem = false) {
+                    const div = document.createElement('div');
+                    div.className = 'chat-message mb-2';
+                    const badge = isSystem ? 'bg-white' : 'bg-primary text-white';
+                    div.innerHTML = `<small class="text-muted fw-bold">${sender}:</small> <span class="${badge} px-2 py-1 rounded shadow-sm small" style="display:inline-block">${text}</span>`;
+                    chatWindow.appendChild(div);
+                    chatWindow.scrollTop = chatWindow.scrollHeight;
+                }
+
+                sendBtn.addEventListener('click', function () {
+                    const msg = input.value;
+                    if (!msg) return;
+
+                    addMessage('You', msg);
+                    input.value = '';
+
+                    // Simulation of vulnerable WebSocket handling
+                    // In a real scenario, this would go over wss://
+                    // Here we simulate the backend logic via fetch
+
+                    let isSqli = false;
+                    const patterns = ["'", '"', "UNION", "SELECT", "OR", "1=1"];
+                    if (patterns.some(p => msg.toUpperCase().includes(p))) {
+                        isSqli = true;
+                    }
+
+                    fetch('/sqli/level16', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            ws_message: msg,
+                            sqli_detected: isSqli
+                        })
+                    })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.success && isSqli) {
+                                addMessage('System', 'Internal Server Error: Syntax error in SQL statement...', true);
+                                setTimeout(() => {
+                                    window.location.reload(); // Reload to show success flag
+                                }, 1500);
+                            } else {
+                                setTimeout(() => {
+                                    addMessage('Support', 'I did not understand that command.', true);
+                                }, 500);
+                            }
+                        });
+                });
+            });
+        </script>
     </div>
 </div>
 {%endblock %}

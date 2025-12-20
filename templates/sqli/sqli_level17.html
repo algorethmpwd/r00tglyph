@@ -98,8 +98,44 @@
             </div>
         </div>
 
-        <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for SQLi Level 17</p>
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0 d-flex align-items-center">
+                <i class="bi bi-phone me-2 text-primary"></i>
+                <h6 class="mb-0">Mobile App API Tester</h6>
+            </div>
+            <div class="card-body">
+                {% if api_response %}
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">API Response</label>
+                    <div class="bg-dark text-light p-3 rounded font-monospace small"
+                        style="white-space: pre-wrap; max-height: 200px; overflow-y: auto;">{{ api_response }}</div>
+                </div>
+                {% endif %}
+
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="api_request" class="form-label small fw-bold text-muted">JSON Request
+                            Payload</label>
+                        <textarea class="form-control font-monospace form-control-sm" id="api_request"
+                            name="api_request" rows="8">{{ 
+                                api_request if api_request else '{
+  "action": "get_products",
+  "category": "Electronics",
+  "sort": "price_asc",
+  "limit": 10
+}' 
+                            }}</textarea>
+                        <div class="form-text text-muted small">
+                            Modify JSON parameters to test for injection. Backend parses this JSON and builds SQL.
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="bi bi-send me-1"></i> Send Request
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>

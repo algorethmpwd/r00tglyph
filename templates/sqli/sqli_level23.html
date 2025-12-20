@@ -37,7 +37,8 @@
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Polyglot SQLi works across multiple databases (MySQL, PostgreSQL, MSSQL). Use syntax compatible with all.
+                            Polyglot SQLi works across multiple databases (MySQL, PostgreSQL, MSSQL). Use syntax
+                            compatible with all.
                         </div>
                     </div>
                 </div>
@@ -50,7 +51,8 @@
                     </h2>
                     <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Example: <code>' OR '1'='1'--</code> works on most databases. Avoid database-specific functions.
+                            Example: <code>' OR '1'='1'--</code> works on most databases. Avoid database-specific
+                            functions.
                         </div>
                     </div>
                 </div>
@@ -98,8 +100,81 @@
             </div>
         </div>
 
-        <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for SQLi Level 23</p>
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0 d-flex align-items-center">
+                <i class="bi bi-braces me-2 text-primary"></i>
+                <h6 class="mb-0">ORM Article Search</h6>
+            </div>
+            <div class="card-body">
+                {% if error %}
+                <div class="alert alert-danger small py-2 mb-3">
+                    <i class="bi bi-exclamation-circle me-1"></i> {{ error }}
+                </div>
+                {% endif %}
+
+                <form method="POST" class="row g-3">
+                    <div class="col-md-6">
+                        <label for="search_term" class="form-label small fw-bold text-muted">Search Term</label>
+                        <input type="text" class="form-control form-control-sm" id="search_term" name="search_term"
+                            value="{{ request.form.get('search_term', '') }}" placeholder="Search articles...">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="filter_by" class="form-label small fw-bold text-muted">Filter Field</label>
+                        <select class="form-select form-select-sm" id="filter_by" name="filter_by">
+                            <option value="title">Title</option>
+                            <option value="content">Content</option>
+                            <option value="author">Author</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="sort_by" class="form-label small fw-bold text-muted">Sort By</label>
+                        <select class="form-select form-select-sm" id="sort_by" name="sort_by">
+                            <option value="id">ID</option>
+                            <option value="title">Title</option>
+                            <option value="created_at">Date</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="sort_order" class="form-label small fw-bold text-muted">Order</label>
+                        <select class="form-select form-select-sm" id="sort_order" name="sort_order">
+                            <option value="asc">Ascending</option>
+                            <option value="desc">Descending</option>
+                        </select>
+                    </div>
+                    <div class="col-12 text-end">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="bi bi-search me-1"></i> Search
+                        </button>
+                    </div>
+                </form>
+
+                {% if orm_query %}
+                <div class="mt-4 mb-3">
+                    <h6 class="small fw-bold text-muted mb-2">Generated ORM Query</h6>
+                    <div class="bg-light p-2 rounded border font-monospace small text-muted">
+                        {{ orm_query }}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if results %}
+                <div class="mt-4">
+                    <h6 class="small fw-bold text-muted mb-2">Results</h6>
+                    <div class="list-group list-group-flush border rounded">
+                        {% for article in results %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ article.title }}</h6>
+                                <small class="text-muted">{{ article.created_at }}</small>
+                            </div>
+                            <p class="mb-1 small text-secondary">{{ article.content }}</p>
+                            <small class="text-muted fst-italic">By {{ article.author }}</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>

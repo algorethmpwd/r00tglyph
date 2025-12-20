@@ -37,7 +37,8 @@
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            LIMIT clauses can sometimes be exploited: <code>LIMIT 10 OFFSET 0; SELECT password FROM users--</code>
+                            LIMIT clauses can sometimes be exploited:
+                            <code>LIMIT 10 OFFSET 0; SELECT password FROM users--</code>
                         </div>
                     </div>
                 </div>
@@ -98,8 +99,60 @@
             </div>
         </div>
 
-        <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for SQLi Level 18</p>
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0 d-flex align-items-center">
+                <i class="bi bi-cloud-lightning me-2 text-primary"></i>
+                <h6 class="mb-0">Cloud Function Trigger</h6>
+            </div>
+            <div class="card-body">
+                {% if function_response %}
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">Function Response</label>
+                    <div class="bg-dark text-light p-3 rounded font-monospace small" style="white-space: pre-wrap;">{{
+                        function_response }}</div>
+                </div>
+                {% endif %}
+
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="event_data" class="form-label small fw-bold text-muted">Event Payload (JSON)</label>
+                        <textarea class="form-control font-monospace form-control-sm" id="event_data" name="event_data"
+                            rows="8">{{ 
+                                event_data if event_data else '{
+  "action": "query_data",
+  "dataset": "sales_2023",
+  "filter": "quantity > 10",
+  "format": "json"
+}' 
+                            }}</textarea>
+                        <div class="form-text text-muted small">
+                            Event data is processed by a serverless function that builds a query dynamically.
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="bi bi-lightning-fill me-1"></i> Trigger Function
+                        </button>
+                    </div>
+                </form>
+
+                {% if function_logs %}
+                <div class="mt-4">
+                    <h6 class="small fw-bold text-muted mb-2">Execution Logs</h6>
+                    <div class="bg-light p-2 rounded border font-monospace small"
+                        style="max-height: 200px; overflow-y: auto;">
+                        {% for log in function_logs %}
+                        <div class="mb-1">
+                            <span class="text-muted">[{{ log.timestamp }}]</span>
+                            <span class="{{ 'text-danger fw-bold' if log.level == 'warning' else 'text-success' }}">{{
+                                log.level|upper }}:</span>
+                            {{ log.message }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>

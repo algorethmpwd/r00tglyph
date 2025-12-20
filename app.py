@@ -6909,6 +6909,8 @@ def sqli_level20():
 def sqli_level21():
     # machine_id = get_machine_id() # Deprecated
     user = get_current_user()
+    import json
+    import re
     flag = None
     sqli_detected = False
     graphql_query = None
@@ -6919,8 +6921,6 @@ def sqli_level21():
 
         try:
             # Parse the GraphQL query
-            import json
-            import re
 
             # Check for SQL injection patterns
             sqli_patterns = [
