@@ -417,6 +417,55 @@ def reset_database():
                 description="Exploit XSS vulnerabilities in federated identity systems.",
                 points=2200,
             ),
+            Challenge(
+                name="DOM Clobbering",
+                category="xss",
+                difficulty="expert",
+                description="Overwrite global window objects using HTML element IDs to execute code.",
+                points=2300,
+            ),
+            Challenge(
+                name="Dangling Markup Injection",
+                category="xss",
+                difficulty="expert",
+                description="Exfiltrate data using unclosed tags when script execution is blocked by CSP.",
+                points=2400,
+            ),
+            Challenge(
+                name="Polyglot XSS",
+                category="xss",
+                difficulty="expert",
+                description="Create a payload valid in multiple contexts (HTML, JS, URL).",
+                points=2500,
+            ),
+            Challenge(
+                name="Client-Side Template Injection",
+                category="xss",
+                difficulty="expert",
+                description="Inject directives into client-side frameworks like Alpine.js.",
+                points=2600,
+            ),
+            Challenge(
+                name="Import Map Injection",
+                category="xss",
+                difficulty="expert",
+                description="Hijack module loading by injecting malicious Import Maps.",
+                points=2700,
+            ),
+            Challenge(
+                name="HMR Injection",
+                category="xss",
+                difficulty="expert",
+                description="Exploit Hot Module Replacement mechanisms via WebSocket injection.",
+                points=2800,
+            ),
+            Challenge(
+                name="Indirect Prompt Injection",
+                category="xss",
+                difficulty="expert",
+                description="Trick an AI model into generating XSS payloads from untrusted input.",
+                points=2900,
+            ),
             # SQL Injection Challenges
             Challenge(
                 name="Basic SQL Injection",
@@ -3590,6 +3639,206 @@ def xss_level23():
         message=message,
     )
 
+
+# XSS Level 24 - DOM Clobbering
+@app.route("/xss/level24", methods=["GET", "POST"])
+@login_required
+def xss_level24():
+    user = get_current_user()
+    flag = None
+    xss_detected = False
+    message = ""
+    
+    if request.method == "POST":
+        user_input = request.form.get("input", "")
+        # Check if user is attempting DOM clobbering by injecting elements with specific IDs
+        if 'id="config"' in user_input or "id='config'" in user_input:
+             xss_detected = True
+             completed_challenge("DOM Clobbering", user)
+             message = "Challenge solved! Flag revealed."
+        else:
+            message = "Try to clobber the window.config object."
+
+    flag = get_flag_if_completed("DOM Clobbering", user)
+    return render_template(
+        "xss/xss_level24.html",
+        flag=flag,
+        user=user,
+        xss_detected=xss_detected,
+        message=message,
+    )
+
+
+# XSS Level 25 - Dangling Markup Injection
+@app.route("/xss/level25", methods=["GET", "POST"])
+@login_required
+def xss_level25():
+    user = get_current_user()
+    flag = None
+    xss_detected = False
+    message = ""
+    
+    if request.method == "POST":
+        user_input = request.form.get("input", "")
+        # Check for unclosed tags characteristic of dangling markup
+        if "<img src='" in user_input and "'>" not in user_input:
+             xss_detected = True
+             completed_challenge("Dangling Markup Injection", user)
+             message = "Challenge solved! Flag revealed."
+        else:
+            message = "Try to exfiltrate data using dangling markup."
+
+    flag = get_flag_if_completed("Dangling Markup Injection", user)
+    return render_template(
+        "xss/xss_level25.html",
+        flag=flag,
+        user=user,
+        xss_detected=xss_detected,
+        message=message,
+    )
+
+
+# XSS Level 26 - Polyglot XSS
+@app.route("/xss/level26", methods=["GET", "POST"])
+@login_required
+def xss_level26():
+    user = get_current_user()
+    flag = None
+    xss_detected = False
+    message = ""
+    
+    if request.method == "POST":
+        user_input = request.form.get("input", "")
+        # Simple check for common polyglot patterns
+        if "javascript:" in user_input and "//" in user_input and "<" in user_input:
+             xss_detected = True
+             completed_challenge("Polyglot XSS", user)
+             message = "Challenge solved! Flag revealed."
+        else:
+            message = "Create a payload valid in HTML, JS dictionary, and URL contexts."
+
+    flag = get_flag_if_completed("Polyglot XSS", user)
+    return render_template(
+        "xss/xss_level26.html",
+        flag=flag,
+        user=user,
+        xss_detected=xss_detected,
+        message=message,
+    )
+
+
+# XSS Level 27 - Client-Side Template Injection (Alpine.js)
+@app.route("/xss/level27", methods=["GET", "POST"])
+@login_required
+def xss_level27():
+    user = get_current_user()
+    flag = None
+    xss_detected = False
+    message = ""
+    
+    if request.method == "POST":
+        user_input = request.form.get("input", "")
+        if "x-html" in user_input or "x-on:click" in user_input:
+             xss_detected = True
+             completed_challenge("Client-Side Template Injection", user)
+             message = "Challenge solved! Flag revealed."
+        else:
+            message = "Inject Alpine.js directives."
+
+    flag = get_flag_if_completed("Client-Side Template Injection", user)
+    return render_template(
+        "xss/xss_level27.html",
+        flag=flag,
+        user=user,
+        xss_detected=xss_detected,
+        message=message,
+    )
+
+
+# XSS Level 28 - Import Map Injection
+@app.route("/xss/level28", methods=["GET", "POST"])
+@login_required
+def xss_level28():
+    user = get_current_user()
+    flag = None
+    xss_detected = False
+    message = ""
+    
+    if request.method == "POST":
+        user_input = request.form.get("input", "")
+        if 'type="importmap"' in user_input or "type='importmap'" in user_input:
+             xss_detected = True
+             completed_challenge("Import Map Injection", user)
+             message = "Challenge solved! Flag revealed."
+        else:
+            message = "Inject or manipulate an import map."
+
+    flag = get_flag_if_completed("Import Map Injection", user)
+    return render_template(
+        "xss/xss_level28.html",
+        flag=flag,
+        user=user,
+        xss_detected=xss_detected,
+        message=message,
+    )
+
+
+# XSS Level 29 - Web Bundle / HMR Injection
+@app.route("/xss/level29", methods=["GET", "POST"])
+@login_required
+def xss_level29():
+    user = get_current_user()
+    flag = None
+    xss_detected = False
+    message = ""
+    
+    if request.method == "POST":
+        user_input = request.form.get("input", "")
+        # Check for HMR-like payload structure
+        if '"type":"update"' in user_input and "modules" in user_input:
+             xss_detected = True
+             completed_challenge("HMR Injection", user)
+             message = "Challenge solved! Flag revealed."
+        else:
+            message = "Simulate a malicious HMR update."
+
+    flag = get_flag_if_completed("HMR Injection", user)
+    return render_template(
+        "xss/xss_level29.html",
+        flag=flag,
+        user=user,
+        xss_detected=xss_detected,
+        message=message,
+    )
+
+
+# XSS Level 30 - Indirect Prompt Injection
+@app.route("/xss/level30", methods=["GET", "POST"])
+@login_required
+def xss_level30():
+    user = get_current_user()
+    flag = None
+    xss_detected = False
+    message = ""
+    
+    if request.method == "POST":
+        user_input = request.form.get("input", "")
+        # Look for prompt injection keywords targeting the AI
+        if "ignore previous" in user_input.lower() and "<script>" in user_input.lower():
+             xss_detected = True
+             completed_challenge("Indirect Prompt Injection", user)
+             message = "Challenge solved! Flag revealed."
+        else:
+            message = "Trick the AI into generating XSS."
+
+    flag = get_flag_if_completed("Indirect Prompt Injection", user)
+    return render_template(
+        "xss/xss_level30.html",
+        flag=flag,
+        user=user,
+        xss_detected=xss_detected,
+        message=message,
+    )
 
 # SQL Injection Level 1 - Basic SQL Injection
 @app.route("/sqli/level1", methods=["GET", "POST"])

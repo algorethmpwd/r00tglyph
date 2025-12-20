@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
+        </div>
+        <div class="mission-content">
+            <h5 class="mb-3">Level 27: Client-Side Template Injection (CSTI)</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>Reactive Dashboard</strong>. Powered by Alpine.js.
+            </p>
+
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Inject Alpine.js directives to execute arbitrary JavaScript.</p>
+                </div>
+            </div>
+
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Modern Frameworks
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Frameworks like Alpine.js, Vue, and Angular scan the DOM for special attributes (directives)
+                            to execute logic.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Directive Injection
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            If user input is injected into an HTML attribute that the framework scans, you can inject
+                            directives like <code>x-on:click</code> or <code>x-init</code>.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Payload: <code>&lt;div x-data x-init="alert(1)"&gt;&lt;/div&gt;</code> or breaking out of an
+                            attribute to add <code>x-on:click="alert(1)"</code>.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <!-- Level 27: CSTI -->
+            <div class="card border-0 shadow-none mb-4">
+                <div class="card-body">
+                    <h4 class="mb-3">Live Status</h4>
+
+                    {% if message %}
+                    <div
+                        class="alert {% if xss_detected %}alert-success{% else %}alert-info{% endif %} border-0 d-flex align-items-center mb-4">
+                        <i class="bi {% if xss_detected %}bi-check-circle{% else %}bi-info-circle{% endif %} me-2"></i>
+                        <div>{{ message }}</div>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" action="{{ url_for('xss_level27') }}">
+                        <div class="mb-3">
+                            <label class="form-label">Update Status</label>
+                            <input type="text" class="form-control" name="input" placeholder="Status..." required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </form>
+
+                    <hr>
+
+                    <div class="mt-4">
+                        <!-- Simulated Alpine.js Context -->
+                        <div x-data="{ status: '{{ request.form.get('input', 'Active') }}' }">
+                            <p>Current Status: <span x-text="status"></span></p>
+                            <button class="btn btn-sm btn-outline-secondary">Check</button>
+                        </div>
+                        <small class="text-muted">Currently using Alpine.js v3.x</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Load Alpine.js from CDN (simulated or real) -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+{% endblock %}

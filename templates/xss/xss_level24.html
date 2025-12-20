@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
+        </div>
+        <div class="mission-content">
+            <h5 class="mb-3">Level 24: DOM Clobbering</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>Global Config Manager</strong>.
+            </p>
+
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Overwrite the global <code>window.config</code> object to execute arbitrary
+                        code.</p>
+                </div>
+            </div>
+
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Global Scope
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            HTML elements with an <code>id</code> attribute are automatically added to the global window
+                            scope as variables.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Overwriting
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            If the application uses a global variable like <code>config</code> without initializing it
+                            with `let` or `const`, you might be able to overwrite it by injecting an element with
+                            `id="config"`.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Payload: <code>&lt;a id="config" href="javascript:alert(1)"&gt;clobber&lt;/a&gt;</code> (or
+                            similar structure depending on how the config object is used).
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <!-- Level 24: DOM Clobbering -->
+            <div class="card border-0 shadow-none mb-4">
+                <div class="card-body">
+                    <h4 class="mb-3">Global Configuration</h4>
+
+                    {% if message %}
+                    <div
+                        class="alert {% if xss_detected %}alert-success{% else %}alert-info{% endif %} border-0 d-flex align-items-center mb-4">
+                        <i class="bi {% if xss_detected %}bi-check-circle{% else %}bi-info-circle{% endif %} me-2"></i>
+                        <div>{{ message }}</div>
+                    </div>
+                    {% endif %}
+
+                    <p>Current Config Status: <span id="status" class="badge bg-secondary">Loading...</span></p>
+
+                    <form method="POST" action="{{ url_for('xss_level24') }}">
+                        <div class="mb-3">
+                            <label class="form-label">Update Status Message</label>
+                            <input type="text" class="form-control" name="input" placeholder="Enter HTML..." required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </form>
+
+                    <div class="mt-4 p-3 bg-light border rounded">
+                        <h6>Preview:</h6>
+                        <div id="preview">
+                            <!-- In a real scenario, this would be where the user's input is rendered -->
+                            {% if request.method == 'POST' %}
+                            {{ request.form.get('input', '') | safe }}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <script>
+                        // Vulnerable code simulation
+                        if (window.config) {
+                            // If config exists (clobbered), do something insecure
+                            console.log("Config loaded:", window.config);
+                        } else {
+                            window.config = { debug: false };
+                        }
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

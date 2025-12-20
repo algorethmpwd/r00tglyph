@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
+        </div>
+        <div class="mission-content">
+            <h5 class="mb-3">Level 29: Web Bundle/HMR Injection</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>DevServer Console</strong>. Emulating Hot Module Replacement.
+            </p>
+
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Simulate a malicious HMR update message to execute code.</p>
+                </div>
+            </div>
+
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: What is HMR?
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Hot Module Replacement (HMR) allows modules to be exchanged in a running application without
+                            a full reload using WebSockets.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Malicious Updates
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            If an attacker can inject messages into the HMR WebSocket channel, they can push a malicious
+                            "update" that the client executes.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Payload (simulated): <code>{"type":"update", "modules": {"main.js": "alert(1)"}}</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <!-- Level 29: Web Bundle / HMR -->
+            <div class="card border-0 shadow-none mb-4">
+                <div class="card-body">
+                    <h4 class="mb-3">DevServer Simulator</h4>
+
+                    {% if message %}
+                    <div
+                        class="alert {% if xss_detected %}alert-success{% else %}alert-info{% endif %} border-0 d-flex align-items-center mb-4">
+                        <i class="bi {% if xss_detected %}bi-check-circle{% else %}bi-info-circle{% endif %} me-2"></i>
+                        <div>{{ message }}</div>
+                    </div>
+                    {% endif %}
+
+                    <div class="bg-black text-white p-3 font-monospace rounded mb-3" style="min-height: 150px;">
+                        <div class="text-success">[HMR] Waiting for update signal...</div>
+                        <div class="text-secondary">[WS] Connected to ws://localhost:3000</div>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('xss_level29') }}">
+                        <div class="mb-3">
+                            <label class="form-label">Inject WebSocket Message</label>
+                            <textarea class="form-control font-monospace" name="input" rows="3"
+                                placeholder='{"type":"..."}' required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-warning">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

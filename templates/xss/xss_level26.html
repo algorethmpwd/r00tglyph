@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="mission-header">
+            <i class="bi bi-crosshair me-2"></i>Mission Control
+        </div>
+        <div class="mission-content">
+            <h5 class="mb-3">Level 26: Polyglot XSS</h5>
+            <p class="text-secondary small mb-4">
+                Welcome to <strong>Multi-Context Validator</strong>.
+            </p>
+
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
+                    <p class="mb-0 small">Create a payload that executes in multiple contexts (HTML, JS, URL)
+                        simultaneously.</p>
+                </div>
+            </div>
+
+            <div class="hint-accordion accordion" id="hintsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint1">
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: What is a Polyglot?
+                        </button>
+                    </h2>
+                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            A polyglot XSS payload is a string of characters that breaks out of multiple different
+                            contexts (HTML attribute, script string, etc.) and executes valid JavaScript.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint2">
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Breaking Contexts
+                        </button>
+                    </h2>
+                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Use combinations like <code>javascript://%250Aalert(1)//"</code> to satisfy URL schemes,
+                            comment out trailing code, and break out of strings.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#hint3">
+                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
+                        </button>
+                    </h2>
+                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
+                        <div class="accordion-body small text-secondary">
+                            Example: <code>javascript://%250Aalert(1)//"&gt;&lt;/script&gt;</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="app-frame p-4">
+            <!-- Level 26: Polyglot XSS -->
+            <div class="card border-0 shadow-none mb-4">
+                <div class="card-body">
+                    <h4 class="mb-3">Input Validator</h4>
+
+                    {% if message %}
+                    <div
+                        class="alert {% if xss_detected %}alert-success{% else %}alert-info{% endif %} border-0 d-flex align-items-center mb-4">
+                        <i class="bi {% if xss_detected %}bi-check-circle{% else %}bi-info-circle{% endif %} me-2"></i>
+                        <div>{{ message }}</div>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" action="{{ url_for('xss_level26') }}">
+                        <div class="mb-3">
+                            <label class="form-label">Universal Payload</label>
+                            <input type="text" class="form-control" name="input" placeholder="Payload..." required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Validate</button>
+                    </form>
+
+                    <div class="mt-4 row">
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded">
+                                <small class="text-muted d-block mb-2">Context 1: HTML Body</small>
+                                <div>
+                                    {% if request.method == 'POST' %}
+                                    {{ request.form.get('input', '') | safe }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded">
+                                <small class="text-muted d-block mb-2">Context 2: Attribute</small>
+                                <input type="text" class="form-control" value="{{ request.form.get('input', '') }}">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded">
+                                <small class="text-muted d-block mb-2">Context 3: Script String</small>
+                                <script>
+                                    var input = "{{ request.form.get('input', '') | safe }}";
+                                </script>
+                                <span class="text-muted fst-italic">Rendered inside &lt;script&gt;</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
