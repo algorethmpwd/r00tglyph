@@ -14,30 +14,30 @@
             <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
         <div class="mission-content">
-            <h5 class="mb-3">XSS via SVG</h5>
+            <h5 class="mb-3">CSP Bypass</h5>
             <p class="text-secondary small mb-4">
-                Welcome to <strong>GraphicsEditor</strong>. Test the security of this application.
+                Welcome to <strong>SecureComments</strong>. We use a Content Security Policy to prevent XSS.
             </p>
 
             <div class="card mb-4 border-0 bg-light">
                 <div class="card-body p-3">
                     <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
-                    <p class="mb-0 small">Exploit SVG tags for XSS</p>
+                    <p class="mb-0 small">Bypass the CSP to execute <code>alert("XSS Level 9 Completed!")</code>.</p>
                 </div>
             </div>
 
-            <!-- Integrated Hints System -->
             <div class="hint-accordion accordion" id="hintsAccordion">
                 <div class="accordion-item">
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint1">
-                            <i class="bi bi-lightbulb me-2"></i> Hint 1: SVG Tags
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Analyze the Policy
                         </button>
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            SVG elements support event handlers. <code>&lt;svg&gt;</code> tags are often overlooked by filters.
+                            The CSP allows scripts from `self` and `cdnjs.cloudflare.com`. Any script imported from
+                            there is trusted.
                         </div>
                     </div>
                 </div>
@@ -45,12 +45,13 @@
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint2">
-                            <i class="bi bi-code-slash me-2"></i> Hint 2: SVG Payload
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Script Gadgets
                         </button>
                     </h2>
                     <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Try: <code>&lt;svg onload=alert(1)&gt;</code> or <code>&lt;svg&gt;&lt;script&gt;alert(1)&lt;/script&gt;&lt;/svg&gt;</code>
+                            The page loads AngularJS from the trusted CDN. AngularJS has known CSP bypass vectors using
+                            "Client-Side Template Injection".
                         </div>
                     </div>
                 </div>
@@ -63,7 +64,8 @@
                     </h2>
                     <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Enter: <code>&lt;svg onload="alert('XSS Level 9 Completed!')"&gt;</code>
+                            Inject:
+                            <code>&lt;div ng-app ng-csp&gt;{{ '{{' }}$on.curry.call().alert('XSS Level 9 Completed!'){{ '}}' }}&lt;/div&gt;</code>
                         </div>
                     </div>
                 </div>
@@ -99,7 +101,50 @@
         </div>
 
         <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for XSS Level 9</p>
+            <!-- Level 9: CSP Bypass -->
+            <div class="card border-0 shadow-none mb-4">
+                <div class="card-body">
+                    <h4 class="mb-3">Secure Comments</h4>
+
+                    {% if message %}
+                    <div
+                        class="alert {% if xss_detected %}alert-success{% else %}alert-info{% endif %} border-0 d-flex align-items-center mb-4">
+                        <i class="bi {% if xss_detected %}bi-check-circle{% else %}bi-info-circle{% endif %} me-2"></i>
+                        <div>{{ message }}</div>
+                    </div>
+                    {% endif %}
+
+                    {% if user_comment %}
+                    <div class="mb-4">
+                        <h6 class="text-muted small text-uppercase mb-2">Previous Comment</h6>
+                        <div class="p-3 bg-light rounded border">
+                            <!-- VULNERABILITY: Content is rendered safely but restricted by CSP -->
+                            {{ user_comment | safe }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" action="{{ url_for('xss_level9') }}" class="mb-4">
+                        <div class="mb-3">
+                            <label class="form-label">Comment</label>
+                            <textarea class="form-control" name="comment" rows="3" placeholder="Leave a comment..."
+                                required></textarea>
+                            <div class="form-text">Protected by Content Security Policy (CSP).</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Post Comment</button>
+                    </form>
+
+                    <hr>
+
+                    <div class="d-flex align-items-center text-muted small">
+                        <i class="bi bi-shield-lock me-2 text-warning"></i>
+                        <span>CSP Active: script-src 'self' cdnjs.cloudflare.com</span>
+                    </div>
+
+                    <!-- Hidden Script Gadget for CSP Bypass (AngularJS) -->
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.2/angular.min.js"></script>
+                </div>
+            </div>
         </div>
     </div>
 </div>

@@ -14,30 +14,31 @@
             <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
         <div class="mission-content">
-            <h5 class="mb-3">XSS via Template Injection</h5>
+            <h5 class="mb-3">PDF Generation XSS</h5>
             <p class="text-secondary small mb-4">
-                Welcome to <strong>TemplateEngine</strong>. Test the security of this application.
+                Welcome to <strong>ResumeBuilder</strong>. We generate high-quality PDFs from your input.
             </p>
 
             <div class="card mb-4 border-0 bg-light">
                 <div class="card-body p-3">
                     <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
-                    <p class="mb-0 small">Exploit template engine vulnerabilities</p>
+                    <p class="mb-0 small">Inject JavaScript that executes during PDF generation by a headless browser.
+                    </p>
                 </div>
             </div>
 
-            <!-- Integrated Hints System -->
             <div class="hint-accordion accordion" id="hintsAccordion">
                 <div class="accordion-item">
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint1">
-                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Template Engines
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Server-Side Browsers
                         </button>
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Template engines like Jinja2, Handlebars process special syntax. Test for template injection.
+                            PDF generators often use headless browsers (like Chrome or PhantomJS) to "print" HTML to
+                            PDF. These browsers execute JavaScript.
                         </div>
                     </div>
                 </div>
@@ -45,12 +46,13 @@
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint2">
-                            <i class="bi bi-code-slash me-2"></i> Hint 2: Template Syntax
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: PDF JavaScript
                         </button>
                     </h2>
                     <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Try: <code>{{7*7}}</code> or <code>${7*7}</code>. If it evaluates to 49, you have template injection.
+                            You can inject tags like <code>&lt;script&gt;</code> that write to the document body or
+                            trigger special PDF features.
                         </div>
                     </div>
                 </div>
@@ -63,7 +65,9 @@
                     </h2>
                     <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Use template-specific payloads to execute JavaScript in the rendered output.
+                            Inject <code>&lt;script&gt;document.write('XSS Level 13 Completed!')&lt;/script&gt;</code>
+                            or <code>&lt;img src=x onerror=app.alert('XSS')&gt;</code> (Simulated check looks for
+                            `app.alert`).
                         </div>
                     </div>
                 </div>
@@ -99,7 +103,55 @@
         </div>
 
         <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for XSS Level 13</p>
+            <!-- Level 13: PDF XSS -->
+            <div class="card border-0 shadow-none mb-4">
+                <div class="card-body">
+                    <h4 class="mb-3">Resume Builder</h4>
+
+                    {% if message %}
+                    <div
+                        class="alert {% if xss_detected %}alert-success{% else %}alert-info{% endif %} border-0 d-flex align-items-center mb-4">
+                        <i class="bi {% if xss_detected %}bi-check-circle{% else %}bi-info-circle{% endif %} me-2"></i>
+                        <div>{{ message }}</div>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" action="{{ url_for('xss_level13') }}" class="mb-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" class="form-control" name="name" placeholder="John Doe" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Job Title</label>
+                                <input type="text" class="form-control" name="title" placeholder="Security Researcher"
+                                    required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Summary</label>
+                                <textarea class="form-control" name="summary" rows="3"
+                                    placeholder="Brief professional summary..." required></textarea>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="previewCheck">
+                                <label class="form-check-label small text-muted" for="previewCheck">
+                                    Generate PDF Preview
+                                </label>
+                            </div>
+                            <button type="submit" class="btn btn-primary"><i
+                                    class="bi bi-file-earmark-pdf me-2"></i>Generate Resume</button>
+                        </div>
+                    </form>
+
+                    <div class="alert alert-secondary border-0 small">
+                        <i class="bi bi-info-circle me-2"></i>
+                        The PDF generation service runs on the server using a headless browser. It supports full
+                        JavaScript execution for dynamic layouts.
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

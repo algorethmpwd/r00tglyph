@@ -14,30 +14,30 @@
             <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
         <div class="mission-content">
-            <h5 class="mb-3">XSS in JSON Context</h5>
+            <h5 class="mb-3">Prototype Pollution</h5>
             <p class="text-secondary small mb-4">
-                Welcome to <strong>APIViewer</strong>. Test the security of this application.
+                Welcome to <strong>ThemeManager</strong>. Configure your UI preferences using JSON.
             </p>
 
             <div class="card mb-4 border-0 bg-light">
                 <div class="card-body p-3">
                     <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
-                    <p class="mb-0 small">Break out of JSON context</p>
+                    <p class="mb-0 small">Pollute the prototype chain to execute Reflected XSS.</p>
                 </div>
             </div>
 
-            <!-- Integrated Hints System -->
             <div class="hint-accordion accordion" id="hintsAccordion">
                 <div class="accordion-item">
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint1">
-                            <i class="bi bi-lightbulb me-2"></i> Hint 1: JSON Context
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Magic Properties
                         </button>
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Your input might be in JSON: <code>{"name":"YOUR_INPUT"}</code>. Break out of the JSON structure.
+                            JavaScript objects have a special property <code>__proto__</code> that links to their
+                            prototype.
                         </div>
                     </div>
                 </div>
@@ -45,12 +45,13 @@
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint2">
-                            <i class="bi bi-code-slash me-2"></i> Hint 2: JSON Escape
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Recursive Merge
                         </button>
                     </h2>
                     <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Use: <code>","xss":"&lt;script&gt;alert(1)&lt;/script&gt;</code> to inject new JSON keys.
+                            Vulnerable merge functions recursively copy properties. If you supply `__proto__` as a key,
+                            you can modify `Object.prototype`.
                         </div>
                     </div>
                 </div>
@@ -63,7 +64,9 @@
                     </h2>
                     <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Break JSON structure and inject HTML that gets rendered.
+                            JSON: <code>{"__proto__": {"alert": "XSS Level 14 Completed!"}}</code> or similar to inject
+                            properties that the app blindly trusts. (Backend looks for pollution of specific
+                            properties).
                         </div>
                     </div>
                 </div>
@@ -99,7 +102,57 @@
         </div>
 
         <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for XSS Level 14</p>
+            <!-- Level 14: Prototype Pollution -->
+            <div class="card border-0 shadow-none mb-4">
+                <div class="card-body">
+                    <h4 class="mb-3">Theme Configuration</h4>
+
+                    {% if message %}
+                    <div
+                        class="alert {% if xss_detected %}alert-success{% else %}alert-info{% endif %} border-0 d-flex align-items-center mb-4">
+                        <i class="bi {% if xss_detected %}bi-check-circle{% else %}bi-info-circle{% endif %} me-2"></i>
+                        <div>{{ message }}</div>
+                    </div>
+                    {% endif %}
+
+                    <div class="row align-items-center">
+                        <div class="col-md-5">
+                            <form method="POST" action="{{ url_for('xss_level14') }}">
+                                <div class="mb-3">
+                                    <label class="form-label">Configuration (JSON)</label>
+                                    <textarea class="form-control font-monospace small" name="config" rows="8"
+                                        required>{{ config_json or '{"theme": "light", "fontSize": 14, "showSidebar": true}' }}</textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Update Settings</button>
+                            </form>
+                        </div>
+                        <div class="col-md-2 text-center text-muted">
+                            <i class="bi bi-arrow-right d-none d-md-block fs-2"></i>
+                            <i class="bi bi-arrow-down d-md-none fs-2 my-2"></i>
+                        </div>
+                        <div class="col-md-5">
+                            <div
+                                class="h-100 border rounded p-4 d-flex flex-column justify-content-center align-items-center bg-light">
+                                <div class="text-center">
+                                    <h5 class="text-muted mb-3">Preview</h5>
+                                    <div class="p-3 bg-white shadow-sm rounded border">
+                                        <!-- VULNERABILITY: Prototype pollution can affect Object.prototype, potentially changing logic or injecting HTML if properties are rendered -->
+                                        <span>Sample Text</span>
+                                        {% if xss_detected %}
+                                        <div class="mt-2 text-success fw-bold">Pollution Successful!</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+                    <div class="small text-muted">
+                        <strong>Debug Info:</strong> Object.keys(config) = [{{ (config_json or '{}')|length }} chars]
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

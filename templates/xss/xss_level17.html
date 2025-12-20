@@ -14,30 +14,30 @@
             <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
         <div class="mission-content">
-            <h5 class="mb-3">XSS in Progressive Web Apps</h5>
+            <h5 class="mb-3">PWA XSS</h5>
             <p class="text-secondary small mb-4">
-                Welcome to <strong>PWA Store</strong>. Test the security of this application.
+                Welcome to <strong>PWACreator</strong>. Build your Progressive Web App instantly.
             </p>
 
             <div class="card mb-4 border-0 bg-light">
                 <div class="card-body p-3">
                     <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
-                    <p class="mb-0 small">Exploit PWA vulnerabilities</p>
+                    <p class="mb-0 small">Exploit PWA manifest or service worker registration.</p>
                 </div>
             </div>
 
-            <!-- Integrated Hints System -->
             <div class="hint-accordion accordion" id="hintsAccordion">
                 <div class="accordion-item">
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint1">
-                            <i class="bi bi-lightbulb me-2"></i> Hint 1: PWA Architecture
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Manifest Fields
                         </button>
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            PWAs use service workers and manifest files. Look for XSS in cached resources.
+                            Some browsers or PWA installers might render fields like `name` or `description` from the
+                            `web_app_manifest.json` as HTML.
                         </div>
                     </div>
                 </div>
@@ -45,12 +45,13 @@
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint2">
-                            <i class="bi bi-code-slash me-2"></i> Hint 2: Service Worker XSS
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Service Workers
                         </button>
                     </h2>
                     <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Inject scripts that get cached by the service worker.
+                            A compromised service worker can intercept all network requests and serve malicious
+                            responses (Persistent XSS).
                         </div>
                     </div>
                 </div>
@@ -63,7 +64,8 @@
                     </h2>
                     <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Exploit service worker caching to persist XSS payloads.
+                            Inject <code>alert("XSS Level 17 Completed!")</code> into any field. The backend checks all
+                            inputs.
                         </div>
                     </div>
                 </div>
@@ -99,7 +101,40 @@
         </div>
 
         <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for XSS Level 17</p>
+            <!-- Level 17: PWA XSS -->
+            <div class="card border-0 shadow-none mb-4">
+                <div class="card-body">
+                    <h4 class="mb-3">PWA Manifest Generator</h4>
+
+                    {% if message %}
+                    <div
+                        class="alert {% if xss_detected %}alert-success{% else %}alert-info{% endif %} border-0 d-flex align-items-center mb-4">
+                        <i class="bi {% if xss_detected %}bi-check-circle{% else %}bi-info-circle{% endif %} me-2"></i>
+                        <div>{{ message }}</div>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" action="{{ url_for('xss_level17') }}" class="mb-4">
+                        <div class="mb-3">
+                            <label class="form-label">App Name</label>
+                            <input type="text" class="form-control" name="input" placeholder="My Awesome PWA" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Manifest JSON Override (Optional)</label>
+                                <textarea class="form-control font-monospace small" name="manifest" rows="4"
+                                    placeholder='{"name": "..."}'></textarea>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Service Worker Script (Optional)</label>
+                                <textarea class="form-control font-monospace small" name="service_worker" rows="4"
+                                    placeholder="// sw.js code..."></textarea>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Generate PWA</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </div>

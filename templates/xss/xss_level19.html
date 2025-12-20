@@ -14,30 +14,29 @@
             <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
         <div class="mission-content">
-            <h5 class="mb-3">XSS with WAF Bypass</h5>
+            <h5 class="mb-3">GraphQL XSS</h5>
             <p class="text-secondary small mb-4">
-                Welcome to <strong>ProtectedSite</strong>. Test the security of this application.
+                Welcome to <strong>GraphExplorer</strong>. Query our data flexibly.
             </p>
 
             <div class="card mb-4 border-0 bg-light">
                 <div class="card-body p-3">
                     <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
-                    <p class="mb-0 small">Evade Web Application Firewall</p>
+                    <p class="mb-0 small">Exploit reflected inputs in GraphQL error messages or data fields.</p>
                 </div>
             </div>
 
-            <!-- Integrated Hints System -->
             <div class="hint-accordion accordion" id="hintsAccordion">
                 <div class="accordion-item">
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint1">
-                            <i class="bi bi-lightbulb me-2"></i> Hint 1: WAF Detection
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Error Reflection
                         </button>
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            WAFs block common XSS patterns. Test to identify what's blocked.
+                            GraphQL implementations often reflect invalid field names or arguments in error messages.
                         </div>
                     </div>
                 </div>
@@ -45,12 +44,13 @@
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint2">
-                            <i class="bi bi-code-slash me-2"></i> Hint 2: Obfuscation Techniques
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Data Reflection
                         </button>
                     </h2>
                     <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Use encoding, case variations, or uncommon tags to bypass WAF rules.
+                            Arguments passed to a query might be reflected back in the JSON response. If this JSON is
+                            rendered directly into the HTML without escaping...
                         </div>
                     </div>
                 </div>
@@ -63,7 +63,8 @@
                     </h2>
                     <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Craft payloads that evade WAF signatures using obfuscation.
+                            Try injecting into a string argument:
+                            <code>user(name: "&lt;img src=x onerror=alert('XSS Level 19 Completed!')&gt;")</code>
                         </div>
                     </div>
                 </div>
@@ -99,7 +100,47 @@
         </div>
 
         <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for XSS Level 19</p>
+            <!-- Level 19: GraphQL XSS -->
+            <div class="card border-0 shadow-none mb-4">
+                <div class="card-body">
+                    <h4 class="mb-3">Graph Explorer</h4>
+
+                    {% if message %}
+                    <div
+                        class="alert {% if xss_detected %}alert-success{% else %}alert-info{% endif %} border-0 d-flex align-items-center mb-4">
+                        <i class="bi {% if xss_detected %}bi-check-circle{% else %}bi-info-circle{% endif %} me-2"></i>
+                        <div>{{ message }}</div>
+                    </div>
+                    {% endif %}
+
+                    <div class="row">
+                        <div class="col-md-5">
+                            <form method="POST" action="{{ url_for('xss_level19') }}" class="h-100">
+                                <label class="form-label">Query</label>
+                                <textarea class="form-control font-monospace h-75 mb-3" name="query"
+                                    placeholder='query {' required>query {
+  user(id: "1") {
+    name
+  }
+}</textarea>
+                                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-play-fill me-1"></i>
+                                    Execute</button>
+                            </form>
+                        </div>
+                        <div class="col-md-7">
+                            <label class="form-label">Response</label>
+                            <div class="bg-light p-3 rounded font-monospace h-75 border overflow-auto"
+                                style="min-height: 200px;">
+                                {% if query_result %}
+                                <pre class="mb-0">{{ query_result }}</pre>
+                                {% else %}
+                                <span class="text-muted">No query executed yet.</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

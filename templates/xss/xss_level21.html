@@ -14,30 +14,29 @@
             <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
         <div class="mission-content">
-            <h5 class="mb-3">XSS in Angular</h5>
+            <h5 class="mb-3">Device API XSS</h5>
             <p class="text-secondary small mb-4">
-                Welcome to <strong>AngularApp</strong>. Test the security of this application.
+                Welcome to <strong>DeviceManager</strong>. Manage your connected peripherals.
             </p>
 
             <div class="card mb-4 border-0 bg-light">
                 <div class="card-body p-3">
                     <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
-                    <p class="mb-0 small">Exploit Angular template injection</p>
+                    <p class="mb-0 small">Exploit trust in hardware device names.</p>
                 </div>
             </div>
 
-            <!-- Integrated Hints System -->
             <div class="hint-accordion accordion" id="hintsAccordion">
                 <div class="accordion-item">
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint1">
-                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Angular Templates
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Hardware Trust
                         </button>
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Angular uses {{}} for expressions. Test for template injection.
+                            Developers often assume device names returned by APIs like WebBluetooth are safe plain text.
                         </div>
                     </div>
                 </div>
@@ -45,12 +44,12 @@
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint2">
-                            <i class="bi bi-code-slash me-2"></i> Hint 2: Angular Sandbox
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Malicious Devices
                         </button>
                     </h2>
                     <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Try: <code>{{constructor.constructor('alert(1)')()}}</code>
+                            A malicious device can advertise a name containing HTML/JS characters.
                         </div>
                     </div>
                 </div>
@@ -63,7 +62,8 @@
                     </h2>
                     <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Bypass Angular's sandbox to execute arbitrary JavaScript.
+                            Set the device name to:
+                            <code>&lt;img src=x onerror='alert("XSS Level 21 Completed!")'&gt;</code>
                         </div>
                     </div>
                 </div>
@@ -99,7 +99,44 @@
         </div>
 
         <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for XSS Level 21</p>
+            <!-- Level 21: Web Bluetooth/USB XSS -->
+            <div class="card border-0 shadow-none mb-4">
+                <div class="card-body">
+                    <h4 class="mb-3">Device Manager</h4>
+
+                    {% if message %}
+                    <div
+                        class="alert {% if xss_detected %}alert-success{% else %}alert-info{% endif %} border-0 d-flex align-items-center mb-4">
+                        <i class="bi {% if xss_detected %}bi-check-circle{% else %}bi-info-circle{% endif %} me-2"></i>
+                        <div>{{ message }}</div>
+                    </div>
+                    {% endif %}
+
+                    <div class="text-center py-5 bg-light rounded mb-3">
+                        <i class="bi bi-bluetooth text-primary display-4 mb-3 d-block"></i>
+                        <p class="mb-3">Simulate a device pairing to see its name.</p>
+                        <form method="POST" action="{{ url_for('xss_level21') }}" class="d-inline-block w-50">
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="device_name"
+                                    placeholder="Device Name (e.g. MyHeadset)" required>
+                                <button class="btn btn-outline-primary" type="submit">Pair</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    {% if device_name %}
+                    <div class="mt-4">
+                        <h6>Paired Devices:</h6>
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-usb-symbol me-2"></i> {{ device_name | safe }}</span>
+                                <span class="badge bg-success rounded-pill">Connected</span>
+                            </li>
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </div>
 </div>

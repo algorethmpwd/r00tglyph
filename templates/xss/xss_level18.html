@@ -14,30 +14,30 @@
             <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
         <div class="mission-content">
-            <h5 class="mb-3">XSS via Markdown</h5>
+            <h5 class="mb-3">Web Component XSS</h5>
             <p class="text-secondary small mb-4">
-                Welcome to <strong>MarkdownEditor</strong>. Test the security of this application.
+                Welcome to <strong>WidgetBuilder</strong>. Create isolated UI components.
             </p>
 
             <div class="card mb-4 border-0 bg-light">
                 <div class="card-body p-3">
                     <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
-                    <p class="mb-0 small">Exploit Markdown parser</p>
+                    <p class="mb-0 small">Inject scripts into the Shadow DOM.</p>
                 </div>
             </div>
 
-            <!-- Integrated Hints System -->
             <div class="hint-accordion accordion" id="hintsAccordion">
                 <div class="accordion-item">
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint1">
-                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Markdown Parsers
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Shadow Boundary
                         </button>
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Markdown parsers convert text to HTML. Some allow raw HTML or have XSS vulnerabilities.
+                            The Shadow DOM encapsulates styles and markup, but scripts inside it still execute in the
+                            main document's context.
                         </div>
                     </div>
                 </div>
@@ -45,12 +45,13 @@
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint2">
-                            <i class="bi bi-code-slash me-2"></i> Hint 2: Markdown XSS
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: innerHTML
                         </button>
                     </h2>
                     <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Try: <code>[link](javascript:alert(1))</code> or raw HTML if allowed.
+                            When generic HTML is used to populate `shadowRoot.innerHTML` without sanitization, it's
+                            vulnerable to XSS.
                         </div>
                     </div>
                 </div>
@@ -63,7 +64,8 @@
                     </h2>
                     <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Use Markdown syntax that generates malicious HTML.
+                            Standard payloads work here:
+                            <code>&lt;img src=x onerror='alert("XSS Level 18 Completed!")'&gt;</code>.
                         </div>
                     </div>
                 </div>
@@ -99,7 +101,37 @@
         </div>
 
         <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for XSS Level 18</p>
+            <!-- Level 18: Web Components XSS -->
+            <div class="card border-0 shadow-none mb-4">
+                <div class="card-body">
+                    <h4 class="mb-3">Custom Widget Builder</h4>
+
+                    {% if message %}
+                    <div
+                        class="alert {% if xss_detected %}alert-success{% else %}alert-info{% endif %} border-0 d-flex align-items-center mb-4">
+                        <i class="bi {% if xss_detected %}bi-check-circle{% else %}bi-info-circle{% endif %} me-2"></i>
+                        <div>{{ message }}</div>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" action="{{ url_for('xss_level18') }}" class="mb-4">
+                        <div class="mb-3">
+                            <label class="form-label">Widget HTML Template (Shadow DOM)</label>
+                            <textarea class="form-control font-monospace" name="input" rows="4"
+                                placeholder="<div class='widget'>Content</div>" required></textarea>
+                            <div class="form-text">This HTML will be attached to the Shadow DOM of
+                                <code>&lt;custom-widget&gt;</code>.
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Create Widget</button>
+                    </form>
+
+                    <div class="border p-3 d-flex justify-content-center align-items-center bg-light"
+                        style="min-height: 100px;">
+                        <span class="text-muted fst-italic">Widget Preview Area (Simulated)</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

@@ -14,30 +14,30 @@
             <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
         <div class="mission-content">
-            <h5 class="mb-3">XSS via Polyglot</h5>
+            <h5 class="mb-3">WebRTC XSS</h5>
             <p class="text-secondary small mb-4">
-                Welcome to <strong>MultiContext</strong>. Test the security of this application.
+                Welcome to <strong>WebRTC Chat</strong>. Secure P2P communication.
             </p>
 
             <div class="card mb-4 border-0 bg-light">
                 <div class="card-body p-3">
                     <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
-                    <p class="mb-0 small">Create multi-context payloads</p>
+                    <p class="mb-0 small">Exploit the signaling channel.</p>
                 </div>
             </div>
 
-            <!-- Integrated Hints System -->
             <div class="hint-accordion accordion" id="hintsAccordion">
                 <div class="accordion-item">
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint1">
-                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Polyglot Payloads
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Signaling Channel
                         </button>
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Polyglots work in multiple contexts (HTML, JS, CSS). They're versatile XSS vectors.
+                            WebRTC requires a signaling channel (like WebSockets) to exchange connection info (SDP).
+                            This channel is often just text/JSON.
                         </div>
                     </div>
                 </div>
@@ -45,12 +45,13 @@
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint2">
-                            <i class="bi bi-code-slash me-2"></i> Hint 2: Crafting Polyglots
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Unsafe Rendering
                         </button>
                     </h2>
                     <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Create payloads that work in both HTML and JavaScript contexts.
+                            If the app displays the "From" or "Session ID" fields of signaling messages without
+                            escaping, XSS is possible.
                         </div>
                     </div>
                 </div>
@@ -63,7 +64,8 @@
                     </h2>
                     <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Use polyglot payloads that execute regardless of context.
+                            Inject into the signaling JSON:
+                            <code>{"sdp": "...", "id": "&lt;img src=x onerror=alert('XSS Level 20 Completed!')&gt;"}</code>
                         </div>
                     </div>
                 </div>
@@ -99,7 +101,39 @@
         </div>
 
         <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for XSS Level 20</p>
+            <!-- Level 20: WebRTC XSS -->
+            <div class="card border-0 shadow-none mb-4">
+                <div class="card-body">
+                    <h4 class="mb-3">Secure Video Chat</h4>
+
+                    {% if message %}
+                    <div
+                        class="alert {% if xss_detected %}alert-success{% else %}alert-info{% endif %} border-0 d-flex align-items-center mb-4">
+                        <i class="bi {% if xss_detected %}bi-check-circle{% else %}bi-info-circle{% endif %} me-2"></i>
+                        <div>{{ message }}</div>
+                    </div>
+                    {% endif %}
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <form method="POST" action="{{ url_for('xss_level20') }}" class="mb-4">
+                                <label class="form-label">Signaling Data (SDP/ICE Candidate)</label>
+                                <textarea class="form-control font-monospace mb-3" name="signaling_data" rows="5"
+                                    placeholder='{"type": "offer", "sdp": "..."}' required></textarea>
+                                <button type="submit" class="btn btn-primary">Send Signal</button>
+                            </form>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Connection Log</label>
+                            <div class="bg-dark text-success p-3 rounded font-monospace small h-100"
+                                style="min-height: 200px;">
+                                > Initializing WebRTC peer connection...<br>
+                                > Waiting for signaling data...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

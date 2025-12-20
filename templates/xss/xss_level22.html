@@ -14,30 +14,30 @@
             <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
         <div class="mission-content">
-            <h5 class="mb-3">XSS in React</h5>
+            <h5 class="mb-3">WebGPU XSS</h5>
             <p class="text-secondary small mb-4">
-                Welcome to <strong>ReactApp</strong>. Test the security of this application.
+                Welcome to <strong>ShaderLab</strong>. High-performance graphics on the web.
             </p>
 
             <div class="card mb-4 border-0 bg-light">
                 <div class="card-body p-3">
                     <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
-                    <p class="mb-0 small">Exploit React dangerouslySetInnerHTML</p>
+                    <p class="mb-0 small">Exploit shader compilation errors or pipeline configuration.</p>
                 </div>
             </div>
 
-            <!-- Integrated Hints System -->
             <div class="hint-accordion accordion" id="hintsAccordion">
                 <div class="accordion-item">
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint1">
-                            <i class="bi bi-lightbulb me-2"></i> Hint 1: React XSS
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Shader Errors
                         </button>
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            React escapes by default, but dangerouslySetInnerHTML bypasses this.
+                            When a WebGPU shader fails to compile, the error message returned by the browser might be
+                            displayed to the user.
                         </div>
                     </div>
                 </div>
@@ -45,12 +45,13 @@
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint2">
-                            <i class="bi bi-code-slash me-2"></i> Hint 2: Finding Vulnerable Code
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Reflection
                         </button>
                     </h2>
                     <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Look for components using dangerouslySetInnerHTML with user input.
+                            If the app echoes back the exact shader code that caused the error without sanitization, you
+                            have a reflected XSS.
                         </div>
                     </div>
                 </div>
@@ -63,7 +64,8 @@
                     </h2>
                     <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Inject HTML through dangerouslySetInnerHTML to execute scripts.
+                            Force an error by injecting:
+                            <code>/* &lt;img src=x onerror=alert("XSS Level 22 Completed!")&gt; */ invalid_syntax</code>
                         </div>
                     </div>
                 </div>
@@ -99,7 +101,43 @@
         </div>
 
         <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for XSS Level 22</p>
+            <!-- Level 22: WebGPU XSS -->
+            <div class="card border-0 shadow-none mb-4">
+                <div class="card-body">
+                    <h4 class="mb-3">3D Renderer Config</h4>
+
+                    {% if message %}
+                    <div
+                        class="alert {% if xss_detected %}alert-success{% else %}alert-info{% endif %} border-0 d-flex align-items-center mb-4">
+                        <i class="bi {% if xss_detected %}bi-check-circle{% else %}bi-info-circle{% endif %} me-2"></i>
+                        <div>{{ message }}</div>
+                    </div>
+                    {% endif %}
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <form method="POST" action="{{ url_for('xss_level22') }}" class="mb-4">
+                                <label class="form-label">Shader Configuration</label>
+                                <textarea class="form-control font-monospace mb-3" name="input" rows="5"
+                                    placeholder="// WGSL Shader Code..." required></textarea>
+                                <button type="submit" class="btn btn-primary">Compile Shader</button>
+                            </form>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Renderer Output</label>
+                            <div class="bg-black text-light p-3 rounded d-flex align-items-center justify-content-center"
+                                style="min-height: 200px;">
+                                <div class="text-center">
+                                    <div class="spinner-border text-primary mb-3" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <div class="small text-muted font-monospace">Initializing WebGPU Context...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

@@ -14,30 +14,30 @@
             <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
         <div class="mission-content">
-            <h5 class="mb-3">XSS via CSS</h5>
+            <h5 class="mb-3">SVG XSS</h5>
             <p class="text-secondary small mb-4">
-                Welcome to <strong>StyleEditor</strong>. Test the security of this application.
+                Welcome to <strong>IconCreator</strong>. Create custom SVG icons for your profile.
             </p>
 
             <div class="card mb-4 border-0 bg-light">
                 <div class="card-body p-3">
                     <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
-                    <p class="mb-0 small">Exploit CSS for JavaScript execution</p>
+                    <p class="mb-0 small">Execute <code>alert("XSS Level 11 Completed!")</code> inside the SVG.</p>
                 </div>
             </div>
 
-            <!-- Integrated Hints System -->
             <div class="hint-accordion accordion" id="hintsAccordion">
                 <div class="accordion-item">
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint1">
-                            <i class="bi bi-lightbulb me-2"></i> Hint 1: CSS Expressions
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Regex Filters
                         </button>
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Older browsers supported CSS expressions. Modern attacks use CSS imports or background URLs.
+                            The application tries to remove `on` events using regex like `on\w+=`. Regex is bad at
+                            parsing HTML/XML.
                         </div>
                     </div>
                 </div>
@@ -45,12 +45,13 @@
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint2">
-                            <i class="bi bi-code-slash me-2"></i> Hint 2: CSS Injection
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Spaces and Quotes
                         </button>
                     </h2>
                     <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Try: <code>@import 'javascript:alert(1)';</code> or <code>background:url('javascript:alert(1)')</code>
+                            HTML attributes don't strictly require quotes if they don't contain spaces. Tabs, newlines,
+                            or other separators might confuse a regex.
                         </div>
                     </div>
                 </div>
@@ -63,7 +64,9 @@
                     </h2>
                     <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Inject CSS that loads external resources or uses expression() in legacy contexts.
+                            Try
+                            <code>&lt;svg&gt;&lt;a xlink:href="javascript:alert('XSS Level 11 Completed!')"&gt;&lt;rect width="100" height="100" /&gt;&lt;/a&gt;&lt;/svg&gt;</code>
+                            or bypass filtering with encoded tabs.
                         </div>
                     </div>
                 </div>
@@ -99,7 +102,64 @@
         </div>
 
         <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for XSS Level 11</p>
+            <!-- Level 11: SVG XSS -->
+            <div class="card border-0 shadow-none mb-4">
+                <div class="card-body">
+                    <h4 class="mb-3">SVG Icon Creator</h4>
+
+                    {% if message %}
+                    <div
+                        class="alert {% if xss_detected %}alert-success{% else %}alert-info{% endif %} border-0 d-flex align-items-center mb-4">
+                        <i class="bi {% if xss_detected %}bi-check-circle{% else %}bi-info-circle{% endif %} me-2"></i>
+                        <div>{{ message }}</div>
+                    </div>
+                    {% endif %}
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <form method="POST" action="{{ url_for('xss_level11') }}">
+                                <div class="mb-3">
+                                    <label class="form-label">SVG Source Code</label>
+                                    <textarea class="form-control font-monospace small" name="svg_code" rows="10"
+                                        required>{{ svg_code }}</textarea>
+                                    <div class="form-text">We filter out scripts and event handlers.</div>
+                                </div>
+                                <div class="d-flex gap-2 mb-3">
+                                    <button type="submit" class="btn btn-primary">Render Preview</button>
+                                </div>
+                            </form>
+
+                            <div class="input-group input-group-sm mb-3">
+                                <span class="input-group-text">Templates</span>
+                                <select class="form-select" onchange="loadTemplate(this.value)">
+                                    <option value="">Select a template...</option>
+                                    {% for name, code in example_svgs.items() %}
+                                    <option value="{{ code }}">{{ name|title }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Preview</label>
+                            <div class="border rounded p-3 bg-white d-flex align-items-center justify-content-center"
+                                style="height: 300px;">
+                                <!-- VULNERABILITY: SVG is rendered directly -->
+                                {% if filtered_svg %}
+                                {{ filtered_svg | safe }}
+                                {% else %}
+                                <div class="text-muted small">No preview</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <script>
+                        function loadTemplate(code) {
+                            if (code) document.querySelector('textarea[name="svg_code"]').value = code;
+                        }
+                    </script>
+                </div>
+            </div>
         </div>
     </div>
 </div>

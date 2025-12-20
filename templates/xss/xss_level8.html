@@ -14,30 +14,30 @@
             <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
         <div class="mission-content">
-            <h5 class="mb-3">XSS with Character Filtering</h5>
+            <h5 class="mb-3">API Reflection</h5>
             <p class="text-secondary small mb-4">
-                Welcome to <strong>FilteredInput</strong>. Test the security of this application.
+                Welcome to <strong>DevNotes</strong>. We fetch notes asynchronously from a JSON API.
             </p>
 
             <div class="card mb-4 border-0 bg-light">
                 <div class="card-body p-3">
                     <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
-                    <p class="mb-0 small">Bypass basic character filters</p>
+                    <p class="mb-0 small">Trigger a malicious note injection via the API.</p>
                 </div>
             </div>
 
-            <!-- Integrated Hints System -->
             <div class="hint-accordion accordion" id="hintsAccordion">
                 <div class="accordion-item">
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint1">
-                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Filter Detection
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Client-Side Rendering
                         </button>
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Test what's blocked: try <code>&lt;script&gt;</code>, <code>alert</code>, <code>onerror</code>. Identify the filter patterns.
+                            The application uses JavaScript to fetch JSON data and renders it using `innerHTML`. This
+                            trusts the API response.
                         </div>
                     </div>
                 </div>
@@ -45,12 +45,13 @@
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint2">
-                            <i class="bi bi-code-slash me-2"></i> Hint 2: Encoding Bypass
+                            <i class="bi bi-bug me-2"></i> Hint 2: Backdoor
                         </button>
                     </h2>
                     <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Try alternatives: <code>&lt;img src=x onerror=prompt(1)&gt;</code> or <code>&lt;svg onload=alert(1)&gt;</code>
+                            The API has a backdoor validation. It checks your User-Agent string for a specific
+                            "completion" code.
                         </div>
                     </div>
                 </div>
@@ -63,7 +64,8 @@
                     </h2>
                     <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Use: <code>&lt;svg onload="alert('XSS Level 8 Completed!')"&gt;</code> to bypass script tag filters.
+                            Change your User-Agent to <code>XSS Level 8 Completed!</code> and refresh. The API will
+                            return a payload that the frontend executes.
                         </div>
                     </div>
                 </div>
@@ -99,7 +101,69 @@
         </div>
 
         <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for XSS Level 8</p>
+            <!-- Level 8: JSON API -->
+            <div class="card border-0 shadow-none mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="mb-0">DevNotes Feed</h4>
+                        <button class="btn btn-outline-primary btn-sm" onclick="fetchNotes()">
+                            <i class="bi bi-arrow-clockwise me-1"></i> Refresh
+                        </button>
+                    </div>
+
+                    <div id="notes-container" class="row g-3">
+                        <div class="col-12 text-center py-5 text-muted">
+                            <div class="spinner-border spinner-border-sm mb-2" role="status"></div>
+                            <div>Loading notes from API...</div>
+                        </div>
+                    </div>
+
+                    <script>
+                        async function fetchNotes() {
+                            const container = document.getElementById('notes-container');
+                            try {
+                                const response = await fetch('/api/notes');
+                                const notes = await response.json();
+
+                                container.innerHTML = '';
+
+                                notes.forEach(note => {
+                                    const col = document.createElement('div');
+                                    col.className = 'col-md-6';
+
+                                    // VULNERABILITY: note.title is injected as HTML via template literal in innerHTML
+                                    // The backend specifically injects the payload into the title if User-Agent matches
+                                    const cardHtml = `
+                                        <div class="card h-100 border bg-light">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                    <h6 class="card-title fw-bold text-primary mb-0">${note.title}</h6>
+                                                    <span class="badge bg-white text-muted border">${new Date(note.created).toLocaleDateString()}</span>
+                                                </div>
+                                                <p class="card-text small text-secondary">${note.content}</p>
+                                                <div class="mt-2">
+                                                    ${note.tags.map(tag => `<span class="badge bg-secondary me-1">#${tag}</span>`).join('')}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
+                                    col.innerHTML = cardHtml;
+                                    container.appendChild(col);
+                                });
+                            } catch (error) {
+                                container.innerHTML = `
+                                    <div class="col-12">
+                                        <div class="alert alert-danger">Failed to load notes: ${error.message}</div>
+                                    </div>
+                                `;
+                            }
+                        }
+
+                        // Load on start
+                        document.addEventListener('DOMContentLoaded', fetchNotes);
+                    </script>
+                </div>
+            </div>
         </div>
     </div>
 </div>

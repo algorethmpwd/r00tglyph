@@ -14,30 +14,29 @@
             <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
         <div class="mission-content">
-            <h5 class="mb-3">XSS via JavaScript String</h5>
+            <h5 class="mb-3">Header Injection</h5>
             <p class="text-secondary small mb-4">
-                Welcome to <strong>UserDashboard</strong>. Test the security of this application.
+                Welcome to <strong>Analytics</strong>. We trust browser headers implicitly.
             </p>
 
             <div class="card mb-4 border-0 bg-light">
                 <div class="card-body p-3">
                     <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
-                    <p class="mb-0 small">Break out of JavaScript string context</p>
+                    <p class="mb-0 small">Inject XSS via the User-Agent HTTP header.</p>
                 </div>
             </div>
 
-            <!-- Integrated Hints System -->
             <div class="hint-accordion accordion" id="hintsAccordion">
                 <div class="accordion-item">
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint1">
-                            <i class="bi bi-lightbulb me-2"></i> Hint 1: JavaScript Context
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Hidden Inputs
                         </button>
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Your input might be in a JS string: <code>var name = "YOUR_INPUT";</code>. Break out of the string.
+                            Not all inputs come from forms. The server reads HTTP headers like <code>User-Agent</code>.
                         </div>
                     </div>
                 </div>
@@ -45,12 +44,13 @@
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint2">
-                            <i class="bi bi-code-slash me-2"></i> Hint 2: String Escape
+                            <i class="bi bi-tools me-2"></i> Hint 2: Tools
                         </button>
                     </h2>
                     <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Use: <code>"; alert("XSS"); //</code> to close the string, execute code, and comment out the rest.
+                            You cannot change headers in a standard browser address bar. Use tools like Burp Suite,
+                            Curl, or a browser extension (like "User-Agent Switcher").
                         </div>
                     </div>
                 </div>
@@ -63,7 +63,8 @@
                     </h2>
                     <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Enter: <code>"; alert("XSS Level 7 Completed!"); //</code>
+                            Modify your User-Agent to: <code>&lt;script&gt;alert(1)&lt;/script&gt;</code> and refresh
+                            the page.
                         </div>
                     </div>
                 </div>
@@ -99,7 +100,39 @@
         </div>
 
         <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for XSS Level 7</p>
+            <!-- Level 7: HTTP Headers -->
+            <div class="card border-0 shadow-none mb-4">
+                <div class="card-body">
+                    <h4 class="mb-3">Visitor Analysis Dashboard</h4>
+
+                    <div class="alert alert-info border-0 d-flex align-items-center mb-4">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <div>We track visitor analytics based on HTTP headers.</div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded border h-100">
+                                <h6 class="text-muted small text-uppercase mb-2">IP Address</h6>
+                                <div class="font-monospace">{{ client_ip }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded border h-100">
+                                <h6 class="text-muted small text-uppercase mb-2">Visitor ID</h6>
+                                <div class="font-monospace text-primary">VISITOR-{{ random_id }}</div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="p-3 bg-light rounded border">
+                                <h6 class="text-muted small text-uppercase mb-2">User Agent String</h6>
+                                <!-- VULNERABILITY: User-Agent is rendered without sanitization -->
+                                <div class="font-monospace text-break">{{ user_agent | safe }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
