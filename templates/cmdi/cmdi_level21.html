@@ -1,6 +1,6 @@
 {%extends 'base.html' %}
 
-{%block title %}Level 21: Command Injection in Node.js - R00tGlyph{%endblock %}
+{%block title %}Level 21: Cloud Function Injection - R00tGlyph{%endblock %}
 
 {%block breadcrumb %}
 <span class="text-muted">Challenges</span> / <span class="text-muted">Command Injection</span> / <span>Level 21</span>
@@ -13,15 +13,16 @@
             <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
         <div class="mission-content">
-            <h5 class="mb-3">Command Injection in Node.js</h5>
+            <h5 class="mb-3">Command Injection in Cloud Functions</h5>
             <p class="text-secondary small mb-4">
-                Welcome to <strong>App21</strong>. Test for command injection vulnerabilities.
+                Welcome to <strong>CloudDeploy</strong>. Deploy simple Python cloud functions.
             </p>
 
             <div class="card mb-4 border-0 bg-light">
                 <div class="card-body p-3">
                     <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
-                    <p class="mb-0 small">Exploit command injection in node.js</p>
+                    <p class="mb-0 small">Inject a command into the function code to execute system commands
+                        (`os.system` or `subprocess`).</p>
                 </div>
             </div>
 
@@ -30,12 +31,13 @@
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint1">
-                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Understanding the Technique
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Insecure Code Review
                         </button>
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            This level focuses on command injection in node.js. Research the specific technique.
+                            The deployment process scans for restricted functions but might miss some if obfuscated or
+                            if the check is simple pattern matching.
                         </div>
                     </div>
                 </div>
@@ -43,25 +45,15 @@
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint2">
-                            <i class="bi bi-code-slash me-2"></i> Hint 2: child_process exploitation
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Payload
                         </button>
                     </h2>
                     <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Exploit exec(), spawn() in Node.js
-                        </div>
-                    </div>
-                </div>
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#hint3">
-                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
-                        </button>
-                    </h2>
-                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
-                        <div class="accordion-body small text-secondary">
-                            Apply command injection in node.js techniques to execute commands and retrieve the flag.
+                            Simply use the banned functions: <code>import os; os.system('id')</code>. The scanner is
+                            looking for these to flag them, but in this challenge, finding them *is* the goal
+                            (simulating a successful exploit detection or actual execution depending on the backend
+                            logic).
                         </div>
                     </div>
                 </div>
@@ -91,12 +83,42 @@
             </div>
             <div class="url-bar">
                 <i class="bi bi-lock-fill text-success me-2 small"></i>
-                <span>app21.local/cmd</span>
+                <span>cloud-deploy.local/functions/new</span>
             </div>
         </div>
 
-        <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for Command Injection Level 21</p>
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0 d-flex align-items-center">
+                <i class="bi bi-cloud-upload me-2 text-primary"></i>
+                <h6 class="mb-0">Function Editor</h6>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="function_code" class="form-label small fw-bold text-muted">Python Code</label>
+                        <textarea class="form-control font-monospace form-control-sm" id="function_code"
+                            name="function_code" rows="8">{{ function_code }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="runtime_env" class="form-label small fw-bold text-muted">Runtime</label>
+                        <select class="form-select form-select-sm" id="runtime_env" name="runtime_env">
+                            <option value="python3.9" selected>Python 3.9</option>
+                            <option value="python3.8">Python 3.8</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="bi bi-rocket-takeoff me-1"></i> Deploy Function
+                    </button>
+                </form>
+
+                {% if cloud_result %}
+                <div class="mt-4">
+                    <h6 class="small fw-bold text-muted mb-2">Deployment Logs</h6>
+                    <div class="bg-dark text-light p-3 rounded font-monospace small" style="white-space: pre-wrap;">{{
+                        cloud_result }}</div>
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>

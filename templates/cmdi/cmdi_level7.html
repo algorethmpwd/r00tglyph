@@ -95,8 +95,38 @@
             </div>
         </div>
 
-        <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for Command Injection Level 7</p>
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0 d-flex align-items-center">
+                <i class="bi bi-clock-history me-2 text-primary"></i>
+                <h6 class="mb-0">Server Status Checker</h6>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="hostname" class="form-label small fw-bold text-muted">Hostname</label>
+                        <input type="text" class="form-control form-control-sm font-monospace" id="hostname"
+                            name="hostname" value="{{ hostname }}" placeholder="example.com">
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="bi bi-stopwatch me-1"></i> Check Liveness
+                        </button>
+                    </div>
+                </form>
+
+                {% if check_result %}
+                <div class="mt-4">
+                    <h6 class="small fw-bold text-muted mb-2">Status Report</h6>
+                    <div class="bg-light border p-3 rounded font-monospace small" style="white-space: pre-wrap;">{{
+                        check_result }}</div>
+                    {% if response_time %}
+                    <div class="mt-2 text-end text-muted small">
+                        Response time: <span class="fw-bold">{{ response_time }}s</span>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>

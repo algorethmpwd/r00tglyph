@@ -57,9 +57,9 @@
                     </h2>
                     <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Try adding a <code>color</code> parameter to the URL. Instead of a valid color, inject
-                            JavaScript code. For example: <code>?color=red</code> works normally, but what if you try
-                            <code>?color=red'&gt;&lt;script&gt;alert("XSS Level 2 Completed!")&lt;/script&gt;</code>?
+                            Try adding a <code>color</code> parameter to the URL. Since `innerHTML` doesn't execute
+                            `script` tags, try using an event handler. For example: `?color=red`, but try
+                            <code>?color=&lt;img src=x onerror=alert("XSS Level 2 Completed!")&gt;</code>?
                         </div>
                     </div>
                 </div>
@@ -74,16 +74,17 @@
                         <div class="accordion-body small text-secondary">
                             <strong>Step-by-step solution:</strong>
                             <ol class="mb-2 mt-2">
-                                <li>Examine the page source and find where the color parameter is used</li>
-                                <li>Notice it's inserted directly into the DOM via JavaScript</li>
+                                <li>The page uses <code>innerHTML</code> to display the color, which blocks
+                                    <code>&lt;script&gt;</code> tags.</li>
+                                <li>Use an image tag with an error handler instead.</li>
                                 <li>Craft a URL with the payload:
-                                    <code>/xss/level2?color=red'&gt;&lt;script&gt;alert("XSS Level 2
-                                        Completed!")&lt;/script&gt;</code>
+                                    <code>/xss/level2?color=&lt;img src=x onerror=alert("XSS Level 2 Completed!")&gt;</code>
                                 </li>
-                                <li>The script will execute when the page loads, revealing the flag</li>
+                                <li>When the image fails to load (src="x"), the alert executes.</li>
                             </ol>
-                            <strong>Why it works:</strong> The application uses <code>innerHTML</code> or similar DOM
-                            manipulation without sanitizing the color parameter, allowing script injection.
+                            <strong>Why it works:</strong> The application uses <code>innerHTML</code> which inserts
+                            HTML elements. While script tags are sanitized by modern browsers in this context, event
+                            attributes like <code>onerror</code> are executed.
                         </div>
                     </div>
                 </div>

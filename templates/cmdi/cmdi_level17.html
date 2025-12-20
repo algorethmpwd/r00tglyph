@@ -1,6 +1,6 @@
 {%extends 'base.html' %}
 
-{%block title %}Level 17: Command Injection in Docker - R00tGlyph{%endblock %}
+{%block title %}Level 17: Container Injection - R00tGlyph{%endblock %}
 
 {%block breadcrumb %}
 <span class="text-muted">Challenges</span> / <span class="text-muted">Command Injection</span> / <span>Level 17</span>
@@ -13,15 +13,16 @@
             <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
         <div class="mission-content">
-            <h5 class="mb-3">Command Injection in Docker</h5>
+            <h5 class="mb-3">Command Injection in Containers</h5>
             <p class="text-secondary small mb-4">
-                Welcome to <strong>App17</strong>. Test for command injection vulnerabilities.
+                Welcome to <strong>KubeManage</strong>. This tool lets you spin up containers.
             </p>
 
             <div class="card mb-4 border-0 bg-light">
                 <div class="card-body p-3">
                     <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
-                    <p class="mb-0 small">Exploit command injection in docker</p>
+                    <p class="mb-0 small">Inject a command to access <code>/proc</code> or <code>/sys</code> files, or
+                        execute <code>whoami</code> within the container execution context.</p>
                 </div>
             </div>
 
@@ -30,12 +31,13 @@
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint1">
-                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Understanding the Technique
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Container Arguments
                         </button>
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            This level focuses on command injection in docker. Research the specific technique.
+                            The command you provide is executed inside the container. If you can traverse directories or
+                            mount sensitive paths, you might escape or leak host info.
                         </div>
                     </div>
                 </div>
@@ -43,25 +45,13 @@
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint2">
-                            <i class="bi bi-code-slash me-2"></i> Hint 2: Container escape
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Payload
                         </button>
                     </h2>
                     <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Execute commands to escape Docker container
-                        </div>
-                    </div>
-                </div>
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#hint3">
-                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
-                        </button>
-                    </h2>
-                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
-                        <div class="accordion-body small text-secondary">
-                            Apply command injection in docker techniques to execute commands and retrieve the flag.
+                            Try accessing sensitive files directly in the command: <code>cat /proc/cpuinfo</code> or
+                            inject: <code>; cat /proc/version</code>.
                         </div>
                     </div>
                 </div>
@@ -91,12 +81,40 @@
             </div>
             <div class="url-bar">
                 <i class="bi bi-lock-fill text-success me-2 small"></i>
-                <span>app17.local/cmd</span>
+                <span>kube-manage.local/deploy</span>
             </div>
         </div>
 
-        <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for Command Injection Level 17</p>
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0 d-flex align-items-center">
+                <i class="bi bi-box-seam me-2 text-primary"></i>
+                <h6 class="mb-0">Container Deployment</h6>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="container_image" class="form-label small fw-bold text-muted">Image</label>
+                        <input type="text" class="form-control form-control-sm font-monospace" id="container_image"
+                            name="container_image" value="{{ container_image }}" placeholder="nginx:latest">
+                    </div>
+                    <div class="mb-3">
+                        <label for="container_cmd" class="form-label small fw-bold text-muted">Startup Command</label>
+                        <input type="text" class="form-control form-control-sm font-monospace" id="container_cmd"
+                            name="container_cmd" value="{{ container_cmd }}" placeholder="/bin/sh -c ...">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="bi bi-play-circle me-1"></i> Start Container
+                    </button>
+                </form>
+
+                {% if docker_result %}
+                <div class="mt-4">
+                    <h6 class="small fw-bold text-muted mb-2">Container Logs</h6>
+                    <div class="bg-dark text-light p-3 rounded font-monospace small" style="white-space: pre-wrap;">{{
+                        docker_result }}</div>
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>

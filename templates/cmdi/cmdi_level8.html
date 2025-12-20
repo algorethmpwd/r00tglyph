@@ -95,8 +95,33 @@
             </div>
         </div>
 
-        <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for Command Injection Level 8</p>
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0 d-flex align-items-center">
+                <i class="bi bi-router me-2 text-primary"></i>
+                <h6 class="mb-0">IoT Device Manager</h6>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="device_id" class="form-label small fw-bold text-muted">Device ID</label>
+                        <input type="text" class="form-control form-control-sm font-monospace" id="device_id"
+                            name="device_id" value="{{ device_id }}" placeholder="iot-dev-001">
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="bi bi-tools me-1"></i> Diagnostic Check
+                        </button>
+                    </div>
+                </form>
+
+                {% if management_result %}
+                <div class="mt-4">
+                    <h6 class="small fw-bold text-muted mb-2">Device Logs</h6>
+                    <div class="bg-dark text-light p-3 rounded font-monospace small" style="white-space: pre-wrap;">{{
+                        management_result }}</div>
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>

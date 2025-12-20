@@ -95,8 +95,40 @@
             </div>
         </div>
 
-        <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for Command Injection Level 6</p>
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0 d-flex align-items-center">
+                <i class="bi bi-shield-lock me-2 text-primary"></i>
+                <h6 class="mb-0">Secure Network Scanner (WAF Enabled)</h6>
+            </div>
+            <div class="card-body">
+                {% if waf_blocked %}
+                <div class="alert alert-danger small py-2 mb-3">
+                    <i class="bi bi-shield-x me-1"></i> <strong>WAF Blocked:</strong> Malicious pattern detected in your
+                    input.
+                </div>
+                {% endif %}
+
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="target" class="form-label small fw-bold text-muted">Target IP / Domain</label>
+                        <input type="text" class="form-control form-control-sm font-monospace" id="target" name="target"
+                            value="{{ target }}" placeholder="192.168.1.100">
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="bi bi-radar me-1"></i> Start Scan
+                        </button>
+                    </div>
+                </form>
+
+                {% if scan_result %}
+                <div class="mt-4">
+                    <h6 class="small fw-bold text-muted mb-2">Scan Results</h6>
+                    <div class="bg-dark text-light p-3 rounded font-monospace small" style="white-space: pre-wrap;">{{
+                        scan_result }}</div>
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>

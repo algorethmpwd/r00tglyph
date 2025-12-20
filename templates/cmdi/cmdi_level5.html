@@ -95,8 +95,36 @@
             </div>
         </div>
 
-        <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for Command Injection Level 5</p>
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0 d-flex align-items-center">
+                <i class="bi bi-gear-wide-connected me-2 text-primary"></i>
+                <h6 class="mb-0">Microservice Health Check</h6>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="service_name" class="form-label small fw-bold text-muted">Service Name</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text font-monospace">/api/v1/health/</span>
+                            <input type="text" class="form-control form-control-sm font-monospace" id="service_name"
+                                name="service_name" value="{{ service_name }}" placeholder="auth-service">
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="bi bi-search me-1"></i> Check Status
+                        </button>
+                    </div>
+                </form>
+
+                {% if api_result %}
+                <div class="mt-4">
+                    <h6 class="small fw-bold text-muted mb-2">API Response</h6>
+                    <div class="bg-light border p-3 rounded font-monospace small" style="white-space: pre-wrap;">{{
+                        api_result }}</div>
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>

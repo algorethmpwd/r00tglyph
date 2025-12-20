@@ -95,8 +95,40 @@
             </div>
         </div>
 
-        <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for Command Injection Level 10</p>
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0 d-flex align-items-center">
+                <i class="bi bi-box-seam me-2 text-primary"></i>
+                <h6 class="mb-0">Container Deployment</h6>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="app_name" class="form-label small fw-bold text-muted">Application Name</label>
+                        <input type="text" class="form-control form-control-sm" id="app_name" name="app_name"
+                            value="{{ app_name }}" placeholder="my-app-v1">
+                    </div>
+                    <div class="mb-3">
+                        <label for="env_vars" class="form-label small fw-bold text-muted">Environment Variables</label>
+                        <input type="text" class="form-control form-control-sm font-monospace" id="env_vars"
+                            name="env_vars" value="{{ env_vars }}" placeholder="ENV=prod; DEBUG=false">
+                        <div class="form-text text-muted small">Set environment variables for the container instance.
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="bi bi-box-arrow-in-up me-1"></i> Deploy Container
+                        </button>
+                    </div>
+                </form>
+
+                {% if deploy_result %}
+                <div class="mt-4">
+                    <h6 class="small fw-bold text-muted mb-2">Deployment Log</h6>
+                    <div class="bg-dark text-light p-3 rounded font-monospace small" style="white-space: pre-wrap;">{{
+                        deploy_result }}</div>
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>

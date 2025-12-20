@@ -1,6 +1,6 @@
 {%extends 'base.html' %}
 
-{%block title %}Level 23: Advanced Filter Evasion - R00tGlyph{%endblock %}
+{%block title %}Level 23: Advanced CMDI Chaining - R00tGlyph{%endblock %}
 
 {%block breadcrumb %}
 <span class="text-muted">Challenges</span> / <span class="text-muted">Command Injection</span> / <span>Level 23</span>
@@ -13,15 +13,16 @@
             <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
         <div class="mission-content">
-            <h5 class="mb-3">Advanced Filter Evasion</h5>
+            <h5 class="mb-3">Advanced Command Injection Chaining</h5>
             <p class="text-secondary small mb-4">
-                Welcome to <strong>App23</strong>. Test for command injection vulnerabilities.
+                Welcome to <strong>InfraOrchestrator</strong>. Deploy complex infrastructure using JSON configurations.
             </p>
 
             <div class="card mb-4 border-0 bg-light">
                 <div class="card-body p-3">
                     <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
-                    <p class="mb-0 small">Exploit advanced filter evasion</p>
+                    <p class="mb-0 small">Inject a command using chaining techniques (`&&`, `||`, `;`) into the JSON
+                        configuration.</p>
                 </div>
             </div>
 
@@ -30,12 +31,13 @@
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint1">
-                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Understanding the Technique
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: JSON Parsing
                         </button>
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            This level focuses on advanced filter evasion. Research the specific technique.
+                            The system parses the JSON but might pass string values directly to shell commands like
+                            Terraform or Ansible.
                         </div>
                     </div>
                 </div>
@@ -43,25 +45,13 @@
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint2">
-                            <i class="bi bi-code-slash me-2"></i> Hint 2: Complex bypass techniques
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Payload
                         </button>
                     </h2>
                     <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Combine encoding, obfuscation, alternative syntax
-                        </div>
-                    </div>
-                </div>
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#hint3">
-                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
-                        </button>
-                    </h2>
-                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
-                        <div class="accordion-body small text-secondary">
-                            Apply advanced filter evasion techniques to execute commands and retrieve the flag.
+                            Try injecting into the "region" or "inventory" fields:
+                            <code>"region": "us-east-1 && id"</code>.
                         </div>
                     </div>
                 </div>
@@ -91,12 +81,36 @@
             </div>
             <div class="url-bar">
                 <i class="bi bi-lock-fill text-success me-2 small"></i>
-                <span>app23.local/cmd</span>
+                <span>infra-deploy.local/pipeline</span>
             </div>
         </div>
 
-        <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for Command Injection Level 23</p>
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0 d-flex align-items-center">
+                <i class="bi bi-diagram-2 me-2 text-primary"></i>
+                <h6 class="mb-0">Infrastructure Pipeline</h6>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="infrastructure_config" class="form-label small fw-bold text-muted">Pipeline Config
+                            (JSON)</label>
+                        <textarea class="form-control font-monospace form-control-sm" id="infrastructure_config"
+                            name="infrastructure_config" rows="6">{{ infrastructure_config }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="bi bi-layers-fill me-1"></i> Deploy Infrastructure
+                    </button>
+                </form>
+
+                {% if deployment_result %}
+                <div class="mt-4">
+                    <h6 class="small fw-bold text-muted mb-2">Pipeline Logs</h6>
+                    <div class="bg-dark text-light p-3 rounded font-monospace small" style="white-space: pre-wrap;">{{
+                        deployment_result }}</div>
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>

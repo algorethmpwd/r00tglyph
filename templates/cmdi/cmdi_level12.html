@@ -1,6 +1,6 @@
 {%extends 'base.html' %}
 
-{%block title %}Level 12: PowerShell Injection - R00tGlyph{%endblock %}
+{%block title %}Level 12: Command Injection with Nmap - R00tGlyph{%endblock %}
 
 {%block breadcrumb %}
 <span class="text-muted">Challenges</span> / <span class="text-muted">Command Injection</span> / <span>Level 12</span>
@@ -13,15 +13,15 @@
             <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
         <div class="mission-content">
-            <h5 class="mb-3">PowerShell Injection</h5>
+            <h5 class="mb-3">Command Injection with Nmap</h5>
             <p class="text-secondary small mb-4">
-                Welcome to <strong>App12</strong>. Test for command injection vulnerabilities.
+                Welcome to <strong>NetScanner Pro</strong>. This tool wraps Nmap to scan targets.
             </p>
 
             <div class="card mb-4 border-0 bg-light">
                 <div class="card-body p-3">
                     <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
-                    <p class="mb-0 small">Exploit powershell injection</p>
+                    <p class="mb-0 small">Inject a command to leak system information (specifically `uname`).</p>
                 </div>
             </div>
 
@@ -30,12 +30,12 @@
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint1">
-                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Understanding the Technique
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Argument Injection
                         </button>
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            This level focuses on powershell injection. Research the specific technique.
+                            The input is passed directly to the Nmap command line. Can you add your own commands?
                         </div>
                     </div>
                 </div>
@@ -43,25 +43,12 @@
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint2">
-                            <i class="bi bi-code-slash me-2"></i> Hint 2: PowerShell exploitation
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: Payload
                         </button>
                     </h2>
                     <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Inject PowerShell: <code>; powershell -c whoami</code>
-                        </div>
-                    </div>
-                </div>
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#hint3">
-                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
-                        </button>
-                    </h2>
-                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
-                        <div class="accordion-body small text-secondary">
-                            Apply powershell injection techniques to execute commands and retrieve the flag.
+                            Try appending a separator and a command: <code>127.0.0.1; uname -a</code>.
                         </div>
                     </div>
                 </div>
@@ -91,12 +78,41 @@
             </div>
             <div class="url-bar">
                 <i class="bi bi-lock-fill text-success me-2 small"></i>
-                <span>app12.local/cmd</span>
+                <span>netscanner.local/scan</span>
             </div>
         </div>
 
-        <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for Command Injection Level 12</p>
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0 d-flex align-items-center">
+                <i class="bi bi-radar me-2 text-primary"></i>
+                <h6 class="mb-0">Network Scanner Interface</h6>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="target_network" class="form-label small fw-bold text-muted">Target
+                            Network/IP</label>
+                        <input type="text" class="form-control form-control-sm font-monospace" id="target_network"
+                            name="target_network" value="{{ target_network }}" placeholder="192.168.1.0/24">
+                    </div>
+                    <div class="mb-3">
+                        <label for="scan_options" class="form-label small fw-bold text-muted">Scan Options</label>
+                        <input type="text" class="form-control form-control-sm font-monospace" id="scan_options"
+                            name="scan_options" value="{{ scan_options }}" placeholder="-sS -F">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="bi bi-search me-1"></i> Start Scan
+                    </button>
+                </form>
+
+                {% if nmap_result %}
+                <div class="mt-4">
+                    <h6 class="small fw-bold text-muted mb-2">Scan Results</h6>
+                    <div class="bg-dark text-light p-3 rounded font-monospace small" style="white-space: pre-wrap;">{{
+                        nmap_result }}</div>
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>

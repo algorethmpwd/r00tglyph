@@ -95,8 +95,34 @@
             </div>
         </div>
 
-        <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for Command Injection Level 9</p>
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0 d-flex align-items-center">
+                <i class="bi bi-braces me-2 text-primary"></i>
+                <h6 class="mb-0">CI/CD Build Configuration</h6>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="build_config" class="form-label small fw-bold text-muted">Build Config
+                            (JSON)</label>
+                        <textarea class="form-control form-control-sm font-monospace" id="build_config"
+                            name="build_config" rows="5">{{ build_config }}</textarea>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="bi bi-play-fill me-1"></i> Trigger Build
+                        </button>
+                    </div>
+                </form>
+
+                {% if build_result %}
+                <div class="mt-4">
+                    <h6 class="small fw-bold text-muted mb-2">Build Output</h6>
+                    <div class="bg-light border p-3 rounded font-monospace small" style="white-space: pre-wrap;">{{
+                        build_result }}</div>
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>
