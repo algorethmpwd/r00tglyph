@@ -14,15 +14,16 @@
             <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
         <div class="mission-content">
-            <h5 class="mb-3">XSS with HTML Encoding</h5>
+            <h5 class="mb-3">WAF Bypass</h5>
             <p class="text-secondary small mb-4">
-                Welcome to <strong>SecureForm</strong>. Test the security of this application.
+                Welcome to <strong>SecureForm</strong>. This input is protected by a Web Application Firewall (WAF) that
+                blocks common attacks.
             </p>
 
             <div class="card mb-4 border-0 bg-light">
                 <div class="card-body p-3">
                     <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
-                    <p class="mb-0 small">Bypass incomplete HTML encoding</p>
+                    <p class="mb-0 small">Bypass the WAF using allowed tags and attributes.</p>
                 </div>
             </div>
 
@@ -32,12 +33,14 @@
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint1">
-                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Encoding Bypass
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Analyzing the WAF
                         </button>
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Test which characters are encoded. Sometimes only <code>&lt;&gt;</code> are encoded, leaving quotes vulnerable.
+                            The WAF blocks <code>&lt;script&gt;</code>, <code>&lt;svg&gt;</code>, and events like
+                            <code>onload</code>/<code>onerror</code>. You need a tag that is generally considered "safe"
+                            but can still execute code.
                         </div>
                     </div>
                 </div>
@@ -45,12 +48,13 @@
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint2">
-                            <i class="bi bi-code-slash me-2"></i> Hint 2: Using Existing Tags
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: The iframe Tag
                         </button>
                     </h2>
                     <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            If angle brackets are encoded, inject into existing tag attributes using quotes.
+                            <code>&lt;iframe&gt;</code> tags are often allowed to embed content. The <code>srcdoc</code>
+                            attribute allows you to define the HTML content of the iframe inline.
                         </div>
                     </div>
                 </div>
@@ -63,7 +67,9 @@
                     </h2>
                     <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Use: <code>" onclick="alert('XSS Level 6 Completed!')"</code> in an attribute context.
+                            Inject:
+                            <code>&lt;iframe srcdoc="&lt;script&gt;alert(1)&lt;/script&gt;"&gt;&lt;/iframe&gt;</code>.
+                            The script inside <code>srcdoc</code> is not checked by the outer WAF!
                         </div>
                     </div>
                 </div>
@@ -99,7 +105,51 @@
         </div>
 
         <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for XSS Level 6</p>
+            <!-- Level 6: ModSecurity WAF -->
+            <div class="card border-0 shadow-none mb-4">
+                <div class="card-body">
+                    <h4 class="mb-3">Secure Message Submission</h4>
+
+                    {% if message %}
+                    <div
+                        class="alert {% if waf_blocked %}alert-danger{% else %}alert-success{% endif %} border-0 d-flex align-items-center mb-4">
+                        <i
+                            class="bi {% if waf_blocked %}bi-exclamation-triangle{% else %}bi-check-circle{% endif %} me-2"></i>
+                        <div>{{ message }}</div>
+                    </div>
+                    {% endif %}
+
+                    {% if filtered_input and not waf_blocked %}
+                    <div class="mb-4">
+                        <h6 class="text-muted small text-uppercase mb-2">Message Preview</h6>
+                        <div class="p-3 bg-light rounded border">
+                            <!-- VULNERABILITY: Content is rendered safely if WAF is bypassed -->
+                            {{ filtered_input | safe }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" action="{{ url_for('xss_level6') }}" class="mb-4">
+                        <div class="mb-3">
+                            <label class="form-label">Private Message</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="bi bi-envelope"></i></span>
+                                <input type="text" class="form-control" name="user_input"
+                                    placeholder="Enter your message..." required>
+                            </div>
+                            <div class="form-text">Protected by ModSecurity-style WAF rules.</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send Securely</button>
+                    </form>
+
+                    <hr>
+
+                    <div class="d-flex align-items-center text-muted small">
+                        <i class="bi bi-bricks me-2 text-danger"></i>
+                        <span>ModSecurity WAF Active (Rule ID: 941100)</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

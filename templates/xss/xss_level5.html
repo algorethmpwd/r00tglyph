@@ -14,15 +14,16 @@
             <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
         <div class="mission-content">
-            <h5 class="mb-3">Event Handler XSS</h5>
+            <h5 class="mb-3">Advanced Filter Bypass</h5>
             <p class="text-secondary small mb-4">
-                Welcome to <strong>ImageGallery</strong>. Test the security of this application.
+                Welcome to <strong>ImageGallery</strong>. We've upgraded our security to block `script`, `img`, and
+                `alert` keywords.
             </p>
 
             <div class="card mb-4 border-0 bg-light">
                 <div class="card-body p-3">
                     <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
-                    <p class="mb-0 small">Use event handlers without script tags</p>
+                    <p class="mb-0 small">Bypass the advanced filter using Scalable Vector Graphics.</p>
                 </div>
             </div>
 
@@ -32,12 +33,13 @@
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint1">
-                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Event Handlers
+                            <i class="bi bi-lightbulb me-2"></i> Hint 1: Obscure Vectors
                         </button>
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            HTML elements support event handlers: onclick, onerror, onload. These execute JavaScript without <code>&lt;script&gt;</code> tags.
+                            Common tags like <code>&lt;script&gt;</code> and <code>&lt;img&gt;</code> are easily
+                            blocked. Think about other media types that support scripting.
                         </div>
                     </div>
                 </div>
@@ -45,12 +47,13 @@
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                             data-bs-target="#hint2">
-                            <i class="bi bi-code-slash me-2"></i> Hint 2: Image Tag Trick
+                            <i class="bi bi-code-slash me-2"></i> Hint 2: SVG Magic
                         </button>
                     </h2>
                     <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Use: <code>&lt;img src=x onerror="alert(1)"&gt;</code>. When the image fails to load, onerror fires.
+                            <code>&lt;svg&gt;</code> tags are valid XML and HTML, and they support the
+                            <code>onload</code> event handler.
                         </div>
                     </div>
                 </div>
@@ -63,7 +66,8 @@
                     </h2>
                     <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Enter: <code>&lt;img src=x onerror="alert('XSS Level 5 Completed!')"&gt;</code>
+                            Inject: <code>&lt;svg/onload=alert(1)&gt;</code>. Note how we can use a slash instead of a
+                            space if spaces are filtered!
                         </div>
                     </div>
                 </div>
@@ -99,7 +103,49 @@
         </div>
 
         <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for XSS Level 5</p>
+            <!-- Level 5: Advanced Filters -->
+            <div class="card border-0 shadow-none mb-4">
+                <div class="card-body">
+                    <h4 class="mb-3">Image Gallery Upload</h4>
+
+                    {% if message %}
+                    <div class="alert alert-info border-0 d-flex align-items-center mb-4">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <div>{{ message }}</div>
+                    </div>
+                    {% endif %}
+
+                    {% if filtered_input %}
+                    <div class="mb-4">
+                        <h6 class="text-muted small text-uppercase mb-2">Upload Preview</h6>
+                        <div class="p-3 bg-light rounded border text-center">
+                            <!-- VULNERABILITY: Content is rendered safely after advanced filtering -->
+                            {{ filtered_input | safe }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" action="{{ url_for('xss_level5') }}" class="mb-4">
+                        <div class="mb-3">
+                            <label class="form-label">Image Name / Tag</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="bi bi-image"></i></span>
+                                <input type="text" class="form-control" name="user_input" placeholder="<img> tag or SVG"
+                                    required>
+                            </div>
+                            <div class="form-text">We use an advanced WAF to block common XSS vectors.</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Upload Image</button>
+                    </form>
+
+                    <hr>
+
+                    <div class="d-flex align-items-center text-muted small">
+                        <i class="bi bi-shield-lock me-2 text-warning"></i>
+                        <span>Advanced WAF v2.0 Active</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

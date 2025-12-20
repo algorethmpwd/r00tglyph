@@ -37,7 +37,8 @@
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Stored XSS occurs when malicious scripts are permanently stored on the server. Look for input fields that store and display user content like comments or posts.
+                            Stored XSS occurs when malicious scripts are permanently stored on the server. Look for
+                            input fields that store and display user content like comments or posts.
                         </div>
                     </div>
                 </div>
@@ -50,7 +51,8 @@
                     </h2>
                     <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Test if HTML is sanitized by entering <code>&lt;b&gt;test&lt;/b&gt;</code>. If it renders as bold, you can inject scripts.
+                            Test if HTML is sanitized by entering <code>&lt;b&gt;test&lt;/b&gt;</code>. If it renders as
+                            bold, you can inject scripts.
                         </div>
                     </div>
                 </div>
@@ -63,7 +65,8 @@
                     </h2>
                     <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Enter <code>&lt;script&gt;alert('XSS Level 3 Completed!')&lt;/script&gt;</code> in the comment field. The script persists and executes for all viewers.
+                            Enter <code>&lt;script&gt;alert('XSS Level 3 Completed!')&lt;/script&gt;</code> in the
+                            comment field. The script persists and executes for all viewers.
                         </div>
                     </div>
                 </div>
@@ -99,7 +102,75 @@
         </div>
 
         <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for XSS Level 3</p>
+            <!-- Blog Post Content -->
+            <div class="blog-post mb-5">
+                <span class="badge bg-primary mb-2">Technology</span>
+                <h2 class="fw-bold">The Future of Web Security</h2>
+                <div class="d-flex align-items-center mb-3">
+                    <img src="https://ui-avatars.com/api/?name=Admin&background=random" class="rounded-circle me-2"
+                        width="32" height="32">
+                    <div class="small">
+                        <span class="fw-bold">Admin</span>
+                        <span class="text-muted mx-1">•</span>
+                        <span class="text-muted">Posted 2 days ago</span>
+                    </div>
+                </div>
+                <p class="lead text-secondary">Why traditional security measures are no longer enough in the modern web
+                    era.</p>
+                <hr>
+                <div class="blog-content">
+                    <p>As web applications become more complex, the attack surface grows exponentially. Developers must
+                        stay ahead of the curve by implementing robust security practices from day one.</p>
+                    <p>In this post, we explore why relying solely on firewalls is a thing of the past and how
+                        application security testing is crucial for survival.</p>
+                </div>
+            </div>
+
+            <!-- Comments Section -->
+            <div class="comments-section">
+                <h4 class="mb-4">Comments ({{ comments|length }})</h4>
+
+                <!-- Comment Form -->
+                <div class="card mb-4 border-0 shadow-sm bg-light">
+                    <div class="card-body">
+                        <h6 class="card-title mb-3">Leave a comment</h6>
+                        <form method="POST" action="{{ url_for('xss_level3') }}">
+                            <div class="mb-3">
+                                <textarea class="form-control" name="content" rows="3"
+                                    placeholder="Join the discussion..." required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary px-4">Post Comment</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Comments List -->
+                <div class="list-group list-group-flush">
+                    {% for comment in comments %}
+                    <div class="list-group-item px-0 border-bottom">
+                        <div class="d-flex">
+                            <img src="https://ui-avatars.com/api/?name={{ comment.username }}&background=random"
+                                class="rounded-circle me-3" width="40" height="40">
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <h6 class="fw-bold mb-0">{{ comment.username }}</h6>
+                                    <small class="text-muted">{{ comment.timestamp.strftime('%Y-%m-%d %H:%M') }}</small>
+                                </div>
+                                <div class="comment-content text-break">
+                                    <!-- VULNERABILITY: Content is rendered without escaping -->
+                                    {{ comment.content | safe }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-chat-dots fs-1 mb-2 d-block"></i>
+                        No comments yet. Be the first to share your thoughts!
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     </div>
 </div>
