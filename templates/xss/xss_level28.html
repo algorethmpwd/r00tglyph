@@ -1,21 +1,30 @@
 {% extends "base.html" %}
 
+{% block title %}Level 28: Import Map Injection - R00tGlyph{% endblock %}
+
+{% block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">XSS</span> / <span>Level 28</span>
+{% endblock %}
+
 {% block content %}
-<div class="row">
-    <div class="col-md-12">
+<div class="challenge-lab">
+    <!-- LEFT PANEL: Mission & Intel -->
+    <div class="mission-panel">
         <div class="mission-header">
             <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
         <div class="mission-content">
-            <h5 class="mb-3">Level 28: Import Map Injection</h5>
+            <h5 class="mb-3">Import Map Injection</h5>
             <p class="text-secondary small mb-4">
-                Welcome to <strong>Module Loader</strong>. Managing ES Modules dependencies.
+                Welcome to <strong>Module Loader</strong>. Hijack module imports using Import Maps to execute arbitrary
+                code.
             </p>
 
             <div class="card mb-4 border-0 bg-light">
                 <div class="card-body p-3">
                     <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
-                    <p class="mb-0 small">Hijack module imports using Import Maps.</p>
+                    <p class="mb-0 small">Inject a malicious Import Map to redirect critical module requests to your
+                        payload.</p>
                 </div>
             </div>
 
@@ -58,15 +67,42 @@
                     <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
                             Payload:
-                            <code>&lt;script type="importmap"&gt;{"imports": {"/js/utils.js": "data:text/javascript,alert(1)"}}&lt;/script&gt;</code>
+                            <code>&lt;script type="importmap"&gt;{"imports": {"/static/js/dummy_utils.js": "data:text/javascript,alert(1)"}}&lt;/script&gt;</code>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {% if xss_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully hijacked the module import.</p>
+                {% if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: The Vulnerable App -->
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>module-loader.local/dependencies</span>
+            </div>
         </div>
 
         <div class="app-frame p-4">
-            <!-- Level 28: Import Map Injection -->
             <div class="card border-0 shadow-none mb-4">
                 <div class="card-body">
                     <h4 class="mb-3">Dependency Manager</h4>
@@ -82,7 +118,10 @@
                     <form method="POST" action="{{ url_for('xss_level28') }}">
                         <div class="mb-3">
                             <label class="form-label">Add Custom Module Mapping</label>
-                            <input type="text" class="form-control" name="input" placeholder="JSON map..." required>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="bi bi-box-seam"></i></span>
+                                <input type="text" class="form-control" name="input" placeholder="JSON map..." required>
+                            </div>
                         </div>
                         <button type="submit" class="btn btn-primary">Inject Map</button>
                     </form>
@@ -98,10 +137,19 @@
                         </div>
 
                         <!-- Expected application import -->
-                        <script type="module">
-                            import { loadUtils } from '/static/js/dummy_utils.js'; // This would be the target
-                            console.log("Module loaded");
-                        </script>
+                        <div class="p-3 bg-light border rounded mt-3">
+                            <small class="text-muted d-block mb-2">System Log:</small>
+                            <script type="module">
+                                try {
+                                    import { loadUtils } from '/static/js/dummy_utils.js'; // This would be the target
+                                    console.log("Module loaded");
+                                    document.write('<div class="text-success"><i class="bi bi-check-circle me-1"></i> Module loaded successfully</div>');
+                                } catch (e) {
+                                    console.error("Module load failed", e);
+                                    document.write('<div class="text-danger"><i class="bi bi-x-circle me-1"></i> Module load failed</div>');
+                                }
+                            </script>
+                        </div>
                     </div>
                 </div>
             </div>

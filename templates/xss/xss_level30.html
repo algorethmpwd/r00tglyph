@@ -1,21 +1,30 @@
 {% extends "base.html" %}
 
+{% block title %}Level 30: Indirect Prompt Injection - R00tGlyph{% endblock %}
+
+{% block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">XSS</span> / <span>Level 30</span>
+{% endblock %}
+
 {% block content %}
-<div class="row">
-    <div class="col-md-12">
+<div class="challenge-lab">
+    <!-- LEFT PANEL: Mission & Intel -->
+    <div class="mission-panel">
         <div class="mission-header">
             <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
         <div class="mission-content">
-            <h5 class="mb-3">Level 30: Indirect Prompt Injection</h5>
+            <h5 class="mb-3">Indirect Prompt Injection</h5>
             <p class="text-secondary small mb-4">
-                Welcome to <strong>AI Page Summarizer</strong>. The future of browsing.
+                Welcome to <strong>AI Page Summarizer</strong>. The future of browsing. Trigger XSS by tricking the AI
+                into generating malicious output.
             </p>
 
             <div class="card mb-4 border-0 bg-light">
                 <div class="card-body p-3">
                     <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
-                    <p class="mb-0 small">Trigger XSS by tricking the AI into generating malicious output.</p>
+                    <p class="mb-0 small">Inject a prompt that overrides the AI's safety controls and forces it to
+                        output raw HTML script tags.</p>
                 </div>
             </div>
 
@@ -63,10 +72,37 @@
                     </div>
                 </div>
             </div>
+
+            {% if xss_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully performed Indirect Prompt Injection.</p>
+                {% if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: The Vulnerable App -->
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>ai-summarizer.local/app</span>
+            </div>
         </div>
 
         <div class="app-frame p-4">
-            <!-- Level 30: Indirect Prompt Injection -->
             <div class="card border-0 shadow-none mb-4">
                 <div class="card-body">
                     <h4 class="mb-3">Webpage Summary</h4>
@@ -79,17 +115,30 @@
                     </div>
                     {% endif %}
 
-                    <div class="chat-bubble p-3 rounded mb-3 bg-light border">
-                        <strong class="d-block mb-1 text-primary">AI Bot</strong>
-                        <div class="typing-indicator text-muted small fst-italic">Reading webpage content...</div>
-                        <div class="ai-output mt-2">
+                    <div class="chat-bubble p-3 rounded mb-4 bg-white border shadow-sm">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="bg-primary text-white rounded-circle p-1 me-2 d-flex align-items-center justify-content-center"
+                                style="width: 24px; height: 24px;">
+                                <i class="bi bi-robot small"></i>
+                            </div>
+                            <strong class="text-primary small">AI Assistant</strong>
+                        </div>
+
+                        <div class="ai-output mt-2 small text-secondary">
                             {% if request.method == 'POST' and xss_detected %}
                             <!-- Simulated AI outputting XSS because it was tricked -->
-                            Summary: This page contains interesting data... <br>
-                            <span class="text-danger">[INJECTED AI OUTPUT]:</span> &lt;script&gt;alert('XSS Level 30
-                            Completed!');&lt;/script&gt;
+                            <p>I have analyzed the content. Here is the summary:</p>
+                            <div class="p-2 bg-light border-start border-4 border-danger">
+                                <span class="text-dark">This page contains interesting data...</span> <br>
+                                <span class="text-danger fw-bold">[INJECTED AI OUTPUT]:</span> &lt;script&gt;alert('XSS
+                                Level 30 Completed!');&lt;/script&gt;
+                            </div>
                             {% elif request.method == 'POST' %}
-                            Summary: I read the text you provided. It seems to happen...
+                            <p>I have analyzed the text you provided. It appears to be a standard article. No key
+                                insights found.</p>
+                            {% else %}
+                            <p>Paste the content of a webpage below, and I will summarize it for you using my advanced
+                                language model.</p>
                             {% endif %}
                         </div>
                     </div>
@@ -97,11 +146,13 @@
                     <form method="POST" action="{{ url_for('xss_level30') }}">
                         <div class="mb-3">
                             <label class="form-label">Webpage Content (Input for AI)</label>
-                            <textarea class="form-control" name="input" rows="4" placeholder="Article text..."
-                                required></textarea>
-                            <div class="form-text">The AI will summarize this text. Can you control its output?</div>
+                            <textarea class="form-control" name="input" rows="5"
+                                placeholder="Paste article text here..." required></textarea>
+                            <div class="form-text"><i class="bi bi-info-circle me-1"></i> The AI will read and summarize
+                                this text. Can you control its output?</div>
                         </div>
-                        <button type="submit" class="btn btn-primary">Summarize</button>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-stars me-1"></i>
+                            Summarize</button>
                     </form>
                 </div>
             </div>

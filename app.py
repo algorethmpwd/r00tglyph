@@ -1660,6 +1660,21 @@ def get_or_create_flag(challenge_id, user_id):
     return new_flag_value
 
 
+def get_flag_if_completed(challenge_name, user):
+    """Retrieve the flag for a challenge if the user has completed it."""
+    challenge = Challenge.query.filter_by(name=challenge_name).first()
+    if not challenge:
+        return None
+
+    completed_ids = (
+        json.loads(user.completed_challenges) if user.completed_challenges else []
+    )
+
+    if challenge.id in completed_ids:
+        return get_or_create_flag(challenge.id, user.id)
+    return None
+
+
 def update_user_progress(user_id, challenge_id, points):
     """Update user progress after completing a challenge"""
     user = db.session.get(LocalUser, user_id)

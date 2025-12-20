@@ -37,7 +37,8 @@
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            DELETE queries: <code>DELETE FROM posts WHERE id='INPUT'</code>. Dangerous because you can delete all records: <code>1' OR '1'='1</code>
+                            DELETE queries: <code>DELETE FROM posts WHERE id='INPUT'</code>. Dangerous because you can
+                            delete all records: <code>1' OR '1'='1</code>
                         </div>
                     </div>
                 </div>
@@ -63,7 +64,13 @@
                     </h2>
                     <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            <strong>Step-by-step:</strong><ol class='mb-2 mt-2'><li>In ID field: <code>1' OR '1'='1'--</code></li><li>All records matching the condition are deleted</li><li>Use carefully in testing!</li></ol><strong>Why it works:</strong> The WHERE clause becomes always true, deleting all records.
+                            <strong>Step-by-step:</strong>
+                            <ol class='mb-2 mt-2'>
+                                <li>In ID field: <code>1' OR '1'='1'--</code></li>
+                                <li>All records matching the condition are deleted</li>
+                                <li>Use carefully in testing!</li>
+                            </ol><strong>Why it works:</strong> The WHERE clause becomes always true, deleting all
+                            records.
                         </div>
                     </div>
                 </div>
@@ -98,8 +105,32 @@
             </div>
         </div>
 
-        <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for SQLi Level 9</p>
+        <!-- Level 9: SQL Injection in REST API -->
+        <div class="card border-0 shadow-none mb-4">
+            <div class="card-body">
+                <h4 class="mb-3">API Tester</h4>
+
+                {% if api_response %}
+                <div class="alert alert-secondary border-0 mb-4">
+                    <small class="text-uppercase text-muted fw-bold">API Response</small>
+                    <pre class="mt-2 mb-0"><code>{{ api_response | tojson(indent=2) }}</code></pre>
+                </div>
+                {% endif %}
+
+                <form method="POST" action="{{ url_for('sqli_level9') }}" class="mb-4">
+                    <div class="mb-3">
+                        <label class="form-label">API Endpoint</label>
+                        <input type="text" class="form-control" value="/api/v1/users" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">JSON Payload</label>
+                        <textarea class="form-control font-monospace" name="json_payload"
+                            rows="5">{{ json_payload or '{\n  "user_id": 1\n}' }}</textarea>
+                        <div class="form-text">Send valid JSON to query the API.</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Send Request</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>

@@ -1,25 +1,34 @@
 {% extends "base.html" %}
 
+{% block title %}Level 24: DOM Clobbering - R00tGlyph{% endblock %}
+
+{% block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">XSS</span> / <span>Level 24</span>
+{% endblock %}
+
 {% block content %}
-<div class="row">
-    <div class="col-md-12">
+<div class="challenge-lab">
+    <!-- LEFT PANEL: Mission & Intel -->
+    <div class="mission-panel">
         <div class="mission-header">
             <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
         <div class="mission-content">
-            <h5 class="mb-3">Level 24: DOM Clobbering</h5>
+            <h5 class="mb-3">DOM Clobbering</h5>
             <p class="text-secondary small mb-4">
-                Welcome to <strong>Global Config Manager</strong>.
+                Welcome to <strong>Global Config Manager</strong>. Overwrite the global <code>window.config</code>
+                object to execute arbitrary code.
             </p>
 
             <div class="card mb-4 border-0 bg-light">
                 <div class="card-body p-3">
                     <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
-                    <p class="mb-0 small">Overwrite the global <code>window.config</code> object to execute arbitrary
-                        code.</p>
+                    <p class="mb-0 small">Inject HTML elements with IDs that clobber the global <code>config</code>
+                        variable.</p>
                 </div>
             </div>
 
+            <!-- Integrated Hints System -->
             <div class="hint-accordion accordion" id="hintsAccordion">
                 <div class="accordion-item">
                     <h2 class="accordion-header">
@@ -45,8 +54,7 @@
                     <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
                             If the application uses a global variable like <code>config</code> without initializing it
-                            with `let` or `const`, you might be able to overwrite it by injecting an element with
-                            `id="config"`.
+                            with `let` or `const`, you can overwite it by injecting an element with `id="config"`.
                         </div>
                     </div>
                 </div>
@@ -60,15 +68,42 @@
                     <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
                             Payload: <code>&lt;a id="config" href="javascript:alert(1)"&gt;clobber&lt;/a&gt;</code> (or
-                            similar structure depending on how the config object is used).
+                            similar depending on usage).
                         </div>
                     </div>
                 </div>
             </div>
+
+            {% if xss_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully exploited DOM Clobbering.</p>
+                {% if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: The Vulnerable App -->
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-arrow-left"></i>
+                <i class="bi bi-arrow-right"></i>
+                <i class="bi bi-arrow-clockwise"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-lock-fill text-success me-2 small"></i>
+                <span>config-manager.local/settings</span>
+            </div>
         </div>
 
         <div class="app-frame p-4">
-            <!-- Level 24: DOM Clobbering -->
             <div class="card border-0 shadow-none mb-4">
                 <div class="card-body">
                     <h4 class="mb-3">Global Configuration</h4>
@@ -83,18 +118,21 @@
 
                     <p>Current Config Status: <span id="status" class="badge bg-secondary">Loading...</span></p>
 
-                    <form method="POST" action="{{ url_for('xss_level24') }}">
+                    <form method="POST" action="{{ url_for('xss_level24') }}" class="mb-4">
                         <div class="mb-3">
                             <label class="form-label">Update Status Message</label>
-                            <input type="text" class="form-control" name="input" placeholder="Enter HTML..." required>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="bi bi-terminal"></i></span>
+                                <input type="text" class="form-control" name="input" placeholder="Enter HTML..."
+                                    required>
+                            </div>
                         </div>
                         <button type="submit" class="btn btn-primary">Update</button>
                     </form>
 
-                    <div class="mt-4 p-3 bg-light border rounded">
-                        <h6>Preview:</h6>
-                        <div id="preview">
-                            <!-- In a real scenario, this would be where the user's input is rendered -->
+                    <div class="mb-4">
+                        <h6 class="text-muted small text-uppercase mb-2">Preview</h6>
+                        <div class="p-3 bg-light rounded border" id="preview">
                             {% if request.method == 'POST' %}
                             {{ request.form.get('input', '') | safe }}
                             {% endif %}
@@ -103,12 +141,23 @@
 
                     <script>
                         // Vulnerable code simulation
-                        if (window.config) {
-                            // If config exists (clobbered), do something insecure
-                            console.log("Config loaded:", window.config);
-                        } else {
-                            window.config = { debug: false };
-                        }
+                        // We rely on the browser's behavior where id="config" creates window.config
+                        setTimeout(() => {
+                            if (window.config && window.config.href) {
+                                // Simulate usage of the clobbered config
+                                console.log("Config loaded from clobbered element:", window.config);
+                                if (window.config.href.includes('javascript:')) {
+                                    // This is just a simulation of execution for the alert
+                                    // In a real attack, the app might do: window.location = window.config.href
+                                }
+                            } else if (!window.config) {
+                                // If not clobbered, define safely
+                                window.config = { debug: false };
+                            }
+
+                            document.getElementById('status').innerText = window.config ? 'Active' : 'Default';
+                            document.getElementById('status').className = 'badge bg-success';
+                        }, 500); 
                     </script>
                 </div>
             </div>

@@ -1,6 +1,6 @@
 {%extends 'base.html' %}
 
-{%block title %}Level 10: SQL Injection with WAF Bypass - R00tGlyph{%endblock %}
+{%block title %}Level 10: NoSQL Injection - R00tGlyph{%endblock %}
 
 {%block breadcrumb %}
 <span class="text-muted">Challenges</span> / <span class="text-muted">SQL Injection</span> / <span>Level 10</span>
@@ -14,93 +14,93 @@
             <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
         <div class="mission-content">
-            <h5 class="mb-3">SQL Injection with WAF Bypass</h5>
+            <h5 class="mb-3">NoSQL Injection</h5>
             <p class="text-secondary small mb-4">
-                Welcome to <strong>ProtectedDB</strong>. Test for SQL injection vulnerabilities.
+                Welcome to <strong>CloudPass</strong>. This system uses MongoDB.
             </p>
 
             <div class="card mb-4 border-0 bg-light">
                 <div class="card-body p-3">
                     <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
-                    <p class="mb-0 small">Bypass Web Application Firewall</p>
+                    <p class="mb-0 small">Bypass authentication using NoSQL operators.</p>
                 </div>
             </div>
 
-            <!-- Integrated Hints System -->
-            <div class="hint-accordion accordion" id="hintsAccordion">
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#hint1">
-                            <i class="bi bi-lightbulb me-2"></i> Hint 1: WAF Detection
-                        </button>
-                    </h2>
-                    <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
-                        <div class="accordion-body small text-secondary">
-                            WAFs block common SQLi patterns. Test what's blocked: <code>UNION</code>, <code>SELECT</code>, <code>OR</code>, etc. Then find bypass techniques.
-                        </div>
-                    </div>
-                </div>
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#hint2">
-                            <i class="bi bi-code-slash me-2"></i> Hint 2: Bypass Techniques
-                        </button>
-                    </h2>
-                    <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
-                        <div class="accordion-body small text-secondary">
-                            Use: Case variations (<code>UnIoN</code>), comments (<code>UN/**/ION</code>), encoding (<code>%55NION</code>), or alternative syntax (<code>||</code> instead of <code>OR</code>).
-                        </div>
-                    </div>
-                </div>
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#hint3">
-                            <i class="bi bi-shield-check me-2"></i> Hint 3: Solution
-                        </button>
-                    </h2>
-                    <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
-                        <div class="accordion-body small text-secondary">
-                            <strong>Bypass examples:</strong><ul class='mb-2 mt-2'><li><code>' /*!50000UNION*/ /*!50000SELECT*/ 1,2,3--</code></li><li><code>' %55NION %53ELECT 1,2,3--</code></li><li><code>' UNION/**/SELECT/**/1,2,3--</code></li></ul><strong>Why it works:</strong> WAF rules miss obfuscated variations.
-                        </div>
+            <div class="alert alert-info border-0 small">
+                <div class="d-flex">
+                    <i class="bi bi-lightbulb-fill me-2 mt-1"></i>
+                    <div>
+                        <strong>Intel:</strong><br>
+                        The application accepts JSON input and passes it directly to the database query. Try
+                        manipulating parameter types.
                     </div>
                 </div>
             </div>
 
-            {%if sqli_detected %}
-            <div class="flag-success mt-4">
-                <div class="d-flex align-items-center gap-2 mb-2">
-                    <i class="bi bi-check-circle-fill text-success"></i>
-                    <strong>Mission Accomplished!</strong>
+            <div class="d-grid">
+                <button class="btn btn-outline-dark btn-sm" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#hintCollapse">
+                    <i class="bi bi-question-circle me-1"></i> Need a Hint?
+                </button>
+                <div class="collapse mt-2" id="hintCollapse">
+                    <div class="card card-body bg-light border-0 small text-muted">
+                        In MongoDB, <code>$ne</code> (not equal) or <code>$gt</code> (greater than) operators can change
+                        query logic.
+                    </div>
                 </div>
-                <p class="small text-secondary mb-2">You've successfully exploited the SQL injection vulnerability.</p>
-                {%if flag %}
-                <span class="flag-value">{{ flag }}</span>
-                {%endif %}
             </div>
-            {%endif %}
         </div>
     </div>
 
-    <!-- RIGHT PANEL: The Vulnerable App -->
-    <div class="work-panel">
-        <div class="browser-bar">
-            <div class="d-flex gap-2 text-secondary">
-                <i class="bi bi-arrow-left"></i>
-                <i class="bi bi-arrow-right"></i>
-                <i class="bi bi-arrow-clockwise"></i>
+    <!-- RIGHT PANEL: Vulnerable App -->
+    <div class="app-panel">
+        <div class="app-browser">
+            <div class="browser-header">
+                <div class="browser-dots">
+                    <span></span><span></span><span></span>
+                </div>
+                <div class="browser-url">https://secure-cloud-login.internal/admin</div>
             </div>
-            <div class="url-bar">
-                <i class="bi bi-lock-fill text-success me-2 small"></i>
-                <span>protected.local/query</span>
-            </div>
-        </div>
 
-        <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for SQLi Level 10</p>
+            <!-- Level 10: NoSQL Injection -->
+            <div class="card border-0 shadow-none mb-4">
+                <div class="card-body">
+                    <h4 class="mb-3">CloudPass Login</h4>
+
+                    {% if success %}
+                    <div class="alert alert-success border-0 d-flex align-items-center mb-4">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <div>{{ success }}</div>
+                    </div>
+                    {% endif %}
+
+                    {% if error %}
+                    <div class="alert alert-danger border-0 d-flex align-items-center mb-4">
+                        <i class="bi bi-x-circle-fill me-2"></i>
+                        <div>{{ error }}</div>
+                    </div>
+                    {% endif %}
+
+                    {% if nosql_detected %}
+                    <div class="alert alert-warning border-0 d-flex align-items-center mb-4">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <div>NoSQL Injection vector detected!</div>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" action="{{ url_for('sqli_level10') }}" class="mb-4">
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-control" name="username" placeholder="admin">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-control" name="password" placeholder="********">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Login</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
-</div>
-{%endblock %}
+    {%endblock %}

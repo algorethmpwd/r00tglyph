@@ -37,7 +37,8 @@
                     </h2>
                     <div id="hint1" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            UPDATE queries: <code>UPDATE users SET email='INPUT' WHERE id=1</code>. You can modify other columns: <code>test', role='admin' WHERE '1'='1</code>
+                            UPDATE queries: <code>UPDATE users SET email='INPUT' WHERE id=1</code>. You can modify other
+                            columns: <code>test', role='admin' WHERE '1'='1</code>
                         </div>
                     </div>
                 </div>
@@ -63,7 +64,14 @@
                     </h2>
                     <div id="hint3" class="accordion-collapse collapse" data-bs-parent="#hintsAccordion">
                         <div class="accordion-body small text-secondary">
-                            <strong>Step-by-step:</strong><ol class='mb-2 mt-2'><li>In email field: <code>test@test.com', role='admin' WHERE username='youruser'--</code></li><li>Submit the update</li><li>Refresh and verify you now have admin privileges</li></ol><strong>Why it works:</strong> You inject additional SET clauses to modify unintended columns.
+                            <strong>Step-by-step:</strong>
+                            <ol class='mb-2 mt-2'>
+                                <li>In email field:
+                                    <code>test@test.com', role='admin' WHERE username='youruser'--</code></li>
+                                <li>Submit the update</li>
+                                <li>Refresh and verify you now have admin privileges</li>
+                            </ol><strong>Why it works:</strong> You inject additional SET clauses to modify unintended
+                            columns.
                         </div>
                     </div>
                 </div>
@@ -98,8 +106,46 @@
             </div>
         </div>
 
-        <div class="app-frame p-4">
-            <p class="text-muted">Challenge interface for SQLi Level 8</p>
+        <!-- Level 8: Second-Order SQL Injection -->
+        <div class="card border-0 shadow-none mb-4">
+            <div class="card-body">
+                <h4 class="mb-3">User Profile</h4>
+
+                {% if update_success %}
+                <div class="alert alert-success border-0 d-flex align-items-center mb-4">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <div>Profile updated successfully.</div>
+                </div>
+                {% endif %}
+
+                <form method="POST" action="{{ url_for('sqli_level8') }}" class="mb-4">
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <input type="text" class="form-control" name="username" value="{{ current_username }}"
+                            placeholder="Enter username">
+                        <div class="form-text">Choose a unique username.</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Profile</button>
+                </form>
+
+                <h5 class="mb-3">Start Session</h5>
+                <p class="text-muted small mb-3">Simulate a new session to trigger second-order effects.</p>
+                <form method="GET" action="{{ url_for('sqli_level8') }}">
+                    <input type="hidden" name="action" value="view">
+                    <button type="submit" class="btn btn-outline-secondary">View Profile (Trigger)</button>
+                </form>
+
+                {% if profile_view %}
+                <hr class="my-4">
+                <div class="card bg-light border-0">
+                    <div class="card-body">
+                        <h5 class="card-title">Profile Details</h5>
+                        <p class="mb-1"><strong>Username:</strong> {{ current_username }}</p>
+                        <p class="mb-0"><strong>Role:</strong> {{ role }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>

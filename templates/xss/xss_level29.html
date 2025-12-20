@@ -1,21 +1,30 @@
 {% extends "base.html" %}
 
+{% block title %}Level 29: Web Bundle/HMR Injection - R00tGlyph{% endblock %}
+
+{% block breadcrumb %}
+<span class="text-muted">Challenges</span> / <span class="text-muted">XSS</span> / <span>Level 29</span>
+{% endblock %}
+
 {% block content %}
-<div class="row">
-    <div class="col-md-12">
+<div class="challenge-lab">
+    <!-- LEFT PANEL: Mission & Intel -->
+    <div class="mission-panel">
         <div class="mission-header">
             <i class="bi bi-crosshair me-2"></i>Mission Control
         </div>
         <div class="mission-content">
-            <h5 class="mb-3">Level 29: Web Bundle/HMR Injection</h5>
+            <h5 class="mb-3">Web Bundle/HMR Injection</h5>
             <p class="text-secondary small mb-4">
-                Welcome to <strong>DevServer Console</strong>. Emulating Hot Module Replacement.
+                Welcome to <strong>DevServer Console</strong>. Simulate a malicious Hot Module Replacement (HMR) update
+                to execute code.
             </p>
 
             <div class="card mb-4 border-0 bg-light">
                 <div class="card-body p-3">
                     <h6 class="card-title small text-uppercase text-muted mb-2">Objective</h6>
-                    <p class="mb-0 small">Simulate a malicious HMR update message to execute code.</p>
+                    <p class="mb-0 small">Inject a malicious JSON message into the mock HMR channel to trigger an
+                        update.</p>
                 </div>
             </div>
 
@@ -62,10 +71,36 @@
                     </div>
                 </div>
             </div>
+
+            {% if xss_detected %}
+            <div class="flag-success mt-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <strong>Mission Accomplished!</strong>
+                </div>
+                <p class="small text-secondary mb-2">You've successfully polluted the HMR channel.</p>
+                {% if flag %}
+                <span class="flag-value">{{ flag }}</span>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: The Vulnerable App -->
+    <div class="work-panel">
+        <div class="browser-bar">
+            <div class="d-flex gap-2 text-secondary">
+                <i class="bi bi-code-square"></i>
+                <i class="bi bi-terminal"></i>
+            </div>
+            <div class="url-bar">
+                <i class="bi bi-wifi-off text-warning me-2 small"></i>
+                <span>localhost:3000/hmr-client</span>
+            </div>
         </div>
 
         <div class="app-frame p-4">
-            <!-- Level 29: Web Bundle / HMR -->
             <div class="card border-0 shadow-none mb-4">
                 <div class="card-body">
                     <h4 class="mb-3">DevServer Simulator</h4>
@@ -78,18 +113,26 @@
                     </div>
                     {% endif %}
 
-                    <div class="bg-black text-white p-3 font-monospace rounded mb-3" style="min-height: 150px;">
-                        <div class="text-success">[HMR] Waiting for update signal...</div>
-                        <div class="text-secondary">[WS] Connected to ws://localhost:3000</div>
+                    <div class="bg-black text-white p-3 font-monospace rounded mb-4"
+                        style="min-height: 150px; font-size: 0.85em;">
+                        <div class="text-success mb-1">➜ [HMR] Waiting for update signal...</div>
+                        <div class="text-secondary mb-1">➜ [WS] Connected to ws://localhost:3000</div>
+                        {% if xss_detected %}
+                        <div class="text-danger">➜ [HMR] Update received: Malicious payload detected! Execution
+                            attempted.</div>
+                        {% elif request.method == 'POST' %}
+                        <div class="text-white">➜ [WS-IN] {{ request.form.get('input', '') }}</div>
+                        {% endif %}
                     </div>
 
                     <form method="POST" action="{{ url_for('xss_level29') }}">
                         <div class="mb-3">
                             <label class="form-label">Inject WebSocket Message</label>
-                            <textarea class="form-control font-monospace" name="input" rows="3"
+                            <textarea class="form-control font-monospace bg-light" name="input" rows="3"
                                 placeholder='{"type":"..."}' required></textarea>
                         </div>
-                        <button type="submit" class="btn btn-warning">Send Message</button>
+                        <button type="submit" class="btn btn-warning"><i class="bi bi-send me-2"></i>Send
+                            Message</button>
                     </form>
                 </div>
             </div>
