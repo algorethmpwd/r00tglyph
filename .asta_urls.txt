@@ -1,3 +1,0 @@
-# Asta Crawled URLs Memory
-# Format: 1 URL per line
-# Automatically updated during crawling
