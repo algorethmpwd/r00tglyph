@@ -1,0 +1,10 @@
+{
+  "challenge": "Stored XSS",
+  "category": "xss",
+  "level": 3,
+  "hints": [
+    "This vulnerability persists across page loads and sessions.",
+    "Try submitting a comment with a script tag.",
+    "The stored content is rendered for all users who view the page."
+  ]
+}

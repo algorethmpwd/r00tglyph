@@ -1,0 +1,7 @@
+{
+  "challenge": "SSTI Level 7",
+  "category": "ssti",
+  "level": 7,
+  "solution": "Use template syntax like {config} or {self.__dict__} to access sensitive data. Escalate to RCE using {''.__class__.__mro__[2].__subclasses__()}.",
+  "prevention": "Never render user input in templates. Use sandboxed template engines. Implement input validation and output encoding."
+}

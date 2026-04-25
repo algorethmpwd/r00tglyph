@@ -1,0 +1,55 @@
+wing: r00tglyph
+rooms:
+- name: backup
+  description: Files from backup/
+  keywords:
+  - backup
+  - backup
+- name: app_modular_backup
+  description: Files from app_modular_backup/
+  keywords:
+  - app_modular_backup
+  - app_modular_backup
+- name: instance
+  description: Files from instance/
+  keywords:
+  - instance
+  - instance
+- name: testing
+  description: Files from tests/
+  keywords:
+  - testing
+  - tests
+- name: templates
+  description: Files from templates/
+  keywords:
+  - templates
+  - templates
+- name: data
+  description: Files from data/
+  keywords:
+  - data
+  - data
+- name: static
+  description: Files from static/
+  keywords:
+  - static
+  - static
+- name: backend
+  description: Files from controllers/
+  keywords:
+  - backend
+  - controllers
+- name: documentation
+  description: Files from notes/
+  keywords:
+  - documentation
+  - notes
+- name: frontend
+  description: Files from components/
+  keywords:
+  - frontend
+  - components
+- name: general
+  description: Files that don't fit other rooms
+  keywords: []

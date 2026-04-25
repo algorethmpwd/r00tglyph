@@ -1,0 +1,10 @@
+{
+  "challenge": "CMDi Level 8",
+  "category": "cmdi",
+  "level": 8,
+  "hints": [
+    "Try command separators like ; | & to chain commands.",
+    "Look for input that gets passed to system commands.",
+    "Use command substitution with $() or backticks."
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "challenge": "XSS with Mutation Observer Bypass",
+  "category": "xss",
+  "level": 10,
+  "solution": "Use mXSS techniques where the payload transforms after the Mutation Observer checks it. For example, using nested elements that restructure after DOM parsing.",
+  "prevention": "Use established sanitization libraries like DOMPurify. Don't rely on custom Mutation Observer implementations for security."
+}

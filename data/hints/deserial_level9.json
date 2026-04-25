@@ -1,0 +1,10 @@
+{
+  "challenge": "Deserialization Level 9",
+  "category": "deserial",
+  "level": 9,
+  "hints": [
+    "Try submitting serialized payloads with malicious objects.",
+    "Look for pickle, PHP serialize, or other serialization formats.",
+    "Craft payloads with __reduce__ or magic methods for code execution."
+  ]
+}

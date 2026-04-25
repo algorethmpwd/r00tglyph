@@ -1,0 +1,10 @@
+{
+  "challenge": "XSS via HTTP Headers",
+  "category": "xss",
+  "level": 7,
+  "hints": [
+    "The User-Agent header is reflected in the page.",
+    "Use a proxy tool to modify the User-Agent header.",
+    "Try injecting script tags in the User-Agent."
+  ]
+}

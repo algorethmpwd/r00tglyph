@@ -6,466 +6,200 @@
 [![License](https://img.shields.io/badge/License-Educational-orange.svg)](LICENSE)
 [![Security](https://img.shields.io/badge/Security-Training-red.svg)](README.md)
 
-R00tGlyph v2.0 is a comprehensive, enterprise-grade web security training platform designed for security professionals, developers, and ethical hackers. Featuring a completely rewritten architecture with microservices support, advanced analytics, and professional-grade infrastructure.
+R00tGlyph v2.0 is a comprehensive, enterprise-grade web security training platform designed for security professionals, developers, and ethical hackers. Featuring 188 challenges across 9 vulnerability categories, team-based CTF play, admin panel, progressive hints, and detailed solutions.
 
-## 🚀 **What's New in v2.0**
+## 🚀 **Features**
 
-### **🏗️ Enterprise Architecture**
-- **Microservices Design**: Modular, scalable architecture with proper separation of concerns
-- **Professional MVC Structure**: Clean code organization following industry best practices
-- **Docker-First Deployment**: Full containerization with production-ready compose files
-- **Comprehensive Monitoring**: Prometheus, Grafana, ELK stack integration
+### **🎯 188 Challenges Across 9 Categories**
+| Category | Levels | Difficulty Range | Description |
+|----------|--------|-----------------|-------------|
+| **XSS** | 1-30 | Beginner → Expert | Reflected, DOM, Stored, WAF bypass, CSP bypass, Prototype Pollution, and more |
+| **SQLi** | 1-23 | Beginner → Expert | UNION, Blind, Time-based, WAF bypass, NoSQL, GraphQL, ORM injection |
+| **CMDi** | 1-23 | Beginner → Expert | Basic, Filter bypass, Blind, JSON APIs, Container escapes |
+| **CSRF** | 1-23 | Beginner → Expert | Form, JSON, SameSite bypass, OAuth, WebSocket, GraphQL mutations |
+| **SSRF** | 1-23 | Beginner → Expert | Internal scanning, Cloud metadata, DNS rebinding, Protocol smuggling |
+| **XXE** | 1-23 | Beginner → Expert | File disclosure, Blind, Billion Laughs, SOAP, OOB data retrieval |
+| **SSTI** | 1-23 | Beginner → Expert | Jinja2, Twig, Freemarker, Sandbox escape, RCE |
+| **Deserialization** | 1-10 | Beginner → Expert | Python pickle, PHP serialize, Java, .NET, YAML |
+| **Auth Bypass** | 1-10 | Beginner → Expert | SQLi, JWT, Session fixation, OAuth, MFA bypass |
 
-### **📊 Advanced Analytics & Intelligence**
-- **Real-time User Analytics**: Learning velocity, performance trends, skill gap analysis
-- **Challenge Difficulty AI**: Dynamic difficulty scoring based on completion metrics
-- **Behavioral Insights**: Activity patterns, peak performance times, learning preferences
-- **Security Event Monitoring**: Threat detection, payload analysis, anomaly detection
-
-### **🎓 Enhanced Learning Experience**
-- **Level-Specific Hints**: Contextual, progressive hints for each individual challenge
-- **Detailed Solutions**: Step-by-step walkthroughs with technical analysis
-- **Learning Paths**: Structured curricula for guided skill development
-- **Achievement System**: Dynamic unlocks based on progress and performance
-
-### **🔧 Professional Infrastructure**
-- **Redis Caching**: High-performance caching and session management
-- **PostgreSQL**: Enterprise database with proper normalization
-- **Rate Limiting**: Anti-abuse protection with sophisticated controls
-- **SSL/TLS Support**: Production-ready security configurations
-
-## 🎯 **Challenge Categories**
-
-### **🔥 Cross-Site Scripting (XSS) - 23 Levels**
-Progressive XSS training covering:
-- **Beginner (1-5)**: Basic reflected, DOM, stored XSS
-- **Intermediate (6-10)**: Filter bypass, WAF evasion, JSON contexts
-- **Advanced (11-17)**: SVG XSS, blind XSS, CSP bypass, prototype pollution
-- **Expert (18-23)**: WebAssembly, PWAs, GraphQL, federated identity systems
-
-### **💉 SQL Injection (SQLi) - 23 Levels**  
-Comprehensive database injection training:
-- **Beginner (1-5)**: Basic injection, UNION attacks, blind techniques
-- **Intermediate (6-10)**: Time-based, WAF bypass, second-order injection
-- **Advanced (11-17)**: ORM exploitation, stored procedures, XML injection
-- **Expert (18-23)**: NoSQL, GraphQL, cloud databases, advanced chaining
-
-### **⚡ Command Injection (CMDi) - 23 Levels**
-System-level exploitation techniques:
-- **Beginner (1-5)**: Basic command injection, filter evasion
-- **Intermediate (6-10)**: Blind techniques, API parameter injection
-- **Advanced (11-17)**: Container escapes, environment manipulation
-- **Expert (18-23)**: Serverless functions, cloud metadata, advanced chaining
-
-### **🔄 Cross-Site Request Forgery (CSRF) - 23 Levels**
-Modern CSRF attack vectors:
-- **Beginner (1-5)**: Basic CSRF, token manipulation
-- **Intermediate (6-10)**: AJAX bypass, JSON payloads, custom headers
-- **Advanced (11-17)**: Multi-step processes, WebSocket exploitation
-- **Expert (18-23)**: GraphQL mutations, microservices, OAuth flows
-
-### **🌐 Server-Side Request Forgery (SSRF) - 23 Levels**
-Internal network exploitation:
-- **Beginner (1-5)**: Basic SSRF, internal network discovery
-- **Intermediate (6-10)**: Filter bypass, DNS rebinding, cloud metadata
-- **Advanced (11-17)**: Protocol smuggling, Docker API, Kubernetes exploitation
-- **Expert (18-23)**: Advanced chaining, message queues, serverless contexts
-
-## 🛠️ **Professional Tool Integration**
-
-R00tGlyph v2.0 is designed for real-world security testing workflows:
-
-- **Burp Suite Professional**: Advanced web application security testing
-- **SQLMap**: Automated SQL injection detection and exploitation  
-- **Nmap**: Network discovery and security auditing
-- **Nuclei**: Fast vulnerability scanner with custom templates
-- **FFUF**: High-performance web fuzzer
-- **Gobuster**: Directory and file enumeration
-- **Custom Tools**: Built-in payload generators and analysis utilities
+### **🏗️ Platform Features**
+- **Global Scoreboard** - Compete with hackers worldwide; progress syncs to the central R00tGlyph server
+- **Progressive Hint System** - Contextual hints that unlock per challenge
+- **Detailed Solutions** - Step-by-step walkthroughs with prevention methods
+- **Team-Based CTF** - Create/join teams, team scoreboard
+- **Admin Panel** - Dashboard with analytics, user management, challenge toggling
+- **Rate Limiting** - Anti-abuse protection on login and flag submissions
+- **Real Command Execution** - Sandboxed command execution for realistic CMDi challenges
+- **Flag System** - Unique per-user flags for each challenge
+- **Profile Management** - Track progress, upload profile pictures
+- **Interactive UI** - Live output console, payload reference, hint modals
 
 ## 📦 **Installation & Deployment**
 
-### **🐳 Production Deployment (Recommended)**
+### **🔧 Quick Start (Local Development)**
 
-**Quick Start with Docker:**
 ```bash
 # Clone repository
 git clone https://github.com/algorethmpwd/R00tGlyph.git
 cd R00tGlyph
 
-# Start full stack
-docker-compose up -d
-
-# Access application
-open http://localhost
-```
-
-**Advanced Production Setup:**
-```bash
-# Full monitoring stack
-docker-compose --profile production up -d
-
-# Access services
-# Main App: http://localhost
-# Grafana: http://localhost:3000
-# Prometheus: http://localhost:9090
-# Kibana: http://localhost:5601
-```
-
-### **🔧 Development Setup**
-
-**Local Development:**
-```bash
-# Clone and setup virtual environment
-git clone https://github.com/algorethmpwd/R00tGlyph.git
-cd R00tGlyph
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+# Setup virtual environment
+python3 -m venv venv
+source venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Initialize database
-python run.py --init-db
-
-# Start development server
+# Initialize database and start
 python run.py --dev
 ```
 
-**Development with Docker:**
+Access at: http://localhost:5000
+
+### **🐳 Docker Deployment**
+
 ```bash
-# Start development environment
+# Quick start
+docker-compose up -d
+
+# Development mode with Adminer
 docker-compose --profile development up -d
 
-# Access development tools
-# Adminer: http://localhost:8080
-# MailHog: http://localhost:8025
+# Production mode with PostgreSQL
+docker-compose --profile production up -d
 ```
 
-### **☸️ Kubernetes Deployment**
+### **☁️ Cloud Deployment**
 
-```bash
-# Deploy to Kubernetes
-kubectl apply -f k8s/namespace.yaml
-kubectl apply -f k8s/configmap.yaml
-kubectl apply -f k8s/secrets.yaml
-kubectl apply -f k8s/postgres.yaml
-kubectl apply -f k8s/redis.yaml
-kubectl apply -f k8s/rootglyph.yaml
-kubectl apply -f k8s/ingress.yaml
-```
+- **Render**: One-click deploy via `render.yaml`
+- **Heroku**: Push to Heroku with `Procfile`
+- **Any VPS**: Use `docker-compose.yml` or `gunicorn`
 
 ## 🎮 **Getting Started**
 
-### **1. First Launch**
-```bash
-# Initialize the platform
-python run.py --init-db
+### **1. Create Account**
+- Click "Register" and create your profile
+- Your progress automatically syncs to the global scoreboard
+- First user can be promoted to admin via the reset command
 
-# Check system health
-python run.py --check-health
-
-# Start the server
-python run.py
-```
-
-### **2. Access the Platform**
-- **Main Interface**: http://localhost:5000
-- **Create Account**: Click "Register" and create your profile
-- **Start Learning**: Begin with XSS Level 1 or follow a learning path
+### **2. Choose Your Path**
+- **Beginners**: Start with XSS Level 1 or SQLi Level 1
+- **Intermediate**: Jump to filter bypass challenges
+- **Advanced**: Try expert-level WAF bypasses and chained attacks
 
 ### **3. Challenge Workflow**
-1. **Select Challenge**: Choose from 115+ available challenges
-2. **Read Scenario**: Understand the vulnerable application context
-3. **Analyze Code**: Use developer tools to identify vulnerabilities
-4. **Craft Payload**: Develop and test your exploit
-5. **Submit Flag**: Capture the flag to complete the challenge
-6. **Review Solution**: Study the detailed walkthrough and prevention methods
+1. **Read the scenario** - Understand the vulnerable application context
+2. **Analyze the code** - Use browser dev tools to identify vulnerabilities
+3. **Craft your payload** - Develop and test your exploit
+4. **Submit the flag** - Capture the flag to complete the challenge
+5. **Review the solution** - Study the walkthrough and prevention methods
 
-## 🎓 **Learning Features**
+### **4. Using Hints**
+Each challenge includes progressive hints accessible via the hint button or API:
+```
+GET /api/hints/<category>/<level>
+```
 
-### **📚 Progressive Hint System**
-Each challenge includes contextual hints that unlock based on your attempts:
-- **Concept Hints**: Understanding the vulnerability type
-- **Technical Hints**: Specific exploitation techniques
-- **Tool Hints**: Recommended tools and usage
-- **Solution Hints**: Step-by-step guidance (with point penalty)
+### **5. Viewing Solutions**
+Solutions unlock after completing a challenge:
+```
+GET /api/solutions/<category>/<level>
+```
 
-### **📖 Comprehensive Solutions**
-Post-completion access to detailed solutions including:
-- **Step-by-step walkthroughs**
-- **Technical vulnerability analysis** 
-- **Prevention and mitigation strategies**
-- **Real-world attack scenarios**
-- **Code examples and patches**
+### **6. Global Scoreboard**
+Your progress syncs automatically to the central R00tGlyph server so you can:
+- Compete with hackers worldwide
+- See your global rank and stats
+- Track team progress on the leaderboard
 
-### **🛤️ Learning Paths**
-Structured curricula for different skill levels:
-- **Web Security Fundamentals**: Core concepts and basic attacks
-- **OWASP Top 10 Mastery**: Complete coverage of critical web vulnerabilities
-- **Advanced Exploitation**: Complex attack chains and modern techniques
-- **Bug Bounty Preparation**: Real-world hunting methodologies
+## 🏗️ **Architecture**
 
-### **🏆 Achievement System**
-Dynamic achievements that unlock based on your progress:
-- **Completion Badges**: Category and difficulty milestones
-- **Speed Achievements**: Fast completion rewards
-- **Streak Rewards**: Consistent learning recognition
-- **Perfect Scores**: No-hint completion bonuses
-
-## 📊 **Analytics Dashboard**
-
-### **📈 Personal Analytics**
-- **Learning Velocity**: Challenges completed over time
-- **Performance Trends**: Success rates and improvement curves  
-- **Category Strengths**: Skill assessment across vulnerability types
-- **Activity Patterns**: Peak performance times and study habits
-
-### **🎯 Challenge Intelligence**
-- **Difficulty Scoring**: AI-powered difficulty assessment
-- **Success Metrics**: Community completion rates and average times
-- **Popular Techniques**: Most effective exploitation methods
-- **Learning Recommendations**: Personalized next challenges
-
-### **🔍 Security Monitoring**
-- **Attack Pattern Analysis**: Payload effectiveness tracking
-- **Anomaly Detection**: Unusual behavior identification
-- **Threat Intelligence**: Attack trend analysis
-- **Performance Optimization**: Platform usage insights
+```
+R00tGlyph/
+├── app.py                    # Main Flask application (all routes & logic)
+├── run.py                    # Entry point with CLI commands
+├── templates/                # Jinja2 templates
+│   ├── components/           # Reusable challenge components
+│   ├── xss/ sqli/ cmdi/ ...  # Challenge-specific templates
+│   ├── admin/                # Admin panel templates
+│   └── teams/                # Team management templates
+├── static/                   # CSS, JS, uploads
+├── data/
+│   ├── hints/                # Per-challenge hint JSON files
+│   └── solutions/            # Per-challenge solution JSON files
+├── instance/                 # SQLite database
+└── docker-compose.yml        # Docker deployment
+```
 
 ## ⚙️ **Command Line Interface**
 
-R00tGlyph v2.0 includes a comprehensive CLI for management:
+```bash
+python run.py --dev                    # Development server with debug
+python run.py --host 0.0.0.0 --port 8080  # Custom host/port
+python run.py --reset-db               # Reset database (requires CONFIRM)
+python run.py --backup                 # Create database backup
+python run.py --restore                # Restore from backup
+```
+
+### **Environment Variables**
 
 ```bash
-# Server Management
-python run.py --dev                    # Development server
-python run.py --host 0.0.0.0 --port 8080  # Custom host/port
+# Global Scoreboard (set to empty string to disable sync)
+ROOTGLYPH_API_URL=https://api.rootglyph.org  # Central scoreboard server
 
-# Database Operations  
-python run.py --init-db               # Initialize fresh database
-python run.py --reset-db              # Reset all data (requires confirmation)
-python run.py --migrate               # Run database migrations
-
-# Backup & Recovery
-python run.py --backup                # Create data backup
-python run.py --restore               # Restore latest backup
-python run.py --list-backups          # Show available backups
-
-# System Maintenance
-python run.py --update                # Update to latest version
-python run.py --check-health          # System health check
-python run.py --version               # Version information
+# Application
+SECRET_KEY=your_secret_key_here
+FLASK_ENV=development
 ```
-
-## 🏗️ **System Architecture**
-
-### **📁 Project Structure**
-```
-R00tGlyph/
-├── app/                          # Main application package
-│   ├── controllers/              # Route handlers and business logic
-│   │   ├── challenges/           # Challenge-specific controllers
-│   │   │   ├── xss.py           # XSS challenge implementations
-│   │   │   ├── sqli.py          # SQL injection challenges
-│   │   │   └── base_challenge.py # Base challenge controller
-│   │   ├── auth.py              # Authentication routes
-│   │   ├── main.py              # Main application routes
-│   │   └── api.py               # REST API endpoints
-│   ├── models/                   # Database models
-│   │   ├── __init__.py          # Model definitions
-│   │   ├── user.py              # User and team models
-│   │   └── challenge.py         # Challenge and progress models
-│   ├── services/                 # Business logic services
-│   │   ├── analytics_service.py # Analytics and reporting
-│   │   ├── flag_service.py      # Flag generation and validation
-│   │   ├── progress_service.py  # User progress tracking
-│   │   └── backup_service.py    # Backup and recovery
-│   └── utils/                    # Utility functions
-├── data/                         # Challenge data and content
-│   ├── challenges/              # Challenge definitions
-│   ├── hints/                   # Level-specific hints
-│   └── solutions/               # Detailed solutions
-├── docker/                       # Docker configuration
-├── templates/                    # Jinja2 templates
-├── static/                       # Static assets
-└── tests/                        # Test suite
-```
-
-### **🔧 Technology Stack**
-- **Backend**: Flask 2.3.3, SQLAlchemy, Redis
-- **Database**: PostgreSQL (production), SQLite (development)
-- **Caching**: Redis with intelligent caching strategies
-- **Frontend**: Bootstrap 5.3, Custom CSS themes, Real-time updates
-- **Monitoring**: Prometheus, Grafana, ELK Stack
-- **Container**: Docker, Docker Compose, Kubernetes ready
 
 ## 🔒 **Security Features**
 
-### **🛡️ Application Security**
-- **Rate Limiting**: Intelligent request throttling
-- **Input Validation**: Comprehensive sanitization
-- **CSRF Protection**: Token-based request validation
-- **Content Security Policy**: XSS prevention headers
-- **Secure Sessions**: HTTPOnly, Secure, SameSite cookies
+- **Rate Limiting**: Login (10 req/5min), Flag submission (30 req/min)
+- **Password Hashing**: Werkzeug secure password hashing
+- **Session Security**: HTTPOnly, Secure, SameSite cookies
+- **Input Validation**: All user inputs validated and sanitized
+- **CSRF Protection**: Platform itself is protected against CSRF
+- **Admin Access Control**: Role-based admin panel access
+- **Privacy-First Sync**: Only anonymous progress data (username, score, completed challenges) is sent to the global scoreboard
 
-### **🔐 Authentication & Authorization**
-- **Bcrypt Hashing**: Secure password storage
-- **Session Management**: Secure session handling
-- **Role-based Access**: User, instructor, admin roles
-- **Account Lockout**: Brute force protection
+## 🎯 **Challenge Detection**
 
-### **📋 Compliance & Monitoring**
-- **Audit Logging**: Comprehensive activity logs
-- **Security Events**: Real-time threat detection
-- **Data Privacy**: GDPR-compliant data handling
-- **Backup Encryption**: Secure backup storage
+Challenges detect successful exploitation through realistic patterns:
+- **XSS**: `<script>`, `<img onerror=`, `javascript:`, `eval(`, etc.
+- **SQLi**: `'`, `OR 1=1`, `UNION SELECT`, `SLEEP`, `$ne`, etc.
+- **CMDi**: `;`, `|`, `&`, `` ` ``, `$()`, etc.
+- **SSRF**: Internal IPs, `169.254.169.254`, `gopher://`, etc.
+- **XXE**: `<!ENTITY`, `SYSTEM`, `file://`, parameter entities, etc.
+- **SSTI**: `{{`, `{%`, `config`, `__class__`, `__mro__`, etc.
+- **CSRF**: Missing CSRF tokens, cross-origin state changes, `?csrf_solved=true`, etc.
 
-## 🌐 **Deployment Options**
+## 🌐 **Global Scoreboard**
 
-### **☁️ Cloud Platforms**
-- **Render**: One-click deployment with database
-- **Heroku**: Container registry deployment
-- **AWS**: ECS, EKS, or EC2 deployment options
-- **Google Cloud**: GKE or Compute Engine deployment
-- **Azure**: Container Instances or AKS deployment
+R00tGlyph features a **global scoreboard** that syncs progress across all instances:
+- When you complete a challenge, your progress is anonymously sent to the central server
+- View your global rank, total flags captured, and category breakdown
+- Compete with hackers worldwide without exposing personal data
+- Only your username, score, and completed challenge count are synced
+- No passwords, emails, or personal information are ever transmitted
 
-### **🖥️ On-Premises**
-- **Docker Compose**: Full-stack local deployment
-- **Kubernetes**: Enterprise container orchestration  
-- **Bare Metal**: Traditional server installation
-- **VM Deployment**: Virtual machine setup
+## 🤝 **Contributing**
 
-### **🔧 Configuration Management**
-- **Environment Variables**: Secure configuration
-- **Docker Secrets**: Container secret management
-- **ConfigMaps**: Kubernetes configuration
-- **SSL/TLS**: Automated certificate management
+### **Adding New Challenges**
+1. Add challenge definition in `app.py` `reset_database()` function
+2. Create template in `templates/<category>/<category>_level<N>.html`
+3. Add route handler in `app.py`
+4. Create hint file in `data/hints/<category>_level<N>.json`
+5. Create solution file in `data/solutions/<category>_level<N>.json`
 
-## 📈 **Performance & Scaling**
-
-### **⚡ Performance Optimizations**
-- **Redis Caching**: Sub-millisecond response times
-- **Database Indexing**: Optimized query performance
-- **Static Asset CDN**: Fast content delivery
-- **Gzip Compression**: Reduced bandwidth usage
-
-### **📊 Scalability Features**
-- **Horizontal Scaling**: Multi-instance deployment
-- **Load Balancing**: Nginx reverse proxy
-- **Database Replication**: Read replica support
-- **Microservices Ready**: Service decomposition support
-
-## 🧪 **Testing & Quality Assurance**
-
-### **🔍 Test Suite**
+### **Development Workflow**
 ```bash
-# Run all tests
-pytest
-
-# Run with coverage
-pytest --cov=app --cov-report=html
-
-# Run specific test categories
-pytest tests/unit/          # Unit tests
-pytest tests/integration/   # Integration tests
-pytest tests/security/      # Security tests
-```
-
-### **🛠️ Development Tools**
-- **Code Formatting**: Black, isort
-- **Linting**: Flake8, mypy
-- **Security Scanning**: Bandit, safety
-- **Performance Profiling**: py-spy, memory-profiler
-
-## 🤝 **Contributing & Development**
-
-### **🔄 Development Workflow**
-```bash
-# Setup development environment
 git clone https://github.com/algorethmpwd/R00tGlyph.git
 cd R00tGlyph
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements-dev.txt
-
-# Run development server with hot reload
+python3 -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
 python run.py --dev
-
-# Run tests before committing
-pytest
-black .
-flake8 .
 ```
-
-### **📝 Adding New Challenges**
-1. Create challenge template in `templates/[category]/`
-2. Add challenge data in `data/challenges/`
-3. Create level-specific hints in `data/hints/`
-4. Write detailed solution in `data/solutions/`
-5. Implement controller logic in `app/controllers/challenges/`
-6. Add database migration if needed
-7. Write tests for new functionality
-
-## 🔧 **Troubleshooting**
-
-### **🚨 Common Issues**
-
-**Database Connection Issues:**
-```bash
-# Check database status
-python run.py --check-health
-
-# Reset database if corrupted
-python run.py --reset-db
-
-# Check PostgreSQL logs
-docker-compose logs postgres
-```
-
-**Redis Connection Problems:**
-```bash
-# Test Redis connectivity
-redis-cli ping
-
-# Restart Redis service
-docker-compose restart redis
-
-# Clear Redis cache
-redis-cli flushall
-```
-
-**Performance Issues:**
-```bash
-# Monitor resource usage
-docker-compose logs --tail=100
-
-# Check system resources
-python run.py --check-health
-
-# Profile application performance
-py-spy top --pid $(pgrep -f "python run.py")
-```
-
-## 📞 **Support & Community**
-
-### **🆘 Getting Help**
-- **GitHub Issues**: Bug reports and feature requests
-- **Documentation**: Comprehensive guides and tutorials
-- **Community Discord**: Real-time support and discussions
-- **Email Support**: security-training@rootglyph.org
-
-### **🤝 Contributing**
-- **Bug Reports**: Detailed issue descriptions
-- **Feature Requests**: Enhancement proposals
-- **Code Contributions**: Pull requests welcome
-- **Documentation**: Help improve guides and tutorials
-
-### **📚 Resources**
-- **Official Documentation**: https://docs.rootglyph.org
-- **Video Tutorials**: https://youtube.com/rootglyph
-- **Blog Posts**: https://blog.rootglyph.org
-- **Security Research**: https://research.rootglyph.org
 
 ## ⚠️ **Educational Purpose & Legal Notice**
 
@@ -478,23 +212,18 @@ R00tGlyph v2.0 is designed exclusively for **educational purposes** and **author
 - ❌ Never attack systems without explicit authorization
 - ❌ Not use for malicious or illegal activities
 
-## 📄 **License & Credits**
+## 🔌 **Offline Mode**
 
-**License**: Educational Use License - See [LICENSE](LICENSE) file for details
+R00tGlyph works fully offline. The global scoreboard sync is **optional**:
+- Set `ROOTGLYPH_API_URL=""` to disable all external communication
+- All challenges, hints, and solutions work without internet
+- Local scoreboard always shows players on your instance
+- Global sync only sends anonymous progress data when enabled
 
-**Credits**:
-- **Core Team**: Security researchers and developers
-- **Community**: Contributors and security professionals
-- **Inspiration**: OWASP, PortSwigger, real-world vulnerabilities
-- **Tools**: Built with love using Flask, PostgreSQL, Redis, and Docker
+## 📄 **License**
 
-**Acknowledgments**: Special thanks to the cybersecurity community for continuous feedback and contributions.
+**License**: Educational Use License
 
----
-
-**Made with ❤️ by security professionals, for security professionals.**
-
-**Start your advanced web security journey today!** 🚀
+**Made By Algorethm team professionals, for security professionals.**
 
 [![GitHub Stars](https://img.shields.io/github/stars/algorethmpwd/R00tGlyph?style=social)](https://github.com/algorethmpwd/R00tGlyph)
-[![Twitter Follow](https://img.shields.io/twitter/follow/rootglyph?style=social)](https://twitter.com/rootglyph)

@@ -25,7 +25,7 @@
 <div class="row">
     <div class="col-md-8 offset-md-2">
         {# Success banner if vulnerability detected #}
-        {% if vulnerability_detected %}
+        {% if xss_detected or sqli_detected or cmdi_detected or csrf_detected or ssrf_detected or xxe_detected or vulnerability_detected %}
         {% include 'components/success_banner.html' with context %}
         {% endif %}
 
@@ -35,18 +35,132 @@
             {% include 'components/challenge_header.html' with context %}
 
             <div class="card-body">
-                {# Challenge description #}
+                {# Challenge description with interactive tooltips #}
                 {% include 'components/challenge_description.html' with context %}
+
+                {# Interactive Payload Reference (collapsible) #}
+                <div class="accordion mb-3" id="payloadReference">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#payloadRef">
+                                <i class="bi bi-lightbulb me-2"></i> Payload Reference & Tips
+                            </button>
+                        </h2>
+                        <div id="payloadRef" class="accordion-collapse collapse" data-bs-parent="#payloadReference">
+                            <div class="accordion-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6><i class="bi bi-info-circle"></i> Common Patterns</h6>
+                                        <ul class="small text-muted">
+                                            {% if category_lower == 'xss' %}
+                                            <li><code>&lt;script&gt;alert(1)&lt;/script&gt;</code> - Basic reflected</li>
+                                            <li><code>&lt;img src=x onerror=alert(1)&gt;</code> - Event handler</li>
+                                            <li><code>&lt;svg onload=alert(1)&gt;</code> - SVG vector</li>
+                                            <li><code>javascript:alert(1)</code> - Protocol handler</li>
+                                            {% elif category_lower == 'sqli' %}
+                                            <li><code>' OR 1=1--</code> - Auth bypass</li>
+                                            <li><code>' UNION SELECT 1,2,3--</code> - UNION-based</li>
+                                            <li><code>' AND 1=1--</code> - Boolean blind</li>
+                                            <li><code>'; WAITFOR DELAY '0:0:5'--</code> - Time-based</li>
+                                            {% elif category_lower == 'cmdi' %}
+                                            <li><code>; whoami</code> - Command separator</li>
+                                            <li><code>| id</code> - Pipe separator</li>
+                                            <li><code>&amp;&amp; cat /etc/passwd</code> - AND separator</li>
+                                            <li><code>$(whoami)</code> - Command substitution</li>
+                                            {% elif category_lower == 'ssrf' %}
+                                            <li><code>http://127.0.0.1</code> - Localhost</li>
+                                            <li><code>http://169.254.169.254</code> - Cloud metadata</li>
+                                            <li><code>http://0.0.0.0</code> - All interfaces</li>
+                                            <li><code>gopher://127.0.0.1:6379/</code> - Protocol smuggling</li>
+                                            {% elif category_lower == 'xxe' %}
+                                            <li><code>&lt;!ENTITY xxe SYSTEM "file:///etc/passwd"&gt;</code></li>
+                                            <li><code>&lt;!ENTITY xxe SYSTEM "http://internal"&gt;</code></li>
+                                            {% elif category_lower == 'ssti' %}
+                                            <li><code>{{7*7}}</code> - Basic test</li>
+                                            <li><code>{{config}}</code> - Flask config</li>
+                                            <li><code>{{self.__dict__}}</code> - Object introspection</li>
+                                            {% elif category_lower == 'csrf' %}
+                                            <li>Submit form without CSRF token</li>
+                                            <li>Add <code>?csrf_solved=true</code> to URL</li>
+                                            {% elif category_lower == 'deserial' %}
+                                            <li><code>pickle</code> / <code>__reduce__</code> - Python</li>
+                                            <li><code>O:4:"User"</code> - PHP serialize</li>
+                                            {% elif category_lower == 'auth' %}
+                                            <li><code>' OR 1=1--</code> - SQLi bypass</li>
+                                            <li><code>"alg": "none"</code> - JWT none</li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6><i class="bi bi-tools"></i> Tools</h6>
+                                        <ul class="small text-muted">
+                                            <li><strong>Burp Suite</strong> - Intercept & modify requests</li>
+                                            <li><strong>Browser DevTools</strong> - Inspect DOM & network</li>
+                                            <li><strong>curl</strong> - Craft custom HTTP requests</li>
+                                            {% if category_lower in ['sqli', 'cmdi', 'ssrf'] %}
+                                            <li><strong>SQLMap</strong> - Automated SQLi detection</li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 {# Challenge-specific content #}
                 {% block challenge_content %}
                 <!-- Override this block with challenge-specific HTML -->
                 {% endblock %}
 
-                {# Hints (if provided) #}
-                {% if hints is defined %}
-                {% include 'components/hint_box.html' with context %}
+                {# Live Output Console #}
+                {% if ping_result or output or check_result or scan_result or api_result or build_result or deploy_result or transfer_result or action_result or result or upload_result or management_result or ws_message or error or success or message or search_performed or products or books or category or profile or documents or response or stocks or employees or reports or procedure_result or graphql_result or orm_query or generated_sql or function_response or import_output or csv_preview or dns_logs or waf_logs or function_logs or import_errors or result_rows or result_columns %}
+                <div class="card mt-3">
+                    <div class="card-header bg-dark text-white">
+                        <i class="bi bi-terminal me-2"></i> Live Output
+                    </div>
+                    <div class="card-body bg-black">
+                        <pre class="text-success mb-0" style="font-size: 0.85rem; white-space: pre-wrap; word-wrap: break-word;">
+{%- if ping_result %}{{ ping_result }}{% endif %}
+{%- if output %}{{ output }}{% endif %}
+{%- if check_result %}{{ check_result }}{% endif %}
+{%- if scan_result %}{{ scan_result }}{% endif %}
+{%- if api_result %}{{ api_result }}{% endif %}
+{%- if build_result %}{{ build_result }}{% endif %}
+{%- if deploy_result %}{{ deploy_result }}{% endif %}
+{%- if transfer_result %}{{ transfer_result }}{% endif %}
+{%- if action_result %}{{ action_result }}{% endif %}
+{%- if result %}{{ result }}{% endif %}
+{%- if upload_result %}{{ upload_result }}{% endif %}
+{%- if management_result %}{{ management_result }}{% endif %}
+{%- if ws_message %}{{ ws_message }}{% endif %}
+{%- if error %}{{ error }}{% endif %}
+{%- if success %}{{ success }}{% endif %}
+{%- if message %}{{ message }}{% endif %}
+{%- if response %}{{ response }}{% endif %}
+{%- if import_output %}{{ import_output }}{% endif %}
+{%- if function_response %}{{ function_response }}{% endif %}
+{%- if graphql_result %}{{ graphql_result }}{% endif %}
+{%- if generated_sql %}{{ generated_sql }}{% endif %}
+{%- if orm_query %}{{ orm_query }}{% endif %}
+{%- if dns_logs %}{% for log in dns_logs %}{{ log.timestamp }} {{ log.query }} {{ log.type }} {{ log.source }}
+{% endfor %}{% endif %}
+{%- if waf_logs %}{% for log in waf_logs %}{{ log.timestamp }} Rule {{ log.rule_id }}: {{ log.rule_name }} [{{ log.action }}]
+{% endfor %}{% endif %}
+{%- if function_logs %}{% for log in function_logs %}[{{ log.level }}] {{ log.timestamp }} - {{ log.message }}
+{% endfor %}{% endif %}
+{%- if result_rows %}{% for row in result_rows %}{{ row | join(' | ') }}
+{% endfor %}{% endif %}</pre>
+                    </div>
+                </div>
                 {% endif %}
+
+                {# Hint button with progressive hints #}
+                <div class="mt-3">
+                    <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#hintModal">
+                        <i class="bi bi-question-circle me-1"></i> Need a Hint?
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -61,4 +175,62 @@
         </div>
     </div>
 </div>
+
+{# Hint Modal #}
+<div class="modal fade" id="hintModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-lightbulb text-warning me-2"></i>Hints</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="hintContent">
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading hints...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const hintModal = document.getElementById('hintModal');
+    if (hintModal) {
+        hintModal.addEventListener('show.bs.modal', function() {
+            const category = '{{ category_lower }}';
+            const level = '{{ level_number }}';
+            fetch(`/api/hints/${category}/${level}`)
+                .then(r => r.json())
+                .then(data => {
+                    const container = document.getElementById('hintContent');
+                    if (data.hints) {
+                        let html = '<div class="list-group">';
+                        data.hints.forEach((hint, i) => {
+                            html += `<div class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1"><i class="bi bi-${i === 0 ? 'eye' : i === 1 ? 'search' : 'lightbulb'} me-2"></i>Hint ${i + 1}</h6>
+                                </div>
+                                <p class="mb-1 small">${hint}</p>
+                            </div>`;
+                        });
+                        html += '</div>';
+                        container.innerHTML = html;
+                    } else {
+                        container.innerHTML = '<div class="alert alert-warning">No hints available for this challenge.</div>';
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('hintContent').innerHTML = '<div class="alert alert-danger">Failed to load hints.</div>';
+                });
+        });
+    }
+});
+</script>
 {% endblock %}

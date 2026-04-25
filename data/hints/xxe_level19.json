@@ -1,0 +1,10 @@
+{
+  "challenge": "XXE Level 19",
+  "category": "xxe",
+  "level": 19,
+  "hints": [
+    "Try injecting a DOCTYPE with external entity declarations.",
+    "Use SYSTEM entities to read local files.",
+    "Try parameter entities for blind XXE attacks."
+  ]
+}

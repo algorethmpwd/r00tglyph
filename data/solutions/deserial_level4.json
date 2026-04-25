@@ -1,0 +1,7 @@
+{
+  "challenge": "Deserialization Level 4",
+  "category": "deserial",
+  "level": 4,
+  "solution": "Submit a serialized payload containing a malicious object that executes code when deserialized. Use __reduce__ in Python or magic methods in PHP.",
+  "prevention": "Never deserialize untrusted data. Use safe serialization formats like JSON. Implement integrity checks on serialized data."
+}

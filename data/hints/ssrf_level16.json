@@ -1,0 +1,10 @@
+{
+  "challenge": "SSRF Level 16",
+  "category": "ssrf",
+  "level": 16,
+  "hints": [
+    "Try providing internal IP addresses like 127.0.0.1 or 169.254.169.254.",
+    "Look for URL parameters that fetch external resources.",
+    "Try DNS rebinding or URL encoding to bypass filters."
+  ]
+}

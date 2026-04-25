@@ -1,0 +1,10 @@
+{
+  "challenge": "XSS in JSON API",
+  "category": "xss",
+  "level": 8,
+  "hints": [
+    "The API returns JSON that is rendered in the page.",
+    "Look for how the JSON response is processed client-side.",
+    "Try injecting payloads in the note title."
+  ]
+}

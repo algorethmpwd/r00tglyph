@@ -59,6 +59,24 @@
                     </div>
                     <div class="nav-item">
                         <a
+                            href="{{ url_for('teams') }}"
+                            class="nav-link {{ 'active' if 'team' in request.endpoint or request.endpoint == 'teams' }}"
+                        >
+                            <i class="bi bi-people-fill"></i> Teams
+                        </a>
+                    </div>
+                    {% if current_user and current_user.is_admin %}
+                    <div class="nav-item">
+                        <a
+                            href="{{ url_for('admin_panel') }}"
+                            class="nav-link {{ 'active' if 'admin' in request.endpoint }}"
+                        >
+                            <i class="bi bi-shield-lock-fill"></i> Admin
+                        </a>
+                    </div>
+                    {% endif %}
+                    <div class="nav-item">
+                        <a
                             href="{{ url_for('profile') }}"
                             class="nav-link {{ 'active' if request.endpoint == 'profile' }}"
                         >

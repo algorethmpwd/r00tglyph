@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ team.name }} - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4"><i class="bi bi-people"></i> {{ team.name }}</h1>
+    <p class="text-muted">{{ team.description or 'No description' }}</p>
+    <p><strong>Total Score:</strong> {{ team_score }} pts</p>
+    <p><strong>Created:</strong> {{ team.created_at.strftime('%Y-%m-%d') }}</p>
+
+    <a href="{{ url_for('teams') }}" class="btn btn-secondary mb-3"><i class="bi bi-arrow-left"></i> Back to Teams</a>
+
+    <div class="card">
+        <div class="card-header"><h5>Members</h5></div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr><th>#</th><th>Username</th><th>Score</th><th>Completed</th></tr>
+                </thead>
+                <tbody>
+                    {% for m in members %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ m.display_name }}</td>
+                        <td>{{ m.score }}</td>
+                        <td>{{ (m.completed_challenges|from_json)|length if m.completed_challenges else 0 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

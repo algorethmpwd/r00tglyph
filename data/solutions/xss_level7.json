@@ -1,0 +1,7 @@
+{
+  "challenge": "XSS via HTTP Headers",
+  "category": "xss",
+  "level": 7,
+  "solution": "Set the User-Agent header to <script>alert('XSS')</script>. The application displays the User-Agent without sanitization.",
+  "prevention": "Never reflect HTTP headers in HTML output without encoding. Treat all HTTP headers as untrusted input."
+}

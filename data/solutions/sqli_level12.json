@@ -1,0 +1,7 @@
+{
+  "challenge": "SQLi Level 12",
+  "category": "sqli",
+  "level": 12,
+  "solution": "Inject SQL payloads to extract data or bypass authentication. Common patterns include ' OR 1=1--, UNION SELECT, and boolean-based blind injection.",
+  "prevention": "Use parameterized queries/prepared statements. Never concatenate user input into SQL queries. Implement input validation and least privilege database accounts."
+}

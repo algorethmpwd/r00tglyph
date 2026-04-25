@@ -1,0 +1,10 @@
+{
+  "challenge": "XSS Level 22",
+  "category": "xss",
+  "level": 22,
+  "hints": [
+    "Analyze the application context for level 22.",
+    "Look for input vectors that aren't properly sanitized.",
+    "Consider alternative XSS vectors beyond script tags."
+  ]
+}

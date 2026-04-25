@@ -1,0 +1,10 @@
+{
+  "challenge": "XSS with CSP Bypass",
+  "category": "xss",
+  "level": 9,
+  "hints": [
+    "The CSP allows scripts from cdnjs.cloudflare.com.",
+    "Look for JSONP endpoints or exploitable scripts on allowed domains.",
+    "Try using inline event handlers which may not be blocked."
+  ]
+}

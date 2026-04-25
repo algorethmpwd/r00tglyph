@@ -1,0 +1,7 @@
+{
+  "challenge": "XSS Level 12",
+  "category": "xss",
+  "level": 12,
+  "solution": "Submit a payload containing 'alert(\"XSS Level 12 Completed!\")' to trigger the XSS detection mechanism.",
+  "prevention": "Implement comprehensive input validation, output encoding, and Content Security Policy headers."
+}

@@ -1,0 +1,7 @@
+{
+  "challenge": "Auth Level 3",
+  "category": "auth",
+  "level": 3,
+  "solution": "Exploit authentication weaknesses like SQL injection in login, JWT algorithm confusion, or predictable session tokens.",
+  "prevention": "Use strong authentication mechanisms. Implement proper session management. Use secure JWT algorithms. Implement rate limiting on login attempts."
+}

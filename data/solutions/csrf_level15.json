@@ -1,0 +1,7 @@
+{
+  "challenge": "CSRF Level 15",
+  "category": "csrf",
+  "level": 15,
+  "solution": "Create a malicious form/page that submits a request to the vulnerable endpoint. Exploit missing or weak CSRF protections.",
+  "prevention": "Implement anti-CSRF tokens. Use SameSite cookie attribute. Validate Origin and Referer headers. Require re-authentication for sensitive actions."
+}

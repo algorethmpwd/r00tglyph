@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Teams - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4"><i class="bi bi-people"></i> Teams</h1>
+
+    <div class="mb-4">
+        {% if user.team_id %}
+        <div class="alert alert-info">
+            You are a member of a team.
+            <form method="POST" action="{{ url_for('team_leave') }}" class="d-inline">
+                <button type="submit" class="btn btn-sm btn-warning">Leave Team</button>
+            </form>
+        </div>
+        {% else %}
+        <a href="{{ url_for('team_create') }}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Create Team</a>
+        {% endif %}
+    </div>
+
+    <div class="row">
+        {% for t in teams %}
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ t.team.name }}</h5>
+                    <p class="card-text text-muted">{{ t.team.description or 'No description' }}</p>
+                    <p><strong>Score:</strong> {{ t.score }} pts</p>
+                    <p><strong>Members:</strong> {{ t.member_count }}</p>
+                    <a href="{{ url_for('team_detail', team_id=t.team.id) }}" class="btn btn-sm btn-info">View</a>
+                    {% if not user.team_id %}
+                    <form method="POST" action="{{ url_for('team_join', team_id=t.team.id) }}" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-success">Join</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if not teams %}
+    <div class="alert alert-info">No teams yet. Be the first to create one!</div>
+    {% endif %}
+</div>
+{% endblock %}

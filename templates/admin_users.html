@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Users - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4"><i class="bi bi-people"></i> Manage Users</h1>
+    <a href="{{ url_for('admin_panel') }}" class="btn btn-secondary mb-3"><i class="bi bi-arrow-left"></i> Back to Admin</a>
+
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Display Name</th>
+                        <th>Score</th>
+                        <th>Admin</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                    <tr>
+                        <td>{{ u.id }}</td>
+                        <td>{{ u.username }}</td>
+                        <td>{{ u.display_name }}</td>
+                        <td>{{ u.score }}</td>
+                        <td>
+                            {% if u.is_admin %}
+                            <span class="badge bg-success">Yes</span>
+                            {% else %}
+                            <span class="badge bg-secondary">No</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <form method="POST" action="{{ url_for('admin_toggle_admin', user_id=u.id) }}" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-warning">Toggle Admin</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

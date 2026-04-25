@@ -1,0 +1,11 @@
+{
+  "version": "1.0",
+  "created_at": 1766416784.1772614,
+  "last_updated": 1766416784.1772618,
+  "stats": {
+    "total_urls_crawled": 0,
+    "total_domains_crawled": 0,
+    "total_errors": 0
+  },
+  "domains": {}
+}

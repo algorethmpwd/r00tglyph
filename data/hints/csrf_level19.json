@@ -1,0 +1,10 @@
+{
+  "challenge": "CSRF Level 19",
+  "category": "csrf",
+  "level": 19,
+  "hints": [
+    "Check if the form has any CSRF token protection.",
+    "Try crafting a malicious form that auto-submits.",
+    "Look for predictable or missing anti-CSRF tokens."
+  ]
+}

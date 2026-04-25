@@ -1,0 +1,7 @@
+{
+  "challenge": "CMDi Level 19",
+  "category": "cmdi",
+  "level": 19,
+  "solution": "Inject command separators and system commands like whoami, id, or cat /etc/passwd. Bypass filters using encoding or alternative syntax.",
+  "prevention": "Never pass user input to system commands. Use language-specific APIs instead of shell commands. Implement strict input validation."
+}

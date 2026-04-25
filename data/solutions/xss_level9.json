@@ -1,0 +1,7 @@
+{
+  "challenge": "XSS with CSP Bypass",
+  "category": "xss",
+  "level": 9,
+  "solution": "The CSP misconfiguration allows 'unsafe-inline' for styles and permits external scripts. Exploit by finding a bypass vector in the allowed domains or using event handlers.",
+  "prevention": "Use strict CSP with nonce-based or hash-based script allowlisting. Never use 'unsafe-inline' or 'unsafe-eval'."
+}

@@ -1,0 +1,7 @@
+{
+  "challenge": "XSS with Basic Filters",
+  "category": "xss",
+  "level": 4,
+  "solution": "Use <img src=x onerror=\"alert('XSS')\">. The basic filter only removes script tags but doesn't sanitize event handlers on other HTML elements.",
+  "prevention": "Implement comprehensive input sanitization that removes all HTML tags and event handlers. Use allowlists instead of blocklists."
+}

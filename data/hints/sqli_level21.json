@@ -1,0 +1,10 @@
+{
+  "challenge": "SQLi Level 21",
+  "category": "sqli",
+  "level": 21,
+  "hints": [
+    "Try injecting a single quote (') to test for SQL injection.",
+    "Look for error messages that reveal database information.",
+    "Use UNION-based or boolean-based techniques for level 21."
+  ]
+}

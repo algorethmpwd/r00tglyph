@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Team - R00tGlyph{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4"><i class="bi bi-plus-circle"></i> Create Team</h1>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="POST">
+                <div class="mb-3">
+                    <label for="team_name" class="form-label">Team Name</label>
+                    <input type="text" class="form-control" id="team_name" name="team_name" required maxlength="100">
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="3" maxlength="500"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Create Team</button>
+                <a href="{{ url_for('teams') }}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

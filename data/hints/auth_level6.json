@@ -1,0 +1,10 @@
+{
+  "challenge": "Auth Level 6",
+  "category": "auth",
+  "level": 6,
+  "hints": [
+    "Try common authentication bypass techniques.",
+    "Look for SQL injection in login forms.",
+    "Check for weak token generation or JWT vulnerabilities."
+  ]
+}

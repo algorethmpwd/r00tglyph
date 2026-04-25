@@ -1,0 +1,10 @@
+{
+  "challenge": "XSS with Mutation Observer Bypass",
+  "category": "xss",
+  "level": 10,
+  "hints": [
+    "The Mutation Observer removes malicious nodes after insertion.",
+    "Try using mutation XSS (mXSS) techniques.",
+    "Some payloads can survive DOM sanitization."
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "challenge": "SSRF Level 22",
+  "category": "ssrf",
+  "level": 22,
+  "solution": "Provide URLs pointing to internal services or cloud metadata endpoints. Bypass URL validation using encoding, redirects, or DNS tricks.",
+  "prevention": "Validate and whitelist allowed URLs. Block requests to internal IP ranges. Use network-level controls. Implement allowlists for domains."
+}

@@ -50,7 +50,7 @@ def print_banner():
 ║                                                               ║
 ║        Advanced Web Security Training Platform v2.0           ║
 ║                                                               ║
-║  115+ Challenges | Real-world Scenarios | Professional Tools ║
+║  188 Challenges | Teams | Admin Panel | Hints & Solutions    ║
 ╚═══════════════════════════════════════════════════════════════╝
 """
     print(banner)

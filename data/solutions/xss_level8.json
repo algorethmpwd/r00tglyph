@@ -1,0 +1,7 @@
+{
+  "challenge": "XSS in JSON API",
+  "category": "xss",
+  "level": 8,
+  "solution": "Inject <img src=x onerror=\"alert('XSS Level 8 Completed!');\"> in the note title via the API. The frontend renders the JSON response without escaping.",
+  "prevention": "Set Content-Type: application/json header. Sanitize API responses before rendering. Use DOMPurify for client-side sanitization."
+}

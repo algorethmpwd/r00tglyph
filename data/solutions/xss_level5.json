@@ -1,0 +1,7 @@
+{
+  "challenge": "XSS with Advanced Filters",
+  "category": "xss",
+  "level": 5,
+  "solution": "Use <svg onload=\"alert('XSS')\">. The advanced filter removes script tags and common event handlers but misses SVG elements.",
+  "prevention": "Use a comprehensive HTML sanitization library. Implement strict Content Security Policy. Validate input against an allowlist of safe characters."
+}

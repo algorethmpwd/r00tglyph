@@ -1,0 +1,10 @@
+{
+  "challenge": "XSS with Advanced Filters",
+  "category": "xss",
+  "level": 5,
+  "hints": [
+    "The filter converts input to lowercase and removes common vectors.",
+    "Try using SVG elements with onload handlers.",
+    "The filter doesn't catch all HTML elements that can execute JavaScript."
+  ]
+}

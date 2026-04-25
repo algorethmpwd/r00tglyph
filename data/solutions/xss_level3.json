@@ -1,0 +1,7 @@
+{
+  "challenge": "Stored XSS",
+  "category": "xss",
+  "level": 3,
+  "solution": "Submit a comment containing <script>alert('XSS')</script>. The comment is stored in the database and rendered without sanitization when other users view the page.",
+  "prevention": "Sanitize all user input before storing it. Use output encoding when rendering stored content. Implement Content Security Policy headers."
+}

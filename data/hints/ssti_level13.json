@@ -1,0 +1,10 @@
+{
+  "challenge": "SSTI Level 13",
+  "category": "ssti",
+  "level": 13,
+  "hints": [
+    "Try injecting {{7*7}} to test for template injection.",
+    "Look for input that gets rendered in templates.",
+    "Access configuration or class objects through template syntax."
+  ]
+}

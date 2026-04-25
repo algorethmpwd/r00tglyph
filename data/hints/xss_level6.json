@@ -1,0 +1,10 @@
+{
+  "challenge": "XSS with ModSecurity WAF",
+  "category": "xss",
+  "level": 6,
+  "hints": [
+    "The WAF blocks common XSS patterns but has gaps.",
+    "Try using iframe with srcdoc attribute.",
+    "The WAF doesn't check all possible XSS vectors."
+  ]
+}

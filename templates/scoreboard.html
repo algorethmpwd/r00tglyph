@@ -3,70 +3,240 @@
 {% block title %}Scoreboard - R00tGlyph{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-8 offset-md-2">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center"><i class="bi bi-trophy-fill me-2"></i>R00tGlyph Scoreboard</h2>
-            </div>
-            <div class="card-body">
-                {% if users %}
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead class="table-dark">
-                            <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">Username</th>
-                                <th scope="col">Score</th>
-                                <th scope="col">Completed</th>
-                                <th scope="col">Last Active</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for user in users %}
-                            <tr {% if session.get('machine_id') == user.machine_id %}class="table-success"{% endif %}>
-                                <th scope="row">{{ loop.index }}</th>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <i class="bi bi-person-circle me-2"></i>
-                                        {{ user.display_name }}
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="badge bg-primary">{{ user.score }} pts</span>
-                                </td>
-                                <td>
-                                    {% set completed_count = user.completed_challenges|length if user.completed_challenges else 0 %}
-                                    {% if user.completed_challenges %}
-                                        {% set completed_list = user.completed_challenges|from_json %}
-                                        {% set completed_count = completed_list|length %}
-                                    {% else %}
-                                        {% set completed_count = 0 %}
-                                    {% endif %}
-                                    <span class="badge bg-success">{{ completed_count }}/115</span>
-                                </td>
-                                <td>
-                                    <small class="text-muted">{{ user.last_active.strftime('%Y-%m-%d %H:%M') }}</small>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% else %}
-                <div class="alert alert-info">
-                    <i class="bi bi-info-circle-fill me-2"></i>
-                    No scores yet! Be the first to complete a challenge and earn points.
-                </div>
-                {% endif %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1><i class="bi bi-trophy-fill text-warning me-2"></i>Scoreboard</h1>
+            <p class="text-muted">Compete with other hackers to top the leaderboard</p>
+        </div>
+    </div>
 
-                <div class="text-center mt-4">
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-primary">
-                        <i class="bi bi-lightning-fill me-2"></i>Take on a Challenge
-                    </a>
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-dark text-white">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Total Players</h5>
+                    <h2>{{ total_players }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-dark text-white">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Total Flags Captured</h5>
+                    <h2>{{ total_flags }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-dark text-white">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Your Rank</h5>
+                    <h2>{% if my_rank %}#{{ my_rank }}{% else %}-{% endif %}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-dark text-white">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Your Score</h5>
+                    <h2>{{ my_score or 0 }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if current_user and current_user.team_id %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-1"><i class="bi bi-people-fill me-2"></i>Your Team: {{ current_user.team.name }}</h5>
+                            <p class="mb-0">Team Score: {{ team_score or 0 }} pts</p>
+                        </div>
+                        <a href="{{ url_for('team_scoreboard') }}" class="btn btn-light btn-sm">View Team Rankings</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-bar-chart-fill me-2"></i>Player Rankings</h5>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-light active" id="showAllBtn">All</button>
+                        <button class="btn btn-outline-light" id="showFriendsBtn">My Team</button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    {% if users %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th style="width: 60px;">#</th>
+                                    <th>Player</th>
+                                    <th style="width: 100px;">Score</th>
+                                    <th style="width: 120px;">Progress</th>
+                                    <th style="width: 140px;">Last Active</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                {% set completed_list = user.completed_challenges|from_json if user.completed_challenges else [] %}
+                                {% set completed_count = completed_list|length %}
+                                {% set progress_pct = (completed_count / total_challenges * 100)|int if total_challenges > 0 else 0 %}
+                                {% set is_me = current_user and user.id == current_user.id %}
+                                <tr class="{% if is_me %}table-primary{% elif loop.index <= 3 %}table-warning{% endif %}">
+                                    <td>
+                                        {% if loop.index == 1 %}
+                                        <i class="bi bi-trophy-fill text-warning"></i>
+                                        {% elif loop.index == 2 %}
+                                        <i class="bi bi-trophy-fill text-secondary"></i>
+                                        {% elif loop.index == 3 %}
+                                        <i class="bi bi-trophy-fill" style="color: #cd7f32;"></i>
+                                        {% else %}
+                                        {{ loop.index }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if user.profile_picture %}
+                                            <img src="{{ url_for('static', filename=user.profile_picture) }}" class="rounded-circle me-2" width="32" height="32" alt="{{ user.display_name }}">
+                                            {% else %}
+                                            <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                                <i class="bi bi-person-fill text-white small"></i>
+                                            </div>
+                                            {% endif %}
+                                            <div>
+                                                <div class="fw-bold">{{ user.display_name }} {% if is_me %}<span class="badge bg-primary ms-1">You</span>{% endif %}</div>
+                                                <small class="text-muted">@{{ user.username }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ user.score }} pts</span>
+                                    </td>
+                                    <td>
+                                        <div class="progress" style="height: 8px;">
+                                            <div class="progress-bar {% if progress_pct >= 75 %}bg-success{% elif progress_pct >= 50 %}bg-info{% elif progress_pct >= 25 %}bg-warning{% else %}bg-secondary{% endif %}" style="width: {{ progress_pct }}%"></div>
+                                        </div>
+                                        <small class="text-muted">{{ completed_count }}/{{ total_challenges }}</small>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ user.last_active.strftime('%b %d, %H:%M') if user.last_active else 'Never' }}</small>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-emoji-neutral display-1 text-muted"></i>
+                        <h4 class="mt-3 text-muted">No players yet</h4>
+                        <p class="text-muted">Be the first to register and start hacking!</p>
+                        <a href="{{ url_for('register') }}" class="btn btn-primary mt-2">
+                            <i class="bi bi-person-plus me-1"></i>Create Account
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-activity me-2"></i>Recent Activity</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_activity %}
+                    <div class="list-group list-group-flush">
+                        {% for activity in recent_activity %}
+                        <div class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <small class="text-muted">{{ activity.time_ago }}</small>
+                            </div>
+                            <p class="mb-1">
+                                <strong>{{ activity.username }}</strong>
+                                {% if activity.type == 'capture' %}
+                                captured a flag in
+                                <span class="badge bg-info">{{ activity.category }}</span>
+                                {% elif activity.type == 'register' %}
+                                joined the platform
+                                {% elif activity.type == 'team_join' %}
+                                joined team <strong>{{ activity.team_name }}</strong>
+                                {% endif %}
+                            </p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <small class="text-muted">No recent activity</small>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-pie-chart-fill me-2"></i>Category Breakdown</h5>
+                </div>
+                <div class="card-body">
+                    {% if category_stats %}
+                    {% for cat, stats in category_stats.items() %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <small class="fw-bold">{{ cat.upper() }}</small>
+                            <small class="text-muted">{{ stats.completed }}/{{ stats.total }}</small>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar bg-info" style="width: {{ (stats.completed / stats.total * 100)|int if stats.total > 0 else 0 }}%"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-3">
+                        <small class="text-muted">No data available</small>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const showAllBtn = document.getElementById('showAllBtn');
+    const showFriendsBtn = document.getElementById('showFriendsBtn');
+
+    if (showAllBtn && showFriendsBtn) {
+        showAllBtn.addEventListener('click', function() {
+            showAllBtn.classList.add('active');
+            showFriendsBtn.classList.remove('active');
+            // Show all rows
+            document.querySelectorAll('tbody tr').forEach(row => row.style.display = '');
+        });
+
+        showFriendsBtn.addEventListener('click', function() {
+            showFriendsBtn.classList.add('active');
+            showAllBtn.classList.remove('active');
+            // Highlight your team members (add data-team-id to rows if needed)
+            document.querySelectorAll('tbody tr').forEach(row => {
+                const isMe = row.classList.contains('table-primary');
+                row.style.display = isMe ? '' : 'none';
+            });
+        });
+    }
+});
+</script>
 {% endblock %}

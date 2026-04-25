@@ -1,0 +1,7 @@
+{
+  "challenge": "XSS with ModSecurity WAF",
+  "category": "xss",
+  "level": 6,
+  "solution": "Use <iframe srcdoc=\"<script>alert('XSS')<\\/script>\">. The WAF rules don't cover iframe srcdoc attribute injection.",
+  "prevention": "Keep WAF rules updated. Implement defense in depth with input validation, output encoding, and CSP headers."
+}
