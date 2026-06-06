@@ -6,7 +6,9 @@ Tests all pages load correctly and themes work
 import pytest
 import sys
 sys.path.insert(0, '/home/algorethm/Documents/code/R00tGlyph')
-from app import app, db
+from app import create_app
+from app.extensions import db
+app = create_app()
 
 @pytest.fixture
 def client():

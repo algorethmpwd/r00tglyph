@@ -4,7 +4,10 @@ import os
 # Add current directory to path so we can import app
 sys.path.append(os.getcwd())
 
-from app import app, db, LocalUser
+from app import create_app
+from app.extensions import db
+from app.models import LocalUser
+app = create_app()
 
 def verify_sqli_levels_11_23():
     print("Verifying SQLi Levels 11-23...")

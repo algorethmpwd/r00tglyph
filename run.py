@@ -144,9 +144,12 @@ def main():
     # Print banner
     print_banner()
 
-    # Import the app from app.py (the monolithic working version)
+    # Import the app from the new modular structure
     try:
-        from app import app, db, reset_database
+        from app import create_app
+        from app.extensions import db
+        from app.reset_db_func import reset_database
+        app = create_app()
     except ImportError as e:
         print(f"❌ Failed to import application: {str(e)}")
         sys.exit(1)
@@ -216,7 +219,8 @@ def main():
 
 # Export app for gunicorn
 try:
-    from app import app
+    from app import create_app
+    app = create_app()
 except ImportError:
     app = None
 

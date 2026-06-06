@@ -4,7 +4,10 @@ import os
 # Add current directory to path so we can import app
 sys.path.append(os.getcwd())
 
-from app import app, db, LocalUser, Challenge
+from app import create_app
+from app.extensions import db
+from app.models import LocalUser, Challenge
+app = create_app()
 from flask_login import login_user
 
 def verify_sqli_levels():
