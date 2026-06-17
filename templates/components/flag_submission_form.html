@@ -14,7 +14,8 @@
         <h5><i class="bi bi-flag-fill me-2"></i>{{ form_title|default("Submit Your Flag") }}</h5>
     </div>
     <div class="card-body">
-        <form method="POST" action="{{ url_for('submit_flag') }}" class="flag-form">
+        <form method="POST" action="{{ url_for('api.submit_flag') }}" class="flag-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <input type="hidden" name="challenge_id" value="{{ challenge_id }}">
             <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-flag"></i></span>

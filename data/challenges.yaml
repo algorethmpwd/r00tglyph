@@ -1,0 +1,890 @@
+- active: true
+  category: xss
+  id: 1
+  name: Basic Reflected XSS
+  points: 100
+- active: true
+  category: xss
+  id: 2
+  name: DOM-based XSS
+  points: 200
+- active: true
+  category: xss
+  id: 3
+  name: Stored XSS
+  points: 300
+- active: true
+  category: xss
+  id: 4
+  name: XSS with Basic Filters
+  points: 400
+- active: true
+  category: xss
+  id: 5
+  name: XSS with Advanced Filters
+  points: 500
+- active: true
+  category: xss
+  id: 6
+  name: XSS with ModSecurity WAF
+  points: 600
+- active: true
+  category: xss
+  id: 7
+  name: XSS via HTTP Headers
+  points: 700
+- active: true
+  category: xss
+  id: 8
+  name: XSS in JSON API
+  points: 750
+- active: true
+  category: xss
+  id: 9
+  name: XSS with CSP Bypass
+  points: 800
+- active: true
+  category: xss
+  id: 10
+  name: XSS with Mutation Observer Bypass
+  points: 900
+- active: true
+  category: xss
+  id: 11
+  name: XSS via SVG and CDATA
+  points: 1000
+- active: true
+  category: xss
+  id: 12
+  name: Blind XSS with Webhook Exfiltration
+  points: 1100
+- active: true
+  category: xss
+  id: 13
+  name: XSS in PDF Generation
+  points: 1200
+- active: true
+  category: xss
+  id: 14
+  name: XSS via Prototype Pollution
+  points: 1300
+- active: true
+  category: xss
+  id: 15
+  name: XSS via Template Injection
+  points: 1400
+- active: true
+  category: xss
+  id: 16
+  name: XSS in WebAssembly Applications
+  points: 1500
+- active: true
+  category: xss
+  id: 17
+  name: XSS in Progressive Web Apps
+  points: 1600
+- active: true
+  category: xss
+  id: 18
+  name: XSS via Web Components
+  points: 1700
+- active: true
+  category: xss
+  id: 19
+  name: XSS in GraphQL APIs
+  points: 1800
+- active: true
+  category: xss
+  id: 20
+  name: XSS in WebRTC Applications
+  points: 1900
+- active: true
+  category: xss
+  id: 21
+  name: XSS via Web Bluetooth/USB
+  points: 2000
+- active: true
+  category: xss
+  id: 22
+  name: XSS in WebGPU Applications
+  points: 2100
+- active: true
+  category: xss
+  id: 23
+  name: XSS in Federated Identity Systems
+  points: 2200
+- active: true
+  category: sqli
+  id: 24
+  name: Basic SQL Injection
+  points: 100
+- active: true
+  category: sqli
+  id: 25
+  name: SQL Injection in Search
+  points: 200
+- active: true
+  category: sqli
+  id: 26
+  name: SQL Injection with UNION
+  points: 300
+- active: true
+  category: sqli
+  id: 27
+  name: Blind SQL Injection
+  points: 400
+- active: true
+  category: sqli
+  id: 28
+  name: Time-Based Blind SQL Injection
+  points: 500
+- active: true
+  category: sqli
+  id: 29
+  name: SQL Injection with WAF Bypass
+  points: 600
+- active: true
+  category: sqli
+  id: 30
+  name: Error-Based SQL Injection
+  points: 700
+- active: true
+  category: sqli
+  id: 31
+  name: Second-Order SQL Injection
+  points: 800
+- active: true
+  category: sqli
+  id: 32
+  name: SQL Injection in REST API
+  points: 900
+- active: true
+  category: sqli
+  id: 33
+  name: NoSQL Injection
+  points: 1000
+- active: true
+  category: sqli
+  id: 34
+  name: GraphQL Injection
+  points: 1100
+- active: true
+  category: sqli
+  id: 35
+  name: ORM-based SQL Injection
+  points: 1200
+- active: true
+  category: sqli
+  id: 36
+  name: Out-of-band SQL Injection
+  points: 1300
+- active: true
+  category: sqli
+  id: 37
+  name: SQL Injection with Advanced WAF Bypass
+  points: 1400
+- active: true
+  category: sqli
+  id: 38
+  name: SQL Injection via XML
+  points: 1500
+- active: true
+  category: sqli
+  id: 39
+  name: SQL Injection in WebSockets
+  points: 1600
+- active: true
+  category: sqli
+  id: 40
+  name: SQL Injection in Mobile App Backend
+  points: 1700
+- active: true
+  category: sqli
+  id: 41
+  name: SQL Injection in Cloud Functions
+  points: 1800
+- active: true
+  category: sqli
+  id: 42
+  name: SQL Injection via File Upload
+  points: 1900
+- active: true
+  category: sqli
+  id: 43
+  name: SQL Injection in Stored Procedures
+  points: 2000
+- active: true
+  category: sqli
+  id: 44
+  name: SQL Injection in GraphQL API
+  points: 2100
+- active: true
+  category: sqli
+  id: 45
+  name: SQL Injection in NoSQL Database
+  points: 2200
+- active: true
+  category: sqli
+  id: 46
+  name: SQL Injection in ORM Layer
+  points: 2300
+- active: true
+  category: cmdi
+  id: 47
+  name: Basic Command Injection
+  points: 100
+- active: true
+  category: cmdi
+  id: 48
+  name: Command Injection with Filters
+  points: 200
+- active: true
+  category: cmdi
+  id: 49
+  name: Blind Command Injection
+  points: 300
+- active: true
+  category: cmdi
+  id: 50
+  name: Command Injection via File Upload
+  points: 400
+- active: true
+  category: cmdi
+  id: 51
+  name: Command Injection in API Parameters
+  points: 500
+- active: true
+  category: cmdi
+  id: 52
+  name: Command Injection with WAF Bypass
+  points: 600
+- active: true
+  category: cmdi
+  id: 53
+  name: Time-Based Blind Command Injection
+  points: 700
+- active: true
+  category: cmdi
+  id: 54
+  name: Command Injection in Log Processing
+  points: 800
+- active: true
+  category: cmdi
+  id: 55
+  name: Command Injection in JSON APIs
+  points: 900
+- active: true
+  category: cmdi
+  id: 56
+  name: Command Injection in XML Processing
+  points: 1000
+- active: true
+  category: cmdi
+  id: 57
+  name: Advanced Command Injection WAF Bypass
+  points: 1100
+- active: true
+  category: cmdi
+  id: 58
+  name: Command Injection in DevOps Tools
+  points: 1200
+- active: true
+  category: cmdi
+  id: 59
+  name: Command Injection in GraphQL APIs
+  points: 1300
+- active: true
+  category: cmdi
+  id: 60
+  name: Command Injection in WebSocket Connections
+  points: 1400
+- active: true
+  category: cmdi
+  id: 61
+  name: Command Injection in Serverless Functions
+  points: 1500
+- active: true
+  category: cmdi
+  id: 62
+  name: Advanced Shell Features Command Injection
+  points: 1600
+- active: true
+  category: cmdi
+  id: 63
+  name: Command Injection in Container Environments
+  points: 1700
+- active: true
+  category: cmdi
+  id: 64
+  name: Command Injection via Template Engines
+  points: 1800
+- active: true
+  category: cmdi
+  id: 65
+  name: Command Injection in Message Queues
+  points: 1900
+- active: true
+  category: cmdi
+  id: 66
+  name: Out-of-Band Command Injection
+  points: 2000
+- active: true
+  category: cmdi
+  id: 67
+  name: Command Injection in Cloud Functions
+  points: 2100
+- active: true
+  category: cmdi
+  id: 68
+  name: Command Injection in SSH Commands
+  points: 2200
+- active: true
+  category: cmdi
+  id: 69
+  name: Advanced Command Injection Chaining
+  points: 2300
+- active: true
+  category: xxe
+  id: 70
+  name: Basic XXE File Disclosure
+  points: 100
+- active: true
+  category: xxe
+  id: 71
+  name: XXE with DOCTYPE Restrictions
+  points: 200
+- active: true
+  category: xxe
+  id: 72
+  name: XXE SYSTEM Entity Exploitation
+  points: 300
+- active: true
+  category: xxe
+  id: 73
+  name: XXE Internal Network Scanning
+  points: 400
+- active: true
+  category: xxe
+  id: 74
+  name: XXE Data Exfiltration via HTTP
+  points: 500
+- active: true
+  category: xxe
+  id: 75
+  name: XXE with Parameter Entities
+  points: 600
+- active: true
+  category: xxe
+  id: 76
+  name: Blind XXE via Error Messages
+  points: 700
+- active: true
+  category: xxe
+  id: 77
+  name: XXE with CDATA Injection
+  points: 800
+- active: true
+  category: xxe
+  id: 78
+  name: XXE via SVG File Upload
+  points: 900
+- active: true
+  category: xxe
+  id: 79
+  name: XXE with XInclude Attacks
+  points: 1000
+- active: true
+  category: xxe
+  id: 80
+  name: XXE Billion Laughs DoS
+  points: 1100
+- active: true
+  category: xxe
+  id: 81
+  name: XXE SSRF Combination Attack
+  points: 1200
+- active: true
+  category: xxe
+  id: 82
+  name: XXE with WAF Bypass Techniques
+  points: 1300
+- active: true
+  category: xxe
+  id: 83
+  name: XXE via SOAP Web Services
+  points: 1400
+- active: true
+  category: xxe
+  id: 84
+  name: Advanced XXE with OOB Data Retrieval
+  points: 1500
+- active: true
+  category: xxe
+  id: 85
+  name: XXE in JSON-XML Conversion
+  points: 1600
+- active: true
+  category: xxe
+  id: 86
+  name: XXE with Custom Entity Resolvers
+  points: 1700
+- active: true
+  category: xxe
+  id: 87
+  name: XXE in Microsoft Office Documents
+  points: 1800
+- active: true
+  category: xxe
+  id: 88
+  name: XXE with Protocol Handler Exploitation
+  points: 1900
+- active: true
+  category: xxe
+  id: 89
+  name: XXE in XML Signature Verification
+  points: 2000
+- active: true
+  category: xxe
+  id: 90
+  name: XXE with Time-Based Blind Techniques
+  points: 2100
+- active: true
+  category: xxe
+  id: 91
+  name: XXE in Cloud XML Processing
+  points: 2200
+- active: true
+  category: xxe
+  id: 92
+  name: Advanced XXE Attack Chaining
+  points: 2300
+- active: true
+  category: ssrf
+  id: 93
+  name: Basic SSRF
+  points: 100
+- active: true
+  category: ssrf
+  id: 94
+  name: SSRF with Internal Network Scanning
+  points: 200
+- active: true
+  category: ssrf
+  id: 95
+  name: Cloud Metadata SSRF
+  points: 300
+- active: true
+  category: ssrf
+  id: 96
+  name: Blind SSRF with DNS Exfiltration
+  points: 400
+- active: true
+  category: ssrf
+  id: 97
+  name: SSRF with Basic Filters
+  points: 500
+- active: true
+  category: ssrf
+  id: 98
+  name: SSRF via File Upload
+  points: 600
+- active: true
+  category: ssrf
+  id: 99
+  name: SSRF in Webhooks
+  points: 700
+- active: true
+  category: ssrf
+  id: 100
+  name: SSRF with WAF Bypass
+  points: 800
+- active: true
+  category: ssrf
+  id: 101
+  name: SSRF via XXE
+  points: 900
+- active: true
+  category: ssrf
+  id: 102
+  name: SSRF with DNS Rebinding
+  points: 1000
+- active: true
+  category: ssrf
+  id: 103
+  name: SSRF in GraphQL
+  points: 1100
+- active: true
+  category: ssrf
+  id: 104
+  name: SSRF via Redis Protocol
+  points: 1200
+- active: true
+  category: ssrf
+  id: 105
+  name: SSRF in WebSocket Upgrade
+  points: 1300
+- active: true
+  category: ssrf
+  id: 106
+  name: SSRF via SMTP Protocol
+  points: 1400
+- active: true
+  category: ssrf
+  id: 107
+  name: SSRF in OAuth Callbacks
+  points: 1500
+- active: true
+  category: ssrf
+  id: 108
+  name: SSRF via LDAP Protocol
+  points: 1600
+- active: true
+  category: ssrf
+  id: 109
+  name: SSRF in Container Metadata
+  points: 1700
+- active: true
+  category: ssrf
+  id: 110
+  name: SSRF via FTP Protocol
+  points: 1800
+- active: true
+  category: ssrf
+  id: 111
+  name: SSRF in API Gateway
+  points: 1900
+- active: true
+  category: ssrf
+  id: 112
+  name: SSRF via Time-based Attacks
+  points: 2000
+- active: true
+  category: ssrf
+  id: 113
+  name: SSRF in Microservices
+  points: 2100
+- active: true
+  category: ssrf
+  id: 114
+  name: SSRF via Protocol Smuggling
+  points: 2200
+- active: true
+  category: ssrf
+  id: 115
+  name: SSRF in Serverless Functions
+  points: 2300
+- active: true
+  category: csrf
+  id: 116
+  name: Basic Form CSRF
+  points: 100
+- active: true
+  category: csrf
+  id: 117
+  name: GET-based CSRF
+  points: 200
+- active: true
+  category: csrf
+  id: 118
+  name: JSON CSRF
+  points: 300
+- active: true
+  category: csrf
+  id: 119
+  name: File Upload CSRF
+  points: 400
+- active: true
+  category: csrf
+  id: 120
+  name: CSRF with Weak Tokens
+  points: 500
+- active: true
+  category: csrf
+  id: 121
+  name: Referrer-based Protection Bypass
+  points: 600
+- active: true
+  category: csrf
+  id: 122
+  name: CSRF in AJAX Requests
+  points: 700
+- active: true
+  category: csrf
+  id: 123
+  name: SameSite Cookie Bypass
+  points: 800
+- active: true
+  category: csrf
+  id: 124
+  name: CSRF with Custom Headers
+  points: 900
+- active: true
+  category: csrf
+  id: 125
+  name: Multi-step CSRF
+  points: 1000
+- active: true
+  category: csrf
+  id: 126
+  name: CSRF in Password Change
+  points: 1100
+- active: true
+  category: csrf
+  id: 127
+  name: CSRF with CAPTCHA Bypass
+  points: 1200
+- active: true
+  category: csrf
+  id: 128
+  name: CSRF with CORS Exploitation
+  points: 1300
+- active: true
+  category: csrf
+  id: 129
+  name: WebSocket CSRF
+  points: 1400
+- active: true
+  category: csrf
+  id: 130
+  name: CSRF in OAuth Flows
+  points: 1500
+- active: true
+  category: csrf
+  id: 131
+  name: CSRF with CSP Bypass
+  points: 1600
+- active: true
+  category: csrf
+  id: 132
+  name: CSRF via XSS Chain
+  points: 1700
+- active: true
+  category: csrf
+  id: 133
+  name: GraphQL CSRF
+  points: 1800
+- active: true
+  category: csrf
+  id: 134
+  name: JWT-based CSRF
+  points: 1900
+- active: true
+  category: csrf
+  id: 135
+  name: Mobile API CSRF
+  points: 2000
+- active: true
+  category: csrf
+  id: 136
+  name: Microservices CSRF
+  points: 2100
+- active: true
+  category: csrf
+  id: 137
+  name: CSRF with Subdomain Takeover
+  points: 2200
+- active: true
+  category: csrf
+  id: 138
+  name: Serverless Function CSRF
+  points: 2300
+- active: true
+  category: ssti
+  id: 139
+  name: SSTI Level 1
+  points: 100
+- active: true
+  category: ssti
+  id: 140
+  name: SSTI Level 2
+  points: 200
+- active: true
+  category: ssti
+  id: 141
+  name: SSTI Level 3
+  points: 300
+- active: true
+  category: ssti
+  id: 142
+  name: SSTI Level 4
+  points: 400
+- active: true
+  category: ssti
+  id: 143
+  name: SSTI Level 5
+  points: 500
+- active: true
+  category: ssti
+  id: 144
+  name: SSTI Level 6
+  points: 600
+- active: true
+  category: ssti
+  id: 145
+  name: SSTI Level 7
+  points: 700
+- active: true
+  category: ssti
+  id: 146
+  name: SSTI Level 8
+  points: 800
+- active: true
+  category: ssti
+  id: 147
+  name: SSTI Level 9
+  points: 900
+- active: true
+  category: ssti
+  id: 148
+  name: SSTI Level 10
+  points: 1000
+- active: true
+  category: ssti
+  id: 149
+  name: SSTI Level 11
+  points: 1100
+- active: true
+  category: ssti
+  id: 150
+  name: SSTI Level 12
+  points: 1200
+- active: true
+  category: ssti
+  id: 151
+  name: SSTI Level 13
+  points: 1300
+- active: true
+  category: ssti
+  id: 152
+  name: SSTI Level 14
+  points: 1400
+- active: true
+  category: ssti
+  id: 153
+  name: SSTI Level 15
+  points: 1500
+- active: true
+  category: ssti
+  id: 154
+  name: SSTI Level 16
+  points: 1600
+- active: true
+  category: ssti
+  id: 155
+  name: SSTI Level 17
+  points: 1700
+- active: true
+  category: ssti
+  id: 156
+  name: SSTI Level 18
+  points: 1800
+- active: true
+  category: ssti
+  id: 157
+  name: SSTI Level 19
+  points: 1900
+- active: true
+  category: ssti
+  id: 158
+  name: SSTI Level 20
+  points: 2000
+- active: true
+  category: ssti
+  id: 159
+  name: SSTI Level 21
+  points: 2100
+- active: true
+  category: ssti
+  id: 160
+  name: SSTI Level 22
+  points: 2200
+- active: true
+  category: ssti
+  id: 161
+  name: SSTI Level 23
+  points: 2300
+- active: true
+  category: deserial
+  id: 162
+  name: Deserialization Level 1
+  points: 100
+- active: true
+  category: deserial
+  id: 163
+  name: Deserialization Level 2
+  points: 300
+- active: true
+  category: deserial
+  id: 164
+  name: Deserialization Level 3
+  points: 500
+- active: true
+  category: deserial
+  id: 165
+  name: Deserialization Level 4
+  points: 700
+- active: true
+  category: deserial
+  id: 166
+  name: Deserialization Level 5
+  points: 900
+- active: true
+  category: auth
+  id: 167
+  name: Auth Bypass Level 1
+  points: 100
+- active: true
+  category: auth
+  id: 168
+  name: Auth Bypass Level 2
+  points: 300
+- active: true
+  category: auth
+  id: 169
+  name: Auth Bypass Level 3
+  points: 500
+- active: true
+  category: auth
+  id: 170
+  name: Auth Bypass Level 4
+  points: 700
+- active: true
+  category: auth
+  id: 171
+  name: Auth Bypass Level 5
+  points: 900
+- active: true
+  category: xss
+  id: 172
+  name: DOM Clobbering
+  points: 2300
+- active: true
+  category: xss
+  id: 173
+  name: Dangling Markup Injection
+  points: 2400
+- active: true
+  category: xss
+  id: 174
+  name: Polyglot XSS
+  points: 2500
+- active: true
+  category: xss
+  id: 175
+  name: Client-Side Template Injection
+  points: 2600
+- active: true
+  category: xss
+  id: 176
+  name: Import Map Injection
+  points: 2700
+- active: true
+  category: xss
+  id: 177
+  name: HMR Injection
+  points: 2800
+- active: true
+  category: xss
+  id: 178
+  name: Indirect Prompt Injection
+  points: 2900

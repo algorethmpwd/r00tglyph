@@ -1,0 +1,6 @@
+category: csrf
+id: csrf_11
+level: 11
+mock_data: {}
+name: CSRF Level 11
+template: csrf/csrf_level11.html

@@ -16,7 +16,7 @@
                     {% for ts in team_scores %}
                     <tr>
                         <td>{{ loop.index }}</td>
-                        <td><a href="{{ url_for('team_detail', team_id=ts.team.id) }}">{{ ts.team.name }}</a></td>
+                        <td><a href="{{ url_for('teams.team_detail', team_id=ts.team.id) }}">{{ ts.team.name }}</a></td>
                         <td>{{ ts.member_count }}</td>
                         <td><strong>{{ ts.score }}</strong></td>
                         <td>{{ "%.1f"|format(ts.avg_score) }}</td>
@@ -28,7 +28,7 @@
     </div>
 
     {% if not team_scores %}
-    <div class="alert alert-info">No teams yet. <a href="{{ url_for('teams') }}">Create one!</a></div>
+    <div class="alert alert-info">No teams yet. <a href="{{ url_for('teams.teams') }}">Create one!</a></div>
     {% endif %}
 </div>
 {% endblock %}

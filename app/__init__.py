@@ -4,7 +4,10 @@ from app.extensions import db
 
 def create_app():
     app = Flask(__name__, template_folder='../templates', static_folder='../static')
-    app.secret_key = os.environ.get("SECRET_KEY", "r00tglyph_secret_key_change_in_production")
+    app.secret_key = os.environ.get("SECRET_KEY")
+    if not app.secret_key and (os.environ.get("FLASK_ENV") == "production" or os.environ.get("FLASK_DEBUG", "0") == "0"):
+        raise RuntimeError("SECRET_KEY environment variable not set in production!")
+    app.secret_key = app.secret_key or "r00tglyph_secret_key_change_in_production"
     
     DATABASE_URL = os.environ.get("DATABASE_URL")
     if DATABASE_URL:
@@ -18,26 +21,25 @@ def create_app():
     
     db.init_app(app)
     
+    from flask_wtf.csrf import CSRFProtect
+    csrf = CSRFProtect()
+    csrf.init_app(app)
+    
     from app.routes.auth import auth_bp
     app.register_blueprint(auth_bp)
     from app.routes.core import core_bp
     app.register_blueprint(core_bp)
     from app.routes.api import api_bp
     app.register_blueprint(api_bp)
-    from app.routes.challenges.xss import xss_bp
-    app.register_blueprint(xss_bp)
-    from app.routes.challenges.sqli import sqli_bp
-    app.register_blueprint(sqli_bp)
-    from app.routes.challenges.cmdi import cmdi_bp
-    app.register_blueprint(cmdi_bp)
-    from app.routes.challenges.ssrf import ssrf_bp
-    app.register_blueprint(ssrf_bp)
-    from app.routes.challenges.xxe import xxe_bp
-    app.register_blueprint(xxe_bp)
-    from app.routes.challenges.dynamic import dynamic_bp
-    app.register_blueprint(dynamic_bp)
-    from app.routes.challenges.csrf import csrf_bp
-    app.register_blueprint(csrf_bp)
+    
+    
+    
+    
+    from app.routes.challenge_router import dynamic_router_bp
+    app.register_blueprint(dynamic_router_bp)
+    
+    # Exempt vulnerable challenges from CSRF protection
+    csrf.exempt(dynamic_router_bp)
     from app.routes.admin import admin_bp
     app.register_blueprint(admin_bp)
     from app.routes.teams import teams_bp

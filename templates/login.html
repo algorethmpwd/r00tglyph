@@ -22,7 +22,8 @@
                 {% endif %}
                 {% endwith %}
 
-                <form method="POST" action="{{ url_for('login') }}">
+                <form method="POST" action="{{ url_for('auth.login') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <div class="mb-3">
                         <label for="username" class="form-label text-secondary small fw-bold">USERNAME</label>
                         <div class="input-group">
@@ -47,7 +48,7 @@
                 </form>
             </div>
             <div class="card-footer bg-transparent border-0 text-center pb-4">
-                <p class="small text-muted mb-0">Don't have an account? <a href="{{ url_for('register') }}"
+                <p class="small text-muted mb-0">Don't have an account? <a href="{{ url_for('auth.register') }}"
                         class="text-primary text-decoration-none fw-bold">Register here</a></p>
             </div>
         </div>

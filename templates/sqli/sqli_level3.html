@@ -115,7 +115,7 @@
             <div class="card-body">
                 <h4 class="mb-3">Archive Search</h4>
 
-                <form method="GET" action="{{ url_for('sqli_level3') }}" class="mb-4">
+                <form method="GET" action="{{ url_for('dynamic_router.serve_challenge', category='sqli', level=3) }}" class="mb-4">
                     <div class="input-group">
                         <input type="text" class="form-control" name="search"
                             placeholder="Search archive (e.g. 1984)..." value="{{ search_term }}">

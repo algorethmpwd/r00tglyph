@@ -1,0 +1,6 @@
+category: csrf
+id: csrf_8
+level: 8
+mock_data: {}
+name: CSRF Level 8
+template: csrf/csrf_level8.html

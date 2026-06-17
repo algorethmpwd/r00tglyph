@@ -1,0 +1,6 @@
+category: xss
+id: xss_4
+level: 4
+mock_data: {}
+name: XSS Level 4
+template: xss/xss_level4.html

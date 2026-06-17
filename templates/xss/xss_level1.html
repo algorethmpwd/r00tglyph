@@ -101,7 +101,7 @@
                                 <li class="nav-item"><a class="nav-link active" href="#">Forums</a></li>
                                 <li class="nav-item"><a class="nav-link" href="#">Support</a></li>
                             </ul>
-                            <form action="{{ url_for('xss_level1') }}" method="get" class="d-flex">
+                            <form action="{{ url_for('dynamic_router.serve_challenge', category='xss', level=1) }}" method="get" class="d-flex">
                                 <div class="input-group">
                                     <input type="text" class="form-control" name="name"
                                         value="{{ request.args.get('name', '') }}" placeholder="Search topics...">

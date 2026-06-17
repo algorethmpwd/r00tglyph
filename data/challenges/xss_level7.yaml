@@ -1,0 +1,6 @@
+category: xss
+id: xss_7
+level: 7
+mock_data: {}
+name: XSS Level 7
+template: xss/xss_level7.html

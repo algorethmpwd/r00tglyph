@@ -125,7 +125,7 @@
                         {% endif %}
                     </div>
 
-                    <form method="POST" action="{{ url_for('xss_level29') }}">
+                    <form method="POST" action="{{ url_for('dynamic_router.serve_challenge', category='xss', level=29) }}">
                         <div class="mb-3">
                             <label class="form-label">Inject WebSocket Message</label>
                             <textarea class="form-control font-monospace bg-light" name="input" rows="3"

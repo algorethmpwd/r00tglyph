@@ -115,7 +115,7 @@
                     <div class="text-center py-5 bg-light rounded mb-3">
                         <i class="bi bi-bluetooth text-primary display-4 mb-3 d-block"></i>
                         <p class="mb-3">Simulate a device pairing to see its name.</p>
-                        <form method="POST" action="{{ url_for('xss_level21') }}" class="d-inline-block w-50">
+                        <form method="POST" action="{{ url_for('dynamic_router.serve_challenge', category='xss', level=21) }}" class="d-inline-block w-50">
                             <div class="input-group">
                                 <input type="text" class="form-control" name="device_name"
                                     placeholder="Device Name (e.g. MyHeadset)" required>

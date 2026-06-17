@@ -17,3 +17,5 @@ scripts/
 .vscode/
 IMPORTANT.md
 IMPROVEMENTS_SUMMARY.md
+.vercel
+.env*.local

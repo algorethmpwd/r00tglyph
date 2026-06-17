@@ -134,7 +134,7 @@
                 <div class="card mb-4 border-0 shadow-sm bg-light">
                     <div class="card-body">
                         <h6 class="card-title mb-3">Leave a comment</h6>
-                        <form method="POST" action="{{ url_for('xss_level3') }}">
+                        <form method="POST" action="{{ url_for('dynamic_router.serve_challenge', category='xss', level=3) }}">
                             <div class="mb-3">
                                 <textarea class="form-control" name="content" rows="3"
                                     placeholder="Join the discussion..." required></textarea>

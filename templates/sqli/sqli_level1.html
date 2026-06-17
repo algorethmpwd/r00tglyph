@@ -130,7 +130,7 @@
                 </div>
                 {% endif %}
 
-                <form method="POST" action="{{ url_for('sqli_level1') }}">
+                <form method="POST" action="{{ url_for('dynamic_router.serve_challenge', category='sqli', level=1) }}">
                     <div class="mb-3">
                         <label class="form-label">Username</label>
                         <input type="text" class="form-control" name="username" placeholder="admin">

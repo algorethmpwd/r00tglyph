@@ -60,8 +60,7 @@ def api_notes():
             notes.insert(0, {'id': 104, 'title': '<img src=x onerror="alert(\'XSS Level 8 Completed!\');">', 'content': 'This note contains an XSS payload in the title.', 'tags': ['xss', 'security'], 'created': datetime.now().isoformat()})
             challenge = Challenge.query.filter_by(name='XSS in JSON API').first()
             if challenge:
-                completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
-                if challenge.id not in completed_ids:
+                if challenge not in user.completions:
                     update_user_progress(user.id, challenge.id, challenge.points)
         return jsonify(notes)
 
@@ -139,8 +138,7 @@ def get_solution(category, level):
     if not challenge:
         challenge = Challenge.query.filter_by(category=category).first()
     if challenge:
-        completed = json.loads(user.completed_challenges) if user.completed_challenges else []
-        if challenge.id not in completed and (not user.is_admin):
+        if challenge not in user.completions and (not user.is_admin):
             return (jsonify({'error': 'Complete the challenge to view the solution'}), 403)
     solution_file = f'data/solutions/{category}_level{level}.json'
     if os.path.exists(solution_file):

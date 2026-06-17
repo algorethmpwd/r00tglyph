@@ -118,7 +118,7 @@
                 </div>
                 {% endif %}
 
-                <form method="POST" action="{{ url_for('sqli_level8') }}" class="mb-4">
+                <form method="POST" action="{{ url_for('dynamic_router.serve_challenge', category='sqli', level=8) }}" class="mb-4">
                     <div class="mb-3">
                         <label class="form-label">Username</label>
                         <input type="text" class="form-control" name="username" value="{{ current_username }}"
@@ -130,7 +130,7 @@
 
                 <h5 class="mb-3">Start Session</h5>
                 <p class="text-muted small mb-3">Simulate a new session to trigger second-order effects.</p>
-                <form method="GET" action="{{ url_for('sqli_level8') }}">
+                <form method="GET" action="{{ url_for('dynamic_router.serve_challenge', category='sqli', level=8) }}">
                     <input type="hidden" name="action" value="view">
                     <button type="submit" class="btn btn-outline-secondary">View Profile (Trigger)</button>
                 </form>

@@ -213,8 +213,8 @@ factory.setFeature("http://xml.org/sax/features/external-parameter-entities", fa
                 </div>
                 
                 <div class="mt-4">
-                    <a href="{{ url_for('xxe_level3') }}" class="btn btn-outline-primary">Back to Challenge</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
+                    <a href="{{ url_for('dynamic_router.serve_challenge', category='xxe', level=3) }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('core.vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
                 </div>
             </div>
         </div>

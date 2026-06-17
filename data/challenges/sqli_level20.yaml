@@ -1,0 +1,6 @@
+category: sqli
+id: sqli_20
+level: 20
+mock_data: {}
+name: SQLI Level 20
+template: sqli/sqli_level20.html

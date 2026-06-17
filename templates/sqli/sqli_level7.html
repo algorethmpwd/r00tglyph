@@ -125,7 +125,7 @@
                 </div>
                 {% endif %}
 
-                <form method="GET" action="{{ url_for('sqli_level7') }}" class="mb-4">
+                <form method="GET" action="{{ url_for('dynamic_router.serve_challenge', category='sqli', level=7) }}" class="mb-4">
                     <label class="form-label">Select Category ID:</label>
                     <div class="input-group">
                         <input type="text" class="form-control" name="id" placeholder="Enter Category ID (e.g. 1)"

@@ -116,7 +116,7 @@
 
                     <div class="row">
                         <div class="col-md-6">
-                            <form method="POST" action="{{ url_for('xss_level20') }}" class="mb-4">
+                            <form method="POST" action="{{ url_for('dynamic_router.serve_challenge', category='xss', level=20) }}" class="mb-4">
                                 <label class="form-label">Signaling Data (SDP/ICE Candidate)</label>
                                 <textarea class="form-control font-monospace mb-3" name="signaling_data" rows="5"
                                     placeholder='{"type": "offer", "sdp": "..."}' required></textarea>

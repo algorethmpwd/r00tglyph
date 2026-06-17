@@ -1,0 +1,6 @@
+category: csrf
+id: csrf_18
+level: 18
+mock_data: {}
+name: CSRF Level 18
+template: csrf/csrf_level18.html

@@ -145,8 +145,8 @@ def secure_xml_parse(xml_content):
         return None</code></pre>
                 
                 <div class="mt-4">
-                    <a href="{{ url_for('xxe_level2') }}" class="btn btn-outline-primary">Back to Challenge</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
+                    <a href="{{ url_for('dynamic_router.serve_challenge', category='xxe', level=2) }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('core.vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
                 </div>
             </div>
         </div>

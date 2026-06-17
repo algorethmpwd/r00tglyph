@@ -49,7 +49,7 @@ def admin_toggle_admin(user_id):
         user.is_admin = not user.is_admin
         db.session.commit()
         flash(f'User {user.username} admin status updated.', 'success')
-    return redirect(url_for('admin_users'))
+    return redirect(url_for('admin.admin_users'))
 
 @admin_bp.route('/admin/challenges')
 @admin_required
@@ -65,5 +65,5 @@ def admin_toggle_challenge(challenge_id):
         challenge.active = not challenge.active
         db.session.commit()
         flash(f"Challenge '{challenge.name}' {('activated' if challenge.active else 'deactivated')}.", 'success')
-    return redirect(url_for('admin_challenges'))
+    return redirect(url_for('admin.admin_challenges'))
 

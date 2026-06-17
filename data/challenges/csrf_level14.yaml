@@ -1,0 +1,6 @@
+category: csrf
+id: csrf_14
+level: 14
+mock_data: {}
+name: CSRF Level 14
+template: csrf/csrf_level14.html

@@ -19,7 +19,7 @@ def change_theme(theme):
     valid_themes = ['dark', 'light', 'cyberpunk', 'hacker']
     if theme in valid_themes:
         session['theme'] = theme
-    return redirect(request.referrer or url_for('index'))
+    return redirect(request.referrer or url_for('core.index'))
 
 @core_bp.route('/profile', methods=['GET', 'POST'])
 @login_required
@@ -44,11 +44,8 @@ def profile():
                     file.save(filepath)
                     user.profile_picture = f'uploads/profiles/{unique_filename}'
         db.session.commit()
-        return redirect(url_for('profile'))
-    completed_challenges = []
-    if user.completed_challenges:
-        challenge_ids = json.loads(user.completed_challenges)
-        completed_challenges = Challenge.query.filter(Challenge.id.in_(challenge_ids)).all()
+        return redirect(url_for('core.profile'))
+    completed_challenges = user.completions.all()
     total_challenge_count = Challenge.query.filter_by(active=True).count()
     remaining_challenge_count = total_challenge_count - len(completed_challenges)
     return render_template('profile.html', user=user, completed_challenges=completed_challenges, total_challenge_count=total_challenge_count, remaining_challenge_count=remaining_challenge_count)
@@ -71,8 +68,9 @@ def vulnerabilities():
     category_display_names = {'xss': 'Cross-Site Scripting (XSS)', 'sqli': 'SQL Injection (SQLi)', 'cmdi': 'Command Injection (CMDi)', 'csrf': 'Cross-Site Request Forgery (CSRF)', 'ssrf': 'Server-Side Request Forgery (SSRF)', 'xxe': 'XML External Entity (XXE)', 'ssti': 'Server-Side Template Injection (SSTI)', 'deserial': 'Insecure Deserialization', 'auth': 'Authentication Bypass'}
     user = get_current_user()
     if not user:
-        return redirect(url_for('login', next=request.url))
-    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
+        return redirect(url_for('auth.login', next=request.url))
+        
+    completed_ids = [c.id for c in user.completions.all()]
     challenges_by_category = {}
     category_completion = {}
     total_count = 0
@@ -96,18 +94,36 @@ def vulnerabilities():
 
 @core_bp.route('/scoreboard')
 def scoreboard():
-    top_users = LocalUser.query.order_by(LocalUser.score.desc()).limit(20).all()
+    # Phase 2.2: Scoreboard Query Optimization using Association Table
+    from app.models import user_completions
+    top_users_query = db.session.query(
+        LocalUser,
+        db.func.coalesce(db.func.sum(Challenge.points), 0).label('total_score')
+    ).outerjoin(user_completions, LocalUser.id == user_completions.c.user_id)\
+     .outerjoin(Challenge, user_completions.c.challenge_id == Challenge.id)\
+     .group_by(LocalUser.id)\
+     .order_by(db.desc('total_score')).limit(20).all()
+    
+    # Update local score attribute temporarily for template compatibility
+    top_users = []
+    for u, score in top_users_query:
+        u.score = int(score)
+        top_users.append(u)
+
     total_challenges = Challenge.query.filter_by(active=True).count()
     total_players = LocalUser.query.count()
     total_flags = Flag.query.filter_by(used=True).count()
     recent_submissions = Submission.query.order_by(Submission.timestamp.desc()).limit(10).all()
+    
     current_user_obj = get_current_user()
     my_rank = None
     my_score = None
     if current_user_obj:
+        # Phase 2.3 Global Rank Optimisation uses LocalUser.score which has index
         rank_query = db.session.query(db.func.count(LocalUser.id)).filter(LocalUser.score > current_user_obj.score).scalar()
         my_rank = (rank_query or 0) + 1
         my_score = current_user_obj.score
+        
     category_stats = {}
     for cat in ['xss', 'sqli', 'cmdi', 'csrf', 'ssrf', 'xxe', 'ssti', 'deserial', 'auth']:
         cat_challenges = Challenge.query.filter_by(category=cat, active=True).all()
@@ -117,11 +133,13 @@ def scoreboard():
             if Flag.query.filter_by(challenge_id=c.id, used=True).count() > 0:
                 cat_completed += 1
         category_stats[cat] = {'total': cat_total, 'completed': cat_completed}
+        
     recent_activity = []
     for sub in recent_submissions:
         user = db.session.get(LocalUser, sub.user_id)
         challenge = db.session.get(Challenge, sub.challenge_id)
         if user and challenge:
+            from datetime import datetime, timezone
             diff = datetime.now(timezone.utc) - sub.timestamp
             if diff.days > 0:
                 time_ago = f'{diff.days}d ago'
@@ -130,20 +148,39 @@ def scoreboard():
             else:
                 time_ago = f'{diff.seconds // 60}m ago'
             recent_activity.append({'username': user.display_name, 'type': 'capture' if sub.correct else 'attempt', 'category': challenge.category, 'time_ago': time_ago})
+            
     team_score = None
     if current_user_obj and current_user_obj.team_id:
-        members = LocalUser.query.filter_by(team_id=current_user_obj.team_id).all()
-        team_score = sum((m.score for m in members))
-    return render_template('scoreboard.html', users=top_users, total_challenges=total_challenges, total_players=total_players, total_flags=total_flags, recent_activity=recent_activity, category_stats=category_stats, current_user=current_user_obj, my_rank=my_rank, my_score=my_score, team_score=team_score)
+        # Optimize team score query
+        team_score = db.session.query(db.func.coalesce(db.func.sum(Challenge.points), 0))\
+            .select_from(LocalUser)\
+            .join(user_completions, LocalUser.id == user_completions.c.user_id)\
+            .join(Challenge, user_completions.c.challenge_id == Challenge.id)\
+            .filter(LocalUser.team_id == current_user_obj.team_id).scalar()
+            
+    return render_template('scoreboard.html', users=top_users, total_challenges=total_challenges, total_players=total_players, total_flags=total_flags, recent_activity=recent_activity, category_stats=category_stats, current_user=current_user_obj, my_rank=my_rank, my_score=my_score, team_score=int(team_score) if team_score else 0)
 
 @core_bp.route('/team-scoreboard')
 def team_scoreboard():
-    teams = Team.query.all()
+    from app.models import user_completions
+    team_scores_query = db.session.query(
+        Team,
+        db.func.count(db.distinct(LocalUser.id)).label('member_count'),
+        db.func.coalesce(db.func.sum(Challenge.points), 0).label('total_score')
+    ).outerjoin(LocalUser, Team.id == LocalUser.team_id)\
+     .outerjoin(user_completions, LocalUser.id == user_completions.c.user_id)\
+     .outerjoin(Challenge, user_completions.c.challenge_id == Challenge.id)\
+     .group_by(Team.id)\
+     .order_by(db.desc('total_score')).all()
+     
     team_scores = []
-    for team in teams:
-        members = LocalUser.query.filter_by(team_id=team.id).all()
-        team_score = sum((m.score for m in members))
-        team_scores.append({'team': team, 'score': team_score, 'member_count': len(members), 'avg_score': team_score / len(members) if members else 0})
-    team_scores.sort(key=lambda x: x['score'], reverse=True)
+    for team, member_count, total_score in team_scores_query:
+        team_scores.append({
+            'team': team, 
+            'score': int(total_score), 
+            'member_count': member_count, 
+            'avg_score': int(total_score) / member_count if member_count > 0 else 0
+        })
+        
     return render_template('team_scoreboard.html', team_scores=team_scores)
 

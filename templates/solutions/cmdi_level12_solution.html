@@ -74,8 +74,8 @@
                 </ol>
 
                 <div class="mt-4">
-                    <a href="{{ url_for('cmdi_level12') }}" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end"><i class="bi bi-list me-2"></i>All Challenges</a>
+                    <a href="{{ url_for('dynamic_router.serve_challenge', category='cmdi', level=12) }}" class="btn btn-outline-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                    <a href="{{ url_for('core.vulnerabilities') }}" class="btn btn-outline-secondary float-end"><i class="bi bi-list me-2"></i>All Challenges</a>
                 </div>
             </div>
         </div>

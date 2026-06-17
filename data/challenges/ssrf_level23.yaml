@@ -1,0 +1,6 @@
+category: ssrf
+id: ssrf_23
+level: 23
+mock_data: {}
+name: SSRF Level 23
+template: ssrf/ssrf_level23.html

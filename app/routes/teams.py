@@ -33,7 +33,7 @@ def team_create():
     user = get_current_user()
     if user.team_id:
         flash('You are already a member of a team. Leave your current team first.', 'danger')
-        return redirect(url_for('teams'))
+        return redirect(url_for('teams.teams'))
     if request.method == 'POST':
         name = request.form.get('team_name', '').strip()
         description = request.form.get('description', '').strip()
@@ -50,7 +50,7 @@ def team_create():
         user.team_id = team.id
         db.session.commit()
         flash(f"Team '{name}' created successfully!", 'success')
-        return redirect(url_for('teams'))
+        return redirect(url_for('teams.teams'))
     return render_template('team_create.html')
 
 @teams_bp.route('/teams/join/<int:team_id>', methods=['POST'])
@@ -59,15 +59,15 @@ def team_join(team_id):
     user = get_current_user()
     if user.team_id:
         flash('You are already a member of a team. Leave your current team first.', 'danger')
-        return redirect(url_for('teams'))
+        return redirect(url_for('teams.teams'))
     team = db.session.get(Team, team_id)
     if not team:
         flash('Team not found.', 'danger')
-        return redirect(url_for('teams'))
+        return redirect(url_for('teams.teams'))
     user.team_id = team.id
     db.session.commit()
     flash(f"Joined team '{team.name}'!", 'success')
-    return redirect(url_for('teams'))
+    return redirect(url_for('teams.teams'))
 
 @teams_bp.route('/teams/leave', methods=['POST'])
 @login_required
@@ -78,7 +78,7 @@ def team_leave():
         user.team_id = None
         db.session.commit()
         flash(f"Left team '{team.name}'.", 'info')
-    return redirect(url_for('teams'))
+    return redirect(url_for('teams.teams'))
 
 @teams_bp.route('/teams/<int:team_id>')
 @login_required
@@ -86,7 +86,7 @@ def team_detail(team_id):
     team = db.session.get(Team, team_id)
     if not team:
         flash('Team not found.', 'danger')
-        return redirect(url_for('teams'))
+        return redirect(url_for('teams.teams'))
     members = LocalUser.query.filter_by(team_id=team_id).order_by(LocalUser.score.desc()).all()
     team_score = sum((m.score for m in members))
     return render_template('team_detail.html', team=team, members=members, team_score=team_score)

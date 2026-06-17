@@ -115,7 +115,7 @@
             <div class="card-body">
                 <h4 class="mb-3">User Verification</h4>
 
-                <form method="GET" action="{{ url_for('sqli_level4') }}" class="mb-4">
+                <form method="GET" action="{{ url_for('dynamic_router.serve_challenge', category='sqli', level=4) }}" class="mb-4">
                     <div class="input-group">
                         <input type="text" class="form-control" name="id" placeholder="Enter User ID (e.g. 1)"
                             value="{{ user_id }}">

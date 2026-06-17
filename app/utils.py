@@ -17,6 +17,9 @@ def rate_limit(max_requests=10, window_seconds=60, key_func=None):
 
         @wraps(f)
         def decorated_function(*args, **kwargs):
+            from flask import current_app
+            if current_app.config.get('TESTING'):
+                return f(*args, **kwargs)
             if key_func:
                 key = key_func()
             else:
@@ -42,7 +45,7 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
-            return redirect(url_for('login', next=request.url))
+            return redirect(url_for('auth.login', next=request.url))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -103,20 +106,24 @@ def get_flag_if_completed(challenge_name, user):
     challenge = Challenge.query.filter_by(name=challenge_name).first()
     if not challenge:
         return None
-    completed_ids = json.loads(user.completed_challenges) if user.completed_challenges else []
-    if challenge.id in completed_ids:
+    # Use the completions relationship
+    if challenge in user.completions:
         return get_or_create_flag(challenge.id, user.id)
     return None
 
 def update_user_progress(user_id, challenge_id, points):
     """Update user progress after completing a challenge"""
     user = db.session.get(LocalUser, user_id)
-    if user:
-        completed = json.loads(user.completed_challenges) if user.completed_challenges else []
-        if challenge_id not in completed:
+    challenge = db.session.get(Challenge, challenge_id)
+    if user and challenge:
+        if challenge not in user.completions:
             user.score += points
-            completed.append(challenge_id)
-            user.completed_challenges = json.dumps(completed)
+            user.completions.append(challenge)
+            # Keep old json field updated temporarily
+            completed = json.loads(user.completed_challenges) if user.completed_challenges else []
+            if challenge_id not in completed:
+                completed.append(challenge_id)
+                user.completed_challenges = json.dumps(completed)
             db.session.commit()
             return True
         else:
@@ -125,9 +132,24 @@ def update_user_progress(user_id, challenge_id, points):
 
 def safe_execute_command(cmd, timeout=5):
     """Execute a command safely with timeout and output capture for CTF challenges."""
-    allowed_commands = ['whoami', 'id', 'uname', 'hostname', 'pwd', 'ls', 'cat', 'echo', 'date', 'uptime', 'w', 'ps', 'env', 'printenv', 'id', 'whoami', 'uname', 'hostname', 'pwd', 'ls', 'cat', 'echo', 'date', 'uptime', 'w', 'ps', 'env', 'printenv', 'id', 'whoami', 'uname', 'hostname', 'pwd', 'ls', 'cat', 'echo', 'date', 'uptime', 'w', 'ps', 'env', 'printenv']
+    import shlex
+    allowed_commands = ['whoami', 'id', 'uname', 'hostname', 'pwd', 'ls', 'cat', 'echo', 'date', 'uptime', 'w', 'ps', 'env', 'printenv']
     try:
-        result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=timeout)
+        if isinstance(cmd, str):
+            split_cmd = shlex.split(cmd)
+        else:
+            split_cmd = cmd
+            
+        if not split_cmd:
+            return '(empty command)'
+            
+        base_cmd = split_cmd[0]
+        if base_cmd not in allowed_commands:
+            return f'(error: command "{base_cmd}" not allowed)'
+            
+        # FULL DOCKER SANDBOX TODO
+        # For now, restrict execution safely without shell=True
+        result = subprocess.run(split_cmd, shell=False, capture_output=True, text=True, timeout=timeout)
         output = result.stdout
         if result.stderr:
             output += '\n[stderr]\n' + result.stderr
@@ -157,9 +179,11 @@ def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         user = get_current_user()
+        if not session.get('user_id'):
+            flash('Please log in to access this page.', 'warning')
+            return redirect(url_for('auth.login', next=request.url))
         if not user or not user.is_admin:
             flash('Admin access required.', 'danger')
             return redirect(url_for('index'))
         return f(*args, **kwargs)
     return decorated_function
-

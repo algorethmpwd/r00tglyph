@@ -1,0 +1,6 @@
+category: xss
+id: xss_12
+level: 12
+mock_data: {}
+name: XSS Level 12
+template: xss/xss_level12.html

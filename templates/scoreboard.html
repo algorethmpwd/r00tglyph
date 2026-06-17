@@ -56,7 +56,7 @@
                             <h5 class="mb-1"><i class="bi bi-people-fill me-2"></i>Your Team: {{ current_user.team.name }}</h5>
                             <p class="mb-0">Team Score: {{ team_score or 0 }} pts</p>
                         </div>
-                        <a href="{{ url_for('team_scoreboard') }}" class="btn btn-light btn-sm">View Team Rankings</a>
+                        <a href="{{ url_for('core.team_scoreboard') }}" class="btn btn-light btn-sm">View Team Rankings</a>
                     </div>
                 </div>
             </div>
@@ -142,7 +142,7 @@
                         <i class="bi bi-emoji-neutral display-1 text-muted"></i>
                         <h4 class="mt-3 text-muted">No players yet</h4>
                         <p class="text-muted">Be the first to register and start hacking!</p>
-                        <a href="{{ url_for('register') }}" class="btn btn-primary mt-2">
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-primary mt-2">
                             <i class="bi bi-person-plus me-1"></i>Create Account
                         </a>
                     </div>

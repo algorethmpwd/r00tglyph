@@ -9,7 +9,7 @@
     <p><strong>Total Score:</strong> {{ team_score }} pts</p>
     <p><strong>Created:</strong> {{ team.created_at.strftime('%Y-%m-%d') }}</p>
 
-    <a href="{{ url_for('teams') }}" class="btn btn-secondary mb-3"><i class="bi bi-arrow-left"></i> Back to Teams</a>
+    <a href="{{ url_for('teams.teams') }}" class="btn btn-secondary mb-3"><i class="bi bi-arrow-left"></i> Back to Teams</a>
 
     <div class="card">
         <div class="card-header"><h5>Members</h5></div>

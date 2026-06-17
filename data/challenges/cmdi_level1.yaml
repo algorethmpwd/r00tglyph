@@ -1,0 +1,6 @@
+category: cmdi
+id: cmdi_1
+level: 1
+mock_data: {}
+name: CMDI Level 1
+template: cmdi/cmdi_level1.html

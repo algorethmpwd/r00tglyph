@@ -1,0 +1,6 @@
+category: xss
+id: xss_20
+level: 20
+mock_data: {}
+name: XSS Level 20
+template: xss/xss_level20.html

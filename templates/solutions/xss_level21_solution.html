@@ -232,7 +232,7 @@ await characteristic.getDescriptor('user_description').then(descriptor => {
                 </div>
                 
                 <div class="mt-4">
-                    <a href="{{ url_for('xss_level21') }}" class="btn btn-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
+                    <a href="{{ url_for('dynamic_router.serve_challenge', category='xss', level=21) }}" class="btn btn-primary"><i class="bi bi-arrow-left me-2"></i>Back to Challenge</a>
                 </div>
             </div>
         </div>

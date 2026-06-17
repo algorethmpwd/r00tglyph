@@ -115,7 +115,7 @@
                     </div>
                     {% endif %}
 
-                    <form method="POST" action="{{ url_for('xss_level25') }}" class="mb-4">
+                    <form method="POST" action="{{ url_for('dynamic_router.serve_challenge', category='xss', level=25) }}" class="mb-4">
                         <div class="mb-3">
                             <label class="form-label">User Profile Description</label>
                             <div class="input-group">

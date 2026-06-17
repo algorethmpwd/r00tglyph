@@ -1,0 +1,6 @@
+category: csrf
+id: csrf_23
+level: 23
+mock_data: {}
+name: CSRF Level 23
+template: csrf/csrf_level23.html

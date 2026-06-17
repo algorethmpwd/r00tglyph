@@ -1,0 +1,6 @@
+category: cmdi
+id: cmdi_12
+level: 12
+mock_data: {}
+name: CMDI Level 12
+template: cmdi/cmdi_level12.html

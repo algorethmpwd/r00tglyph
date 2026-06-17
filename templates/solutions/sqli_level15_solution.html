@@ -192,8 +192,8 @@ $reports = $stmt->fetchAll();</code></pre>
                 </ul>
 
                 <div class="mt-4">
-                    <a href="{{ url_for('sqli_level15') }}" class="btn btn-outline-primary">Back to Challenge</a>
-                    <a href="{{ url_for('vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
+                    <a href="{{ url_for('dynamic_router.serve_challenge', category='sqli', level=15) }}" class="btn btn-outline-primary">Back to Challenge</a>
+                    <a href="{{ url_for('core.vulnerabilities') }}" class="btn btn-outline-secondary float-end">All Challenges</a>
                 </div>
             </div>
         </div>

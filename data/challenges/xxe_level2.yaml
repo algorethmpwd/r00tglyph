@@ -1,0 +1,6 @@
+category: xxe
+id: xxe_2
+level: 2
+mock_data: {}
+name: XXE Level 2
+template: xxe/xxe_level2.html

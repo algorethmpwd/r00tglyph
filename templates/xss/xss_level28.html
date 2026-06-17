@@ -115,7 +115,7 @@
                     </div>
                     {% endif %}
 
-                    <form method="POST" action="{{ url_for('xss_level28') }}">
+                    <form method="POST" action="{{ url_for('dynamic_router.serve_challenge', category='xss', level=28) }}">
                         <div class="mb-3">
                             <label class="form-label">Add Custom Module Mapping</label>
                             <div class="input-group">
