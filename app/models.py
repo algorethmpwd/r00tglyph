@@ -15,7 +15,7 @@ class LocalUser(db.Model):
     score = db.Column(db.Integer, default=0, index=True)
     completed_challenges = db.Column(db.Text, default='[]')
     is_admin = db.Column(db.Boolean, default=False)
-    team_id = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=True)
+    team_id = db.Column(db.Integer, db.ForeignKey('team.id', use_alter=True, name='fk_local_user_team_id'), nullable=True)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     last_active = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     

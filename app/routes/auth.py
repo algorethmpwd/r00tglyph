@@ -27,8 +27,9 @@ def register():
         if existing_user:
             flash('Username already exists!', 'danger')
             return redirect(url_for('auth.register'))
+        display_name = request.form.get('display_name') or username
         hashed_password = generate_password_hash(password)
-        new_user = LocalUser(username=username, display_name=username, password_hash=hashed_password)
+        new_user = LocalUser(username=username, display_name=display_name, password_hash=hashed_password)
         db.session.add(new_user)
         db.session.commit()
         flash('Registration successful! Please login.', 'success')

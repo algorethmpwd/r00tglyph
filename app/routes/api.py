@@ -6,7 +6,7 @@ import xml.etree.ElementTree as ET
 import xml.parsers.expat
 import hashlib
 import string
-from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for, flash, make_response
+from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for, flash, make_response, Response
 from werkzeug.security import check_password_hash, generate_password_hash
 from app.extensions import db
 from app.models import LocalUser, Challenge, Flag, Submission, Comment, Team
@@ -145,4 +145,47 @@ def get_solution(category, level):
         with open(solution_file, 'r') as f:
             return jsonify(json.load(f))
     return (jsonify({'error': 'Solution not found'}), 404)
+
+@api_bp.route('/api/oob/<token>', methods=['GET', 'POST'])
+def oob_listener(token):
+    """Out-Of-Band callback listener for OOB XXE, SSRF, and SQLi exfiltration challenges."""
+    oob_data = {
+        'token': token,
+        'method': request.method,
+        'headers': dict(request.headers),
+        'args': dict(request.args),
+        'body': request.get_data(as_text=True),
+        'remote_addr': request.remote_addr
+    }
+    # Log callback data
+    from flask import current_app
+    current_app.logger.info(f"OOB Callback Received [{token}]: {oob_data}")
+    return jsonify({'status': 'received', 'token': token, 'message': 'Out-of-band callback logged successfully'})
+
+@api_bp.route('/api/activity/stream')
+def activity_stream():
+    """Server-Sent Events (SSE) endpoint streaming real-time CTF activity."""
+    import time
+    def event_stream():
+        last_id = 0
+        while True:
+            subs = Submission.query.filter(Submission.id > last_id).order_by(Submission.id.asc()).limit(10).all()
+            for sub in subs:
+                last_id = max(last_id, sub.id)
+                user = db.session.get(LocalUser, sub.user_id)
+                challenge = db.session.get(Challenge, sub.challenge_id)
+                if user and challenge:
+                    data = {
+                        'id': sub.id,
+                        'user': user.display_name,
+                        'category': challenge.category,
+                        'challenge': challenge.name,
+                        'correct': sub.correct,
+                        'points': challenge.points if sub.correct else 0,
+                        'timestamp': sub.timestamp.isoformat()
+                    }
+                    yield f"data: {json.dumps(data)}\n\n"
+            time.sleep(3)
+    
+    return Response(event_stream(), mimetype="text/event-stream")
 

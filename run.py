@@ -13,9 +13,13 @@ import os
 import sys
 from pathlib import Path
 
-# Add the project root to Python path
+# Add the project root and local venv to Python path
 project_root = Path(__file__).parent.absolute()
 sys.path.insert(0, str(project_root))
+
+venv_site_packages = list(project_root.glob("venv/lib/python*/site-packages"))
+if venv_site_packages:
+    sys.path.insert(0, str(venv_site_packages[0]))
 
 
 def setup_logging(debug_mode=False):

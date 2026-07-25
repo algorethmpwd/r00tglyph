@@ -68,4 +68,31 @@ def process_sink(category, level, request):
         if "127.0.0.1" in url or "localhost" in url or "metadata" in url:
             is_exploited = True
 
+    elif category == 'xxe':
+        payload = request.form.get('xml') or request.form.get('payload') or (request.data.decode('utf-8', errors='ignore') if request.data else '')
+        result = payload
+        if any(p in payload.lower() for p in ['<!entity', 'system', 'public', 'file://', 'cdata', 'xinclude']):
+            is_exploited = True
+
+    elif category == 'deserial':
+        payload = request.form.get('payload') or request.form.get('data') or ''
+        result = f"Processed payload: {payload[:100]}"
+        if any(p in payload for p in ['pickle', '__reduce__', 'os.system', 'O:', 'a:', 's:', 'rO0', 'AAEAA', 'yaml.load']):
+            is_exploited = True
+
+    elif category == 'auth':
+        username = request.form.get('username') or ''
+        jwt = request.headers.get('Authorization') or request.cookies.get('token') or ''
+        if "' or '1'='1" in username.lower() or "admin'--" in username.lower() or "eyJ" in jwt or request.form.get('admin') == 'true':
+            is_exploited = True
+            result = "Admin Access Granted"
+        else:
+            result = "Authentication Failed"
+
+    elif category == 'csrf':
+        csrf_token = request.form.get('csrf_token') or request.headers.get('X-CSRF-Token')
+        if not csrf_token or request.args.get('csrf_solved') == 'true' or request.method == 'POST':
+            is_exploited = True
+            result = "CSRF Exploit Executed Successfully"
+
     return result, is_exploited

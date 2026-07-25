@@ -131,15 +131,36 @@ def update_user_progress(user_id, challenge_id, points):
     return False
 
 def safe_execute_command(cmd, timeout=5):
-    """Execute a command safely with timeout and output capture for CTF challenges."""
+    """Execute a command safely with timeout and container sandboxing for CTF challenges."""
     import shlex
     allowed_commands = ['whoami', 'id', 'uname', 'hostname', 'pwd', 'ls', 'cat', 'echo', 'date', 'uptime', 'w', 'ps', 'env', 'printenv']
+    
+    cmd_str = cmd if isinstance(cmd, str) else ' '.join(cmd)
+    if not cmd_str.strip():
+        return '(empty command)'
+        
+    # Attempt 1: Docker Sandboxed Execution
     try:
-        if isinstance(cmd, str):
-            split_cmd = shlex.split(cmd)
-        else:
-            split_cmd = cmd
-            
+        docker_cmd = [
+            'docker', 'run', '--rm',
+            '--read-only',
+            '--network', 'none',
+            '--memory', '64m',
+            '--cpus', '0.5',
+            'alpine:latest',
+            'sh', '-c', cmd_str
+        ]
+        res = subprocess.run(docker_cmd, capture_output=True, text=True, timeout=timeout)
+        if res.returncode == 0 or res.stdout:
+            out = res.stdout
+            if res.stderr: out += '\n[stderr]\n' + res.stderr
+            return out.strip() if out else '(empty output)'
+    except Exception:
+        pass  # Fall back to restricted host execution if Docker is unavailable
+
+    # Attempt 2: Restricted Subprocess Execution
+    try:
+        split_cmd = shlex.split(cmd_str) if isinstance(cmd, str) else cmd
         if not split_cmd:
             return '(empty command)'
             
@@ -147,17 +168,15 @@ def safe_execute_command(cmd, timeout=5):
         if base_cmd not in allowed_commands:
             return f'(error: command "{base_cmd}" not allowed)'
             
-        # FULL DOCKER SANDBOX TODO
-        # For now, restrict execution safely without shell=True
         result = subprocess.run(split_cmd, shell=False, capture_output=True, text=True, timeout=timeout)
         output = result.stdout
         if result.stderr:
             output += '\n[stderr]\n' + result.stderr
         return output.strip() if output else '(empty output)'
     except subprocess.TimeoutExpired:
-        return '(command timed out after {} seconds)'.format(timeout)
+        return f'(command timed out after {timeout} seconds)'
     except Exception as e:
-        return '(error: {})'.format(str(e))
+        return f'(error: {str(e)})'
 
 def show_help():
     """Show help information"""

@@ -18,13 +18,17 @@ teams_bp = Blueprint('teams', __name__)
 @login_required
 def teams():
     user = get_current_user()
-    all_teams = Team.query.order_by(Team.created_at.desc()).all()
+    team_scores_query = db.session.query(
+        Team,
+        db.func.count(db.distinct(LocalUser.id)).label('member_count'),
+        db.func.coalesce(db.func.sum(LocalUser.score), 0).label('total_score')
+    ).outerjoin(LocalUser, Team.id == LocalUser.team_id)\
+     .group_by(Team.id)\
+     .order_by(db.desc('total_score')).all()
+     
     team_scores = []
-    for team in all_teams:
-        members = LocalUser.query.filter_by(team_id=team.id).all()
-        team_score = sum((m.score for m in members))
-        team_scores.append({'team': team, 'score': team_score, 'member_count': len(members)})
-    team_scores.sort(key=lambda x: x['score'], reverse=True)
+    for team, member_count, total_score in team_scores_query:
+        team_scores.append({'team': team, 'score': int(total_score), 'member_count': member_count})
     return render_template('teams.html', user=user, teams=team_scores)
 
 @teams_bp.route('/teams/create', methods=['GET', 'POST'])

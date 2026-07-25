@@ -1,21 +1,31 @@
 from flask import Flask
 import os
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 from app.extensions import db
 
 def create_app():
     app = Flask(__name__, template_folder='../templates', static_folder='../static')
     app.secret_key = os.environ.get("SECRET_KEY")
-    if not app.secret_key and (os.environ.get("FLASK_ENV") == "production" or os.environ.get("FLASK_DEBUG", "0") == "0"):
-        raise RuntimeError("SECRET_KEY environment variable not set in production!")
-    app.secret_key = app.secret_key or "r00tglyph_secret_key_change_in_production"
+    if not app.secret_key:
+        if os.environ.get("FLASK_ENV") == "production":
+            raise RuntimeError("SECRET_KEY environment variable not set in production!")
+        app.secret_key = "r00tglyph_secret_key_change_in_production"
+    
+    os.makedirs(app.instance_path, exist_ok=True)
     
     DATABASE_URL = os.environ.get("DATABASE_URL")
-    if DATABASE_URL:
+    if DATABASE_URL and not DATABASE_URL.startswith("sqlite:///instance/"):
         if DATABASE_URL.startswith("postgres://"):
             DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
         app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
     else:
-        app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///../instance/r00tglyph.db"
+        db_path = os.path.abspath(os.path.join(app.instance_path, "r00tglyph.db"))
+        app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
     
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     
