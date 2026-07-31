@@ -1,0 +1,6 @@
+category: auth
+id: auth_4
+level: 4
+name: Auth Bypass Level 4
+template: auth/auth_level4.html
+mock_data: {}

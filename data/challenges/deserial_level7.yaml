@@ -1,0 +1,6 @@
+category: deserial
+id: deserial_7
+level: 7
+name: DESERIAL Level 7
+template: deserial/deserial_level7.html
+mock_data: {}

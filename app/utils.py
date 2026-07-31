@@ -203,6 +203,6 @@ def admin_required(f):
             return redirect(url_for('auth.login', next=request.url))
         if not user or not user.is_admin:
             flash('Admin access required.', 'danger')
-            return redirect(url_for('index'))
+            return redirect(url_for('core.index'))
         return f(*args, **kwargs)
     return decorated_function

@@ -1,0 +1,6 @@
+category: ssti
+id: ssti_12
+level: 12
+name: SSTI Level 12
+template: ssti/ssti_level12.html
+mock_data: {}

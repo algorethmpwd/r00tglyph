@@ -1,0 +1,6 @@
+category: deserial
+id: deserial_3
+level: 3
+name: Deserialization Level 3
+template: deserial/deserial_level3.html
+mock_data: {}

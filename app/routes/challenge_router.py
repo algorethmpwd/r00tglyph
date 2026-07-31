@@ -32,7 +32,7 @@ def serve_challenge(category, level):
     
     if not config:
         flash("Challenge configuration not found.")
-        return redirect(url_for('core.dashboard'))
+        return redirect(url_for('core.vulnerabilities'))
         
     template_name = config.get('template', f"{category}/{category}_level{level}.html")
     challenge_name = config.get('name')

@@ -1,0 +1,6 @@
+category: auth
+id: auth_6
+level: 6
+name: AUTH Level 6
+template: auth/auth_level6.html
+mock_data: {}
